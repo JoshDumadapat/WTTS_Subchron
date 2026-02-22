@@ -1,0 +1,82 @@
+@page
+@model Subchron.Web.Pages.App.Resources.IndexModel
+@{
+    ViewData["Title"] = "Resources";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-4xl px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Resources</h1>
+        <p class="text-base text-slate-500 dark:text-slate-400">Privacy policy and documentation for Subchron.</p>
+    </div>
+
+    <div class="space-y-4">
+        <!-- Privacy policy card -->
+        <details class="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <summary class="flex cursor-pointer list-none items-center justify-between rounded-t-xl border-b border-slate-200 bg-slate-50/80 px-5 py-4 hover:bg-slate-100/80 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:bg-slate-700/50">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-subgreen-100 dark:bg-subgreen-900/30">
+                        <svg class="h-5 w-5 text-subgreen-600 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Privacy policy</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">How we handle your data</p>
+                    </div>
+                </div>
+                <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            <div class="border-t border-slate-200 dark:border-slate-700">
+                <div class="prose prose-slate dark:prose-invert max-w-none px-5 py-5 text-sm">
+                    <p class="font-medium text-slate-700 dark:text-slate-300">Last updated: Sample date. This is placeholder content for your Subchron privacy policy.</p>
+                    <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">1. Information we collect</h3>
+                    <p>Subchron collects information you provide when creating an organization, adding employees, and using attendance and payroll features. This includes organization name and settings, employee names and contact details, attendance records, and payment-related data for subscription billing.</p>
+                    <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">2. How we use your data</h3>
+                    <p>We use your data to operate the Subchron platform: to manage your organization, run attendance (QR, geolocation, or hybrid modes), process overtime and leave requests, generate payroll and reports, and to communicate with you about your account and subscription. We do not sell your data to third parties.</p>
+                    <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">3. Data retention and security</h3>
+                    <p>Attendance and audit data are retained according to your plan (e.g. Basic, Standard, Enterprise). We use industry-standard measures to protect your data. You can request a copy of your data or deletion by contacting support.</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- Documentation card -->
+        <details class="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <summary class="flex cursor-pointer list-none items-center justify-between rounded-t-xl border-b border-slate-200 bg-slate-50/80 px-5 py-4 hover:bg-slate-100/80 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:bg-slate-700/50">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-subgreen-100 dark:bg-subgreen-900/30">
+                        <svg class="h-5 w-5 text-subgreen-600 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Documentation</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Guides and how-to</p>
+                    </div>
+                </div>
+                <svg class="h-5 w-5 text-slate-500 transition-transform group-open:rotate-180 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            <div class="border-t border-slate-200 dark:border-slate-700">
+                <div class="px-5 py-5 text-sm space-y-6">
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-white">Getting started</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">After signup, complete organization settings (timezone, currency, attendance mode). Add employees and assign roles. Use the Scan Station or mobile flow for clock-in/out. Configure overtime and leave rules in Organization Settings.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-white">Attendance modes</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Subchron supports QR-only, geolocation-based, or hybrid attendance. Enable the mode in Organization Settings → Attendance. For geolocation, set allowed locations and optional geofencing.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-white">Overtime and leave</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Configure OT rules (threshold hours, max per day, approval) and leave (enabled, approval required) in Organization Settings. Employees submit requests from their portal; approvers act from the Operations or dashboard views.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-white">Payroll and reports</h3>
+                        <p class="mt-1 text-slate-600 dark:text-slate-400">Use Payroll to run payroll cycles based on attendance and rates. Reports let you export attendance, overtime, and audit logs. Plan limits (e.g. employee count) apply; upgrade in Settings → Upgrade Plan if needed.</p>
+                    </div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">
+        <a asp-page="/App/Settings/Index" asp-route-tab="Resources" class="font-medium text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400">Back to Settings</a>
+    </p>
+</div>

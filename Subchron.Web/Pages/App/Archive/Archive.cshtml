@@ -1,0 +1,391 @@
+@page
+@model Subchron.Web.Pages.App.Archive.ArchiveModel
+@{
+    ViewData["Title"] = "Archive";
+    ViewData["PageTitle"] = "Archive";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Archive</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Archived employees. Restore to bring them back to the active directory.</p>
+        </div>
+        <div>
+            <a asp-page="/App/Employee/EmployeeManagement" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Back to Employees
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <!-- Stats: same layout as Employee -->
+        <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800 lg:col-span-4">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total archived</p>
+                <p class="mt-0.5 text-right text-lg font-semibold text-slate-900 dark:text-white" id="archiveStatTotal">@Model.ArchivedEmployees.Count</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </span>
+                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white" placeholder="Search by name or email..." />
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
+                        <option value="">All reasons</option>
+                        <option value="Resignation">Resignation</option>
+                        <option value="End of Contract">End of Contract</option>
+                        <option value="Redundancy">Redundancy</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="archiveFilterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
+                        <option value="">All status</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                    <button type="button" id="archiveResetFilters" class="h-10 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Team Member</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Role</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Department</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Archived date</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="archiveTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @{
+                        var initials = (string fn, string ln) => string.Concat((fn?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant(), (ln?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant()).Trim();
+                        var fullName = (string fn, string? mn, string ln) => string.Join(" ", new[] { fn, mn, ln }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                        var addr = (string? line, string? city, string? country) => string.Join(", ", new[] { line, city, country }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                        var ecDisplay = (string? n, string? p, string? r) => string.Join(" · ", new[] { n, p, r }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                    }
+                    @foreach (var emp in Model.ArchivedEmployees)
+                    {
+                        var name = fullName(emp.FirstName, emp.MiddleName, emp.LastName);
+                        var initial = initials(emp.FirstName, emp.LastName);
+                        var address = addr(emp.AddressLine1, emp.City, emp.Country);
+                        var ec = ecDisplay(emp.EmergencyContactName, emp.EmergencyContactPhone, emp.EmergencyContactRelation);
+                        var archivedDate = emp.ArchivedAt?.ToString("MMM dd, yyyy") ?? "—";
+                        var dateHiredStr = emp.DateHired?.ToString("MMM dd, yyyy") ?? "—";
+                        var ageStr = emp.Age.HasValue ? emp.Age.Value.ToString() : "—";
+                        var genderStr = string.IsNullOrWhiteSpace(emp.Gender) ? "—" : emp.Gender;
+                        <tr class="archive-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-emp-id="@emp.EmpID" data-name="@name" data-emp-number="@(emp.EmpNumber ?? "—")" data-email="@(emp.Email ?? "")" data-role="@emp.Role" data-department="@(emp.DepartmentName ?? "—")" data-reason="@(emp.ArchivedReason ?? "—")" data-status="Archived" data-archived-date="@archivedDate" data-address="@address" data-phone="@(emp.Phone ?? "—")" data-age="@ageStr" data-gender="@genderStr" data-date-hired="@dateHiredStr" data-ec-name="@(emp.EmergencyContactName ?? "—")" data-ec-phone="@(emp.EmergencyContactPhone ?? "—")" data-ec-relation="@(emp.EmergencyContactRelation ?? "—")">
+                            <td class="px-5 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-400">@(string.IsNullOrWhiteSpace(initial) ? "—" : initial)</div>
+                                    <div>
+                                        <div class="text-sm font-medium text-slate-900 dark:text-white">@name</div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">@emp.EmpNumber</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@emp.Role</td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.DepartmentName ?? "—")</td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.ArchivedReason ?? "—")</td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Archived</td>
+                            <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">@archivedDate</td>
+                            <td class="px-5 py-3 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button type="button" onclick="openArchiveViewModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button>
+                                    <button type="button" onclick="openRestoreModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-subgreen-500"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="archivePaginationShowing">2</span> of <span id="archivePaginationTotal">2</span>
+                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">Rows</span>
+                    <select id="archiveRowsPerPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button type="button" id="archivePaginationPrev" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <div class="flex items-center gap-1" id="archivePaginationNumbers"></div>
+                <button type="button" id="archivePaginationNext" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View archived employee modal -->
+    <div id="archiveViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeArchiveViewModal()"></div>
+            <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                <div class="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Archived employee information</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View only. Use Restore to bring back to active directory.</p>
+                </div>
+                <div class="p-6 space-y-6">
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Employee information</h4>
+                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><dt class="text-xs text-slate-500">Full name</dt><dd id="archiveViewName" class="text-sm font-medium text-slate-900 dark:text-white">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Employee ID</dt><dd id="archiveViewEmpNumber" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Email</dt><dd id="archiveViewEmail" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Age</dt><dd id="archiveViewAge" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Gender</dt><dd id="archiveViewGender" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Date hired</dt><dd id="archiveViewDateHired" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Role</dt><dd id="archiveViewRole" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Department</dt><dd id="archiveViewDepartment" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Archive reason</dt><dd id="archiveViewReason" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Archived date</dt><dd id="archiveViewArchivedDate" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        </dl>
+                    </section>
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
+                        <p id="archiveViewAddress" class="text-sm text-slate-700 dark:text-slate-300">—</p>
+                    </section>
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
+                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><dt class="text-xs text-slate-500">Phone</dt><dd id="archiveViewPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        </dl>
+                    </section>
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
+                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><dt class="text-xs text-slate-500">Name</dt><dd id="archiveViewEcName" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Phone</dt><dd id="archiveViewEcPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                            <div><dt class="text-xs text-slate-500">Relation</dt><dd id="archiveViewEcRelation" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        </dl>
+                    </section>
+                </div>
+                <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
+                    <button type="button" onclick="closeArchiveViewModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore modal: employee info + optional reason -->
+    <div id="restoreModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeRestoreModal()"></div>
+            <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                <form id="restoreForm" method="post" asp-page-handler="Restore" asp-antiforgery="true" data-turbo="false">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="restoreEmpId" value="" />
+                    <div class="sticky top-0 z-10 border-b border-slate-100 bg-subgreen-50/80 px-6 py-4 dark:border-slate-800 dark:bg-subgreen-900/20">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Restore employee</h3>
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">This will move the employee back to the active directory. A reason for restore is required.</p>
+                    </div>
+                    <div class="p-6 space-y-5">
+                        <section>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Employee information</h4>
+                            <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
+                                <div><dt class="text-xs text-slate-500">Full name</dt><dd id="restoreModalName" class="font-medium text-slate-900 dark:text-white">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Email</dt><dd id="restoreModalEmail" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Role</dt><dd id="restoreModalRole" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Department</dt><dd id="restoreModalDepartment" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Reason archived</dt><dd id="restoreModalReason" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Archived date</dt><dd id="restoreModalArchivedDate" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div class="sm:col-span-2"><dt class="text-xs text-slate-500">Address</dt><dd id="restoreModalAddress" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Phone</dt><dd id="restoreModalPhone" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                                <div><dt class="text-xs text-slate-500">Emergency contact</dt><dd id="restoreModalEc" class="text-slate-700 dark:text-slate-300">—</dd></div>
+                            </dl>
+                        </section>
+                        <section>
+                            <label for="restoreReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason for restore <span class="text-red-500">*</span></label>
+                            <input type="text" name="reason" id="restoreReason" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Rehired, Contract renewed" maxlength="200" />
+                        </section>
+                    </div>
+                    <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
+                        <div class="flex gap-3">
+                            <button type="button" onclick="closeRestoreModal()" class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
+                            <button type="submit" id="confirmRestoreBtn" class="flex-1 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-subgreen-500 disabled:opacity-70 disabled:cursor-not-allowed">Confirm restore</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="archiveEmpty" class="hidden rounded-2xl border border-slate-200 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+            <svg class="h-7 w-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+        </div>
+        <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">No archived employees</h3>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Archived employees will appear here. Use the status badge on the Employee Management page to archive someone.</p>
+        <a asp-page="/App/Employee/EmployeeManagement" class="mt-4 inline-flex items-center rounded-xl bg-subgreen-600 px-4 py-2 text-sm font-semibold text-white hover:bg-subgreen-500">Go to Employees</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var rows = document.querySelectorAll('.archive-row');
+            var search = document.getElementById('archiveSearch');
+            var filterReason = document.getElementById('archiveFilterReason');
+            var filterStatus = document.getElementById('archiveFilterStatus');
+            var resetBtn = document.getElementById('archiveResetFilters');
+            var rowsPerPage = document.getElementById('archiveRowsPerPage');
+            var table = document.getElementById('archiveTableBody');
+            var empty = document.getElementById('archiveEmpty');
+            var statTotal = document.getElementById('archiveStatTotal');
+            var currentPage = 1;
+
+            function getVisible() {
+                var q = (search && search.value || '').toLowerCase();
+                var reason = (filterReason && filterReason.value || '').toLowerCase();
+                var statusVal = (filterStatus && filterStatus.value || '').toLowerCase();
+                return Array.from(rows).filter(function (tr) {
+                    var name = (tr.getAttribute('data-name') || '').toLowerCase();
+                    var email = (tr.getAttribute('data-email') || '').toLowerCase();
+                    var r = (tr.getAttribute('data-reason') || '').toLowerCase();
+                    var s = (tr.getAttribute('data-status') || '').toLowerCase();
+                    var matchSearch = !q || name.indexOf(q) !== -1 || email.indexOf(q) !== -1;
+                    var matchReason = !reason || r === reason;
+                    var matchStatus = !statusVal || s === statusVal;
+                    return matchSearch && matchReason && matchStatus;
+                });
+            }
+
+            function render() {
+                var visible = getVisible();
+                var perPage = parseInt(rowsPerPage && rowsPerPage.value || '10', 10) || 10;
+                var totalPages = Math.max(1, Math.ceil(visible.length / perPage));
+                currentPage = Math.min(currentPage, totalPages) || 1;
+                var start = (currentPage - 1) * perPage;
+                var end = start + perPage;
+                rows.forEach(function (tr) { tr.style.display = 'none'; });
+                visible.slice(start, end).forEach(function (tr) { tr.style.display = ''; });
+                var showing = visible.length === 0 ? 0 : visible.slice(start, end).length;
+                var showEl = document.getElementById('archivePaginationShowing');
+                var totalEl = document.getElementById('archivePaginationTotal');
+                if (showEl) showEl.textContent = showing;
+                if (totalEl) totalEl.textContent = visible.length;
+                if (statTotal) statTotal.textContent = visible.length;
+                var container = document.getElementById('archivePaginationNumbers');
+                if (container) {
+                    container.innerHTML = '';
+                    for (var i = 1; i <= totalPages; i++) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'h-8 min-w-[32px] rounded-lg border px-2 text-xs font-semibold ' + (i === currentPage ? 'border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-800 dark:bg-subgreen-900/20 dark:text-subgreen-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800');
+                        btn.textContent = i;
+                        (function (p) { btn.addEventListener('click', function () { currentPage = p; render(); }); })(i);
+                        container.appendChild(btn);
+                    }
+                }
+                document.getElementById('archivePaginationPrev').disabled = currentPage <= 1;
+                document.getElementById('archivePaginationNext').disabled = currentPage >= totalPages;
+                if (table && empty) {
+                    table.closest('.overflow-x-auto').style.display = visible.length ? '' : 'none';
+                    empty.classList.toggle('hidden', visible.length > 0);
+                }
+            }
+
+            function openArchiveViewModal(btn) {
+                var row = btn.closest('tr');
+                if (!row) return;
+                document.getElementById('archiveViewName').textContent = row.getAttribute('data-name') || '—';
+                document.getElementById('archiveViewEmpNumber').textContent = row.getAttribute('data-emp-number') || '—';
+                document.getElementById('archiveViewEmail').textContent = row.getAttribute('data-email') || '—';
+                document.getElementById('archiveViewAge').textContent = row.getAttribute('data-age') || '—';
+                document.getElementById('archiveViewGender').textContent = row.getAttribute('data-gender') || '—';
+                document.getElementById('archiveViewDateHired').textContent = row.getAttribute('data-date-hired') || '—';
+                document.getElementById('archiveViewRole').textContent = row.getAttribute('data-role') || '—';
+                document.getElementById('archiveViewDepartment').textContent = row.getAttribute('data-department') || '—';
+                document.getElementById('archiveViewReason').textContent = row.getAttribute('data-reason') || '—';
+                document.getElementById('archiveViewArchivedDate').textContent = row.getAttribute('data-archived-date') || '—';
+                document.getElementById('archiveViewAddress').textContent = row.getAttribute('data-address') || '—';
+                document.getElementById('archiveViewPhone').textContent = row.getAttribute('data-phone') || '—';
+                document.getElementById('archiveViewEcName').textContent = row.getAttribute('data-ec-name') || '—';
+                document.getElementById('archiveViewEcPhone').textContent = row.getAttribute('data-ec-phone') || '—';
+                document.getElementById('archiveViewEcRelation').textContent = row.getAttribute('data-ec-relation') || '—';
+                document.getElementById('archiveViewModal').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+            function closeArchiveViewModal() {
+                document.getElementById('archiveViewModal').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+            function openRestoreModal(btn) {
+                var row = btn.closest('tr');
+                if (!row) return;
+                var empId = row.getAttribute('data-emp-id');
+                if (!empId) return;
+                document.getElementById('restoreEmpId').value = empId;
+                document.getElementById('restoreModalName').textContent = row.getAttribute('data-name') || '—';
+                document.getElementById('restoreModalEmail').textContent = row.getAttribute('data-email') || '—';
+                document.getElementById('restoreModalRole').textContent = row.getAttribute('data-role') || '—';
+                document.getElementById('restoreModalDepartment').textContent = row.getAttribute('data-department') || '—';
+                document.getElementById('restoreModalReason').textContent = row.getAttribute('data-reason') || '—';
+                document.getElementById('restoreModalArchivedDate').textContent = row.getAttribute('data-archived-date') || '—';
+                document.getElementById('restoreModalAddress').textContent = row.getAttribute('data-address') || '—';
+                document.getElementById('restoreModalPhone').textContent = row.getAttribute('data-phone') || '—';
+                var ecName = row.getAttribute('data-ec-name') || '';
+                var ecPhone = row.getAttribute('data-ec-phone') || '';
+                var ecRel = row.getAttribute('data-ec-relation') || '';
+                document.getElementById('restoreModalEc').textContent = [ecName, ecPhone, ecRel].filter(Boolean).join(' · ') || '—';
+                document.getElementById('restoreReason').value = '';
+                document.getElementById('restoreModal').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+            function closeRestoreModal() {
+                document.getElementById('restoreModal').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+            window.openArchiveViewModal = openArchiveViewModal;
+            window.closeArchiveViewModal = closeArchiveViewModal;
+            window.openRestoreModal = openRestoreModal;
+            window.closeRestoreModal = closeRestoreModal;
+            if (search) search.addEventListener('input', function () { currentPage = 1; render(); });
+            if (filterReason) filterReason.addEventListener('change', function () { currentPage = 1; render(); });
+            if (filterStatus) filterStatus.addEventListener('change', function () { currentPage = 1; render(); });
+            if (resetBtn) resetBtn.addEventListener('click', function () {
+                if (search) search.value = '';
+                if (filterReason) filterReason.value = '';
+                if (filterStatus) filterStatus.value = '';
+                currentPage = 1;
+                render();
+            });
+            if (rowsPerPage) rowsPerPage.addEventListener('change', function () { currentPage = 1; render(); });
+            document.getElementById('archivePaginationPrev').addEventListener('click', function () { if (currentPage > 1) { currentPage--; render(); } });
+            document.getElementById('archivePaginationNext').addEventListener('click', function () { currentPage++; render(); });
+            var loadingHtml = '<span class="inline-flex items-center gap-2"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing…</span>';
+            document.getElementById('restoreForm')?.addEventListener('submit', function () {
+                var btn = document.getElementById('confirmRestoreBtn');
+                if (btn && !btn.disabled) {
+                    btn.disabled = true;
+                    btn.innerHTML = loadingHtml;
+                }
+            });
+            render();
+        })();
+    </script>
+}

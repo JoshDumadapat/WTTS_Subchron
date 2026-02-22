@@ -1,0 +1,243 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.DemoRequests.DetailsModel
+@{
+    ViewData["Title"] = "Demo Request Details";
+    ViewData["PageTitle"] = "Demo Request Details";
+    ViewData["PageDescription"] = $"Review demo request from {Model.Request.OrgName}";
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<div class="max-w-4xl">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+   <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+  <!-- Request Details -->
+   <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+    <div class="flex items-center justify-between mb-4">
+       <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Request Information</h2>
+   <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+  @(Model.Request.Status switch {
+     "Pending" => "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+        "Approved" => "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
+         "Rejected" => "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+          _ => "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300"
+   })">
+     @Model.Request.Status
+      </span>
+            </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div>
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-4">Organization Details</h3>
+    <dl class="space-y-3">
+      <div>
+  <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Name</dt>
+        <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.OrgName</dd>
+      </div>
+     <div>
+            <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Size</dt>
+   <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.OrgSize employees</dd>
+    </div>
+           <div>
+         <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Desired Mode</dt>
+          <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.DesiredMode</dd>
+      </div>
+  </dl>
+    </div>
+
+      <div>
+      <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-4">Contact Information</h3>
+         <dl class="space-y-3">
+     <div>
+       <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Contact Name</dt>
+   <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.ContactName</dd>
+           </div>
+         <div>
+    <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Email</dt>
+       <dd class="text-sm text-slate-900 dark:text-white mt-1">
+      <a href="mailto:@Model.Request.Email" class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">@Model.Request.Email</a>
+       </dd>
+          </div>
+     <div>
+          <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Phone</dt>
+        <dd class="text-sm text-slate-900 dark:text-white mt-1">
+         <a href="tel:@Model.Request.Phone" class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">@Model.Request.Phone</a>
+      </dd>
+            </div>
+     </dl>
+            </div>
+       </div>
+
+@if (!string.IsNullOrEmpty(Model.Request.Message))
+{
+          <div class="mt-6">
+      <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-2">Message</h3>
+    <div class="bg-slate-50 rounded-lg p-4 dark:bg-slate-700/50">
+          <p class="text-sm text-slate-700 dark:text-slate-300">@Model.Request.Message</p>
+         </div>
+     </div>
+  }
+   </div>
+
+            <!-- Review History -->
+         @if (Model.Request.Status != "Pending")
+            {
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+       <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Review History</h2>
+<div class="space-y-4">
+   <div class="flex items-start space-x-3">
+<div class="flex-shrink-0 w-2 h-2 bg-subgreen-500 rounded-full mt-2"></div>
+       <div class="flex-1">
+     <p class="text-sm text-slate-900 dark:text-white">
+       <span class="font-medium">Request @Model.Request.Status.ToLower()</span>
+         </p>
+   <p class="text-xs text-slate-500">
+           @Model.Request.ReviewedAt?.ToString("MMM dd, yyyy HH:mm")
+      @if (Model.Request.OrgID.HasValue && Model.Request.Status == "Approved")
+      {
+  <span>• Organization ID: @Model.Request.OrgID</span>
+  }
+     </p>
+      </div>
+        </div>
+   <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0 w-2 h-2 bg-slate-300 rounded-full mt-2 dark:bg-slate-600"></div>
+          <div class="flex-1">
+    <p class="text-sm text-slate-900 dark:text-white">
+   <span class="font-medium">Request submitted</span>
+          </p>
+         <p class="text-xs text-slate-500">
+ @Model.Request.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+        </p>
+                  </div>
+         </div>
+            </div>
+    </div>
+ }
+     </div>
+
+        <!-- Actions Sidebar -->
+      <div class="space-y-6">
+   @if (Model.Request.Status == "Pending")
+   {
+    <!-- Actions -->
+     <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+       <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Actions</h3>
+                
+     <form method="post">
+  <input type="hidden" name="action" value="" id="actionInput" />
+ <div class="space-y-3">
+    <button type="button" onclick="approveRequest()"
+     class="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      Approve & Create Organization
+           </button>
+
+      <button type="button" onclick="rejectRequest()"
+     class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg>
+              Reject Request
+       </button>
+  </div>
+       </form>
+     </div>
+
+       <!-- Approval Info -->
+      <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 dark:bg-slate-800/50 dark:border-slate-700">
+      <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-3">What happens on approval:</h3>
+            <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+  <li class="flex items-start">
+      <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg>
+           Create new organization
+    </li>
+  <li class="flex items-start">
+   <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+    Set up default settings
+              </li>
+      <li class="flex items-start">
+       <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg>
+   Create 14-day trial subscription
+    </li>
+     <li class="flex items-start">
+ <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+   </svg>
+            Generate audit log entries
+    </li>
+        </ul>
+        </div>
+       }
+
+            <!-- Request Details -->
+   <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Request Details</h3>
+      <dl class="space-y-3">
+   <div>
+       <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Request ID</dt>
+     <dd class="text-sm text-slate-900 dark:text-white mt-1">#@Model.Request.DemoRequestID</dd>
+  </div>
+    <div>
+      <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Submitted</dt>
+        <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.CreatedAt.ToString("MMM dd, yyyy HH:mm")</dd>
+        </div>
+  @if (Model.Request.ReviewedAt.HasValue)
+   {
+     <div>
+         <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Reviewed</dt>
+    <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.ReviewedAt?.ToString("MMM dd, yyyy HH:mm")</dd>
+         </div>
+        }
+   @if (Model.Request.OrgID.HasValue)
+   {
+   <div>
+   <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Created</dt>
+       <dd class="text-sm text-slate-900 dark:text-white mt-1">
+         <a asp-page="/SuperAdmin/Organizations/Details" asp-route-id="@Model.Request.OrgID" 
+       class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">
+       View Organization #@Model.Request.OrgID
+       </a>
+    </dd>
+        </div>
+      }
+   </dl>
+     </div>
+
+  <!-- Navigation -->
+  <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+  <a asp-page="/SuperAdmin/DemoRequests/Index" 
+  class="inline-flex items-center text-sm text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400 dark:hover:text-subgreen-300">
+     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+     </svg>
+  Back to Demo Requests
+     </a>
+     </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveRequest() {
+    if (confirm('Are you sure you want to approve this request? This will create a new organization and trial subscription.')) {
+       document.getElementById('actionInput').value = 'approve';
+    document.querySelector('form').submit();
+        }
+    }
+
+    function rejectRequest() {
+        if (confirm('Are you sure you want to reject this request? This action cannot be undone.')) {
+      document.getElementById('actionInput').value = 'reject';
+            document.querySelector('form').submit();
+   }
+    }
+</script>

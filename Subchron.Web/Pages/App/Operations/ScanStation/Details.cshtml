@@ -1,0 +1,79 @@
+@page
+@model Subchron.Web.Pages.App.Operations.ScanStation.DetailsModel
+@{
+    ViewData["Title"] = "Station Details";
+    ViewData["PageTitle"] = "Station Details";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+    var kioskUrl = $"{Request.Scheme}://{Request.Host}/App/Operations/ScanStation/Kiosk?id={Model.StationId}";
+}
+
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6 flex items-center gap-3">
+        <a asp-page="/App/Operations/ScanStation" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </a>
+        <div>
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Station Details</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Main Lobby Kiosk · HQ Building</p>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Copy Kiosk URL -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Kiosk URL</h3>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Open this URL on the tablet or device you want to use as the scan station.</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <input type="text" id="kioskUrl" readonly value="@kioskUrl"
+                       class="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300" />
+                <button type="button" id="copyKioskUrl" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy URL
+                </button>
+            </div>
+            <p id="copyFeedback" class="mt-2 hidden text-sm text-subgreen-600 dark:text-subgreen-400">URL copied to clipboard.</p>
+        </div>
+
+        <!-- Open on tablet / Lock device -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Setup on tablet</h3>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Open the kiosk URL in the tablet browser, then lock the device to kiosk mode so employees only see the scan screen.</p>
+            <ul class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                <li class="flex items-start gap-2">
+                    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/40 dark:text-subgreen-400">1</span>
+                    <span><strong class="text-slate-800 dark:text-slate-200">Open in browser:</strong> Paste the kiosk URL in Chrome or Safari on the tablet.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/40 dark:text-subgreen-400">2</span>
+                    <span><strong class="text-slate-800 dark:text-slate-200">Lock to kiosk mode:</strong> Use your device’s kiosk/single-app mode (e.g. Android “Screen pinning”, iOS Guided Access, or MDM) so only this tab is visible.</span>
+                </li>
+            </ul>
+            <div class="mt-5 flex flex-wrap gap-3">
+                <a href="@kioskUrl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    Open on tablet (new tab)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var copyBtn = document.getElementById('copyKioskUrl');
+    var input = document.getElementById('kioskUrl');
+    var feedback = document.getElementById('copyFeedback');
+    if (copyBtn && input) {
+        copyBtn.addEventListener('click', function () {
+            input.select();
+            input.setSelectionRange(0, 99999);
+            try {
+                navigator.clipboard.writeText(input.value);
+                if (feedback) { feedback.classList.remove('hidden'); setTimeout(function () { feedback.classList.add('hidden'); }, 2500); }
+            } catch (e) { /* fallback not needed for UI demo */ }
+        });
+    }
+})();
+</script>
+}

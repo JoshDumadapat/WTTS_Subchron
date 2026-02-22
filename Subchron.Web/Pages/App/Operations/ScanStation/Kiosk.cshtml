@@ -1,0 +1,223 @@
+@page
+@model Subchron.Web.Pages.App.Operations.ScanStation.KioskModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Kiosk";
+}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Scan Station - Subchron</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { subgreen: { 500: '#28a84d', 600: '#209030' }, subblue: { 600: '#0060B0' } } } } };
+    </script>
+    <script>
+        (function () {
+            var stored = localStorage.getItem('subchron-theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+        })();
+    </script>
+    <style>
+        .kiosk-screen { display: none; }
+        .kiosk-screen.active { display: flex; }
+        #scanVideo { object-fit: cover; width: 100%; height: 100%; border-radius: 1rem; }
+        #scanCanvas { display: none; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+    <div class="flex min-h-screen flex-col items-center justify-center p-6">
+        <!-- SCAN SCREEN -->
+        <div id="screenScan" class="kiosk-screen active w-full max-w-md flex-col items-center text-center">
+            <p class="text-lg font-semibold text-slate-600 dark:text-slate-400" id="kioskSiteName">HQ Building</p>
+            <p class="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-white" id="kioskTime">--:--:--</p>
+            <p class="mt-6 text-xl font-semibold text-slate-800 dark:text-slate-200">Scan QR</p>
+            <div class="scan-area relative mt-4 h-56 w-full max-w-sm overflow-hidden rounded-2xl border-2 border-slate-300 bg-slate-900 dark:border-slate-600">
+                <video id="scanVideo" class="absolute inset-0 h-full w-full object-cover" autoplay playsinline muted></video>
+                <canvas id="scanCanvas"></canvas>
+                <div id="scanPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95 p-4 text-slate-400">
+                    <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    <p class="text-center text-sm font-medium">Hold QR code or ID in front of camera</p>
+                    <button type="button" id="btnStartCamera" class="rounded-xl bg-subgreen-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                        Start camera
+                    </button>
+                    <p id="scanError" class="hidden text-center text-sm text-red-400"></p>
+                </div>
+                <div id="scanLiveWrap" class="absolute bottom-2 right-2 hidden">
+                    <span class="rounded bg-black/60 px-2 py-1 text-xs text-white">Live</span>
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">No camera? <button type="button" id="btnSimulateScan" class="text-subgreen-600 hover:underline dark:text-subgreen-400">Simulate QR scan</button></p>
+            @if (Model.IdEntryEnabled)
+            {
+                <p class="mt-6 text-xl font-semibold text-slate-800 dark:text-slate-200">Enter ID</p>
+                <div class="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row">
+                    <input type="text" id="employeeIdInput" placeholder="Employee ID" class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-lg text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500" />
+                    <button type="button" id="btnSubmitId" class="rounded-xl bg-subgreen-600 px-6 py-3 text-lg font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Submit</button>
+                </div>
+            }
+        </div>
+
+        <!-- SUCCESS SCREEN (2–3 sec then auto reset) -->
+        <div id="screenSuccess" class="kiosk-screen w-full max-w-md flex-col items-center text-center">
+            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-subgreen-100 dark:bg-subgreen-900/40">
+                <svg class="h-12 w-12 text-subgreen-600 dark:text-subgreen-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p class="mt-4 text-2xl font-bold text-subgreen-700 dark:text-subgreen-300">Success</p>
+            <p class="mt-1 text-slate-600 dark:text-slate-400" id="successMessage">Attendance recorded.</p>
+        </div>
+
+        <!-- FAIL SCREEN (2–3 sec then auto reset) -->
+        <div id="screenFail" class="kiosk-screen w-full max-w-md flex-col items-center text-center">
+            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                <svg class="h-12 w-12 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </div>
+            <p class="mt-4 text-2xl font-bold text-red-700 dark:text-red-300">Failed</p>
+            <p class="mt-1 text-slate-600 dark:text-slate-400" id="failMessage">Invalid or expired. Try again.</p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var screenScan = document.getElementById('screenScan');
+            var screenSuccess = document.getElementById('screenSuccess');
+            var screenFail = document.getElementById('screenFail');
+            var kioskTime = document.getElementById('kioskTime');
+            var btnSimulateScan = document.getElementById('btnSimulateScan');
+            var btnSubmitId = document.getElementById('btnSubmitId');
+            var employeeIdInput = document.getElementById('employeeIdInput');
+            var scanVideo = document.getElementById('scanVideo');
+            var scanCanvas = document.getElementById('scanCanvas');
+            var scanPlaceholder = document.getElementById('scanPlaceholder');
+            var scanError = document.getElementById('scanError');
+            var scanLiveWrap = document.getElementById('scanLiveWrap');
+            var btnStartCamera = document.getElementById('btnStartCamera');
+            var RESET_MS = 2500;
+            var COOLDOWN_MS = 2000;
+            var stream = null;
+            var scanCooldownUntil = 0;
+            var rafId = null;
+
+            function showScreen(el) {
+                [screenScan, screenSuccess, screenFail].forEach(function (s) { if (s) s.classList.remove('active'); });
+                if (el) el.classList.add('active');
+            }
+
+            function showSuccess(msg) {
+                var m = document.getElementById('successMessage');
+                if (m) m.textContent = msg || 'Attendance recorded.';
+                showScreen(screenSuccess);
+                setTimeout(function () { showScreen(screenScan); }, RESET_MS);
+            }
+
+            function showFail(msg) {
+                var m = document.getElementById('failMessage');
+                if (m) m.textContent = msg || 'Invalid or expired. Try again.';
+                showScreen(screenFail);
+                setTimeout(function () { showScreen(screenScan); }, RESET_MS);
+            }
+
+            function updateTime() {
+                if (kioskTime) kioskTime.textContent = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            function setScanError(msg) {
+                if (scanError) {
+                    scanError.textContent = msg || '';
+                    scanError.classList.toggle('hidden', !msg);
+                }
+            }
+
+            function tick() {
+                if (!scanVideo || !scanCanvas || !stream || !window.jsQR) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                if (scanVideo.readyState !== scanVideo.HAVE_ENOUGH_DATA) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                var now = Date.now();
+                if (now < scanCooldownUntil) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                var w = scanVideo.videoWidth;
+                var h = scanVideo.videoHeight;
+                if (!w || !h) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                scanCanvas.width = w;
+                scanCanvas.height = h;
+                var ctx = scanCanvas.getContext('2d');
+                if (!ctx) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                ctx.drawImage(scanVideo, 0, 0);
+                var imageData = ctx.getImageData(0, 0, w, h);
+                var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                if (code && code.data) {
+                    scanCooldownUntil = now + COOLDOWN_MS;
+                    var data = (code.data || '').trim();
+                    showSuccess(data.length > 40 ? 'Attendance recorded.' : 'Scanned: ' + data);
+                }
+                rafId = requestAnimationFrame(tick);
+            }
+
+            function startCamera() {
+                if (stream) return;
+                setScanError('');
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    setScanError('Camera not supported in this browser.');
+                    return;
+                }
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+                    .then(function (s) {
+                        stream = s;
+                        if (scanVideo) scanVideo.srcObject = stream;
+                        if (scanPlaceholder) scanPlaceholder.classList.add('hidden');
+                        if (scanLiveWrap) scanLiveWrap.classList.remove('hidden');
+                        if (rafId != null) cancelAnimationFrame(rafId);
+                        rafId = requestAnimationFrame(tick);
+                    })
+                    .catch(function (err) {
+                        var msg = err.name === 'NotAllowedError' ? 'Camera permission denied.' : (err.message || 'Could not start camera.');
+                        setScanError(msg);
+                    });
+            }
+
+            if (btnStartCamera) btnStartCamera.addEventListener('click', startCamera);
+            if (btnSimulateScan) btnSimulateScan.addEventListener('click', function () { showSuccess('Attendance recorded.'); });
+            if (btnSubmitId && employeeIdInput) {
+                btnSubmitId.addEventListener('click', function () {
+                    var id = (employeeIdInput.value || '').trim();
+                    if (!id) return;
+                    if (id === '0' || id.toLowerCase() === 'fail') showFail('Invalid or expired. Try again.');
+                    else showSuccess('Attendance recorded for ID ' + id);
+                    employeeIdInput.value = '';
+                });
+                employeeIdInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') btnSubmitId.click(); });
+            }
+
+            if (scanVideo) {
+                scanVideo.addEventListener('loadedmetadata', function () {
+                    if (scanCanvas && scanVideo.videoWidth) {
+                        scanCanvas.width = scanVideo.videoWidth;
+                        scanCanvas.height = scanVideo.videoHeight;
+                    }
+                });
+            }
+
+            startCamera();
+        })();
+    </script>
+</body>
+</html>

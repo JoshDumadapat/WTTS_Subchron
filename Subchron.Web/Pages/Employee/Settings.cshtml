@@ -1,0 +1,60 @@
+@page
+@model Subchron.Web.Pages.Employee.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+    ViewData["PageTitle"] = "Settings";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+}
+
+<div class="mx-auto max-w-2xl">
+    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">Manage your attendance and security options.</p>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Biometrics</h3>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use your device fingerprint or face to record time in/out from this app.</p>
+        <div class="mt-4 flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Enable Biometrics</span>
+            <button type="button" id="toggleBiometrics" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600">
+                <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
+            </button>
+        </div>
+        <p id="biometricsStatus" class="mt-2 text-sm text-slate-500 dark:text-slate-400">Status: Disabled</p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var toggle = document.getElementById('toggleBiometrics');
+    var statusEl = document.getElementById('biometricsStatus');
+    function setState(on) {
+        toggle.setAttribute('aria-checked', on ? 'true' : 'false');
+        var thumb = toggle.querySelector('span');
+        if (on) {
+            toggle.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+            toggle.classList.add('bg-subgreen-600', 'dark:bg-subgreen-500');
+            if (thumb) { thumb.classList.remove('translate-x-0'); thumb.classList.add('translate-x-5'); }
+            if (statusEl) statusEl.textContent = 'Status: Enabled';
+        } else {
+            toggle.classList.add('bg-slate-200', 'dark:bg-slate-600');
+            toggle.classList.remove('bg-subgreen-600', 'dark:bg-subgreen-500');
+            if (thumb) { thumb.classList.add('translate-x-0'); thumb.classList.remove('translate-x-5'); }
+            if (statusEl) statusEl.textContent = 'Status: Disabled';
+        }
+    }
+    toggle?.addEventListener('click', function () {
+        var on = this.getAttribute('aria-checked') === 'true';
+        if (!on) {
+            if (typeof PublicKeyCredential !== 'undefined') {
+                alert('OS biometric prompt would appear here to verify. (Demo: no backend.)');
+            } else {
+                alert('Biometric verification would run here. (Demo: no backend.)');
+            }
+            setState(true);
+        } else {
+            setState(false);
+        }
+    });
+})();
+</script>
+}

@@ -1,0 +1,57 @@
+@page
+@model Subchron.Web.Pages.Employee.MyQrModel
+@{
+    ViewData["Title"] = "My QR";
+    ViewData["PageTitle"] = "My QR";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+}
+
+<div class="mx-auto max-w-md">
+    <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Show this QR at a kiosk to record time in or out.</p>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-col items-center">
+            <div id="qrContainer" class="flex h-64 w-64 items-center justify-center rounded-xl bg-white dark:bg-slate-100">
+                <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SUBCHRON-EMP-001" alt="My QR" class="h-56 w-56 object-contain" />
+            </div>
+            <p class="mt-4 text-lg font-bold tabular-nums text-slate-900 dark:text-white" id="empNumber">EMP-001</p>
+            <p class="text-sm font-medium text-slate-600 dark:text-slate-400" id="empName">@(User.Identity?.Name ?? "Employee")</p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <button type="button" id="btnFullscreen" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Show fullscreen</button>
+            <button type="button" id="btnRefreshQr" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Refresh
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">Optional: tap Refresh to refetch the current QR code.</p>
+</div>
+
+<!-- Fullscreen QR overlay -->
+<div id="qrFullscreen" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-slate-900 p-4">
+    <button type="button" id="closeFullscreen" class="absolute right-4 top-4 rounded-lg p-2 text-white hover:bg-white/10" aria-label="Close">✕</button>
+    <img id="qrFullscreenImage" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=SUBCHRON-EMP-001" alt="QR" class="max-h-[70vmin] w-auto rounded-xl bg-white p-2" />
+    <p class="mt-4 text-2xl font-bold tabular-nums text-white" id="qrFullscreenEmpNo">EMP-001</p>
+    <p class="text-lg text-slate-300" id="qrFullscreenName">@(User.Identity?.Name ?? "Employee")</p>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    function refreshQr() {
+        var t = Date.now();
+        var img = document.getElementById('qrImage');
+        var fsImg = document.getElementById('qrFullscreenImage');
+        if (img) img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SUBCHRON-EMP-001&t=' + t;
+        if (fsImg) fsImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=SUBCHRON-EMP-001&t=' + t;
+    }
+    document.getElementById('btnRefreshQr')?.addEventListener('click', refreshQr);
+    var fs = document.getElementById('qrFullscreen');
+    document.getElementById('btnFullscreen')?.addEventListener('click', function () { fs.classList.remove('hidden'); fs.classList.add('flex'); });
+    document.getElementById('closeFullscreen')?.addEventListener('click', function () { fs.classList.add('hidden'); fs.classList.remove('flex'); });
+    fs?.addEventListener('click', function (e) { if (e.target === fs) { fs.classList.add('hidden'); fs.classList.remove('flex'); } });
+})();
+</script>
+}

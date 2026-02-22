@@ -1,0 +1,262 @@
+﻿<style>
+    /* Utility to hide scrollbar while keeping scroll functionality */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+</style>
+
+<div id="tab-locations" class="tab-content hidden h-full flex-col">
+
+    <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Locations Management</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage geofenced sites and office coordinates.</p>
+        </div>
+        <span class="hidden text-xs font-medium text-gray-400 sm:block">Click map to set coordinates</span>
+    </div>
+
+    <div class="flex h-[600px] flex-1 flex-col lg:flex-row">
+
+        <div class="flex w-full flex-col border-b border-gray-200 bg-white lg:w-[400px] lg:border-r lg:border-b-0 dark:border-gray-700 dark:bg-gray-900">
+
+            <div class="scrollbar-hide h-[260px] shrink-0 overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900/50">
+                <div class="mb-3 flex items-center justify-between">
+                    <span class="text-xs font-bold tracking-wider text-gray-500 uppercase">Active Sites</span>
+                    <span class="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-gray-700 dark:text-gray-300">3</span>
+                </div>
+
+                <div class="space-y-3">
+
+                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
+                        <div class="mb-3 flex items-start justify-between">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Main HQ</h3>
+                            <span onclick="openModal('status', 'Main HQ')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                Active
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="font-mono text-xs text-gray-500">14.5995, 120.9842</div>
+                            <div class="relative">
+                                <button onclick="toggleMenu('menu-1')" class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                                </button>
+                                <div id="menu-1" class="ring-opacity-5 absolute top-full right-0 z-50 mt-1 hidden w-32 rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-700">
+                                    <a href="#" onclick="editSite('Main HQ', '14.5995', '120.9842', '50')" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-600">Edit</a>
+                                    <a href="#" onclick="openModal('remove', 'Main HQ')" class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
+                        <div class="mb-3 flex items-start justify-between">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Warehouse A</h3>
+                            <span onclick="openModal('status', 'Warehouse A')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                Active
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="font-mono text-xs text-gray-500">14.6000, 121.0000</div>
+                            <div class="relative">
+                                <button onclick="toggleMenu('menu-2')" class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                                </button>
+                                <div id="menu-2" class="ring-opacity-5 absolute top-full right-0 z-50 mt-1 hidden w-32 rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-700">
+                                    <a href="#" onclick="editSite('Warehouse A', '14.6000', '121.0000', '100')" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-600">Edit</a>
+                                    <a href="#" onclick="openModal('remove', 'Warehouse A')" class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
+                        <div class="mb-3 flex items-start justify-between">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Davao Hub</h3>
+                            <span onclick="openModal('status', 'Davao Hub')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                Active
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="font-mono text-xs text-gray-500">7.1907, 125.4553</div>
+                            <div class="relative">
+                                <button class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="flex-1 border-t border-gray-200 bg-white p-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:border-gray-700 dark:bg-gray-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 id="form-title" class="text-base font-bold text-gray-900 dark:text-white">Add New Site</h3>
+                    <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">Cancel Edit</button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="site_name" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Location Name</label>
+                        <div class="mt-1"><input type="text" id="site_name" placeholder="e.g. Makati Branch" class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:ring-emerald-500"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="site_lat" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Latitude</label>
+                            <div class="mt-1"><input type="text" id="site_lat" placeholder="00.0000" class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:ring-emerald-500"></div>
+                        </div>
+                        <div>
+                            <label for="site_lng" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Longitude</label>
+                            <div class="mt-1"><input type="text" id="site_lng" placeholder="00.0000" class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:ring-emerald-500"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="site_radius" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Radius (Meters)</label>
+                        <div class="mt-1"><input type="number" id="site_radius" value="50" class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:ring-emerald-500"></div>
+                    </div>
+                    <button id="form-submit-btn" class="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">Add Site</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="group relative flex-1 bg-gray-100 dark:bg-gray-900">
+            <div class="absolute inset-0 flex items-center justify-center overflow-hidden bg-slate-200 dark:bg-slate-800">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px;"></div>
+                <div class="pointer-events-none z-10 text-center">
+                    <svg class="mx-auto mb-2 h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7m0 0L9 17"></path></svg>
+                    <span class="block text-base font-medium text-gray-500">Interactive Map Component</span>
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+                    <div class="h-5 w-5 animate-bounce rounded-full border-2 border-white bg-emerald-500 shadow-lg"></div>
+                </div>
+                <button onclick="simulateMapClick()" class="absolute right-4 bottom-4 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200">
+                    <span class="flex items-center">
+                        <svg class="mr-2 h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Set Current Pin
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-modal" class="relative z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+
+            <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+
+                <div class="bg-white px-6 pt-6 pb-6">
+                    <div class="sm:flex sm:items-start">
+
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+
+                        <div class="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 id="modal-title" class="text-lg leading-6 font-bold text-gray-900">Remove Site</h3>
+                            <div class="mt-2">
+                                <p id="modal-desc" class="text-sm text-gray-500">Are you sure you want to remove this location? This action cannot be undone.</p>
+
+                                <div class="mt-4">
+                                    <label for="action-reason" class="block text-sm font-semibold text-gray-700">Reason / Remarks</label>
+                                    <textarea id="action-reason"
+                                              rows="3"
+                                              class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none sm:text-sm"
+                                              placeholder="e.g. Site renovation, relocation..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse">
+                    <button id="modal-confirm-btn" type="button" onclick="closeModal()" class="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-500 sm:ml-3 sm:w-auto">
+                        Confirm Removal
+                    </button>
+                    <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 transition-colors ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                        Cancel
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic (same as previous)
+    function toggleMenu(menuId) {
+        document.querySelectorAll('[id^="menu-"]').forEach(menu => {
+            if (menu.id !== menuId) menu.classList.add('hidden');
+        });
+        document.getElementById(menuId).classList.toggle('hidden');
+    }
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) {
+            document.querySelectorAll('[id^="menu-"]').forEach(menu => menu.classList.add('hidden'));
+        }
+    });
+
+    function editSite(name, lat, lng, rad) {
+        document.getElementById('site_name').value = name;
+        document.getElementById('site_lat').value = lat;
+        document.getElementById('site_lng').value = lng;
+        document.getElementById('site_radius').value = rad;
+        document.getElementById('form-title').innerText = "Edit Site";
+        document.getElementById('form-submit-btn').innerText = "Update Site";
+        document.getElementById('cancel-edit-btn').classList.remove('hidden');
+        document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
+    }
+    function resetForm() {
+        document.getElementById('site_name').value = '';
+        document.getElementById('site_lat').value = '';
+        document.getElementById('site_lng').value = '';
+        document.getElementById('site_radius').value = 50;
+        document.getElementById('form-title').innerText = "Add New Site";
+        document.getElementById('form-submit-btn').innerText = "Add Site";
+        document.getElementById('cancel-edit-btn').classList.add('hidden');
+    }
+
+    function openModal(type, siteName) {
+        const modal = document.getElementById('action-modal');
+        const title = document.getElementById('modal-title');
+        const desc = document.getElementById('modal-desc');
+        const btn = document.getElementById('modal-confirm-btn');
+        const reasonInput = document.getElementById('action-reason');
+
+        if (type === 'remove') {
+            title.innerText = "Remove Site";
+            desc.innerText = `Are you sure you want to remove ${siteName}? This action cannot be undone.`;
+            btn.innerText = "Confirm Removal";
+            btn.className = "inline-flex w-full justify-center items-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 transition-colors sm:ml-3 sm:w-auto";
+            // Red Theme Focus
+            reasonInput.className = "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 sm:text-sm";
+
+        } else if (type === 'status') {
+            title.innerText = "Deactivate Site";
+            desc.innerText = `You are about to deactivate ${siteName}. Users will no longer be able to clock in here.`;
+            btn.innerText = "Confirm Deactivation";
+            btn.className = "inline-flex w-full justify-center items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors sm:ml-3 sm:w-auto";
+            // Emerald Theme Focus for Deactivation
+            reasonInput.className = "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:text-sm";
+        }
+        document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
+        modal.classList.remove('hidden');
+    }
+    function closeModal() {
+        document.getElementById('action-modal').classList.add('hidden');
+    }
+    function simulateMapClick() {
+        document.getElementById('site_lat').value = '14.5547';
+        document.getElementById('site_lng').value = '121.0244';
+    }
+</script>

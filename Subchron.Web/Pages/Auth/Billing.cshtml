@@ -1,0 +1,1068 @@
+@page
+@model Subchron.Web.Pages.Auth.BillingModel
+@{
+    ViewData["Title"] = "Complete Payment";
+    Layout = "_LayoutLogin";
+}
+
+<div class="w-full max-w-6xl mx-auto px-4">
+    <!-- Logo + brand -->
+    <div class="flex flex-col items-center gap-2">
+        <a asp-page="/Index" class="inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 rounded-lg">
+            <img src="~/images/logo/logo.png" alt="Subchron" class="h-12 w-auto object-contain" loading="eager" />
+        </a>
+        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200" aria-hidden="true">Subchron</span>
+    </div>
+
+    <h1 id="billingTitle" class="mt-6 text-center text-2xl font-bold text-slate-900 dark:text-white">
+        Complete your payment
+    </h1>
+
+    <!-- Layout: summary LEFT, form RIGHT (no stacking on md+) -->
+    <div class="mt-6 flex flex-col md:flex-row md:gap-8 md:items-start max-w-6xl mx-auto">
+        <!-- Left: payment summary (darker card) -->
+        <div id="receiptPanel" class="hidden w-full md:w-[360px] md:flex-shrink-0 order-2 md:order-1">
+            <div class="sticky top-8 rounded-2xl border border-slate-300 bg-slate-100 p-6 shadow-lg dark:border-slate-600 dark:bg-slate-800/90">
+                <div class="flex items-center gap-3 mb-5">
+                    <img src="~/images/logo/logo.png" alt="" class="h-8 w-auto object-contain flex-shrink-0" aria-hidden="true" />
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Paying</p>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Subchron</p>
+                    </div>
+                </div>
+                <p id="receiptPlanName" class="text-lg font-semibold text-slate-900 dark:text-white">—</p>
+                <p id="receiptAmountPerMonth" class="mt-1 text-2xl font-bold text-subgreen-600 dark:text-subgreen-400">—</p>
+                <p id="receiptPerMonthLabel" class="text-xs text-slate-500 dark:text-slate-400">per month</p>
+                <p id="receiptExchangeNote" class="mt-2 text-xs text-slate-500 dark:text-slate-400 hidden"></p>
+                <p id="receiptPlanDescription" class="mt-3 text-sm text-slate-600 dark:text-slate-300">—</p>
+                <p id="receiptBilledLabel" class="mt-2 text-xs text-slate-500 dark:text-slate-400 hidden">Billed monthly</p>
+                <div id="receiptAnnualBlock" class="mt-3 hidden text-xs text-slate-600 dark:text-slate-300"></div>
+                <div class="mt-4 pt-4 space-y-2 border-t border-slate-200 dark:border-slate-600">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600 dark:text-slate-400">Subtotal</span>
+                        <span id="receiptSubtotal" class="font-medium text-slate-900 dark:text-white">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600 dark:text-slate-400">Tax</span>
+                        <span id="receiptTax" class="font-medium text-slate-900 dark:text-white">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-semibold pt-2 border-t border-slate-200 dark:border-slate-600">
+                        <span class="text-slate-800 dark:text-slate-200">Total due today</span>
+                        <span id="receiptTotal" class="text-subgreen-600 dark:text-subgreen-400">—</span>
+                    </div>
+                </div>
+                <p id="receiptMethod" class="mt-4 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <img id="receiptMethodIcon" src="~/images/payment/cardvisaicon.png" alt="" class="h-4 w-4 object-contain" aria-hidden="true" />
+                    <span>Card</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Right: form -->
+        <div class="flex-1 min-w-0 order-1 md:order-2">
+    <div id="billingCard" class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+         data-token="@Model.Token"
+         data-return-payment-intent-id="@Model.ReturnPaymentIntentId"
+         data-api-base-url="@Model.ApiBaseUrl">
+
+        <!-- Payment processing header: Subchron logo + label -->
+        <div class="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
+            <img src="~/images/logo/logo.png" alt="" class="h-9 w-auto object-contain flex-shrink-0" aria-hidden="true" />
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Payment processing</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Secured by Subchron</p>
+            </div>
+        </div>
+
+        <!-- Always-visible error when create-intent fails or token invalid -->
+        <div id="billingPageError" class="mb-4 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"></div>
+
+        <!-- Plan selector -->
+        <div id="planSelectorWrap" class="mb-5 hidden">
+            <label for="planSelect" class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                <svg class="h-4 w-4 text-subgreen-600 dark:text-subgreen-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Select plan
+            </label>
+            <select id="planSelect" aria-label="Select subscription plan" class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pl-10 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+                <option value="">Loading plans...</option>
+            </select>
+        </div>
+
+        <div id="loadingState" class="mb-6 flex items-center justify-center py-8">
+            <span class="text-sm text-slate-500 dark:text-slate-400">Loading...</span>
+        </div>
+
+        <div id="paymentFormWrap" class="hidden">
+            <!-- Payment method: icon cards (Card = Visa + Mastercard) -->
+            <p class="mb-3 text-sm font-medium text-slate-700 dark:text-slate-200">Payment method</p>
+            <div class="mb-6 grid grid-cols-3 gap-3">
+                <button type="button" id="tabCard" data-method="card"
+                        class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium transition
+                               hover:border-subgreen-400 hover:bg-subgreen-50/50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20
+                               data-[active=true]:border-subgreen-500 data-[active=true]:bg-subgreen-50 data-[active=true]:ring-2 data-[active=true]:ring-subgreen-500/30
+                               dark:data-[active=true]:border-subgreen-400 dark:data-[active=true]:bg-subgreen-900/30 dark:data-[active=true]:ring-subgreen-400/30">
+                    <span class="flex items-center gap-1">
+                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-7 w-auto object-contain" aria-hidden="true" />
+                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-7 w-auto object-contain" aria-hidden="true" />
+                    </span>
+                    <span>Card</span>
+                </button>
+                <button type="button" id="tabGcash" data-method="gcash"
+                        class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium transition
+                               hover:border-subgreen-400 hover:bg-subgreen-50/50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20
+                               data-[active=true]:border-subgreen-500 data-[active=true]:bg-subgreen-50 data-[active=true]:ring-2 data-[active=true]:ring-subgreen-500/30
+                               dark:data-[active=true]:border-subgreen-400 dark:data-[active=true]:bg-subgreen-900/30 dark:data-[active=true]:ring-subgreen-400/30">
+                    <img src="~/images/payment/gcashicon.png" alt="" class="h-8 w-auto object-contain" aria-hidden="true" />
+                    <span>GCash</span>
+                </button>
+                <button type="button" id="tabPaymaya" data-method="paymaya"
+                        class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium transition
+                               hover:border-subgreen-400 hover:bg-subgreen-50/50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20
+                               data-[active=true]:border-subgreen-500 data-[active=true]:bg-subgreen-50 data-[active=true]:ring-2 data-[active=true]:ring-subgreen-500/30
+                               dark:data-[active=true]:border-subgreen-400 dark:data-[active=true]:bg-subgreen-900/30 dark:data-[active=true]:ring-subgreen-400/30">
+                    <img src="~/images/payment/mayaicon.png" alt="" class="h-8 w-auto object-contain" aria-hidden="true" />
+                    <span>Maya</span>
+                </button>
+            </div>
+
+            <!-- Shared contact: one email, one phone (PH 11 digits / US 10 digits), country selector with flag -->
+            <div class="mb-6">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Contact information</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="billingEmail" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email address <span class="text-red-500" aria-hidden="true">*</span></label>
+                        <input id="billingEmail" type="email" placeholder="email@example.com" autocomplete="email"
+                               class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        <p id="billingEmailError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+                    <div>
+                        <label for="billingPhone" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Phone number (optional)</label>
+                        <div class="mt-1.5 flex rounded-lg border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900">
+                            <div class="inline-flex items-center rounded-l-lg border-r border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800 px-3">
+                                <select id="billingPhoneCountry" aria-label="Country" class="border-0 bg-transparent py-3 pr-2 text-sm font-medium text-slate-700 dark:text-slate-200 focus:ring-0">
+                                    <option value="PH" data-prefix="+63">🇵🇭 +63</option>
+                                    <option value="US" data-prefix="+1">🇺🇸 +1</option>
+                                </select>
+                            </div>
+                            <input id="billingPhone" type="tel" placeholder="0956 585 8754" autocomplete="tel" maxlength="14"
+                                   class="w-full min-w-0 rounded-r-lg border-0 bg-transparent px-4 py-3 text-sm dark:text-slate-100 focus:ring-2 focus:ring-inset focus:ring-subgreen-500" data-country="PH" />
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PH: 11 digits (e.g. 0956 585 8754). Stored as 11 digits only.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card form: Card + Billing -->
+            <datalist id="datalistProvinces">
+                <option value="Abra"></option><option value="Agusan del Norte"></option><option value="Agusan del Sur"></option><option value="Aklan"></option><option value="Albay"></option><option value="Antique"></option><option value="Apayao"></option><option value="Aurora"></option><option value="Basilan"></option><option value="Bataan"></option><option value="Batanes"></option><option value="Batangas"></option><option value="Benguet"></option><option value="Biliran"></option><option value="Bohol"></option><option value="Bukidnon"></option><option value="Bulacan"></option><option value="Cagayan"></option><option value="Camarines Norte"></option><option value="Camarines Sur"></option><option value="Camiguin"></option><option value="Capiz"></option><option value="Catanduanes"></option><option value="Cavite"></option><option value="Cebu"></option><option value="Cotabato"></option><option value="Davao de Oro"></option><option value="Davao del Norte"></option><option value="Davao del Sur"></option><option value="Davao Occidental"></option><option value="Davao Oriental"></option><option value="Dinagat Islands"></option><option value="Eastern Samar"></option><option value="Guimaras"></option><option value="Ifugao"></option><option value="Ilocos Norte"></option><option value="Ilocos Sur"></option><option value="Iloilo"></option><option value="Isabela"></option><option value="Kalinga"></option><option value="La Union"></option><option value="Laguna"></option><option value="Lanao del Norte"></option><option value="Lanao del Sur"></option><option value="Leyte"></option><option value="Maguindanao del Norte"></option><option value="Maguindanao del Sur"></option><option value="Marinduque"></option><option value="Masbate"></option><option value="Metro Manila"></option><option value="Misamis Occidental"></option><option value="Misamis Oriental"></option><option value="Mountain Province"></option><option value="Negros Occidental"></option><option value="Negros Oriental"></option><option value="Northern Samar"></option><option value="Nueva Ecija"></option><option value="Nueva Vizcaya"></option><option value="Occidental Mindoro"></option><option value="Oriental Mindoro"></option><option value="Palawan"></option><option value="Pampanga"></option><option value="Pangasinan"></option><option value="Quezon"></option><option value="Quirino"></option><option value="Rizal"></option><option value="Romblon"></option><option value="Samar"></option><option value="Sarangani"></option><option value="Siquijor"></option><option value="Sorsogon"></option><option value="South Cotabato"></option><option value="Southern Leyte"></option><option value="Sultan Kudarat"></option><option value="Sulu"></option><option value="Surigao del Norte"></option><option value="Surigao del Sur"></option><option value="Tarlac"></option><option value="Tawi-Tawi"></option><option value="Zambales"></option><option value="Zamboanga del Norte"></option><option value="Zamboanga del Sur"></option><option value="Zamboanga Sibugay"></option>
+            </datalist>
+            <datalist id="datalistAddressSuggestions">
+                <option value="Street"></option><option value="Barangay"></option><option value="Block"></option><option value="Lot"></option><option value="Unit"></option><option value="Building"></option><option value="Subdivision"></option><option value="Sitio"></option><option value="Purok"></option>
+            </datalist>
+            <div id="panelCard" class="space-y-5">
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-600">
+                    <p class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                        Card information
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Test: <strong>4343 4343 4343 4345</strong>, any future expiry, any CVC.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="cardNumber" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Card number <span class="text-red-500">*</span></label>
+                            <input id="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" maxlength="19"
+                                   class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                            <p id="cardNumberError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="cardExp" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Expiry (MM/YY) <span class="text-red-500">*</span></label>
+                                <input id="cardExp" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="12/24" maxlength="5"
+                                       class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                            </div>
+                            <div>
+                                <label for="cardCvc" class="block text-sm font-medium text-slate-700 dark:text-slate-200">CVC <span class="text-red-500">*</span></label>
+                                <input id="cardCvc" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="3"
+                                       class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="cardName" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name on card <span class="text-red-500">*</span></label>
+                            <input id="cardName" type="text" autocomplete="cc-name" placeholder="Juan Dela Cruz"
+                                   class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 pt-2">Billing address</p>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label for="cardAddressLine1" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 1 <span class="text-red-500">*</span></label>
+                        <input id="cardAddressLine1" type="text" placeholder="Start typing address — suggestions from OpenStreetMap" autocomplete="off"
+                               class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        <div id="addressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Select an address to fill city, province, and postal code (powered by OpenStreetMap).</p>
+                    </div>
+                    <div>
+                        <label for="cardAddressLine2" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 2 (optional)</label>
+                        <input id="cardAddressLine2" type="text" placeholder="Unit, building" autocomplete="address-line2"
+                               class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cardBillingCity" class="block text-sm font-medium text-slate-700 dark:text-slate-200">City <span class="text-red-500">*</span></label>
+                            <input id="cardBillingCity" type="text" placeholder="City" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label for="cardBillingProvince" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Province <span class="text-red-500">*</span></label>
+                            <input id="cardBillingProvince" type="text" placeholder="Province" autocomplete="address-level1" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cardBillingPostal" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Postal code</label>
+                            <input id="cardBillingPostal" type="text" placeholder="Postal code" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label for="cardBillingCountry" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Country</label>
+                            <input id="cardBillingCountry" type="text" placeholder="Philippines" value="Philippines" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">By completing your purchase, you agree to <a href="https://paymongo.com/privacy" target="_blank" rel="noopener" class="text-subgreen-600 hover:underline">PayMongo's Privacy Policy</a>.</p>
+            </div>
+
+            <!-- E-wallet (GCash / Maya): customer info -->
+            <div id="panelEwallet" class="hidden space-y-4">
+                <p class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    <img id="panelEwalletIcon" src="~/images/payment/gcashicon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                    <span>Customer information</span>
+                </p>
+                <div>
+                    <label for="ewalletNameInput" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name <span class="text-red-500">*</span></label>
+                    <input id="ewalletNameInput" type="text" placeholder="John Doe" autocomplete="name"
+                           class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                    <p id="ewalletNameError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400"></p>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300">
+                    You will be redirected to <span id="ewalletName">GCash</span> to authorize the payment. After completing payment, you will return here to finish signup.
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">By completing your purchase, you agree to <a href="https://paymongo.com/privacy" target="_blank" rel="noopener" class="text-subgreen-600 hover:underline">PayMongo's Privacy Policy</a>.</p>
+            </div>
+
+            <p id="billingError" class="mt-4 hidden text-xs text-red-600 dark:text-red-400"></p>
+
+            <div class="mt-5 flex items-start gap-3">
+                <input type="checkbox" id="agreePolicy" class="mt-1 h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500 dark:border-slate-600 dark:bg-slate-800" />
+                <label for="agreePolicy" class="text-sm text-slate-700 dark:text-slate-200">
+                    I agree to the <a href="/Landing/About" class="text-subgreen-600 hover:underline">Terms of Service</a> and <a href="https://paymongo.com/privacy" target="_blank" rel="noopener" class="text-subgreen-600 hover:underline">Privacy Policy</a>. <span class="text-red-500">*</span>
+                </label>
+            </div>
+            <p id="agreePolicyError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400">Please agree to the terms and privacy policy.</p>
+
+            <button type="button" id="btnPay"
+                    class="mt-6 w-full rounded-lg bg-subgreen-500 py-3.5 text-center text-sm font-semibold text-white shadow-md transition hover:bg-subgreen-600 disabled:opacity-70 flex items-center justify-center gap-2">
+                <span id="btnPayText">Subscribe</span>
+                <span id="btnPaySpinner" class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+            </button>
+        </div>
+
+        <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            Secure payment powered by PayMongo (test mode)
+        </p>
+    </div>
+        </div>
+    </div>
+</div>
+
+<!-- E-wallet simulation modal: confirm before redirect to GCash/Maya -->
+<div id="ewalletSimModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4" aria-modal="true" role="dialog" aria-labelledby="ewalletSimTitle">
+    <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-600 dark:bg-slate-800">
+        <div id="ewalletSimIconWrap" class="mb-4 flex justify-center">
+            <img id="ewalletSimIcon" src="~/images/payment/gcashicon.png" alt="" class="h-16 w-auto object-contain" />
+        </div>
+        <h2 id="ewalletSimTitle" class="text-center text-lg font-semibold text-slate-900 dark:text-white">Confirm payment</h2>
+        <p id="ewalletSimMessage" class="mt-2 text-center text-sm text-slate-600 dark:text-slate-300">You will be redirected to <strong>GCash</strong> to authorize payment of <strong id="ewalletSimAmount">₱0</strong>.</p>
+        <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Simulation: click below to proceed to the payment page.</p>
+        <div class="mt-6 flex gap-3">
+            <button type="button" id="ewalletSimCancel" class="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">Cancel</button>
+            <button type="button" id="ewalletSimConfirm" class="flex-1 rounded-lg bg-subgreen-500 py-2.5 text-sm font-semibold text-white hover:bg-subgreen-600">Continue to payment</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (!Model.IsManagePaymentOnly)
+    {
+    <script>
+        (function () {
+            const card = document.getElementById('billingCard');
+            const apiBaseUrl = (card && card.getAttribute('data-api-base-url')) || '';
+            const payMongoPublicKey = '@Model.PayMongoPublicKey';
+            const signupToken = (card && card.getAttribute('data-token')) || '';
+            const returnPaymentIntentId = (card && card.getAttribute('data-return-payment-intent-id')) || '';
+
+            const loadingState = document.getElementById('loadingState');
+            const paymentFormWrap = document.getElementById('paymentFormWrap');
+            const billingTitle = document.getElementById('billingTitle');
+            const tabCard = document.getElementById('tabCard');
+            const tabGcash = document.getElementById('tabGcash');
+            const tabPaymaya = document.getElementById('tabPaymaya');
+            const panelCard = document.getElementById('panelCard');
+            const panelEwallet = document.getElementById('panelEwallet');
+            const ewalletName = document.getElementById('ewalletName');
+            const billingError = document.getElementById('billingError');
+            const billingPageError = document.getElementById('billingPageError');
+            const btnPay = document.getElementById('btnPay');
+
+            let clientKey = '';
+            let paymentIntentId = '';
+            let amount = 0;
+            let planName = '';
+            let selectedMethod = 'card';
+
+            function setError(msg) {
+                if (billingError) {
+                    billingError.textContent = msg || '';
+                    billingError.classList.toggle('hidden', !msg);
+                }
+            }
+
+            function setPageError(msg) {
+                if (billingPageError) {
+                    billingPageError.textContent = msg || '';
+                    billingPageError.classList.toggle('hidden', !msg);
+                }
+            }
+
+            var panelEwalletIcon = document.getElementById('panelEwalletIcon');
+            var receiptMethodIcon = document.getElementById('receiptMethodIcon');
+            var receiptMethodSpan = document.getElementById('receiptMethod')?.querySelector('span');
+            function setTabs(method) {
+                selectedMethod = method;
+                [tabCard, tabGcash, tabPaymaya].forEach(t => {
+                    if (t) t.dataset.active = (t.dataset.method === method);
+                });
+                if (panelCard) panelCard.classList.toggle('hidden', method !== 'card');
+                if (panelEwallet) {
+                    panelEwallet.classList.toggle('hidden', method === 'card');
+                    if (ewalletName) ewalletName.textContent = method === 'gcash' ? 'GCash' : 'PayMaya';
+                    if (panelEwalletIcon) panelEwalletIcon.src = method === 'gcash' ? '/images/payment/gcashicon.png' : '/images/payment/mayaicon.png';
+                }
+                if (receiptMethodIcon) receiptMethodIcon.src = method === 'card' ? '/images/payment/cardvisaicon.png' : (method === 'gcash' ? '/images/payment/gcashicon.png' : '/images/payment/mayaicon.png');
+                if (receiptMethodSpan) receiptMethodSpan.textContent = method === 'card' ? 'Card' : (method === 'gcash' ? 'GCash' : 'Maya');
+            }
+
+            tabCard?.addEventListener('click', () => setTabs('card'));
+            tabGcash?.addEventListener('click', () => setTabs('gcash'));
+            tabPaymaya?.addEventListener('click', () => setTabs('paymaya'));
+
+            // --- Card number: format as XXXX XXXX XXXX XXXX (space every 4 digits, max 16 digits) ---
+            (function () {
+                var cardInput = document.getElementById('cardNumber');
+                if (!cardInput) return;
+                cardInput.addEventListener('input', function () {
+                    var v = this.value.replace(/\D/g, '');
+                    v = v.substring(0, 16);
+                    var parts = [];
+                    for (var i = 0; i < v.length; i += 4) parts.push(v.substring(i, i + 4));
+                    this.value = parts.join(' ');
+                });
+            })();
+
+            // --- Phone (PH): display +63 prefix in UI; input stores 10 digits formatted as 0956 777 9876 ---
+            (function () {
+                function formatPhMobile(input) {
+                    var v = input.value.replace(/\D/g, '');
+                    if (v.indexOf('63') === 0) v = v.substring(2);
+                    v = v.substring(0, 10);
+                    if (v.length === 0) { input.value = ''; return; }
+                    if (v.charAt(0) !== '0') v = '0' + v.substring(0, 9);
+                    var out = v.substring(0, 4);
+                    if (v.length > 4) out += ' ' + v.substring(4, 7);
+                    if (v.length > 7) out += ' ' + v.substring(7, 10);
+                    input.value = out;
+                }
+                ['billingMobile', 'ewalletMobile'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', function () { formatPhMobile(this); });
+                    }
+                });
+            })();
+
+            // --- Expiry: 4 digits only, auto-format to MM/YY (e.g. 1224 -> 12/24) ---
+            (function () {
+                var expInput = document.getElementById('cardExp');
+                if (!expInput) return;
+                expInput.setAttribute('maxlength', '5');
+                expInput.addEventListener('input', function () {
+                    var v = this.value.replace(/\D/g, '');
+                    v = v.substring(0, 4);
+                    if (v.length >= 2)
+                        this.value = v.substring(0, 2) + '/' + v.substring(2);
+                    else
+                        this.value = v;
+                });
+            })();
+
+            // --- CVC: max 3 digits only ---
+            (function () {
+                var cvcInput = document.getElementById('cardCvc');
+                if (!cvcInput) return;
+                cvcInput.setAttribute('maxlength', '3');
+                cvcInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '').substring(0, 3);
+                });
+            })();
+
+            // --- Billing phone: country PH/US, format PH as 0956 585 8754 (11 digits), US as 202 555 1234 (10 digits); store 11 chars ---
+            (function () {
+                var phoneInput = document.getElementById('billingPhone');
+                var countrySelect = document.getElementById('billingPhoneCountry');
+                if (!phoneInput || !countrySelect) return;
+                function getCountry() { return (countrySelect.value || 'PH'); }
+                function formatPhone(val, country) {
+                    var d = val.replace(/\D/g, '');
+                    if (country === 'US') {
+                        d = d.substring(0, 10);
+                        if (d.length <= 3) return d;
+                        if (d.length <= 6) return d.substring(0, 3) + ' ' + d.substring(3);
+                        return d.substring(0, 3) + ' ' + d.substring(3, 6) + ' ' + d.substring(6);
+                    }
+                    d = d.substring(0, 11);
+                    if (d.length <= 4) return d;
+                    if (d.length <= 7) return d.substring(0, 4) + ' ' + d.substring(4);
+                    return d.substring(0, 4) + ' ' + d.substring(4, 7) + ' ' + d.substring(7);
+                }
+                phoneInput.addEventListener('input', function () {
+                    var c = getCountry();
+                    var digits = this.value.replace(/\D/g, '');
+                    this.value = formatPhone(digits, c);
+                });
+                countrySelect.addEventListener('change', function () {
+                    var c = getCountry();
+                    phoneInput.setAttribute('data-country', c);
+                    phoneInput.placeholder = c === 'US' ? '202 555 1234' : '0956 585 8754';
+                    phoneInput.setAttribute('maxlength', c === 'US' ? 12 : 14);
+                    var digits = phoneInput.value.replace(/\D/g, '');
+                    phoneInput.value = formatPhone(digits, c);
+                });
+            })();
+
+            function payMongoAuthHeader() {
+                return 'Basic ' + btoa(payMongoPublicKey + ':');
+            }
+
+            let isFreeTrial = false;
+            let isDraft = false;
+
+            function normalizePhone11(val, country) {
+                if (!val || typeof val !== 'string') return '';
+                var digits = val.replace(/\D/g, '');
+                if (digits.length === 0) return '';
+                country = country || (document.getElementById('billingPhoneCountry') && document.getElementById('billingPhoneCountry').value) || 'PH';
+                if (country === 'US') {
+                    if (digits.length > 10) digits = digits.slice(-10);
+                    return ('1' + digits.padStart(10, '0')).slice(0, 11);
+                }
+                if (digits.length > 11) digits = digits.slice(-11);
+                return digits.padStart(11, '0').slice(0, 11);
+            }
+
+            function getBillingPayload() {
+                var emailEl = document.getElementById('billingEmail');
+                var phoneEl = document.getElementById('billingPhone');
+                var rawPhone = (phoneEl && phoneEl.value) || '';
+                var billingEmail = (emailEl && emailEl.value && emailEl.value.trim()) || '';
+                var country = (document.getElementById('billingPhoneCountry') && document.getElementById('billingPhoneCountry').value) || 'PH';
+                var phone11 = normalizePhone11(rawPhone, country);
+                var nameOnCard = '';
+                var last4 = '';
+                var expiry = '';
+                var brand = '';
+                if (selectedMethod === 'card') {
+                    var cardNameEl = document.getElementById('cardName');
+                    var cardNumEl = document.getElementById('cardNumber');
+                    var cardExpEl = document.getElementById('cardExp');
+                    nameOnCard = (cardNameEl && cardNameEl.value && cardNameEl.value.trim()) || '';
+                    var num = (cardNumEl && cardNumEl.value) ? cardNumEl.value.replace(/\s/g, '') : '';
+                    if (num.length >= 4) last4 = num.slice(-4);
+                    expiry = (cardExpEl && cardExpEl.value && cardExpEl.value.trim()) || '';
+                    if (num.length >= 1) brand = (num[0] === '4') ? 'visa' : (num[0] === '5') ? 'mastercard' : '';
+                } else {
+                    var ewalletNameEl = document.getElementById('ewalletNameInput');
+                    nameOnCard = (ewalletNameEl && ewalletNameEl.value && ewalletNameEl.value.trim()) || '';
+                }
+                return { billingEmail: billingEmail, billingPhone: phone11, nameOnCard: nameOnCard, last4: last4, expiry: expiry, brand: brand };
+            }
+
+            function completeLoginAndRedirect(data) {
+                return fetch('/Auth/CompleteLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: data.userId, orgId: data.orgId, role: data.role, name: data.name, token: data.token || null })
+                }).then(r => r.json()).then(loginData => {
+                    if (loginData && loginData.ok)
+                        window.location.replace('/App/Dashboard');
+                    else
+                        setError('Could not complete login.');
+                });
+            }
+
+            if (!signupToken) {
+                loadingState?.classList.add('hidden');
+                setPageError('Missing or invalid session. Please complete signup again from the signup page.');
+                return;
+            }
+
+            const apiUrl = (apiBaseUrl.trim().replace(/\/$/, '') || window.location.origin);
+
+            // Safe parse: API may return 500 with HTML; show message instead of "Unexpected token..."
+            function parseJsonResponse(r) {
+                var ct = (r.headers.get('Content-Type') || '').toLowerCase();
+                if (ct.indexOf('application/json') !== -1) {
+                    return r.text().then(function (text) {
+                        try { return JSON.parse(text); } catch (e) { throw new Error(text || 'Invalid response'); }
+                    });
+                }
+                return r.text().then(function (text) {
+                    if (r.status >= 400) throw new Error(text || ('Request failed: ' + r.status));
+                    throw new Error('Invalid response from server.');
+                });
+            }
+
+            // If we have returnPaymentIntentId we came back from e-wallet redirect — complete signup
+            if (returnPaymentIntentId && signupToken) {
+                loadingState?.classList.remove('hidden');
+                var loadingSpan = loadingState?.querySelector('span');
+                if (loadingSpan) loadingSpan.textContent = 'Completing signup...';
+                var useDraft = sessionStorage.getItem('billingIsDraft') === '1';
+                var completeUrl = useDraft ? (apiUrl + '/api/auth/complete-signup-with-billing') : (apiUrl + '/api/billing/complete-signup');
+                var completeBody = useDraft
+                    ? JSON.stringify({ draftToken: signupToken, paymentIntentId: returnPaymentIntentId })
+                    : JSON.stringify({ signupToken: signupToken, paymentIntentId: returnPaymentIntentId });
+                fetch(completeUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: completeBody
+                })
+                    .then(function (r) { return parseJsonResponse(r).then(function (data) { return { r: r, data: data }; }); })
+                    .then(function (result) {
+                        var data = result.data;
+                        if (!data || !data.ok) throw new Error((data && data.message) || 'Payment not completed');
+                        sessionStorage.removeItem('billingIsDraft');
+                        return completeLoginAndRedirect(data);
+                    })
+                    .catch(err => {
+                        setPageError(err.message || 'Something went wrong.');
+                        loadingState?.classList.add('hidden');
+                    });
+                return;
+            }
+
+            var planSelect = document.getElementById('planSelect');
+            var planSelectorWrap = document.getElementById('planSelectorWrap');
+            var plansList = [];
+
+            var receiptPanel = document.getElementById('receiptPanel');
+            var receiptPlanName = document.getElementById('receiptPlanName');
+            var receiptAmountPerMonth = document.getElementById('receiptAmountPerMonth');
+            var receiptSubtotal = document.getElementById('receiptSubtotal');
+            var receiptTax = document.getElementById('receiptTax');
+            var receiptTotal = document.getElementById('receiptTotal');
+            var receiptExchangeNote = document.getElementById('receiptExchangeNote');
+            var receiptPlanDescription = document.getElementById('receiptPlanDescription');
+            var receiptBilledLabel = document.getElementById('receiptBilledLabel');
+            var receiptAnnualBlock = document.getElementById('receiptAnnualBlock');
+            var receiptPerMonthLabel = document.getElementById('receiptPerMonthLabel');
+
+            function getPlanDescription(name) {
+                return name === 'Basic' ? 'Time tracking, attendance, and basic reporting for small teams.' :
+                    name === 'Standard' ? 'Everything in Basic plus leave management, overtime, and 7-day free trial.' :
+                    name === 'Enterprise' ? 'Full platform with advanced reporting, API, and dedicated support.' : 'Subscription plan.';
+            }
+
+            function applyCreateIntentResponse(data) {
+                setPageError('');
+                isFreeTrial = data.isFreeTrial === true;
+                planName = data.planName || 'Subscription';
+                amount = data.amount || 0;
+                if (receiptPanel) receiptPanel.classList.remove('hidden');
+                if (receiptPlanName) receiptPlanName.textContent = planName;
+                if (receiptPlanDescription) receiptPlanDescription.textContent = getPlanDescription(planName);
+                if (receiptPerMonthLabel) receiptPerMonthLabel.style.display = isFreeTrial ? 'none' : '';
+                if (receiptBilledLabel) { receiptBilledLabel.classList.toggle('hidden', isFreeTrial); }
+                if (receiptExchangeNote) { receiptExchangeNote.classList.toggle('hidden', isFreeTrial); receiptExchangeNote.textContent = isFreeTrial ? '' : 'PHP / USD — 1 USD ≈ 60.36 PHP. Charges can vary based on exchange rates.'; }
+                if (receiptAnnualBlock) {
+                    receiptAnnualBlock.classList.add('hidden');
+                    if (!isFreeTrial && amount > 0) {
+                        var annualPerMonth = amount * 0.8;
+                        var save = amount * 12 * 0.2;
+                        receiptAnnualBlock.innerHTML = 'Save ₱' + Math.round(save).toLocaleString() + ' with annual billing — ₱' + annualPerMonth.toLocaleString('en-PH', { minimumFractionDigits: 2 }) + '/month';
+                        receiptAnnualBlock.classList.remove('hidden');
+                    }
+                }
+                if (receiptAmountPerMonth) receiptAmountPerMonth.textContent = isFreeTrial ? '7-day free trial' : ('₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }));
+                if (receiptSubtotal) receiptSubtotal.textContent = isFreeTrial ? '₱0.00' : ('₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }));
+                if (receiptTax) receiptTax.textContent = '₱0.00';
+                if (receiptTotal) receiptTotal.textContent = isFreeTrial ? '₱0.00' : ('₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }));
+                paymentFormWrap?.classList.remove('hidden');
+                if (isFreeTrial) {
+                    if (billingTitle) billingTitle.textContent = 'Billing details';
+                    clientKey = '';
+                    paymentIntentId = '';
+                    setTabs('card');
+                    if (data.billingEmail) {
+                        var be = document.getElementById('billingEmail'); if (be) be.value = data.billingEmail;
+                    }
+                    return;
+                }
+                if (!data.clientKey) {
+                    setPageError(data.message || 'Could not create payment session.');
+                    return;
+                }
+                clientKey = data.clientKey;
+                paymentIntentId = data.paymentIntentId;
+                setTabs('card');
+                if (data.billingEmail) {
+                    var be = document.getElementById('billingEmail'); if (be) be.value = data.billingEmail;
+                }
+            }
+
+            function loadCreateIntent(planIdVal) {
+                var body = { signupToken: signupToken, draftToken: signupToken };
+                if (planIdVal) body.planId = parseInt(planIdVal, 10);
+                return fetch(apiUrl + '/api/billing/create-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                })
+                    .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; }); })
+                    .catch(function () { return { ok: false, data: null }; });
+            }
+
+            function fetchPlansAndLoad() {
+                var plansPromise = fetch(apiUrl + '/api/plans').then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+                var intentPromise = loadCreateIntent(null);
+                Promise.all([plansPromise, intentPromise]).then(function (results) {
+                    plansList = results[0] || [];
+                    var intentResult = results[1];
+                    loadingState?.classList.add('hidden');
+                    if (!intentResult.ok || !intentResult.data || !intentResult.data.ok) {
+                        var msg = (intentResult.data && intentResult.data.message) ? intentResult.data.message : 'Could not load session. Check API and PayMongo keys in appsettings.';
+                        setPageError(msg);
+                        return;
+                    }
+                    var data = intentResult.data;
+                    isDraft = data.isDraft === true;
+                    if (isDraft) sessionStorage.setItem('billingIsDraft', '1');
+                    if (planSelectorWrap && planSelect && plansList.length > 0) {
+                        planSelect.innerHTML = '';
+                        plansList.forEach(function (p) {
+                            var opt = document.createElement('option');
+                            opt.value = p.planId || p.planID;
+                            var label = (p.planName || p.PlanName) + (p.isFreeTrial ? ' (7-day free trial)' : ' - ₱' + (p.basePrice || p.BasePrice || 0).toLocaleString() + '/mo');
+                            opt.textContent = label;
+                            if (p.planName === data.planName) opt.selected = true;
+                            planSelect.appendChild(opt);
+                        });
+                        planSelectorWrap.classList.remove('hidden');
+                        planSelect.addEventListener('change', function () {
+                            var val = planSelect.value;
+                            if (!val) return;
+                            setPageError('');
+                            loadingState?.classList.remove('hidden');
+                            loadCreateIntent(val).then(function (res) {
+                                loadingState?.classList.add('hidden');
+                                if (res.ok && res.data && res.data.ok) applyCreateIntentResponse(res.data);
+                                else setPageError((res.data && res.data.message) ? res.data.message : 'Could not switch plan.');
+                            });
+                        });
+                    }
+                    if (billingTitle && !data.isFreeTrial) billingTitle.textContent = 'Complete your payment';
+                    applyCreateIntentResponse(data);
+                });
+            }
+
+            fetchPlansAndLoad();
+
+            var agreePolicy = document.getElementById('agreePolicy');
+            var agreePolicyError = document.getElementById('agreePolicyError');
+            var btnPayText = document.getElementById('btnPayText');
+            var btnPaySpinner = document.getElementById('btnPaySpinner');
+            var ewalletSimModal = document.getElementById('ewalletSimModal');
+            var ewalletSimCancel = document.getElementById('ewalletSimCancel');
+            var ewalletSimConfirm = document.getElementById('ewalletSimConfirm');
+            var ewalletSimAmount = document.getElementById('ewalletSimAmount');
+            var ewalletSimMessage = document.getElementById('ewalletSimMessage');
+            var ewalletSimIcon = document.getElementById('ewalletSimIcon');
+            var ewalletSimTitle = document.getElementById('ewalletSimTitle');
+            var pendingEwalletRedirect = null;
+
+            function setPayButtonLoading(loading) {
+                if (btnPay) btnPay.disabled = loading;
+                if (btnPayText) btnPayText.classList.toggle('hidden', loading);
+                if (btnPaySpinner) btnPaySpinner.classList.toggle('hidden', !loading);
+            }
+
+            function validatePolicy() {
+                var ok = agreePolicy && agreePolicy.checked;
+                if (agreePolicyError) { agreePolicyError.classList.toggle('hidden', ok); }
+                return ok;
+            }
+
+            ewalletSimCancel?.addEventListener('click', function () {
+                if (ewalletSimModal) ewalletSimModal.classList.add('hidden');
+                ewalletSimModal?.classList.remove('flex');
+                pendingEwalletRedirect = null;
+                setPayButtonLoading(false);
+            });
+            ewalletSimConfirm?.addEventListener('click', function () {
+                if (pendingEwalletRedirect) window.location.href = pendingEwalletRedirect;
+                if (ewalletSimModal) ewalletSimModal.classList.add('hidden');
+                ewalletSimModal?.classList.remove('flex');
+                pendingEwalletRedirect = null;
+            });
+
+            btnPay?.addEventListener('click', async function () {
+                setError('');
+                if (agreePolicyError) agreePolicyError.classList.add('hidden');
+                if (!validatePolicy()) return;
+                if (selectedMethod === 'card') {
+                    var emailEl = document.getElementById('billingEmail');
+                    var cardNum = (document.getElementById('cardNumber')?.value || '').replace(/\s/g, '');
+                    var addr1 = (document.getElementById('cardAddressLine1')?.value || '').trim();
+                    var city = (document.getElementById('cardBillingCity')?.value || '').trim();
+                    var province = (document.getElementById('cardBillingProvince')?.value || '').trim();
+                    if (!emailEl?.value?.trim()) { document.getElementById('billingEmailError').textContent = 'Email is required.'; document.getElementById('billingEmailError').classList.remove('hidden'); setPayButtonLoading(false); return; }
+                    if (document.getElementById('billingEmailError')) document.getElementById('billingEmailError').classList.add('hidden');
+                    if (!isFreeTrial && cardNum.length < 13) { setError('Please enter a valid card number.'); return; }
+                    if (document.getElementById('cardNumberError')) document.getElementById('cardNumberError').classList.add('hidden');
+                    if (!isFreeTrial && (!addr1 || !city || !province)) { setError('Please fill in address line 1, city, and province.'); return; }
+                }
+                if (selectedMethod !== 'card') {
+                    var nameEl = document.getElementById('ewalletNameInput');
+                    var emailEl = document.getElementById('billingEmail');
+                    if (!nameEl?.value?.trim()) { var err = document.getElementById('ewalletNameError'); if (err) { err.textContent = 'Name is required.'; err.classList.remove('hidden'); } setPayButtonLoading(false); return; }
+                    if (document.getElementById('ewalletNameError')) document.getElementById('ewalletNameError').classList.add('hidden');
+                    if (!emailEl?.value?.trim()) { setError('Email is required for e-wallet.'); return; }
+                }
+                setPayButtonLoading(true);
+
+                if (isFreeTrial) {
+                    var completeUrl = isDraft ? (apiUrl + '/api/auth/complete-signup-with-billing') : (apiUrl + '/api/billing/complete-signup');
+                    var billingPayload = getBillingPayload();
+                    var completeBase = isDraft ? { draftToken: signupToken } : { signupToken: signupToken };
+                    var completeBody = JSON.stringify(Object.assign(completeBase, billingPayload));
+                    fetch(completeUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: completeBody })
+                        .then(function (r) { return parseJsonResponse(r); })
+                        .then(function (data) {
+                            if (!data || !data.ok) throw new Error((data && data.message) || 'Could not complete.');
+                            return completeLoginAndRedirect(data);
+                        })
+                        .catch(function (err) {
+                            setError(err.message || 'Something went wrong.');
+                            setPayButtonLoading(false);
+                        });
+                    return;
+                }
+
+                if (selectedMethod === 'card') {
+                    const number = (document.getElementById('cardNumber')?.value || '').replace(/\s/g, '');
+                    const exp = (document.getElementById('cardExp')?.value || '').split('/');
+                    const expMonth = parseInt(exp[0], 10) || 12;
+                    const expYearParsed = parseInt(exp[1], 10) || 28;
+                    const expYear = expYearParsed < 100 ? expYearParsed + 2000 : expYearParsed;
+                    const cvc = (document.getElementById('cardCvc')?.value || '');
+                    const name = (document.getElementById('cardName')?.value || 'Cardholder').trim();
+                    const billingEmail = (document.getElementById('billingEmail')?.value || '').trim();
+                    const line1 = (document.getElementById('cardAddressLine1')?.value || '').trim();
+                    const line2 = (document.getElementById('cardAddressLine2')?.value || '').trim();
+                    const city = (document.getElementById('cardBillingCity')?.value || '').trim();
+                    const state = (document.getElementById('cardBillingProvince')?.value || '').trim();
+                    const postalCode = (document.getElementById('cardBillingPostal')?.value || '').trim();
+                    const country = (document.getElementById('cardBillingCountry')?.value || 'Philippines').trim();
+
+                    if (number.length < 13) {
+                        setError('Please enter a valid card number.');
+                        setPayButtonLoading(false);
+                        return;
+                    }
+                    if (!billingEmail) {
+                        setError('Billing email is required.');
+                        setPayButtonLoading(false);
+                        return;
+                    }
+
+                    var billingAttrs = { name: name || 'N/A', email: billingEmail };
+                    if (line1 || city || state || postalCode || country) {
+                        billingAttrs.address = {
+                            line1: line1 || undefined,
+                            line2: line2 || undefined,
+                            city: city || undefined,
+                            state: state || undefined,
+                            postal_code: postalCode || undefined,
+                            country: country === 'Philippines' ? 'PH' : (country.length === 2 ? country : 'PH')
+                        };
+                    }
+
+                    try {
+                        const pmRes = await fetch('https://api.paymongo.com/v1/payment_methods', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': payMongoAuthHeader()
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    attributes: {
+                                        type: 'card',
+                                        details: {
+                                            card_number: number,
+                                            exp_month: expMonth,
+                                            exp_year: expYear,
+                                            cvc: cvc
+                                        },
+                                        billing: billingAttrs
+                                    }
+                                }
+                            })
+                        });
+                        const pmData = await pmRes.json();
+                        const pmId = pmData?.data?.id;
+                        if (!pmId) {
+                            var errMsg = (pmData?.errors && pmData.errors[0]) ? (pmData.errors[0].detail || pmData.errors[0].title || JSON.stringify(pmData.errors[0])) : (pmData?.message || 'Invalid card details.');
+                            setError(errMsg);
+                            setPayButtonLoading(false);
+                            return;
+                        }
+
+                        const attachRes = await fetch('https://api.paymongo.com/v1/payment_intents/' + paymentIntentId + '/attach', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': payMongoAuthHeader()
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    attributes: {
+                                        client_key: clientKey,
+                                        payment_method: pmId,
+                                        return_url: window.location.origin + '/Auth/Billing?token=' + encodeURIComponent(signupToken) + '&paymentIntentId=' + encodeURIComponent(paymentIntentId)
+                                    }
+                                }
+                            })
+                        });
+                        const attachData = await attachRes.json();
+                        const status = attachData?.data?.attributes?.status;
+                        const nextAction = attachData?.data?.attributes?.next_action;
+
+                        if (status === 'succeeded') {
+                            completeSignup();
+                            return;
+                        }
+                        if (status === 'awaiting_next_action' && nextAction?.redirect?.url) {
+                            window.location.href = nextAction.redirect.url;
+                            return;
+                        }
+                        if (status === 'processing') {
+                            setTimeout(function () { completeSignup(); }, 2000);
+                            return;
+                        }
+                        setError(attachData?.data?.attributes?.last_payment_error || 'Payment could not be processed.');
+                    } catch (e) {
+                        setError('Network error. Please try again.');
+                    }
+                    setPayButtonLoading(false);
+                } else {
+                    // GCash or PayMaya: include billing email/name; show simulation modal then redirect
+                    var ewalletName = (document.getElementById('ewalletNameInput')?.value || '').trim();
+                    var billingEmailEw = (document.getElementById('billingEmail')?.value || '').trim();
+                    var ewalletBilling = { name: ewalletName || 'N/A', email: billingEmailEw || '' };
+                    try {
+                        const pmRes = await fetch('https://api.paymongo.com/v1/payment_methods', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': payMongoAuthHeader()
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    attributes: {
+                                        type: selectedMethod,
+                                        billing: ewalletBilling
+                                    }
+                                }
+                            })
+                        });
+                        const pmData = await pmRes.json();
+                        const pmId = pmData?.data?.id;
+                        if (!pmId) {
+                            var errMsg = (pmData?.errors && pmData.errors[0]) ? (pmData.errors[0].detail || pmData.errors[0].title || 'Could not create payment method.') : (pmData?.message || 'Could not create payment method.');
+                            setError(errMsg);
+                            setPayButtonLoading(false);
+                            return;
+                        }
+
+                        const returnUrl = window.location.origin + '/Auth/Billing?token=' + encodeURIComponent(signupToken) + '&paymentIntentId=' + encodeURIComponent(paymentIntentId);
+                        const attachRes = await fetch('https://api.paymongo.com/v1/payment_intents/' + paymentIntentId + '/attach', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': payMongoAuthHeader()
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    attributes: {
+                                        client_key: clientKey,
+                                        payment_method: pmId,
+                                        return_url: returnUrl
+                                    }
+                                }
+                            })
+                        });
+                        const attachData = await attachRes.json();
+                        const nextAction = attachData?.data?.attributes?.next_action;
+                        if (nextAction?.redirect?.url) {
+                            pendingEwalletRedirect = nextAction.redirect.url;
+                            var amtStr = '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+                            if (ewalletSimAmount) ewalletSimAmount.textContent = amtStr;
+                            if (ewalletSimMessage) ewalletSimMessage.innerHTML = 'You will be redirected to <strong>' + (selectedMethod === 'gcash' ? 'GCash' : 'Maya') + '</strong> to authorize payment of <strong>' + amtStr + '</strong>.';
+                            if (ewalletSimIcon) ewalletSimIcon.src = selectedMethod === 'gcash' ? '/images/payment/gcashicon.png' : '/images/payment/mayaicon.png';
+                            if (ewalletSimTitle) ewalletSimTitle.textContent = 'Confirm payment — ' + (selectedMethod === 'gcash' ? 'GCash' : 'Maya');
+                            if (ewalletSimModal) { ewalletSimModal.classList.remove('hidden'); ewalletSimModal.classList.add('flex'); }
+                            setPayButtonLoading(false);
+                            return;
+                        }
+                        setError('Redirect URL not received. Please try again.');
+                    } catch (e) {
+                        setError('Network error. Please try again.');
+                    }
+                    setPayButtonLoading(false);
+                }
+            });
+
+            function completeSignup() {
+                var completeUrl = isDraft ? (apiUrl + '/api/auth/complete-signup-with-billing') : (apiUrl + '/api/billing/complete-signup');
+                var billingPayload = getBillingPayload();
+                var completeBase = isDraft ? { draftToken: signupToken, paymentIntentId: paymentIntentId } : { signupToken: signupToken, paymentIntentId: paymentIntentId };
+                var completeBody = JSON.stringify(Object.assign(completeBase, billingPayload));
+                fetch(completeUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: completeBody
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.ok) {
+                            setError(data.message || 'Could not complete signup.');
+                            setPayButtonLoading(false);
+                            return;
+                        }
+                        return fetch('/Auth/CompleteLogin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: data.userId, orgId: data.orgId, role: data.role, name: data.name, token: data.token || null })
+                        }).then(r => r.json());
+                    })
+                    .then(loginData => {
+                        if (loginData && loginData.ok)
+                            window.location.replace('/App/Dashboard');
+                        else
+                            setError('Could not complete login.');
+                        setPayButtonLoading(false);
+                    })
+                    .catch(() => {
+                        setError('Network error.');
+                        setPayButtonLoading(false);
+                    });
+            }
+        })();
+    </script>
+    <!-- Address autocomplete via OpenStreetMap (Photon API) - no API key -->
+    <script>
+        (function () {
+            var input = document.getElementById('cardAddressLine1');
+            var list = document.getElementById('addressSuggestions');
+            if (!input || !list) return;
+            var debounceTimer;
+            var lastQuery = '';
+            var abortController = null;
+
+            function fillAddress(feature) {
+                var p = feature.properties || {};
+                var line1 = [p.street, p.name].filter(Boolean).join(', ') || p.name || '';
+                var city = p.city || p.locality || '';
+                var state = p.state || '';
+                var postcode = (p.postcode && String(p.postcode)) || '';
+                var country = (p.country && p.country.toUpperCase() === 'PH') ? 'Philippines' : (p.country || 'Philippines');
+                var line1El = document.getElementById('cardAddressLine1');
+                var cityEl = document.getElementById('cardBillingCity');
+                var provEl = document.getElementById('cardBillingProvince');
+                var postalEl = document.getElementById('cardBillingPostal');
+                var countryEl = document.getElementById('cardBillingCountry');
+                if (line1El) line1El.value = line1;
+                if (cityEl) cityEl.value = city;
+                if (provEl) provEl.value = state;
+                if (postalEl) postalEl.value = postcode;
+                if (countryEl) countryEl.value = country;
+                list.classList.add('hidden');
+                list.innerHTML = '';
+            }
+
+            function showSuggestions(query) {
+                if (!query || query.length < 2) {
+                    list.classList.add('hidden');
+                    list.innerHTML = '';
+                    return;
+                }
+                if (abortController) abortController.abort();
+                abortController = new AbortController();
+                fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(query) + '&limit=6&lang=en', { signal: abortController.signal })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var features = (data && data.features) ? data.features : [];
+                        list.innerHTML = '';
+                        if (features.length === 0) {
+                            list.classList.add('hidden');
+                            return;
+                        }
+                        features.forEach(function (f) {
+                            var p = f.properties || {};
+                            var label = [p.street, p.name, p.city, p.state, p.country].filter(Boolean).join(', ') || p.name || 'Address';
+                            var item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700';
+                            item.textContent = label;
+                            item.addEventListener('click', function () { fillAddress(f); });
+                            list.appendChild(item);
+                        });
+                        list.classList.remove('hidden');
+                    })
+                    .catch(function (err) {
+                        if (err.name !== 'AbortError') list.classList.add('hidden');
+                    });
+            }
+
+            input.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                var q = input.value.trim();
+                if (q === lastQuery) return;
+                lastQuery = q;
+                debounceTimer = setTimeout(function () { showSuggestions(q); }, 280);
+            });
+            input.addEventListener('focus', function () {
+                if (list.children.length > 0) list.classList.remove('hidden');
+            });
+            input.addEventListener('blur', function () {
+                setTimeout(function () { list.classList.add('hidden'); }, 200);
+            });
+            document.addEventListener('click', function (e) {
+                if (e.target !== input && !list.contains(e.target)) list.classList.add('hidden');
+            });
+        })();
+    </script>
+    }
+}

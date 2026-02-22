@@ -1,0 +1,172 @@
+@page
+@model Subchron.Web.Pages.Employee.OvertimeModel
+@{
+    ViewData["Title"] = "Overtime";
+    ViewData["PageTitle"] = "Overtime";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+}
+
+<div class="mx-auto max-w-5xl">
+    <div class="mb-6 flex gap-2 border-b border-slate-200 dark:border-slate-700">
+        <button type="button" id="tabNewRequest" class="emp-tab border-b-2 border-subgreen-600 pb-2 text-sm font-semibold text-subgreen-600 dark:border-subgreen-400 dark:text-subgreen-400">New Request</button>
+        <button type="button" id="tabMyRequests" class="emp-tab border-b-2 border-transparent pb-2 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">My Requests</button>
+    </div>
+
+    <div id="panelNewRequest" class="space-y-6">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Submit an overtime request for manager approval.</p>
+        <form id="otForm" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="otDate" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Date</label>
+                    <input type="date" id="otDate" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                </div>
+                <div class="sm:col-span-2 grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="otStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Start time</label>
+                        <input type="time" id="otStart" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                    </div>
+                    <div>
+                        <label for="otEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">End time</label>
+                        <input type="time" id="otEnd" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                    </div>
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="otReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason</label>
+                    <textarea id="otReason" rows="3" required placeholder="e.g. Project deadline, deployment support" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"></textarea>
+                </div>
+            </div>
+            <p id="otValidationMsg" class="mt-2 hidden text-sm text-red-600 dark:text-red-400"></p>
+            <button type="submit" class="mt-4 w-full rounded-xl bg-subgreen-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Submit Request</button>
+        </form>
+    </div>
+
+    <div id="panelMyRequests" class="hidden space-y-4">
+        <p class="text-sm text-slate-500 dark:text-slate-400">View and track your overtime requests.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Hours</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Submitted</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 22, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">3.0</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Project deadline</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 21, 2025</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 20, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">3.0</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Deployment support</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 19, 2025</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 18, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">17:00 – 19:00</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">2.0</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Inventory</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 17, 2025</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="otTableEmpty" class="hidden px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No overtime requests yet. Submit one from the New Request tab.</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var tabNew = document.getElementById('tabNewRequest');
+    var tabMy = document.getElementById('tabMyRequests');
+    var panelNew = document.getElementById('panelNewRequest');
+    var panelMy = document.getElementById('panelMyRequests');
+    var otForm = document.getElementById('otForm');
+    var otDate = document.getElementById('otDate');
+    var otStart = document.getElementById('otStart');
+    var otEnd = document.getElementById('otEnd');
+    var otReason = document.getElementById('otReason');
+    var otValidationMsg = document.getElementById('otValidationMsg');
+    var otTableBody = document.getElementById('otTableBody');
+
+    function setActiveTab(active) {
+        var isNew = active === 'new';
+        panelNew.classList.toggle('hidden', !isNew);
+        panelMy.classList.toggle('hidden', isNew);
+        tabNew.classList.toggle('border-subgreen-600', isNew);
+        tabNew.classList.toggle('text-subgreen-600', isNew);
+        tabNew.classList.toggle('dark:border-subgreen-400', isNew);
+        tabNew.classList.toggle('dark:text-subgreen-400', isNew);
+        tabNew.classList.toggle('border-transparent', !isNew);
+        tabMy.classList.toggle('border-subgreen-600', !isNew);
+        tabMy.classList.toggle('text-subgreen-600', !isNew);
+        tabMy.classList.toggle('dark:border-subgreen-400', !isNew);
+        tabMy.classList.toggle('dark:text-subgreen-400', !isNew);
+        tabMy.classList.toggle('border-transparent', isNew);
+    }
+
+    function showValidation(msg) {
+        if (!otValidationMsg) return;
+        otValidationMsg.textContent = msg || '';
+        otValidationMsg.classList.toggle('hidden', !msg);
+    }
+
+    function parseTime(str) {
+        var parts = (str || '').split(':');
+        return parts.length >= 2 ? parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) : 0;
+    }
+
+    tabNew && tabNew.addEventListener('click', function () { setActiveTab('new'); });
+    tabMy && tabMy.addEventListener('click', function () { setActiveTab('my'); });
+
+    otForm && otForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        showValidation('');
+        var dateVal = otDate && otDate.value;
+        var startVal = otStart && otStart.value;
+        var endVal = otEnd && otEnd.value;
+        var reasonVal = otReason && otReason.value && otReason.value.trim();
+        if (!dateVal || !startVal || !endVal || !reasonVal) {
+            showValidation('Please fill in date, start time, end time, and reason.');
+            return;
+        }
+        var startMins = parseTime(startVal);
+        var endMins = parseTime(endVal);
+        if (endMins <= startMins) {
+            showValidation('End time must be after start time.');
+            return;
+        }
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var chosen = new Date(dateVal);
+        if (chosen < today) {
+            showValidation('Date cannot be in the past.');
+            return;
+        }
+        showValidation('');
+        setActiveTab('my');
+        otForm.reset();
+    });
+})();
+</script>
+}

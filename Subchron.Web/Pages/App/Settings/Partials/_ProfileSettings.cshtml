@@ -1,0 +1,429 @@
+@model Subchron.Web.Pages.App.Settings.IndexModel
+@{
+    var displayName = Model.ProfileName ?? "";
+    var email = Model.ProfileEmail ?? "";
+    var avatarUrl = Model.ProfileAvatarUrl;
+    var initials = string.IsNullOrWhiteSpace(displayName)
+        ? (email.Length > 0 ? email[0].ToString().ToUpperInvariant() : "?")
+        : string.Join("", displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpperInvariant();
+    // Frontend display: show "Admin" instead of "OrgAdmin"; backend value stays OrgAdmin.
+    var roleDisplay = string.Equals(Model.EmpRole, "OrgAdmin", StringComparison.OrdinalIgnoreCase) ? "Admin" : (Model.EmpRole ?? "");
+}
+
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+
+    <!-- HEADER ROW: Avatar + Name/Email + Edit button -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-4">
+            <!-- Avatar -->
+            <div class="relative">
+                <div class="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-700">
+                    @if (!string.IsNullOrEmpty(avatarUrl))
+                    {
+                        <img src="@(avatarUrl + "?v=" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())"
+                             alt="Profile"
+                             class="h-full w-full object-cover"
+                             id="profileAvatarImg" />
+                    }
+                    else
+                    {
+                        <img src=""
+                             class="hidden h-full w-full object-cover"
+                             id="profileAvatarImg" />
+                    }
+                </div>
+
+                <!-- Camera icon button (FB-like) -->
+                <label id="cameraBtn"
+                       for="profileAvatar"
+                       class="absolute bottom-0 right-0 inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm opacity-60
+                           dark:border-slate-600 dark:bg-slate-700"
+                       title="Change photo (click Edit first)">
+                    <!-- camera icon -->
+                    <svg class="h-5 w-5 text-slate-700 dark:text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 8a3 3 0 013-3h2l1-1h6l1 1h2a3 3 0 013 3v10a3 3 0 01-3 3H6a3 3 0 01-3-3V8z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 17a4 4 0 100-8 4 4 0 000 8z" />
+                    </svg>
+                </label>
+
+                <input type="file"
+                       id="profileAvatar"
+                       name="avatarFile"
+                       form="employeeForm"
+                       accept=".jpg,.jpeg,.png,.webp"
+                       class="sr-only"
+                       disabled />
+            </div>
+
+            <!-- Name + Email (NOT editable) -->
+            <div class="min-w-0">
+                <h2 class="truncate text-xl font-semibold text-slate-900 dark:text-white">
+                    @(string.IsNullOrWhiteSpace(displayName) ? "Unnamed User" : displayName)
+                </h2>
+                <p class="truncate text-sm text-slate-600 dark:text-slate-400">@email</p>
+            </div>
+        </div>
+
+        <!-- Edit button -->
+        <div class="flex items-center justify-end">
+            <button type="button"
+                    id="editToggleBtn"
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50
+                           dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 4h-4a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3v-4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <span id="editBtnText">Edit</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- messages -->
+    <div class="mt-6">
+        @if (TempData["ProfileMessage"] is string msg)
+        {
+            <p class="mb-4 rounded-lg bg-subgreen-50 px-4 py-2 text-sm text-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300">@msg</p>
+        }
+        @if (TempData["ProfileError"] is string err)
+        {
+            <p class="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-300">@err</p>
+        }
+    </div>
+
+    @if (Model.HasEmployee)
+    {
+        <!-- ONE FORM: avatar + employee fields -->
+        <form id="employeeForm"
+              method="post"
+              asp-page-handler="UpdateEmployeeInfo"
+              enctype="multipart/form-data"
+              class="mt-2 space-y-8">
+
+            <!-- Employee information -->
+            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Employee information</h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Your employee profile is shown below. Click <span class="font-medium">Edit</span> to update.
+                </p>
+
+                <div class="mt-6 space-y-8">
+
+                    <!-- Full name -->
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Full name</h4>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">First name</label>
+                                <input type="text" name="FirstName" value="@Model.EmpFirstName"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="50" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Middle (optional)</label>
+                                <input type="text" name="MiddleName" value="@Model.EmpMiddleName"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="50" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Last name</label>
+                                <input type="text" name="LastName" value="@Model.EmpLastName"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="50" disabled />
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Address -->
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 1</label>
+                                <input type="text" name="AddressLine1" value="@Model.EmpAddressLine1"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="200" disabled />
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2</label>
+                                <input type="text" name="AddressLine2" value="@Model.EmpAddressLine2"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="200" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">City</label>
+                                <input type="text" name="City" value="@Model.EmpCity"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="80" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">State / Province</label>
+                                <input type="text" name="StateProvince" value="@Model.EmpStateProvince"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="80" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Postal code</label>
+                                <input type="text" name="PostalCode" value="@Model.EmpPostalCode"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="20" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
+                                <input type="text" name="Country" value="@Model.EmpCountry"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="80" disabled />
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Account / contact -->
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                                <div class="mt-1.5 flex rounded-lg border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700">
+                                    <span class="inline-flex items-center rounded-l-lg border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                                    <input type="tel" name="Phone" value="@Model.EmpPhone"
+                                           class="emp-field ph-phone-input w-full min-w-0 rounded-r-lg border-0 bg-transparent px-3 py-2.5 text-sm text-slate-900
+                                                      focus:ring-2 focus:ring-inset focus:ring-subgreen-500
+                                                      disabled:text-slate-500
+                                                      dark:text-slate-100 dark:disabled:text-slate-400"
+                                           maxlength="14" disabled />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email (for login)</label>
+                                <input type="email" value="@Model.ProfileEmail" readonly
+                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600
+                                                  dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Role</label>
+                                <input type="text" value="@roleDisplay" readonly
+                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600
+                                                  dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Emergency contact -->
+                    <section>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
+                                <input type="text" name="EmergencyContactName" value="@Model.EmpEmergencyContactName"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="100" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                                <div class="mt-1.5 flex rounded-lg border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700">
+                                    <span class="inline-flex items-center rounded-l-lg border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                                    <input type="tel" name="EmergencyContactPhone" value="@Model.EmpEmergencyContactPhone"
+                                           class="emp-field ph-phone-input w-full min-w-0 rounded-r-lg border-0 bg-transparent px-3 py-2.5 text-sm
+                                                      focus:ring-2 focus:ring-inset focus:ring-subgreen-500
+                                                      disabled:text-slate-500
+                                                      dark:text-slate-100 dark:disabled:text-slate-400"
+                                           maxlength="14" disabled />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Relation</label>
+                                <input type="text" name="EmergencyContactRelation" value="@Model.EmpEmergencyContactRelation"
+                                       class="emp-field mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm
+                                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                                  disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none
+                                                  dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100
+                                                  dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
+                                       maxlength="50" disabled />
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Save/Cancel (hidden until Edit) -->
+                <div id="editActions" class="mt-8 hidden items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex">
+                    <button type="submit"
+                            class="rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
+                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                        Save changes
+                    </button>
+
+                    <button type="button"
+                            id="cancelEditBtn"
+                            class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                                       dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<script>
+    (function() {
+        var isEditing = false;
+        /** Snapshot of field values when Edit was clicked (for Cancel restore). */
+        var snapshot = {};
+
+        var editToggleBtn = document.getElementById('editToggleBtn');
+        var editBtnText = document.getElementById('editBtnText');
+        var cancelEditBtn = document.getElementById('cancelEditBtn');
+
+        var cameraBtn = document.getElementById('cameraBtn');
+        var avatarInput = document.getElementById('profileAvatar');
+        var img = document.getElementById('profileAvatarImg');
+        var initials = document.getElementById('profileAvatarInitials');
+
+        var editActions = document.getElementById('editActions');
+        var empFields = document.querySelectorAll('.emp-field');
+
+        function setEditing(on) {
+            isEditing = on;
+
+            // Enable/disable employee inputs
+            empFields.forEach(function(el) {
+                el.disabled = !on;
+            });
+
+            // Enable/disable avatar upload + camera button look
+            if (avatarInput) avatarInput.disabled = !on;
+
+            if (cameraBtn) {
+                if (on) {
+                    cameraBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                    cameraBtn.classList.add('hover:bg-slate-50', 'cursor-pointer', 'dark:hover:bg-slate-600');
+                    cameraBtn.title = 'Change photo';
+                } else {
+                    cameraBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                    cameraBtn.classList.remove('hover:bg-slate-50', 'cursor-pointer', 'dark:hover:bg-slate-600');
+                    cameraBtn.title = 'Change photo (click Edit first)';
+                }
+            }
+
+            // Show/hide Save/Cancel
+            if (editActions) editActions.classList.toggle('hidden', !on);
+
+            // Edit button text
+            if (editBtnText) editBtnText.textContent = on ? 'Editing' : 'Edit';
+        }
+
+        function takeSnapshot() {
+            snapshot = {};
+            empFields.forEach(function(el, i) {
+                var key = el.name || el.id || ('_idx_' + i);
+                if (el.type === 'checkbox' || el.type === 'radio')
+                    snapshot[key] = el.checked;
+                else
+                    snapshot[key] = el.value;
+            });
+            if (img) snapshot._avatarSrc = img.src || '';
+            if (initials) snapshot._avatarShowInitials = !initials.classList.contains('hidden');
+        }
+
+        function restoreSnapshot() {
+            empFields.forEach(function(el, i) {
+                var key = el.name || el.id || ('_idx_' + i);
+                if (snapshot[key] !== undefined) {
+                    if (el.type === 'checkbox' || el.type === 'radio')
+                        el.checked = !!snapshot[key];
+                    else
+                        el.value = snapshot[key];
+                }
+            });
+            if (img && snapshot._avatarSrc !== undefined) {
+                img.src = snapshot._avatarSrc;
+                if (snapshot._avatarSrc) { img.classList.remove('hidden'); img.alt = 'Profile'; } else { img.classList.add('hidden'); }
+            }
+            if (initials && snapshot._avatarShowInitials !== undefined) {
+                if (snapshot._avatarShowInitials) initials.classList.remove('hidden'); else initials.classList.add('hidden');
+            }
+            if (avatarInput) avatarInput.value = '';
+        }
+
+        // Default: view mode
+        setEditing(false);
+
+        if (editToggleBtn) {
+            editToggleBtn.addEventListener('click', function() {
+                if (!isEditing) {
+                    takeSnapshot();
+                    setEditing(true);
+                } else {
+                    setEditing(false);
+                }
+            });
+        }
+
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', function() {
+                restoreSnapshot();
+                setEditing(false);
+            });
+        }
+
+        // Avatar preview (only works when enabled)
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function() {
+                if (!isEditing) return;
+                if (this.files && this.files[0]) {
+                    var r = new FileReader();
+                    r.onload = function() {
+                        if (img) { img.src = r.result; img.classList.remove('hidden'); img.alt = 'Profile'; }
+                        if (initials) initials.classList.add('hidden');
+                    };
+                    r.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    })();
+</script>   

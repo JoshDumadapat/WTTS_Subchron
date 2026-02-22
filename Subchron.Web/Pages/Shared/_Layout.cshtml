@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Subchron</title>
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
+    <script>
+        (function() {
+            const stored = localStorage.getItem('subchron-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const dark = stored === 'dark' || (!stored && prefersDark);
+            if (dark) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        })();
+    </script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-subgreen-200 selection:text-subgreen-900 dark:bg-slate-900 dark:text-slate-100 dark:selection:bg-subgreen-800 dark:selection:text-subgreen-100">
+    <!-- Animated gradient background orbs -->
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div class="animate-glow-pulse absolute -top-[10%] -left-[15%] h-[50%] w-[50%] rounded-full bg-subgreen-100/60 blur-[140px] dark:bg-subgreen-900/30 dark:opacity-60"></div>
+        <div class="animate-glow-pulse absolute top-[15%] -right-[15%] h-[45%] w-[45%] rounded-full bg-subblue-100/60 blur-[140px] dark:bg-subblue-900/30 dark:opacity-60" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-[10%] left-1/2 h-[35%] w-[40%] -translate-x-1/2 rounded-full bg-subgreen-50/40 blur-[100px] dark:bg-subgreen-900/20 dark:opacity-50" style="animation-delay: 0.5s;"></div>
+        <!-- Subtle grid overlay -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,96,176,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,96,176,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+    </div>
+
+    <header class="sticky top-0 z-50 border-b border-slate-200/50 bg-white/80 backdrop-blur-xl transition-shadow duration-300 hover:shadow-sm dark:border-slate-700/50 dark:bg-slate-900/80">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            @await Html.PartialAsync("_Header")
+        </div>
+    </header>
+
+    <main class="relative">
+        @RenderBody()
+    </main>
+
+    <footer class="relative bg-slate-950 text-slate-200">
+        @await Html.PartialAsync("_Footer")
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/reveal.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,233 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.AuditLogs.IndexModel
+@{
+    ViewData["Title"] = "Audit Logs";
+    ViewData["PageTitle"] = "Audit Logs";
+    ViewData["PageDescription"] = "System activity and audit trail";
+    ViewData["ShowSearch"] = true;
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+    <!-- Header and filters -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Audit Log</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">@Model.AuditLogs.Count total entries</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
+            <!-- Organization filter -->
+      <div class="relative">
+          <select id="orgFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+          <option value="">All Organizations</option>
+    @foreach (var org in Model.Organizations)
+                 {
+       <option value="@org.Key">@org.Value</option>
+    }
+     </select>
+     </div>
+       
+            <!-- Action filter -->
+            <div class="relative">
+                <select id="actionFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+       <option value="">All Actions</option>
+           <option value="CREATE_ORG">Create Organization</option>
+          <option value="UPDATE_ORG">Update Organization</option>
+      <option value="SUSPEND_ORG">Suspend Organization</option>
+      <option value="CREATE_SUBSCRIPTION">Create Subscription</option>
+  <option value="UPDATE_SUBSCRIPTION">Update Subscription</option>
+    <option value="ACTIVATE_SUBSCRIPTION">Activate Subscription</option>
+           <option value="APPROVE_DEMO_REQUEST">Approve Demo Request</option>
+         <option value="REJECT_DEMO_REQUEST">Reject Demo Request</option>
+           <option value="CREATE_PLAN">Create Plan</option>
+        <option value="UPDATE_PLAN">Update Plan</option>
+                </select>
+    </div>
+      
+         <!-- Date range -->
+            <div class="flex items-center space-x-2">
+             <input type="date" id="startDate" 
+      class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+     value="@DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd")" />
+    <span class="text-slate-500 dark:text-slate-400">to</span>
+         <input type="date" id="endDate" 
+         class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+     value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+  </div>
+   </div>
+    </div>
+
+    <!-- Audit logs table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead>
+    <tr>
+         <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
+                  Timestamp
+    </th>
+           <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
+   Organization
+   </th>
+  <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
+            Action
+       </th>
+       <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
+         Entity
+        </th>
+   <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">
+      Details
+         </th>
+             </tr>
+            </thead>
+     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+@foreach (var log in Model.AuditLogs)
+    {
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-750">
+             <td class="px-6 py-4 whitespace-nowrap">
+             <div class="flex flex-col">
+        <div class="text-sm text-slate-900 dark:text-white">@log.CreatedAt.ToString("MMM dd, yyyy")</div>
+   <div class="text-xs text-slate-500 dark:text-slate-400">@log.CreatedAt.ToString("HH:mm:ss")</div>
+     </div>
+          </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+  @if (!string.IsNullOrEmpty(log.OrgName))
+          {
+            <div class="flex items-center">
+    <div class="h-8 w-8 flex-shrink-0">
+   <div class="h-8 w-8 rounded-full bg-subgreen-100 dark:bg-subgreen-900/50 flex items-center justify-center">
+         <svg class="h-4 w-4 text-subgreen-600 dark:text-subgreen-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    </svg>
+        </div>
+              </div>
+     <div class="ml-3">
+             <div class="text-sm font-medium text-slate-900 dark:text-white">@log.OrgName</div>
+                @if (log.OrgID.HasValue)
+           {
+           <div class="text-xs text-slate-500 dark:text-slate-400">ID: @log.OrgID</div>
+    }
+        </div>
+       </div>
+    }
+             else
+          {
+                  <span class="text-sm text-slate-500 italic dark:text-slate-400">System</span>
+          }
+            </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+   @(log.Action switch {
+    var action when action.Contains("CREATE") => "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
+         var action when action.Contains("UPDATE") => "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
+      var action when action.Contains("DELETE") || action.Contains("SUSPEND") || action.Contains("REJECT") => "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+     var action when action.Contains("APPROVE") || action.Contains("ACTIVATE") => "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
+       _ => "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300"
+        })">
+            @GetActionDisplayName(log.Action)
+         </span>
+ </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-slate-900 dark:text-white">@log.EntityName</div>
+        @if (log.EntityID.HasValue)
+   {
+             <div class="text-xs text-slate-500 dark:text-slate-400">ID: @log.EntityID</div>
+    }
+         </td>
+  <td class="px-6 py-4">
+   <div class="text-sm text-slate-900 dark:text-white max-w-xs">
+         <p class="truncate" title="@log.Details">@log.Details</p>
+        </div>
+            </td>
+  </tr>
+        }
+  </tbody>
+        </table>
+    </div>
+
+    @if (!Model.AuditLogs.Any())
+    {
+<div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+       </svg>
+       <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">No audit logs</h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Audit logs will appear here as activities occur.</p>
+        </div>
+  }
+</div>
+
+@{
+    string GetActionDisplayName(string action) => action switch {
+        "CREATE_ORG" => "Create Org",
+        "UPDATE_ORG" => "Update Org",
+        "SUSPEND_ORG" => "Suspend Org",
+        "CREATE_SUBSCRIPTION" => "Create Sub",
+    "UPDATE_SUBSCRIPTION" => "Update Sub",
+    "ACTIVATE_SUBSCRIPTION" => "Activate Sub",
+        "APPROVE_DEMO_REQUEST" => "Approve Demo",
+  "REJECT_DEMO_REQUEST" => "Reject Demo",
+        "CREATE_PLAN" => "Create Plan",
+        "UPDATE_PLAN" => "Update Plan",
+        _ => action
+    };
+}
+
+<script>
+    // Search functionality
+    document.getElementById('globalSearch')?.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+       const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Filters
+    function applyFilters() {
+        const orgFilter = document.getElementById('orgFilter').value;
+        const actionFilter = document.getElementById('actionFilter').value;
+     const startDate = new Date(document.getElementById('startDate').value);
+        const endDate = new Date(document.getElementById('endDate').value);
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+      let show = true;
+       
+   if (orgFilter) {
+                const orgCell = row.querySelector('td:nth-child(2)');
+       const orgText = orgCell?.textContent.trim() || '';
+     show = show && (orgText.includes(orgFilter) || orgText === 'System');
+     }
+   
+        if (actionFilter) {
+            const actionCell = row.querySelector('td:nth-child(3) span');
+    const actionText = actionCell?.textContent.trim() || '';
+      const actionMap = {
+   'CREATE_ORG': 'Create Org',
+      'UPDATE_ORG': 'Update Org',
+          'SUSPEND_ORG': 'Suspend Org',
+      'CREATE_SUBSCRIPTION': 'Create Sub',
+          'UPDATE_SUBSCRIPTION': 'Update Sub',
+           'ACTIVATE_SUBSCRIPTION': 'Activate Sub',
+    'APPROVE_DEMO_REQUEST': 'Approve Demo',
+        'REJECT_DEMO_REQUEST': 'Reject Demo',
+          'CREATE_PLAN': 'Create Plan',
+               'UPDATE_PLAN': 'Update Plan'
+           };
+       show = show && actionText === actionMap[actionFilter];
+            }
+            
+       // Date filtering would require parsing the date from the row
+            // For now, skip date filtering in client-side code
+            
+       row.style.display = show ? '' : 'none';
+    });
+    }
+
+    document.getElementById('orgFilter')?.addEventListener('change', applyFilters);
+    document.getElementById('actionFilter')?.addEventListener('change', applyFilters);
+    document.getElementById('startDate')?.addEventListener('change', applyFilters);
+    document.getElementById('endDate')?.addEventListener('change', applyFilters);
+</script>

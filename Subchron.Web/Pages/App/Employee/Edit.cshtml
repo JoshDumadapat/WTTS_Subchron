@@ -1,0 +1,217 @@
+@page "{id:int}"
+@model Subchron.Web.Pages.App.Employee.EditModel
+@{
+    ViewData["Title"] = "Edit Employee";
+    ViewData["PageTitle"] = "Edit Employee";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+    var e = Model.Employee;
+    var dateHired = e?.DateHired?.ToString("yyyy-MM-dd") ?? "";
+    string Option(string value, string text, string? current)
+    {
+        if (string.IsNullOrEmpty(value))
+            return "<option value=\"\">" + System.Net.WebUtility.HtmlEncode(text) + "</option>";
+        var sel = value == current ? " selected" : "";
+        return "<option value=\"" + System.Net.WebUtility.HtmlEncode(value) + "\"" + sel + ">" + System.Net.WebUtility.HtmlEncode(text) + "</option>";
+    }
+    string OptionInt(int value, string text, int? current)
+    {
+        var sel = current.HasValue && value == current.Value ? " selected" : "";
+        return "<option value=\"" + value + "\"" + sel + ">" + System.Net.WebUtility.HtmlEncode(text) + "</option>";
+    }
+}
+
+<div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <a href="/App/Employee/EmployeeManagement" class="hover:text-subgreen-600 dark:hover:text-subgreen-400">Employee Directory</a>
+                <span>/</span>
+                <span class="text-slate-700 dark:text-slate-200">Edit Employee</span>
+            </nav>
+            <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Edit Employee</h1>
+            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Update employee details. Changes are saved when you click Update Employee.</p>
+        </div>
+    </div>
+
+    @if (e == null)
+    {
+        <p class="text-slate-600 dark:text-slate-400">Employee not found.</p>
+    }
+    else
+    {
+    <form method="post" asp-page-handler="Update" asp-route-id="@Model.Id" class="space-y-8" data-turbo="false">
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <!-- Basic information -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Basic information</h2>
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <input type="text" name="firstName" value="@e.FirstName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="First name" required />
+                        </div>
+                        <div>
+                            <input type="text" name="middleName" value="@e.MiddleName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Middle (optional)" />
+                        </div>
+                        <div>
+                            <input type="text" name="lastName" value="@e.LastName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Last name" required />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="editAge" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                    <input type="number" name="age" id="editAge" value="@e.Age" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="1" max="120" />
+                </div>
+                <div>
+                    <label for="editGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                    <select name="gender" id="editGender" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        @Html.Raw(Option("", "— Select —", null))
+                        @Html.Raw(Option("Male", "Male", e.Gender))
+                        @Html.Raw(Option("Female", "Female", e.Gender))
+                        @Html.Raw(Option("Non-binary", "Non-binary", e.Gender))
+                        @Html.Raw(Option("Prefer not to say", "Prefer not to say", e.Gender))
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Address -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Address</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="editAddressLine1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line <span class="text-red-500">*</span></label>
+                    <input type="text" name="addressLine1" id="editAddressLine1" value="@e.AddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Address line 1" required />
+                </div>
+                <div>
+                    <label for="editAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
+                    <input type="text" name="addressLine2" id="editAddressLine2" value="@e.AddressLine2" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Unit, building, etc." />
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                        <label for="editCity" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">City <span class="text-red-500">*</span></label>
+                        <input type="text" name="city" id="editCity" value="@e.City" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="City" required />
+                    </div>
+                    <div>
+                        <label for="editStateProvince" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">State / Province</label>
+                        <input type="text" name="stateProvince" id="editStateProvince" value="@e.StateProvince" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="State / Province" />
+                    </div>
+                    <div>
+                        <label for="editPostalCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Postal code</label>
+                        <input type="text" name="postalCode" id="editPostalCode" value="@e.PostalCode" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Postal code" />
+                    </div>
+                    <div>
+                        <label for="editCountry" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Country <span class="text-red-500">*</span></label>
+                        <input type="text" name="country" id="editCountry" value="@(e.Country ?? "Philippines")" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Country" required />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account / contact -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Account / contact</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Contact number</label>
+                    <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700">
+                        <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                        <input type="tel" name="phone" id="editPhone" value="@e.Phone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0934 347 387" maxlength="14" />
+                    </div>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email (login account)</label>
+                    <input type="text" value="@e.Email" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" readonly placeholder="No login account" />
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Shown when employee has a linked login account. Password is never displayed.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency contact -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Emergency contact</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label for="editEmergencyContactName" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
+                    <input type="text" name="emergencyContactName" id="editEmergencyContactName" value="@e.EmergencyContactName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Full name" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                    <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700">
+                        <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                        <input type="tel" name="emergencyContactPhone" id="editEmergencyContactPhone" value="@e.EmergencyContactPhone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0934 347 387" maxlength="14" />
+                    </div>
+                </div>
+                <div>
+                    <label for="editEmergencyContactRelation" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Relation</label>
+                    <input type="text" name="emergencyContactRelation" id="editEmergencyContactRelation" value="@e.EmergencyContactRelation" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. Spouse, Parent" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Employment information -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Employment information</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label for="editRole" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role <span class="text-red-500">*</span></label>
+                    <select name="role" id="editRole" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required>
+                        @Html.Raw(Option("", "— Select role —", null))
+                        @Html.Raw(Option("Employee", "Employee", e.Role))
+                        @Html.Raw(Option("HR", "HR", e.Role))
+                        @Html.Raw(Option("Manager", "Manager", e.Role))
+                        @Html.Raw(Option("PayrollPersonnel", "Payroll Personnel", e.Role))
+                        @Html.Raw(Option("Supervisor", "Supervisor", e.Role))
+                    </select>
+                </div>
+                <div>
+                    <label for="editEmpNumber" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label>
+                    <input type="text" name="empNumber" id="editEmpNumber" value="@e.EmpNumber" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" readonly />
+                </div>
+                <div>
+                    <label for="editDateHired" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label>
+                    <input type="date" name="dateHired" id="editDateHired" value="@dateHired" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                </div>
+                <div>
+                    <label for="editDepartmentID" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
+                    <select name="departmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        @Html.Raw(Option("", "— Select —", null))
+                        @foreach (var d in Model.Departments)
+                        {
+                            @Html.Raw(OptionInt(d.DepID, d.DepartmentName ?? "", e.DepartmentID))
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="editEmploymentType" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type <span class="text-red-500">*</span></label>
+                    <select name="employmentType" id="editEmploymentType" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required>
+                        @Html.Raw(Option("", "— Select —", null))
+                        @Html.Raw(Option("Contractual", "Contractual", e.EmploymentType))
+                        @Html.Raw(Option("Part-time", "Part-time", e.EmploymentType))
+                        @Html.Raw(Option("Regular", "Regular", e.EmploymentType))
+                    </select>
+                </div>
+                <div>
+                    <label for="editWorkState" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Work state</label>
+                    <select name="workState" id="editWorkState" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        @Html.Raw(Option("Active", "Active", e.WorkState))
+                        @Html.Raw(Option("On Leave", "On Leave", e.WorkState))
+                        @Html.Raw(Option("Suspended", "Suspended", e.WorkState))
+                        @Html.Raw(Option("Probation", "Probation", e.WorkState))
+                        @Html.Raw(Option("Training", "Training", e.WorkState))
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <a href="/App/Employee/EmployeeManagement" class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</a>
+            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-xl bg-subgreen-600 px-6 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 hover:bg-subgreen-500">Update Employee</button>
+        </div>
+    </form>
+    }
+</div>
+
+<script src="~/js/ph-phone.js" asp-append-version="true"></script>

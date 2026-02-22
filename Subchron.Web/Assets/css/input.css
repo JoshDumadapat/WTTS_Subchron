@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@source "./**/*.cshtml";
+@source "./**/*.razor";
+
+/* Class-based dark mode (toggle) instead of prefers-color-scheme only */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* Subchron blue/green palette */
+    --color-subblue-50: #eef6ff;
+    --color-subblue-100: #d9ebff;
+    --color-subblue-200: #b6d7ff;
+    --color-subblue-300: #85beff;
+    --color-subblue-400: #4b9cff;
+    --color-subblue-500: #1f7cff;
+    --color-subblue-600: #0060B0;
+    --color-subblue-700: #004a8a;
+    --color-subblue-800: #003b6f;
+    --color-subblue-900: #00325f;
+    --color-subgreen-50: #effbf1;
+    --color-subgreen-100: #d9f5de;
+    --color-subgreen-200: #b6eac0;
+    --color-subgreen-300: #84d999;
+    --color-subgreen-400: #4bc56c;
+    --color-subgreen-500: #28a84d;
+    --color-subgreen-600: #209030;
+    --color-subgreen-700: #177027;
+    --color-subgreen-800: #145923;
+    --color-subgreen-900: #114a1f;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@layer utilities {
+    .reveal-base {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .card-hover {
+        transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -12px rgba(0, 96, 176, 0.15), 0 0 0 1px rgba(32, 144, 48, 0.08);
+    }
+
+    .link-underline {
+        position: relative;
+    }
+
+    .link-underline:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        height: 2px;
+        width: 0;
+        background: linear-gradient(to right, #209030, #0060B0);
+        transition: width 0.25s ease;
+    }
+
+    .link-underline:hover:after {
+        width: 100%;
+    }
+
+    .btn-primary-glow:hover {
+        box-shadow: 0 0 24px rgba(32, 144, 48, 0.4);
+    }
+
+    .btn-secondary-glow:hover {
+        box-shadow: 0 0 24px rgba(0, 96, 176, 0.35);
+    }
+
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        transform-origin: center;
+        will-change: transform;
+    }
+}

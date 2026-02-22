@@ -1,0 +1,322 @@
+﻿@page
+@model PricingModel
+@{
+    ViewData["Title"] = "Pricing";
+}
+
+<!-- Hero -->
+<section class="bg-slate-50 py-16 lg:py-24 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <span class="inline-block rounded-full border border-subblue-200 bg-subblue-50 px-4 py-1.5 text-sm font-semibold text-subblue-700 dark:border-subblue-800 dark:bg-subblue-900/50 dark:text-subblue-200">Plans & limits</span>
+        <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 lg:text-5xl dark:text-white">Simple, transparent pricing</h1>
+        <p class="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+            Choose a plan that fits your organization size. All plans include your choice of attendance mode.
+        </p>
+    </div>
+</section>
+
+<!-- Attendance mode in every plan – ONE ROW ONLY -->
+<section class="bg-slate-50 py-12 lg:py-16 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+
+        <h2 class="text-center text-xl font-bold text-slate-900 dark:text-white">
+            Attendance mode in every plan
+        </h2>
+        <p class="mx-auto mt-2 max-w-2xl text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            Choose how your team clocks in. Available in Basic, Standard, and Enterprise.
+        </p>
+
+        <!-- ONE ROW -->
+        <div class="mx-auto mt-8 flex max-w-4xl flex-row gap-6">
+
+            <!-- QR ONLY -->
+            <div class="flex w-1/3 flex-col items-center rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800/90">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-subblue-100 text-subblue-600 dark:bg-subblue-900/50 dark:text-subblue-400">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 3h6v6H3V3zm12 0h6v6h-6V3zM3 15h6v6H3v-6zm8 0h2m4 0h4m-6 4h6" />
+                    </svg>
+                </div>
+                <span class="mt-4 text-sm font-bold tracking-wider text-subblue-600 uppercase dark:text-subblue-400">
+                    QR only
+                </span>
+                <p class="mt-2 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    Scan QR at station or on ID. Fast, no devices.
+                </p>
+            </div>
+
+            <!-- BIOMETRIC + GEO -->
+            <div class="flex w-1/3 flex-col items-center rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800/90">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-400">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 11c1.657 0 3 1.343 3 3v2m-6-2v2m9-2v2M6 14v2m12-2v2M12 5a7 7 0 00-7 7v1m14-1v-1a7 7 0 00-7-7" />
+                    </svg>
+                </div>
+                <span class="mt-4 text-sm font-bold tracking-wider text-subgreen-600 uppercase dark:text-subgreen-400">
+                    Biometric + geolocation
+                </span>
+                <p class="mt-2 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    Face/fingerprint + location. Time in only from allowed places.
+                </p>
+            </div>
+
+            <!-- HYBRID (REFERENCE STYLE) -->
+            <div class="flex w-1/3 flex-col items-center rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800/90">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-400">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M7 7l-4 4 4 4M17 17l4-4-4-4M3 11h18" />
+                    </svg>
+                </div>
+                <span class="mt-4 text-sm font-bold tracking-wider text-subgreen-600 uppercase dark:text-subgreen-400">
+                    Hybrid
+                </span>
+                <p class="mt-2 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    Field + office—both modes seamlessly in one unified system.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+
+<!-- Plan cards – home page style (Plans & limits, Clear limits...) -->
+<section class="bg-slate-50 py-16 lg:py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-12 max-w-2xl text-center sm:mb-14">
+            <span class="inline-flex items-center rounded-full border border-subblue-200 bg-subblue-50 px-4 py-1.5 text-sm font-semibold text-subblue-700 dark:border-subblue-800 dark:bg-subblue-900/50 dark:text-subblue-200">Plans & limits</span>
+            <h2 class="mt-4 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">Clear limits and what’s included</h2>
+            <p class="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-300">Choose your plan. Transparent pricing that scales with your team.</p>
+        </div>
+        <div class="grid gap-6 pt-2 lg:grid-cols-3 lg:items-stretch lg:gap-8">
+            <!-- Basic – home style -->
+            <div data-reveal class="relative flex h-full min-h-[480px] flex-col rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
+                <div class="flex items-start justify-between">
+                    <h3 class="text-xl font-bold text-subblue-600 dark:text-subblue-400">Basic</h3>
+                    <span class="rounded-full border border-subblue-200 bg-subblue-50/80 px-3 py-1.5 text-xs font-medium text-subblue-600 dark:border-subblue-700 dark:bg-subblue-900/40 dark:text-subblue-300">Starter</span>
+                </div>
+                <p class="mt-4 mb-6 text-sm leading-relaxed text-slate-500 dark:text-slate-400">Perfect for small teams getting started</p>
+                <div class="mb-8 flex items-baseline gap-2">
+                    <span class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">₱2,499</span>
+                    <span class="text-sm font-medium text-slate-500 dark:text-slate-400">/month</span>
+                </div>
+                <ul class="mb-8 flex-1 space-y-4">
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Up to <strong>150</strong> employees</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>QR attendance only</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Overtime tracking</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Leave requests</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Reports & CSV export</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Email support</span>
+                    </li>
+
+                    <!-- Not included -->
+                    <li class="flex items-start gap-3 text-sm text-slate-400 dark:text-slate-500">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <span>BioGeo attendance</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-slate-400 dark:text-slate-500">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <span>Hybrid attendance & geofence</span>
+                    </li>
+                </ul>
+
+                <div class="mt-auto pt-4">
+                    <a asp-page="/Auth/Signup" asp-route-planId="1" class="inline-flex w-full items-center justify-center rounded-lg border border-subblue-200 px-4 py-3.5 text-sm font-semibold text-subblue-700 hover:border-subblue-400 hover:bg-subblue-50 hover:text-subblue-800 dark:border-subblue-700 dark:text-subblue-300 dark:hover:border-subblue-500 dark:hover:bg-subblue-900/40 dark:hover:text-subblue-200">Get Started</a>
+                    <p class="mt-4 text-center text-xs text-slate-400">No credit card required</p>
+                </div>
+            </div>
+            <!-- Standard (Most Popular) – home style -->
+            <div class="relative flex h-full min-h-[480px] flex-col items-stretch">
+                <div class="absolute top-0 left-1/2 z-20 -translate-x-1/2 translate-y-[-50%]">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-subgreen-500 to-subblue-600 px-4 py-1.5 text-xs font-bold whitespace-nowrap text-white shadow-lg dark:from-subgreen-500 dark:to-subblue-600">
+                        <svg class="h-5 w-5 shrink-0 text-yellow-400"
+                             fill="currentColor"
+                             viewBox="0 0 20 20"
+                             xmlns="http://www.w3.org/2000/svg"
+                             aria-hidden="true">
+
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0
+             l1.286 3.963h4.165c.969 0 1.371 1.24.588 1.81
+             l-3.37 2.449 1.287 3.963c.3.921-.755 1.688-1.54 1.118
+             L10 13.347l-3.367 2.446c-.785.57-1.84-.197-1.54-1.118
+             l1.287-3.963-3.37-2.449c-.783-.57-.38-1.81.588-1.81
+             h4.165l1.286-3.963z" />
+                        </svg>
+
+                        Most Popular
+                    </span>
+                </div>
+                <div class="flex min-h-0 w-full flex-1 flex-col rounded-3xl bg-gradient-to-br from-subgreen-400 via-subblue-500 to-subgreen-400 p-[3px] shadow-[0_0_24px_rgba(32,168,77,0.25),0_0_24px_rgba(0,96,176,0.2)] dark:shadow-[0_0_24px_rgba(32,168,77,0.2),0_0_24px_rgba(0,96,176,0.15)]">
+                    <div data-reveal class="flex min-h-0 flex-1 flex-col overflow-hidden bg-white px-8 py-10 dark:bg-slate-900" style="border-radius: calc(1.5rem - 3px);">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-subgreen-600 dark:text-subgreen-400">Standard</h3>
+                            <span class="rounded-full bg-subblue-100 px-3 py-1.5 text-xs font-bold text-subblue-600 dark:bg-subblue-900/60 dark:text-subblue-300">Best Value</span>
+                        </div>
+                        <p class="mt-4 mb-6 text-sm leading-relaxed text-slate-500 dark:text-slate-400">Ideal for growing teams and offices</p>
+                        <div class="mb-8 flex items-baseline gap-2">
+                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₱5,999</span>
+                            <span class="text-sm text-slate-500 dark:text-slate-400">/month</span>
+                        </div>
+                        <ul class="mb-8 flex-1 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Up to <strong>500</strong> employees</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>QR, BioGeo & Hybrid attendance</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Geolocation & geofence support</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Overtime with approval workflow</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Leave requests & approvals</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Reports, analytics & export</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Enhanced email support</span>
+                            </li>
+                        </ul>
+    
+                        <div class="mt-auto pt-4">
+                            <a asp-page="/Auth/Signup" asp-route-planId="2" class="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-subgreen-500 to-subblue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg transition hover:opacity-95 dark:from-subgreen-500 dark:to-subblue-600">Get Started Now</a>
+                            <p class="mt-4 text-center text-xs text-slate-400 dark:text-slate-500">14-day free trial included</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Enterprise – home style -->
+            <div data-reveal class="relative flex h-full min-h-[480px] flex-col rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
+                <div class="flex items-start justify-between">
+                    <h3 class="text-xl font-bold text-subgreen-600 dark:text-subgreen-400">Enterprise</h3>
+                    <span class="rounded-full border border-subgreen-200 bg-subgreen-50/80 px-3 py-1.5 text-xs font-medium text-subgreen-600 dark:border-subgreen-700 dark:bg-subgreen-900/40 dark:text-subgreen-300">Custom</span>
+                </div>
+                <p class="mt-4 mb-6 text-sm leading-relaxed text-slate-500 dark:text-slate-400">For large-scale organizations</p>
+                <div class="mb-8">
+                    <span class="text-4xl font-extrabold text-slate-900 dark:text-white">Custom</span>
+                    <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Tailored pricing for your needs</p>
+                </div>
+                <ul class="mb-8 flex-1 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                    <li class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Up to <strong>1500</strong> employees</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>QR & BioGeo attendance (Hybrid supported)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Geo capture & geofence settings</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>All Standard features included</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-subgreen-500 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span>Priority email support</span>
+                    </li>
+                </ul>
+
+
+                <div class="mt-auto pt-4">
+                    <a asp-page="/Contact" class="inline-flex w-full items-center justify-center rounded-lg border border-subgreen-200 px-4 py-3.5 text-sm font-semibold text-subgreen-700 hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-800 dark:border-subgreen-700 dark:text-subgreen-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/40 dark:hover:text-subgreen-200">Contact Sales</a>
+                    <p class="mt-4 text-center text-xs text-slate-400 dark:text-slate-500">Custom onboarding included</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-slate-50 py-16 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-center text-2xl font-extrabold text-slate-900 dark:text-white">Compare plans</h2>
+        <p class="mx-auto mt-2 max-w-xl text-center leading-relaxed text-slate-600 dark:text-slate-400">Feature checklist across Basic, Standard, and Enterprise.</p>
+        <div class="mx-auto mt-10 max-w-[480px] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
+            <table class="w-full min-w-[480px] text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-800/80">
+                        <th class="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">Feature</th>
+                        <th class="px-3 py-2.5 font-semibold text-subblue-600 dark:text-subblue-400">Basic</th>
+                        <th class="px-3 py-2.5 font-semibold text-subgreen-600 dark:text-subgreen-400">Standard</th>
+                        <th class="px-3 py-2.5 font-semibold text-subgreen-600 dark:text-subgreen-400">Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-600">
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Employees</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Up to 50</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Up to 200</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Unlimited</td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/50"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Site locations</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">1</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Up to 5</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Unlimited</td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Attendance mode: QR only</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/50"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Attendance mode: Biometric + geolocation</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Attendance mode: Hybrid (QR + bio + geo)</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/50"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">CSV export</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Geolocation tracking</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><span class="text-slate-400 dark:text-slate-500">—</span></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/50"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Supervisor approvals</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><span class="text-slate-400 dark:text-slate-500">—</span></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Advanced reports & analytics</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><span class="text-slate-400 dark:text-slate-500">—</span></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/50"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">API / ERP integration</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><span class="text-slate-400 dark:text-slate-500">—</span></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><span class="text-slate-400 dark:text-slate-500">—</span></td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400"><svg class="inline h-5 w-5 text-subgreen-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-200">Support</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Email</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">Priority</td><td class="px-3 py-2.5 text-slate-600 dark:text-slate-400">24/7 & SLA</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Detailed pricing -->
+<section class="bg-slate-50 py-16 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-center text-2xl font-extrabold text-slate-900 dark:text-white">Detailed pricing</h2>
+        <p class="mx-auto mt-2 max-w-xl text-center leading-relaxed text-slate-600 dark:text-slate-400">What you pay and what’s included.</p>
+        <div class="mt-10 space-y-6">
+            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-600 dark:bg-slate-800/90">
+                <h3 class="font-bold text-subblue-600 dark:text-subblue-400">Basic — ₱2,499/month</h3>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Billed monthly. Includes up to 50 employees, 1 site, your choice of attendance mode (QR only, biometric + geolocation, or hybrid), CSV export, and email support. No long-term contract required.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-600 dark:bg-slate-800/90">
+                <h3 class="font-bold text-subgreen-600 dark:text-subgreen-400">Standard — ₱5,999/month</h3>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Billed monthly. Includes up to 200 employees, up to 5 sites, all attendance modes, geolocation tracking, supervisor approvals, advanced reports & analytics, and priority support. 14-day free trial available.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-600 dark:bg-slate-800/90">
+                <h3 class="font-bold text-subgreen-600 dark:text-subgreen-400">Enterprise — Custom</h3>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Tailored to your organization: unlimited employees and sites, API and ERP/HRIS integration, dedicated account manager, 24/7 support and SLA. Contact sales for a quote.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-slate-50 py-14 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <p class="leading-relaxed text-slate-600 dark:text-slate-300">Need a custom quote or volume pricing? <a asp-page="/Landing/Contact" class="font-semibold text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400 dark:hover:text-subgreen-300">Contact us</a>.</p>
+    </div>
+</section>

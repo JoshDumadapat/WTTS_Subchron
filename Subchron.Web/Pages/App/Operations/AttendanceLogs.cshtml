@@ -1,0 +1,197 @@
+@page
+@model Subchron.Web.Pages.App.Operations.AttendanceLogsModel
+@{
+    ViewData["Title"] = "Attendance Logs";
+    ViewData["PageTitle"] = "Attendance Logs";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Attendance Logs</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View and filter attendance records by date, site, method, and status.</p>
+        </div>
+        <button type="button" id="btnExportCsv" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Export CSV
+        </button>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <!-- Filters -->
+        <div class="border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <p class="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">Filters</p>
+            <div class="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+                <div class="flex flex-col gap-1">
+                    <label for="filterDateFrom" class="text-xs font-medium text-slate-500 dark:text-slate-400">Date from</label>
+                    <input type="date" id="filterDateFrom" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterDateTo" class="text-xs font-medium text-slate-500 dark:text-slate-400">Date to</label>
+                    <input type="date" id="filterDateTo" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterSite" class="text-xs font-medium text-slate-500 dark:text-slate-400">Site</label>
+                    <select id="filterSite" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        <option value="">All sites</option>
+                        <option value="hq">HQ Building</option>
+                        <option value="warehouse">Warehouse A</option>
+                        <option value="branch2">Branch Office 2</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterDepartment" class="text-xs font-medium text-slate-500 dark:text-slate-400">Department</label>
+                    <select id="filterDepartment" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        <option value="">All departments</option>
+                        <option value="1">Engineering</option>
+                        <option value="2">Human Resources</option>
+                        <option value="3">Product Team</option>
+                        <option value="4">Finance</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterEmployee" class="text-xs font-medium text-slate-500 dark:text-slate-400">Employee</label>
+                    <select id="filterEmployee" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        <option value="">All employees</option>
+                        <option value="1">Tim Jones</option>
+                        <option value="2">Jane Smith</option>
+                        <option value="3">Alex Reyes</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterMethod" class="text-xs font-medium text-slate-500 dark:text-slate-400">Method</label>
+                    <select id="filterMethod" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        <option value="">All methods</option>
+                        <option value="QR">QR</option>
+                        <option value="ID">ID</option>
+                        <option value="Bio">Bio</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="filterStatus" class="text-xs font-medium text-slate-500 dark:text-slate-400">Status</label>
+                    <select id="filterStatus" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        <option value="">All statuses</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" id="btnApplyFilters" class="h-11 rounded-xl bg-subgreen-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Apply</button>
+                    <button type="button" id="btnResetFilters" class="h-11 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs list -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employee</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Site</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Station</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Method</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Timestamp</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Decision</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="1" data-employee="Tim Jones" data-site="HQ Building" data-station="Main Lobby Kiosk" data-method="QR" data-timestamp="2025-02-21T08:32:00" data-decision="Accepted" data-reason="">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Tim+Jones&background=209030&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <div>
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Tim Jones</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-001</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">HQ Building</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Main Lobby Kiosk</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">QR</span>
+                        </td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 08:32</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Accepted</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="1" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="2" data-employee="Jane Smith" data-site="HQ Building" data-station="Main Lobby Kiosk" data-method="ID" data-timestamp="2025-02-21T08:45:00" data-decision="Accepted" data-reason="">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=0060B0&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <div>
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Jane Smith</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-002</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">HQ Building</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Main Lobby Kiosk</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">ID</span>
+                        </td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 08:45</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Accepted</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="2" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="3" data-employee="Alex Reyes" data-site="Warehouse A" data-station="" data-method="Bio" data-timestamp="2025-02-21T09:00:00" data-decision="Rejected" data-reason="Outside allowed time window">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Alex+Reyes&background=6b7280&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <div>
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Alex Reyes</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-003</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Warehouse A</td>
+                        <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-500">—</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">Bio</span>
+                        </td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 09:00</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="3" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var tbody = document.getElementById('logsTableBody');
+    var btnExport = document.getElementById('btnExportCsv');
+    if (tbody) {
+        tbody.addEventListener('click', function (e) {
+            var row = e.target.closest('tr.log-row');
+            var link = e.target.closest('a[href*="Details"]');
+            if (link) return;
+            if (row) {
+                var id = row.getAttribute('data-log-id');
+                if (id) window.location.href = '/App/Operations/AttendanceLogs/Details?id=' + encodeURIComponent(id);
+            }
+        });
+    }
+    if (btnExport) btnExport.addEventListener('click', function () {
+        alert('Export CSV will be implemented when backend is connected. Filtered logs would be exported.');
+    });
+})();
+</script>
+}

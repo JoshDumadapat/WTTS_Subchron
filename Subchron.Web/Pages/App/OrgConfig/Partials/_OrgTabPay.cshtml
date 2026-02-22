@@ -1,0 +1,199 @@
+﻿<div id="tab-pay" class="tab-content hidden h-full flex-col">
+
+    <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
+        <div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Payroll Configuration</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enable and configure specific pay rules for your organization.</p>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-8">
+        <div class="mx-auto max-w-3xl space-y-6">
+
+            <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="p-6">
+                    <h3 class="flex items-center text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                        <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.546 1.16 3.74.322 4.298-1.517l.611-2.017c.553-1.822-1.415-3.321-3.114-2.523l-.133.062c-1.699.798-3.667-.701-3.115-2.523l.612-2.017c.566-1.864 2.899-2.614 4.453-1.428l.848.647M12 3v3m0 15v-3" /></svg>
+                        Financial Basis
+                    </h3>
+                    <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">Currency</label>
+                            <select class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option>PHP (₱)</option>
+                                <option>USD ($)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">Pay Cycle</label>
+                            <select class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option>Semi-Monthly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="px-2 text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compensation Rules</h3>
+
+                <div id="row-reg-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('reg-ot', this.checked)">
+                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
+                            </label>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Regular Overtime</span>
+                                <span class="text-xs text-gray-500">Standard multiplier for hours beyond 8hrs/day</span>
+                            </div>
+                        </div>
+                        <div id="controls-reg-ot" class="flex items-center gap-4">
+                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+                                <button onclick="setRateType('reg-ot', 'percent')" id="reg-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
+                                <button onclick="setRateType('reg-ot', 'fixed')" id="reg-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
+                            </div>
+                            <div class="relative w-28">
+                                <span id="reg-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                                <input type="number" value="125" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="reg-ot-input">
+                                <span id="reg-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="row-night-diff" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('night-diff', this.checked)">
+                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
+                            </label>
+                            <div>
+                                <span class="flex items-center text-sm font-bold text-gray-900 dark:text-white">
+                                    Night Differential
+                                    <span class="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">10PM - 6AM</span>
+                                </span>
+                                <span class="text-xs text-gray-500">Premium for regular hours worked at night</span>
+                            </div>
+                        </div>
+                        <div id="controls-night-diff" class="flex items-center gap-4">
+                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+                                <button onclick="setRateType('night-diff', 'percent')" id="night-diff-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
+                                <button onclick="setRateType('night-diff', 'fixed')" id="night-diff-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
+                            </div>
+                            <div class="relative w-28">
+                                <span id="night-diff-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                                <input type="number" value="10" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="night-diff-input">
+                                <span id="night-diff-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="row-night-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('night-ot', this.checked)">
+                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
+                            </label>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Night Overtime</span>
+                                <span class="text-xs text-gray-500">Compounded rate for OT during night window</span>
+                            </div>
+                        </div>
+                        <div id="controls-night-ot" class="flex items-center gap-4">
+                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+                                <button onclick="setRateType('night-ot', 'percent')" id="night-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
+                                <button onclick="setRateType('night-ot', 'fixed')" id="night-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
+                            </div>
+                            <div class="relative w-28">
+                                <span id="night-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                                <input type="number" value="137.5" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="night-ot-input">
+                                <span id="night-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="row-rest-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('rest-ot', this.checked)">
+                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
+                            </label>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Rest Day Overtime</span>
+                                <span class="text-xs text-gray-500">Rate for working on scheduled off-days</span>
+                            </div>
+                        </div>
+                        <div id="controls-rest-ot" class="flex items-center gap-4">
+                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+                                <button onclick="setRateType('rest-ot', 'percent')" id="rest-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
+                                <button onclick="setRateType('rest-ot', 'fixed')" id="rest-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
+                            </div>
+                            <div class="relative w-28">
+                                <span id="rest-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
+                                <input type="number" value="130" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="rest-ot-input">
+                                <span id="rest-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex items-center justify-end pt-4">
+                <button class="rounded-lg bg-emerald-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                    Save Payroll Configuration
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic to enable/disable specific rule rows
+    function toggleRow(idPrefix, isEnabled) {
+        const row = document.getElementById(`row-${idPrefix}`);
+        const controls = document.getElementById(`controls-${idPrefix}`);
+
+        if (isEnabled) {
+            row.classList.remove('opacity-40');
+            controls.classList.remove('pointer-events-none');
+        } else {
+            row.classList.add('opacity-40');
+            controls.classList.add('pointer-events-none');
+        }
+    }
+
+    // Logic to switch between % and ₱ rates
+    function setRateType(idPrefix, type) {
+        const pctBtn = document.getElementById(`${idPrefix}-btn-pct`);
+        const fixBtn = document.getElementById(`${idPrefix}-btn-fix`);
+        const input = document.getElementById(`${idPrefix}-input`);
+        const preSymbol = document.getElementById(`${idPrefix}-symbol-pre`);
+        const postSymbol = document.getElementById(`${idPrefix}-symbol-post`);
+
+        if (type === 'fixed') {
+            fixBtn.className = "rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400";
+            pctBtn.className = "px-2 py-1 text-[10px] font-bold text-gray-500 dark:text-gray-400";
+            preSymbol.classList.remove('hidden');
+            postSymbol.classList.add('hidden');
+            input.classList.add('pl-8');
+            input.classList.remove('pr-8');
+        } else {
+            pctBtn.className = "rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400";
+            fixBtn.className = "px-2 py-1 text-[10px] font-bold text-gray-500 dark:text-gray-400";
+            preSymbol.classList.add('hidden');
+            postSymbol.classList.remove('hidden');
+            input.classList.remove('pl-8');
+            input.classList.add('pr-8');
+        }
+    }
+</script>

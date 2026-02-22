@@ -1,0 +1,167 @@
+@model Subchron.Web.Pages.SuperAdmin.Settings.IndexModel
+
+<div class="p-6 space-y-6">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Account &amp; Security</h2>
+    <p class="text-sm text-slate-600 dark:text-slate-300">Manage your password and two-factor authentication.</p>
+
+    <!-- Change password (step-by-step) -->
+    <div class="rounded-lg border border-slate-200 dark:border-slate-600 p-4">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white">Change password</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">You will be asked for your current password first.</p>
+        <div id="saChangePwdStep1" class="mt-3">
+            <button type="button" id="saBtnStartChangePwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Change password</button>
+        </div>
+        <div id="saChangePwdStep2" class="mt-3 hidden max-w-md">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Current password</label>
+            <input type="password" id="saCurrentPassword" autocomplete="current-password" placeholder="Current password"
+                   class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            <div class="mt-2 flex gap-2">
+                <button type="button" id="saBtnContinueToNewPwd" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Continue</button>
+                <button type="button" id="saBtnCancelChangePwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">Cancel</button>
+            </div>
+        </div>
+        <form id="saChangePwdForm" method="post" asp-page-handler="ChangePassword" class="mt-3 hidden max-w-md space-y-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="currentPassword" id="saHiddenCurrentPassword" />
+            <div>
+                <label for="saNewPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">New password</label>
+                <input type="password" id="saNewPassword" name="newPassword" autocomplete="new-password" required minlength="8" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+            <div>
+                <label for="saConfirmPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm new password</label>
+                <input type="password" id="saConfirmPassword" autocomplete="new-password" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                <p id="saChangePwdMismatch" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden">Passwords do not match.</p>
+            </div>
+            <div id="saChangePwdError" class="hidden text-sm text-red-600 dark:text-red-400"></div>
+            <div id="saChangePwdSuccess" class="hidden text-sm text-emerald-600 dark:text-emerald-400">Password updated successfully.</div>
+            <div class="flex gap-2">
+                <button type="submit" id="saBtnSubmitChangePwd" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Update password</button>
+                <button type="button" id="saBtnCancelNewPwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Forgot password -->
+    <div class="rounded-lg border border-slate-200 dark:border-slate-600 p-4">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white">Forgot password?</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Request a reset link to your email (same as on the login page).</p>
+        <p class="mt-2"><a asp-page="/Auth/ForgotPassword" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Send password reset link</a></p>
+    </div>
+
+    <!-- 2FA -->
+    <div class="rounded-lg border border-slate-200 dark:border-slate-600 p-4">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white">Two-factor authentication (2FA)</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Add security using an authenticator app (TOTP).</p>
+        <div id="saTotpDisabledState" class="mt-3">
+            <button type="button" id="saBtnEnableTotp" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Enable 2FA</button>
+        </div>
+        <div id="saTotpPlaceholder" class="mt-3 hidden">
+            <p class="text-sm text-slate-500 dark:text-slate-400">QR code and secret key will appear here once the backend is connected.</p>
+        </div>
+    </div>
+
+    <!-- Resources -->
+    <div class="rounded-lg border border-slate-200 dark:border-slate-600 p-4">
+        <h3 class="text-sm font-medium text-slate-900 dark:text-white">Resources</h3>
+        <ul class="mt-2 space-y-1 text-sm">
+            <li><a asp-page="/Landing/Contact" class="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Privacy policy</a></li>
+            <li><a href="/Landing/HowItWorks" class="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Documentation</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- 2FA instructions modal -->
+<div id="saTotpInstructionsModal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+    <div class="fixed inset-0 bg-slate-900/60 dark:bg-slate-900/80" id="saTotpModalBackdrop"></div>
+    <div class="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Before you enable 2FA</h3>
+        <div class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+            <p>You will need to save the QR code, secret key, and recovery codes. If you lose your device and don’t have these, you may lose access to your account.</p>
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+            <button type="button" id="saTotpModalCancel" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">Cancel</button>
+            <button type="button" id="saTotpModalConfirm" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">I understand, enable 2FA</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const step1 = document.getElementById('saChangePwdStep1');
+    const step2 = document.getElementById('saChangePwdStep2');
+    const form = document.getElementById('saChangePwdForm');
+    const currentPassword = document.getElementById('saCurrentPassword');
+    const hiddenCurrent = document.getElementById('saHiddenCurrentPassword');
+    const newPassword = document.getElementById('saNewPassword');
+    const confirmPassword = document.getElementById('saConfirmPassword');
+    const mismatchMsg = document.getElementById('saChangePwdMismatch');
+    const errorDiv = document.getElementById('saChangePwdError');
+    const successDiv = document.getElementById('saChangePwdSuccess');
+
+    function showStep1() {
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+        form.classList.add('hidden');
+        if (currentPassword) currentPassword.value = '';
+        if (hiddenCurrent) hiddenCurrent.value = '';
+        if (newPassword) newPassword.value = '';
+        if (confirmPassword) confirmPassword.value = '';
+        if (errorDiv) errorDiv.classList.add('hidden');
+        if (successDiv) successDiv.classList.add('hidden');
+        if (mismatchMsg) mismatchMsg.classList.add('hidden');
+    }
+    function showStep2() {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        form.classList.add('hidden');
+        if (currentPassword) currentPassword.focus();
+    }
+    function showStep3() {
+        step2.classList.add('hidden');
+        form.classList.remove('hidden');
+        if (hiddenCurrent) hiddenCurrent.value = currentPassword ? currentPassword.value : '';
+        if (newPassword) newPassword.focus();
+    }
+
+    document.getElementById('saBtnStartChangePwd').addEventListener('click', showStep2);
+    document.getElementById('saBtnCancelChangePwd').addEventListener('click', showStep1);
+    document.getElementById('saBtnContinueToNewPwd').addEventListener('click', function() {
+        if (currentPassword && !currentPassword.value.trim()) return;
+        showStep3();
+    });
+    document.getElementById('saBtnCancelNewPwd').addEventListener('click', showStep1);
+
+    if (confirmPassword) confirmPassword.addEventListener('input', function() { if (mismatchMsg) mismatchMsg.classList.toggle('hidden', !confirmPassword.value || newPassword.value === confirmPassword.value); });
+    if (newPassword) newPassword.addEventListener('input', function() { if (mismatchMsg) mismatchMsg.classList.toggle('hidden', !confirmPassword.value || newPassword.value === confirmPassword.value); });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (newPassword.value !== confirmPassword.value) { if (mismatchMsg) mismatchMsg.classList.remove('hidden'); return; }
+        if (mismatchMsg) mismatchMsg.classList.add('hidden');
+        if (errorDiv) errorDiv.classList.add('hidden');
+        if (successDiv) successDiv.classList.add('hidden');
+        const btn = document.getElementById('saBtnSubmitChangePwd');
+        if (btn) btn.disabled = true;
+        const formData = new FormData(form);
+        formData.set('currentPassword', hiddenCurrent.value);
+        formData.set('newPassword', newPassword.value);
+        try {
+            const res = await fetch(form.action, { method: 'POST', body: formData });
+            const data = await res.json().catch(function() { return {}; });
+            if (res.ok && data.ok) { if (successDiv) { successDiv.classList.remove('hidden'); } setTimeout(showStep1, 2000); }
+            else { if (errorDiv) { errorDiv.textContent = data.message || 'Failed to update password.'; errorDiv.classList.remove('hidden'); } }
+        } catch (err) { if (errorDiv) { errorDiv.textContent = 'Network error.'; errorDiv.classList.remove('hidden'); } }
+        if (btn) btn.disabled = false;
+    });
+
+    const modal = document.getElementById('saTotpInstructionsModal');
+    document.getElementById('saBtnEnableTotp').addEventListener('click', function() { modal.classList.remove('hidden'); });
+    document.getElementById('saTotpModalCancel').addEventListener('click', function() { modal.classList.add('hidden'); });
+    document.getElementById('saTotpModalBackdrop').addEventListener('click', function() { modal.classList.add('hidden'); });
+    document.getElementById('saTotpModalConfirm').addEventListener('click', function() {
+        modal.classList.add('hidden');
+        document.getElementById('saTotpDisabledState').classList.add('hidden');
+        document.getElementById('saTotpPlaceholder').classList.remove('hidden');
+    });
+})();
+</script>

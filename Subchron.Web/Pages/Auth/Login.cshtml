@@ -1,0 +1,585 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_LayoutLogin";
+}
+
+<div class="w-full max-w-md">
+    <!-- Logo -->
+    <div class="flex justify-center">
+        <a asp-page="/Index" class="inline-block">
+            <img src="~/images/logo/logo.png" alt="Subchron" class="h-12 w-auto object-contain" />
+        </a>
+    </div>
+
+    <h1 class="mt-8 text-center text-2xl font-bold text-slate-900 dark:text-white">
+        Sign in to your account
+    </h1>
+
+    <!-- Card -->
+    <div class="mt-8 rounded-xl border border-slate-200 bg-white p-8 shadow-lg
+                dark:border-slate-700 dark:bg-slate-800">
+
+        <!-- STEP 1: Credentials -->
+        <div id="loginStep">
+            <form id="loginForm" class="space-y-5" onsubmit="return handleLogin(event)">
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Email address
+                    </label>
+                    <input id="email" name="email" type="email" autocomplete="email" required
+                           placeholder="you@company.com"
+                           class="placeholder-slate-400 mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm
+                                  text-slate-900 transition-colors outline-none
+                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                  dark:placeholder-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
+                                  dark:focus:border-subgreen-400 dark:focus:ring-subgreen-400" />
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Password
+                    </label>
+
+                    <div class="relative">
+                        <input id="password" name="password" type="password" autocomplete="current-password" required
+                               placeholder="••••••••"
+                               class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pe-12 text-sm text-slate-900 shadow-sm
+                                      transition outline-none placeholder:text-slate-400
+                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/30
+                                      dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                      dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400/30" />
+
+                        <button type="button"
+                                onclick="togglePassword('password','eyeLogin','eyeSlashLogin')"
+                                style="position:absolute; right:12px; top:50%; transform: translateY(-30%); z-index: 20; display:flex; align-items:center; justify-content:center;"
+                                class="cursor-pointer text-slate-400 hover:text-slate-600 focus:outline-none dark:text-slate-500 dark:hover:text-slate-300">
+                            <svg id="eyeLogin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <svg id="eyeSlashLogin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember / Forgot -->
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex cursor-pointer items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <input type="checkbox" name="remember"
+                               class="rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500
+                                      dark:border-slate-600 dark:bg-slate-900 dark:text-subgreen-400
+                                      dark:focus:ring-subgreen-400" />
+                        Remember me
+                    </label>
+                    <a asp-page="/Auth/ForgotPassword"
+                       class="font-medium text-subgreen-600 hover:text-subgreen-700
+                              dark:text-subgreen-400 dark:hover:text-subgreen-300">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <!-- reCAPTCHA v2 -->
+                <div id="recaptchaWrapper" class="mt-4 mb-2 hidden">
+                    <div id="recaptcha-container"
+                         class="g-recaptcha"
+                         data-sitekey="@Model.RecaptchaSiteKey"
+                         data-size="normal"
+                         style="transform:scale(.9); transform-origin:0 0;">
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn"
+    class="flex w-full items-center justify-center gap-2 rounded-lg bg-subgreen-500 py-3.5
+       text-sm font-semibold text-white shadow-md transition
+  hover:bg-subgreen-700
+     focus:outline-none
+          disabled:cursor-not-allowed disabled:opacity-60
+        dark:bg-subgreen-500 dark:hover:bg-subgreen-700
+       dark:focus:ring-offset-slate-900">
+    <!-- Loading spinner (hidden by default, shows only when processing) -->
+     <svg id="submitSpinner" aria-hidden="true" class="hidden h-6 w-6 animate-spin fill-white text-white/30" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+       <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+           </svg>
+ <span id="submitText">Sign in</span>
+    </button>
+
+                <!-- Error Message -->
+     <div id="loginError" class="mt-4 flex hidden items-center rounded-md border border-red-200 bg-red-50 px-4 py-3">
+         <svg viewBox="0 0 24 24" class="mr-2.5 h-4 w-4 flex-shrink-0 text-red-600">
+      <path fill="currentColor"
+d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.779,0,0,0,11.8,24h.214A12.111,12.111,0,0,0,24,11.791h0A11.766,11.766,0,0,0,11.983,0ZM10.5,16.542a1.476,1.476,0,0,1,1.449-1.53h.027a1.527,1.527,0,0,1,1.523,1.47,1.475,1.475,0,0,1-1.449,1.53h-.027A1.529,1.529,0,0,1,10.5,16.542ZM11,12.5v-6a1,1,0,0,1,2,0v6a1,1,0,1,1-2,0Z">
+     </path>
+   </svg>
+  <span class="text-xs text-red-700" id="loginErrorText">Invalid credentials</span>
+  </div>
+     </form>
+
+            <!-- Divider + Social -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="bg-white px-3 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                            Or continue with
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <a href="/Auth/ExternalLogin?provider=Google&flow=login"
+                       class="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3
+                              text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50
+                              focus:ring-2 focus:ring-slate-200 focus:outline-none
+                              dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
+                              dark:focus:ring-slate-700">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Google
+                    </a>
+                </div>
+            </div>
+            <div class="mt-2 text-center">
+                <a asp-page="/Auth/Login"
+                   class="text-xs font-medium text-slate-600 hover:text-slate-400
+       dark:text-slate-200 dark:hover:text-slate-400">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+
+        <!-- STEP 2: TOTP wrapper (shown after credentials when 2FA required, or on load when returning from external login with 2FA) -->
+        <div id="totpStep" class="hidden">
+            <input type="hidden" id="totpIntentToken" value="@Model.TotpIntentToken" />
+            <input type="hidden" id="totpIntentEmail" value="@Model.TotpIntentEmail" />
+            <partial name="Auth/Partials/_TotpEntry" />
+            <partial name="Auth/Partials/_RecoveryPanel" />
+        </div>
+    </div>
+
+    <p class="mt-8 text-center text-sm text-slate-600 dark:text-slate-300">
+        Not a member?
+        <a asp-page="/Auth/Signup"
+           class="font-semibold text-subgreen-600 hover:text-subgreen-700
+                  dark:text-subgreen-400 dark:hover:text-subgreen-300">
+            Start a 7 days free trial
+        </a>
+    </p>
+</div>
+
+@section Scripts {
+ <!-- reCAPTCHA v2 Checkbox script with explicit render and callback -->
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+}
+
+<script>
+    const apiBaseUrl = '@Model.ApiBaseUrl';
+    const recaptchaSiteKey = '@Model.RecaptchaSiteKey';
+
+    // When set, we came from external login and must use verify-external-totp (no password).
+    let externalTotpIntentToken = (function() {
+        const el = document.getElementById('totpIntentToken');
+        return (el && el.value) ? el.value.trim() : '';
+    })();
+    const totpIntentEmail = (function() {
+        const el = document.getElementById('totpIntentEmail');
+        return (el && el.value) ? el.value.trim() : '';
+    })();
+
+    // Holds credentials between Step 1 and Step 2 (TOTP) for email/password login
+    let pendingEmail = '';
+    let pendingPassword = '';
+
+    // Track if captcha is currently required and rendered
+    let captchaRequired = false;
+    let captchaRendered = false;
+
+    // Check if captcha is required on page load
+    async function checkCaptchaRequired() {
+        try {
+            const res = await fetch(`${apiBaseUrl}/api/auth/captcha-required`);
+            const data = await res.json();
+            if (data.required) {
+                showRecaptcha();
+            }
+        } catch (error) {
+            // If check fails, don't show captcha initially
+            console.log('Could not check captcha status');
+        }
+    }
+
+    // Show reCAPTCHA widget
+    function showRecaptcha() {
+        if (captchaRequired) return; // Already showing
+
+        captchaRequired = true;
+        const wrapper = document.getElementById('recaptchaWrapper');
+        wrapper.classList.remove('hidden');
+
+        // Render captcha if not already rendered and grecaptcha is ready
+        if (!captchaRendered && typeof grecaptcha !== 'undefined' && grecaptcha.render) {
+            renderRecaptcha();
+        }
+    }
+
+    // Render the reCAPTCHA widget
+    function renderRecaptcha() {
+        if (captchaRendered) return;
+
+        try {
+            grecaptcha.render('recaptcha-container', {
+                'sitekey': recaptchaSiteKey
+            });
+            captchaRendered = true;
+        } catch (e) {
+            console.log('reCAPTCHA render error:', e);
+        }
+    }
+
+    // Called by reCAPTCHA script when ready
+    function onRecaptchaLoad() {
+        if (captchaRequired && !captchaRendered) {
+            renderRecaptcha();
+        }
+    }
+
+    // Show inline error below Sign In button
+    function showError(message) {
+        const errorEl = document.getElementById('loginError');
+        const errorText = document.getElementById('loginErrorText');
+        errorText.textContent = message || 'Invalid credentials';
+        errorEl.classList.remove('hidden');
+    }
+
+    // Hide error
+    function hideError() {
+        const errorEl = document.getElementById('loginError');
+        errorEl.classList.add('hidden');
+    }
+
+    // Set loading state - shows spinner only when processing, hides when done
+    function setLoading(loading) {
+        const btn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('submitSpinner');
+
+        btn.disabled = loading;
+        if (loading) {
+            spinner.classList.remove('hidden');
+        } else {
+            spinner.classList.add('hidden');
+        }
+    }
+
+    // ── STEP 1: credentials → API login ──────────────────────────
+    async function handleLogin(e) {
+        e.preventDefault();
+        hideError();
+
+        pendingEmail = document.getElementById('email').value.trim();
+        pendingPassword = document.getElementById('password').value;
+
+        // Get reCAPTCHA response only if captcha is required
+        let recaptchaToken = '';
+        if (captchaRequired) {
+            recaptchaToken = grecaptcha.getResponse();
+            if (!recaptchaToken) {
+                showError('Please complete the CAPTCHA verification.');
+                return false;
+            }
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${apiBaseUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: pendingEmail,
+                    password: pendingPassword,
+                    recaptchaToken: recaptchaToken
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.ok) {
+                // Check if captcha is now required
+                if (data.requiresCaptcha && !captchaRequired) {
+                    showRecaptcha();
+                }
+
+                // Reset reCAPTCHA on failure if it's showing
+                if (captchaRequired && typeof grecaptcha !== 'undefined') {
+                    grecaptcha.reset();
+                }
+
+                showError(data.message || 'Invalid credentials');
+                setLoading(false);
+                return false;
+            }
+
+            // Account requires TOTP → show Step 2
+            if (data.requiresTotp) {
+                document.getElementById('loginStep').classList.add('hidden');
+                document.getElementById('totpStep').classList.remove('hidden');
+                closeRecovery();
+
+                const err = document.getElementById('totpError');
+                const errText = document.getElementById('totpErrorText');
+                if (err) { err.classList.add('hidden'); }
+                if (errText) { errText.textContent = ''; }
+
+                setTimeout(() => document.getElementById('totp')?.focus(), 0);
+                setLoading(false);
+                return false;
+            }
+
+            // No TOTP → complete login immediately
+            await completeLogin(data.userId, data.orgId, data.role, data.name, data.token, data.orgName);
+        } catch (error) {
+            // Reset reCAPTCHA on error if showing
+            if (captchaRequired && typeof grecaptcha !== 'undefined') {
+                grecaptcha.reset();
+            }
+            showError('Network error. Please check your connection and try again.');
+            setLoading(false);
+        }
+
+        return false;
+    }
+
+    // ── STEP 2: TOTP verification ────────────────────────────────
+    async function verifyTotp(e) {
+        e.preventDefault();
+
+        const code = (document.getElementById('totp').value || '').trim();
+        const err = document.getElementById('totpError');
+        const errText = document.getElementById('totpErrorText');
+
+        if (code.length !== 6) {
+            err.classList.remove('hidden');
+            errText.textContent = 'Enter a 6-digit code.';
+            return false;
+        }
+
+        var totpBtn = document.getElementById('totpVerifyBtn');
+        var totpSpinner = document.getElementById('totpVerifySpinner');
+        var totpBtnText = document.getElementById('totpVerifyBtnText');
+        if (totpBtn) { totpBtn.disabled = true; }
+        if (totpSpinner) totpSpinner.classList.remove('hidden');
+        if (totpBtnText) totpBtnText.textContent = 'Verifying…';
+        if (err) err.classList.add('hidden');
+
+        let res, data;
+        if (externalTotpIntentToken) {
+            res = await fetch(`${apiBaseUrl}/api/auth/verify-external-totp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ totpIntentToken: externalTotpIntentToken, totpCode: code })
+            });
+        } else {
+            res = await fetch(`${apiBaseUrl}/api/auth/verify-totp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: pendingEmail,
+                    password: pendingPassword,
+                    totpCode: code,
+                    recaptchaToken: ''
+                })
+            });
+        }
+        data = await res.json();
+
+        if (totpBtn) totpBtn.disabled = false;
+        if (totpSpinner) totpSpinner.classList.add('hidden');
+        if (totpBtnText) totpBtnText.textContent = 'Verify & continue';
+        if (!res.ok || !data.ok) {
+            if (err) { err.classList.remove('hidden'); errText.textContent = data.message || 'Invalid code.'; }
+            return false;
+        }
+
+        await completeLogin(data.userId, data.orgId, data.role, data.name, data.token, data.orgName);
+        return false;
+    }
+
+    // ── Set cookie session via Razor Page handler ────────────────
+    async function completeLogin(userId, orgId, role, name, token, orgName) {
+        const res = await fetch('/Auth/CompleteLogin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, orgId, role, name: name || null, token: token || null, orgName: orgName || null })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            const destinations = {
+                SuperAdmin: '/SuperAdmin/Dashboard',
+                OrgAdmin: '/App/Dashboard',
+                HR: '/App/Dashboard',
+                Manager: '/App/Dashboard',
+                Supervisor: '/App/Dashboard',
+                Payroll: '/App/Dashboard',
+                Employee: '/Employee/Dashboard'
+            };
+            // Use replace to prevent back button returning to login
+            window.location.replace(destinations[role] || '/App/Dashboard');
+        } else {
+            showError('Failed to complete login. Please try again.');
+            setLoading(false);
+        }
+    }
+
+    function backToLogin() {
+        if (externalTotpIntentToken) {
+            window.location.href = '/Auth/Login';
+            return;
+        }
+        document.getElementById('totpStep').classList.add('hidden');
+        document.getElementById('loginStep').classList.remove('hidden');
+        hideError();
+        document.getElementById('password')?.focus();
+    }
+
+    // ── Recovery UI ──────────────────────────────────────────────
+    function openRecovery() {
+        document.getElementById('totpEntry')?.classList.add('hidden');
+        document.getElementById('recoveryPanel')?.classList.remove('hidden');
+
+        const recErr = document.getElementById('recoveryError');
+        const recErrText = document.getElementById('recoveryErrorText');
+        if (recErr) { recErr.classList.add('hidden'); }
+        if (recErrText) { recErrText.textContent = ''; }
+
+        document.getElementById('supportInfo')?.classList.add('hidden');
+        setTimeout(() => document.getElementById('recoveryCode')?.focus(), 0);
+    }
+
+    function closeRecovery() {
+        document.getElementById('recoveryPanel')?.classList.add('hidden');
+        document.getElementById('totpEntry')?.classList.remove('hidden');
+
+        const totpErr = document.getElementById('totpError');
+        const totpErrText = document.getElementById('totpErrorText');
+        if (totpErr) { totpErr.classList.add('hidden'); }
+        if (totpErrText) { totpErrText.textContent = ''; }
+    }
+
+    async function verifyRecoveryCode() {
+        const code = (document.getElementById('recoveryCode').value || '').trim();
+        const recErr = document.getElementById('recoveryError');
+        const recErrText = document.getElementById('recoveryErrorText');
+
+        if (!code) {
+            recErr.classList.remove('hidden');
+            recErrText.textContent = 'Enter a recovery code.';
+            return;
+        }
+
+        if (recErr) recErr.classList.add('hidden');
+        var recBtn = document.getElementById('recoveryVerifyBtn');
+        var recSpinner = document.getElementById('recoveryVerifySpinner');
+        var recBtnText = document.getElementById('recoveryVerifyBtnText');
+        if (recBtn) recBtn.disabled = true;
+        if (recSpinner) recSpinner.classList.remove('hidden');
+        if (recBtnText) recBtnText.textContent = 'Verifying…';
+
+        var res, data;
+        if (externalTotpIntentToken) {
+            res = await fetch(`${apiBaseUrl}/api/auth/verify-external-recovery`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ totpIntentToken: externalTotpIntentToken, recoveryCode: code })
+            });
+        } else {
+            res = await fetch(`${apiBaseUrl}/api/auth/verify-recovery`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: pendingEmail,
+                    password: pendingPassword,
+                    recoveryCode: code
+                })
+            });
+        }
+        data = await res.json();
+
+        if (recBtn) recBtn.disabled = false;
+        if (recSpinner) recSpinner.classList.add('hidden');
+        if (recBtnText) recBtnText.textContent = 'Verify & continue';
+
+        if (!res.ok || !data.ok) {
+            recErr.classList.remove('hidden');
+            recErrText.textContent = data.message || 'Invalid or already used recovery code.';
+            return;
+        }
+
+        await completeLogin(data.userId, data.orgId, data.role, data.name, data.token, data.orgName);
+    }
+
+    function simulateRestoredAuthenticator() {
+        closeRecovery();
+        setTimeout(() => document.getElementById('totp')?.focus(), 0);
+    }
+
+    function showSupportInfo() {
+        document.getElementById('supportInfo')?.classList.remove('hidden');
+    }
+
+    function togglePassword(inputId, eyeId, eyeSlashId) {
+        const input = document.getElementById(inputId);
+        const eye = document.getElementById(eyeId);
+        const eyeSlash = document.getElementById(eyeSlashId);
+        if (!input || !eye || !eyeSlash) return;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.classList.add('hidden');
+            eyeSlash.classList.remove('hidden');
+        } else {
+            input.type = 'password';
+            eye.classList.remove('hidden');
+            eyeSlash.classList.add('hidden');
+        }
+    }
+
+    // Clear error when user starts typing
+    document.getElementById('email')?.addEventListener('input', hideError);
+    document.getElementById('password')?.addEventListener('input', hideError);
+
+    // Prevent browser from caching this page
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    // Check if captcha is required on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        checkCaptchaRequired();
+        if (externalTotpIntentToken) {
+            document.getElementById('loginStep').classList.add('hidden');
+            document.getElementById('totpStep').classList.remove('hidden');
+            document.getElementById('recoveryPanel')?.classList.add('hidden');
+            var recoveryLink = document.querySelector('[onclick="openRecovery()"]');
+            if (recoveryLink) recoveryLink.style.display = 'none';
+            setTimeout(function() { document.getElementById('totp')?.focus(); }, 0);
+        }
+    });
+
+    // Also set up callback for when reCAPTCHA loads
+    window.onRecaptchaLoad = onRecaptchaLoad;
+</script>

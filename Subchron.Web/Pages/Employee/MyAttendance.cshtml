@@ -1,0 +1,209 @@
+@page
+@model Subchron.Web.Pages.Employee.MyAttendanceModel
+@{
+    ViewData["Title"] = "Attendance & Schedule";
+    ViewData["PageTitle"] = "Attendance & Schedule";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+}
+
+<div class="mx-auto max-w-5xl">
+    <div class="mb-6 flex gap-2 border-b border-slate-200 dark:border-slate-700">
+        <button type="button" id="tabRecord" class="emp-tab border-b-2 border-subgreen-600 pb-2 text-sm font-semibold text-subgreen-600 dark:border-subgreen-400 dark:text-subgreen-400">Attendance Record</button>
+        <button type="button" id="tabSchedule" class="emp-tab border-b-2 border-transparent pb-2 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">My Schedule</button>
+    </div>
+
+    <div id="panelRecord" class="space-y-4">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Your time in/out history. Use Time In / Out or QR at kiosk to record attendance.</p>
+        <div class="flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <span>From</span>
+                <input type="date" id="recordFrom" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <span>To</span>
+                <input type="date" id="recordTo" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </label>
+            <button type="button" id="recordFilterBtn" class="rounded-lg bg-subgreen-600 px-4 py-2 text-sm font-medium text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Apply</button>
+        </div>
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time in</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time out</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Hours</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 21, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:02</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">17:35</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">9.6</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (2 min)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 20, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">07:58</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">17:30</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">9.5</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 19, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">17:00</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">9.0</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 18, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">—</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">—</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">Absent</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 17, 2025</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:15</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">17:45</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">9.5</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (15 min)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="panelSchedule" class="hidden space-y-4">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Your assigned shift schedule. Contact HR if you need changes.</p>
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Regular schedule</h3>
+                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Mon – Fri (unless on leave or holiday)</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Day</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Shift</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time</th>
+                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Monday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Regular</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00 – 17:00</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">1 hr break</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Tuesday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Regular</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00 – 17:00</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">1 hr break</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Wednesday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Regular</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00 – 17:00</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">1 hr break</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Thursday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Regular</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00 – 17:00</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">1 hr break</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Friday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Regular</td>
+                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">08:00 – 17:00</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">1 hr break</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Saturday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Rest day</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Sunday</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Rest day</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
+                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 dark:border-sky-800 dark:bg-sky-900/20">
+            <p class="text-sm font-medium text-sky-800 dark:text-sky-200">Need a different shift?</p>
+            <p class="mt-1 text-sm text-sky-700 dark:text-sky-300">Contact your supervisor or HR to request schedule changes.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var tabRecord = document.getElementById('tabRecord');
+    var tabSchedule = document.getElementById('tabSchedule');
+    var panelRecord = document.getElementById('panelRecord');
+    var panelSchedule = document.getElementById('panelSchedule');
+    var recordFrom = document.getElementById('recordFrom');
+    var recordTo = document.getElementById('recordTo');
+    var recordFilterBtn = document.getElementById('recordFilterBtn');
+
+    function setActiveTab(active) {
+        var isRecord = active === 'record';
+        panelRecord.classList.toggle('hidden', !isRecord);
+        panelSchedule.classList.toggle('hidden', isRecord);
+        tabRecord.classList.toggle('border-subgreen-600', isRecord);
+        tabRecord.classList.toggle('text-subgreen-600', isRecord);
+        tabRecord.classList.toggle('dark:border-subgreen-400', isRecord);
+        tabRecord.classList.toggle('dark:text-subgreen-400', isRecord);
+        tabRecord.classList.toggle('border-transparent', !isRecord);
+        tabSchedule.classList.toggle('border-subgreen-600', !isRecord);
+        tabSchedule.classList.toggle('text-subgreen-600', !isRecord);
+        tabSchedule.classList.toggle('dark:border-subgreen-400', !isRecord);
+        tabSchedule.classList.toggle('dark:text-subgreen-400', !isRecord);
+        tabSchedule.classList.toggle('border-transparent', isRecord);
+    }
+
+    tabRecord && tabRecord.addEventListener('click', function () { setActiveTab('record'); });
+    tabSchedule && tabSchedule.addEventListener('click', function () { setActiveTab('schedule'); });
+
+    if (recordFrom && recordTo) {
+        var today = new Date();
+        var weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 14);
+        recordTo.value = today.toISOString().slice(0, 10);
+        recordFrom.value = weekAgo.toISOString().slice(0, 10);
+    }
+    recordFilterBtn && recordFilterBtn.addEventListener('click', function () {
+        if (recordFrom && recordTo) {
+            var from = recordFrom.value;
+            var to = recordTo.value;
+            if (from && to) alert('Filter would apply: ' + from + ' to ' + to + '. (UI only – no backend.)');
+        }
+    });
+})();
+</script>
+}

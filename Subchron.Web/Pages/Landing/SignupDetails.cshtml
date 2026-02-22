@@ -1,0 +1,1021 @@
+@page
+@model Subchron.Web.Pages.Auth.SignupDetailsModel
+@{
+    ViewData["Title"] = "Account Details";
+    Layout = "_LayoutLogin";
+}
+
+<div class="w-full max-w-md">
+
+    <!-- Logo -->
+    <div class="flex justify-center">
+        <a asp-page="/Index" class="inline-block">
+            <img src="~/images/logo/logo.png" alt="Subchron" class="h-12 w-auto object-contain" />
+        </a>
+    </div>
+
+    <!-- Title -->
+    <h1 class="mt-8 text-center text-2xl font-bold text-slate-900 dark:text-white">
+        Account Details
+    </h1>
+
+    <!-- Card -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg ring-1 ring-slate-200
+                dark:border-slate-700 dark:bg-slate-800 dark:ring-slate-700">
+
+        <!-- Google identity banner (enhanced, no user icon) -->
+        <div id="googleBanner"
+             class="mb-6 hidden rounded-xl border border-slate-200 bg-slate-50 p-4
+            dark:border-slate-700 dark:bg-slate-900">
+
+            <div class="flex items-start gap-3">
+                <!-- Google logo -->
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                </div>
+
+                <div class="min-w-0">
+                    <!-- Title -->
+                    <div class="text-sm font-semibold text-slate-900 dark:text-white">
+                        Connected with Google
+                    </div>
+
+                    <!-- Email line (strong emphasis on the email) -->
+                    <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                        Signed in as
+                        <span id="googleEmail" class="font-semibold text-slate-900 dark:text-white"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Selected plan (visible when planId in URL) -->
+        <div id="selectedPlanWrap" class="mb-4 hidden rounded-xl border border-subgreen-200 bg-subgreen-50/50 p-3 dark:border-subgreen-800 dark:bg-subgreen-900/20">
+            <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Selected plan</p>
+            <p id="selectedPlanText" class="mt-1 text-sm font-semibold text-subgreen-700 dark:text-subgreen-300">—</p>
+        </div>
+
+        <p class="mt-0 mb-4 text-center text-sm text-slate-600 dark:text-slate-300">
+            Step <span id="stepText" class="font-semibold text-subgreen-600 dark:text-subgreen-400">1</span>
+            of <span id="totalStepsText" class="font-semibold text-slate-900 dark:text-white">3</span>
+        </p>
+
+        <!-- Step header -->
+        <div class="space-y-4">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p id="stepTitle" class="text-base font-semibold text-slate-900 dark:text-white">
+                        Organization
+                    </p>
+                    <p id="stepSubtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                        Create your workspace identity.
+                    </p>
+                </div>
+
+                <!-- step indicator (dots) -->
+                <div class="flex flex-none items-center gap-2 pt-1">
+                    <span id="dot1" class="h-2.5 w-2.5 rounded-full bg-subgreen-500"></span>
+                    <span id="dot2" class="h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    <span id="dot3" class="h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-900">
+                <div id="progressBar"
+                     class="h-full rounded-full bg-gradient-to-r from-subgreen-500 to-subgreen-600 transition-all duration-500 ease-in-out"
+                     style="width: 25%;"></div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form class="mt-8 space-y-8">
+
+            <!-- STEP 1: Organization -->
+            <section id="step1" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Organization Name <span style="color:#f01e2c;">*</span>
+                    </label>
+                    <input id="orgName" type="text" placeholder="e.g., Sentro Solutions Inc."
+                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm
+                                  transition outline-none placeholder:text-slate-400
+                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                  dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                  dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                    <p id="orgNameError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        This shows on reports and your workspace header.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Organization Code <span style="color:#f01e2c;">*</span>
+                    </label>
+                    <input id="orgCode" type="text" placeholder="e.g., SUB101" autocomplete="off"
+                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm uppercase text-slate-900 shadow-sm
+                                  transition outline-none placeholder:text-slate-400
+                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                  dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                  dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                    <p id="orgCodeError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        Uppercase letters and numbers only. Auto-generated from org name or enter your own.
+                    </p>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button id="btnNextStep1" type="button" style="cursor:pointer;"
+                            class="rounded-lg bg-subgreen-500 px-6 py-2.5
+                                   text-sm font-semibold text-white shadow-md transition-all duration-200
+                                   hover:scale-105 hover:bg-subgreen-600">
+                        Next
+                    </button>
+                </div>
+            </section>
+
+            <!-- STEP 2: Admin Profile -->
+            <section id="step2" class="hidden space-y-5">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                            First Name <span style="color:#f01e2c;">*</span>
+                        </label>
+                        <input id="adminFirstName" type="text" placeholder="Ivan"
+                               class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm
+                                      transition outline-none placeholder:text-slate-400
+                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                      dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                      dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                        <p id="adminFirstNameError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                            Last Name <span style="color:#f01e2c;">*</span>
+                        </label>
+                        <input id="adminLastName" type="text" placeholder="Dumadapat"
+                               class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm
+                                      transition outline-none placeholder:text-slate-400
+                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                      dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                      dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                        <p id="adminLastNameError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Middle Name (Optional)
+                    </label>
+                    <input id="adminMiddleName" type="text" placeholder="Optional"
+                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm
+                                  transition outline-none placeholder:text-slate-400
+                                  focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                                  dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                                  dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        This creates your first employee record (Admin).
+                    </p>
+                </div>
+
+                <!-- Google-mode readonly email preview -->
+                <div id="googleEmailReadonlyWrap" class="hidden">
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Admin Email (from Google)
+                    </label>
+                    <input id="googleEmailReadonly" type="text" readonly
+                           class="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none
+                                  dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                </div>
+            </section>
+
+            <!-- STEP 3: Login Credentials (EMAIL SIGNUP ONLY) -->
+            <section id="step3" class="hidden space-y-5">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Email <span style="color:#f01e2c;">*</span>
+                    </label>
+                    <input id="emailCred" type="email" placeholder="you@company.com" required
+                           class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm
+                      transition outline-none placeholder:text-slate-400
+                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                      dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                      dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400" />
+                    <p id="emailCredError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="passwordInput" class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Password <span style="color:#f01e2c;">*</span>
+                    </label>
+
+                    <div class="relative">
+                        <input id="passwordInput" type="password" placeholder="••••••••"
+                               autocomplete="new-password"
+                               data-lpignore="true"
+                               required
+                               oninput="suUpdatePwHints()"
+                               onfocus="suMaybeShowPwChecklist()"
+                               class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pe-12 text-sm text-slate-900 shadow-sm
+                          transition outline-none placeholder:text-slate-400
+                          focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/30
+                          dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                          dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400/30" />
+
+                        <button type="button" tabindex="-1" aria-label="Show password"
+                                onclick="window.toggleSignupPassword && window.toggleSignupPassword('passwordInput','eyePw','eyeSlashPw')"
+                                style="position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:10; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:transparent;"
+                                class="cursor-pointer rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700">
+                            <svg id="eyePw" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 pointer-events-none">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <svg id="eyeSlashPw" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden h-5 w-5 pointer-events-none">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- CHECKLIST (hidden until user types) -->
+                    <div id="suPwChecklist"
+                         class="mt-3 hidden rounded-lg border border-slate-200 bg-slate-50 p-4
+                    dark:border-slate-700 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                Password requirements
+                            </div>
+                            <button type="button"
+                                    class="text-xs font-medium text-slate-600 hover:text-slate-900
+                               dark:text-slate-300 dark:hover:text-white"
+                                    onclick="suHidePwChecklist()">
+                                Hide
+                            </button>
+                        </div>
+
+                        <ul class="mt-3 space-y-2 text-sm">
+                            <li class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 items-center justify-center" id="suHintLenIcon"></span>
+                                <span id="suHintLenText">At least 12 characters</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 items-center justify-center" id="suHintUpperIcon"></span>
+                                <span id="suHintUpperText">One uppercase letter</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 items-center justify-center" id="suHintLowerIcon"></span>
+                                <span id="suHintLowerText">One lowercase letter</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 items-center justify-center" id="suHintNumIcon"></span>
+                                <span id="suHintNumText">One number</span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="flex h-5 w-5 items-center justify-center" id="suHintSymIcon"></span>
+                                <span id="suHintSymText">One symbol</span>
+                            </li>
+                        </ul>
+
+                        <!-- General submit error (kept in checklist area) -->
+                        <div id="suPwError"
+                             class="mt-4 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700
+                        dark:border-red-700 dark:bg-slate-900 dark:text-red-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirm password -->
+                <div>
+                    <label for="confirmPasswordInput" class="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                        Confirm Password <span style="color:#f01e2c;">*</span>
+                    </label>
+
+                    <div class="relative">
+                        <input id="confirmPasswordInput" type="password" placeholder="••••••••"
+                               autocomplete="new-password"
+                               data-lpignore="true"
+                               required
+                               oninput="suUpdatePwHints()"
+                               class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pe-12 text-sm text-slate-900 shadow-sm
+                          transition outline-none placeholder:text-slate-400
+                          focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/30
+                          dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-subgreen-400
+                          dark:placeholder:text-slate-500 dark:focus:ring-subgreen-400/30" />
+
+                        <button type="button" tabindex="-1" aria-label="Show password"
+                                onclick="window.toggleSignupPassword && window.toggleSignupPassword('confirmPasswordInput','eyeConfirmPw','eyeSlashConfirmPw')"
+                                style="position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:10; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:none; background:transparent;"
+                                class="cursor-pointer rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700">
+                            <svg id="eyeConfirmPw" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 pointer-events-none">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <svg id="eyeSlashConfirmPw" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden h-5 w-5 pointer-events-none">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p id="confirmPasswordInputError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    <p id="suPwMismatch" class="mt-2 hidden text-xs text-red-600 dark:text-red-400">Passwords do not match.</p>
+                </div>
+
+                <!-- ReCaptcha -->
+                <div id="recaptchaWrapper" class="mt-4 mb-2 hidden">
+                    <div id="recaptcha-container"></div>
+                </div>
+
+                <p class="text-xs text-subgreen-600 dark:text-subgreen-400">
+                    Trial starts after setup — no credit card required.
+                </p>
+            </section>
+
+
+            <!-- Actions -->
+            <div class="space-y-4 pt-4">
+                <div id="signupError"
+                     class="hidden rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                </div>
+                <div id="actionsRow23" class="flex hidden items-center justify-between">
+                    <button id="btnBack" type="button" style="cursor:pointer;"
+                            class="rounded-lg border border-slate-300 bg-white px-6 py-2.5
+                                   text-sm font-semibold text-slate-700 transition-all duration-200
+                                   hover:scale-105 hover:bg-slate-50
+                                   focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 focus:outline-none
+                                   dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
+                                   dark:focus:ring-slate-600 dark:focus:ring-offset-slate-900">
+                        Back
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <button id="btnNext" type="button" style="cursor:pointer;"
+                                class="rounded-lg bg-subgreen-500 px-6 py-2.5
+                                   text-sm font-semibold text-white shadow-md transition-all duration-200
+                                   hover:scale-105 hover:bg-subgreen-600">
+                            Next
+                        </button>
+
+                        <button id="btnContinue" type="button"
+                                class="rounded-lg bg-subgreen-500 px-6 py-2.5
+                                   text-sm font-semibold text-white shadow-md transition-all duration-200
+                                   hover:scale-105 hover:bg-subgreen-600 disabled:opacity-70 disabled:cursor-not-allowed"
+                                style="cursor:pointer;">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-center text-xs text-slate-500 dark:text-slate-400">
+                    You can edit these details later in Settings.
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+
+    <script>
+        (function () {
+          // ----------------------------
+          // Query params
+          // ----------------------------
+          const params = new URLSearchParams(window.location.search);
+          const provider = (params.get("provider") || "email").toLowerCase();
+          const isGoogleSignup = provider === "google";
+
+          const inboundEmail = (params.get("email") || "").trim();
+          const externalId = (params.get("externalId") || "").trim();
+          const externalName = (params.get("name") || "").trim();
+
+          // ✅ Plan (auto-fill)
+          // Priority: query param planId -> default 1
+          const planId = (() => {
+            const raw = params.get("planId");
+            const n = parseInt(raw || "1", 10);
+            return Number.isFinite(n) && n > 0 ? n : 1;
+          })();
+
+          // ----------------------------
+          // Server-injected config
+          // ----------------------------
+          const apiBaseUrl = '@Model.ApiBaseUrl';
+          const recaptchaSiteKey = '@Model.RecaptchaSiteKey';
+
+          // ----------------------------
+          // Step setup
+          // ----------------------------
+          let step = 1;
+          const totalSteps = isGoogleSignup ? 2 : 3;
+
+          const stepText = document.getElementById('stepText');
+          const totalStepsText = document.getElementById('totalStepsText');
+          const progressBar = document.getElementById('progressBar');
+          const stepTitle = document.getElementById('stepTitle');
+          const stepSubtitle = document.getElementById('stepSubtitle');
+
+          const dot1 = document.getElementById('dot1');
+          const dot2 = document.getElementById('dot2');
+          const dot3 = document.getElementById('dot3');
+
+          const s1 = document.getElementById('step1');
+          const s2 = document.getElementById('step2');
+          const s3 = document.getElementById('step3');
+
+          const btnNextStep1 = document.getElementById('btnNextStep1');
+          const actionsRow23 = document.getElementById('actionsRow23');
+          const btnBack = document.getElementById('btnBack');
+          const btnNext = document.getElementById('btnNext');
+          const btnContinue = document.getElementById('btnContinue');
+
+          const googleBanner = document.getElementById('googleBanner');
+          const googleEmail = document.getElementById('googleEmail');
+          const googleEmailReadonlyWrap = document.getElementById('googleEmailReadonlyWrap');
+          const googleEmailReadonly = document.getElementById('googleEmailReadonly');
+
+          const emailCred = document.getElementById('emailCred');
+
+          // ----------------------------
+          // reCAPTCHA (explicit render)
+          // ----------------------------
+          let recaptchaRendered = false;
+          let recaptchaWidgetId = null;
+
+          function renderRecaptchaIfNeeded() {
+            if (isGoogleSignup) return;
+            const wrapper = document.getElementById('recaptchaWrapper');
+            if (!wrapper) return;
+            wrapper.classList.remove('hidden');
+
+            if (!recaptchaRendered && typeof grecaptcha !== 'undefined' && grecaptcha.render) {
+              recaptchaWidgetId = grecaptcha.render('recaptcha-container', { sitekey: recaptchaSiteKey });
+              recaptchaRendered = true;
+            }
+          }
+
+          // Called by Google script onload
+          window.onRecaptchaLoad = function () {
+            if (!isGoogleSignup && step === 3) renderRecaptchaIfNeeded();
+          };
+
+          // ----------------------------
+          // Password visibility toggle (eye icon)
+          // ----------------------------
+          window.toggleSignupPassword = function (inputId, eyeId, eyeSlashId) {
+            var input = document.getElementById(inputId);
+            var eye = document.getElementById(eyeId);
+            var eyeSlash = document.getElementById(eyeSlashId);
+            if (!input || !eye || !eyeSlash) return;
+            if (input.type === 'password') {
+              input.type = 'text';
+              eye.classList.add('hidden');
+              eyeSlash.classList.remove('hidden');
+            } else {
+              input.type = 'password';
+              eye.classList.remove('hidden');
+              eyeSlash.classList.add('hidden');
+            }
+          };
+
+          // ----------------------------
+          // Password checklist (12+ chars, upper, lower, number, symbol) – turn green when met
+          // ----------------------------
+          function suUpdatePwHints() {
+            var pw = (document.getElementById('passwordInput') && document.getElementById('passwordInput').value) || '';
+            var lenOk = pw.length >= 12;
+            var upperOk = /[A-Z]/.test(pw);
+            var lowerOk = /[a-z]/.test(pw);
+            var numOk = /[0-9]/.test(pw);
+            var symOk = /[^A-Za-z0-9]/.test(pw);
+            function setIcon(id, ok) {
+              var el = document.getElementById(id);
+              if (!el) return;
+              el.textContent = ok ? '\u2713' : '';
+              el.className = 'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ' + (ok ? 'bg-subgreen-500 text-white' : 'bg-slate-200 text-slate-500 dark:bg-slate-600 dark:text-slate-400');
+            }
+            setIcon('suHintLenIcon', lenOk);
+            setIcon('suHintUpperIcon', upperOk);
+            setIcon('suHintLowerIcon', lowerOk);
+            setIcon('suHintNumIcon', numOk);
+            setIcon('suHintSymIcon', symOk);
+          }
+          window.suUpdatePwHints = suUpdatePwHints;
+
+          function suMaybeShowPwChecklist() {
+            var wrap = document.getElementById('suPwChecklist');
+            if (wrap) wrap.classList.remove('hidden');
+          }
+          window.suMaybeShowPwChecklist = suMaybeShowPwChecklist;
+
+          function suHidePwChecklist() {
+            var wrap = document.getElementById('suPwChecklist');
+            if (wrap) wrap.classList.add('hidden');
+          }
+          window.suHidePwChecklist = suHidePwChecklist;
+
+          function suValidatePasswordForContinue() {
+            var pw = (document.getElementById('passwordInput') && document.getElementById('passwordInput').value) || '';
+            return pw.length >= 12 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+          }
+          window.suValidatePasswordForContinue = suValidatePasswordForContinue;
+
+          // ----------------------------
+          // Errors
+          // ----------------------------
+          function showSignupError(msg) {
+            const el = document.getElementById('signupError');
+            if (!el) return;
+            el.textContent = msg || 'Something went wrong.';
+            el.classList.remove('hidden');
+          }
+
+          function clearSignupError() {
+            const el = document.getElementById('signupError');
+            if (!el) return;
+            el.textContent = '';
+            el.classList.add('hidden');
+          }
+
+          // ----------------------------
+          // Validation (FIELD-LEVEL, NO DESIGN CHANGES)
+          // Adds red border/ring when required fields are missing.
+          // ----------------------------
+          const baseInputClasses = "border-slate-300 dark:border-slate-600";
+          const errorInputClasses = "border-red-500 ring-2 ring-red-200 dark:border-red-500 dark:ring-red-900/40";
+
+          function setFieldError(inputEl, isError) {
+            if (!inputEl) return;
+            if (isError) {
+              inputEl.classList.remove(...baseInputClasses.split(" "));
+              inputEl.classList.add(...errorInputClasses.split(" "));
+            } else {
+              inputEl.classList.remove(...errorInputClasses.split(" "));
+              inputEl.classList.add(...baseInputClasses.split(" "));
+            }
+          }
+
+          function getVal(id) {
+            return (document.getElementById(id)?.value || '').trim();
+          }
+
+          function required(id) {
+            const el = document.getElementById(id);
+            const v = (el?.value || "").trim();
+            const bad = !v;
+            setFieldError(el, bad);
+            return !bad;
+          }
+
+          function emailFormatOk(id) {
+            const el = document.getElementById(id);
+            const v = (el?.value || "").trim();
+            const ok = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v);
+            setFieldError(el, !ok);
+            return ok;
+          }
+
+          function setFieldErrorText(fieldId, msg) {
+            const el = document.getElementById(fieldId + 'Error');
+            if (el) { el.textContent = msg || ''; el.classList.toggle('hidden', !msg); }
+          }
+
+          function validateStep1() {
+            clearSignupError();
+            setFieldErrorText('orgName', '');
+            setFieldErrorText('orgCode', '');
+            const ok1 = required("orgName");
+            const ok2 = required("orgCode");
+            if (!ok1) setFieldErrorText('orgName', 'Organization name is required.');
+            if (!ok2) setFieldErrorText('orgCode', 'Organization code is required.');
+            const codeEl = document.getElementById('orgCode');
+            const code = (codeEl?.value || '').trim();
+            if (code && !/^[A-Z0-9\-]+$/.test(code)) {
+              setFieldError(codeEl, true);
+              setFieldErrorText('orgCode', 'Use only uppercase letters, numbers, and hyphens.');
+              return false;
+            }
+            return ok1 && ok2;
+          }
+
+          function validateStep2() {
+            clearSignupError();
+            setFieldErrorText('adminFirstName', '');
+            setFieldErrorText('adminLastName', '');
+            const ok1 = required("adminFirstName");
+            const ok2 = required("adminLastName");
+            if (!ok1) setFieldErrorText('adminFirstName', 'First name is required.');
+            if (!ok2) setFieldErrorText('adminLastName', 'Last name is required.');
+            if (isGoogleSignup && !inboundEmail) {
+              showSignupError("Google email is missing. Please try again.");
+              return false;
+            }
+            return ok1 && ok2;
+          }
+
+          function validateStep3() {
+            if (isGoogleSignup) return true;
+            clearSignupError();
+            setFieldErrorText('emailCred', '');
+            setFieldErrorText('confirmPasswordInput', '');
+            const suPwErr = document.getElementById('suPwError');
+            if (suPwErr) { suPwErr.textContent = ''; suPwErr.classList.add('hidden'); }
+
+            const okEmail = emailFormatOk("emailCred");
+            const okPw = required("passwordInput");
+            const okCpw = required("confirmPasswordInput");
+            if (!okEmail) setFieldErrorText('emailCred', 'Enter a valid email address.');
+            if (!okPw && suPwErr) { suPwErr.textContent = 'Password is required.'; suPwErr.classList.remove('hidden'); }
+            if (!okCpw) setFieldErrorText('confirmPasswordInput', 'Confirm password is required.');
+
+            const pw = document.getElementById("passwordInput")?.value || "";
+            const cpw = document.getElementById("confirmPasswordInput")?.value || "";
+            const mismatchEl = document.getElementById("suPwMismatch");
+            const mismatch = pw && cpw && pw !== cpw;
+            if (mismatchEl) mismatchEl.classList.toggle("hidden", !mismatch);
+            setFieldError(document.getElementById("passwordInput"), mismatch);
+            setFieldError(document.getElementById("confirmPasswordInput"), mismatch);
+            if (mismatch) {
+              const suPwErr = document.getElementById('suPwError');
+              if (suPwErr) { suPwErr.textContent = 'Passwords do not match.'; suPwErr.classList.remove('hidden'); }
+            } else {
+              const suPwErr = document.getElementById('suPwError');
+              if (suPwErr) { suPwErr.textContent = ''; suPwErr.classList.add('hidden'); }
+            }
+
+            if (typeof suValidatePasswordForContinue === "function" && !suValidatePasswordForContinue()) {
+              const suPwErr = document.getElementById('suPwError');
+              if (suPwErr) { suPwErr.textContent = 'Please meet all password requirements.'; suPwErr.classList.remove('hidden'); }
+              return false;
+            }
+            return okEmail && okPw && okCpw && !mismatch;
+          }
+
+          function attachLiveValidation() {
+            // Step 1
+            ["orgName", "orgCode"].forEach(id => {
+              const el = document.getElementById(id);
+              if (!el) return;
+              el.addEventListener("input", () => setFieldError(el, !(el.value || "").trim()));
+              el.addEventListener("blur", () => setFieldError(el, !(el.value || "").trim()));
+            });
+
+            // Step 2
+            ["adminFirstName", "adminLastName"].forEach(id => {
+              const el = document.getElementById(id);
+              if (!el) return;
+              el.addEventListener("input", () => setFieldError(el, !(el.value || "").trim()));
+              el.addEventListener("blur", () => setFieldError(el, !(el.value || "").trim()));
+            });
+
+            // Step 3
+            const emailEl = document.getElementById("emailCred");
+            if (emailEl) {
+              const check = () => {
+                const v = (emailEl.value || "").trim();
+                const ok = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v);
+                // only show red once user has typed something OR on blur
+                setFieldError(emailEl, v.length > 0 && !ok);
+              };
+              emailEl.addEventListener("input", check);
+              emailEl.addEventListener("blur", () => setFieldError(emailEl, !/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test((emailEl.value || "").trim())));
+            }
+
+            // Password mismatch live highlight
+            const pwEl = document.getElementById("passwordInput");
+            const cpwEl = document.getElementById("confirmPasswordInput");
+            const mismatchEl = document.getElementById("suPwMismatch");
+
+            const checkMismatch = () => {
+              if (isGoogleSignup) return;
+              const pw = pwEl?.value || "";
+              const cpw = cpwEl?.value || "";
+              if (!pw && !cpw) {
+                if (mismatchEl) mismatchEl.classList.add("hidden");
+                setFieldError(pwEl, false);
+                setFieldError(cpwEl, false);
+                return;
+              }
+              const mismatch = pw && cpw && pw !== cpw;
+              if (mismatchEl) mismatchEl.classList.toggle("hidden", !mismatch);
+              setFieldError(pwEl, mismatch);
+              setFieldError(cpwEl, mismatch);
+            };
+
+            pwEl?.addEventListener("input", checkMismatch);
+            cpwEl?.addEventListener("input", checkMismatch);
+          }
+
+          // ----------------------------
+          // Selected plan display
+          // ----------------------------
+          const selectedPlanWrap = document.getElementById('selectedPlanWrap');
+          const selectedPlanText = document.getElementById('selectedPlanText');
+          fetch(apiBaseUrl + '/api/plans')
+            .then(r => r.json())
+            .then(plans => {
+              const plan = Array.isArray(plans) && plans.find(p => (p.planId ?? p.planID ?? p.PlanID) === planId);
+              if (plan && selectedPlanWrap && selectedPlanText) {
+                selectedPlanWrap.classList.remove('hidden');
+                const priceVal = plan.basePrice ?? plan.BasePrice ?? 0;
+                const trialDays = plan.trialDays ?? plan.TrialDays ?? 0;
+                const isFreeTrial = plan.isFreeTrial ?? plan.IsFreeTrial;
+                const planName = plan.planName ?? plan.PlanName;
+                let price;
+                if (isFreeTrial && trialDays > 0)
+                  price = trialDays + '-day free trial, then ₱' + Number(priceVal).toLocaleString() + '/mo';
+                else
+                  price = '₱' + Number(priceVal).toLocaleString() + '/mo';
+                selectedPlanText.textContent = planName + ' — ' + price;
+              }
+            })
+            .catch(() => {});
+
+          // ----------------------------
+          // Org code: uppercase only + auto-generate from org name
+          // ----------------------------
+          const orgNameEl = document.getElementById('orgName');
+          const orgCodeEl = document.getElementById('orgCode');
+          if (orgCodeEl) {
+            orgCodeEl.addEventListener('input', function () {
+              this.value = this.value.replace(/[^A-Z0-9\-]/gi, '').toUpperCase();
+            });
+            orgCodeEl.addEventListener('keypress', function (e) {
+              if (/[a-z]/.test(e.key)) e.preventDefault();
+            });
+          }
+          function generateOrgCode(name) {
+            const letters = (name || '').replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
+            const code = letters.length >= 2 ? letters + String(101 + Math.floor(Math.random() * 898)) : '';
+            return code || '';
+          }
+          if (orgNameEl && orgCodeEl) {
+            orgNameEl.addEventListener('blur', function () {
+              const name = (this.value || '').trim();
+              if (name && (!orgCodeEl.value || orgCodeEl.value.length < 4)) {
+                const suggested = generateOrgCode(name);
+                if (suggested) orgCodeEl.value = suggested;
+              }
+            });
+          }
+
+          // ----------------------------
+          // Initial UI setup
+          // ----------------------------
+          if (totalStepsText) totalStepsText.textContent = String(totalSteps);
+          if (emailCred) emailCred.value = inboundEmail || "";
+
+          if (isGoogleSignup) {
+            if (googleBanner) googleBanner.classList.remove('hidden');
+            if (googleEmail) googleEmail.textContent = inboundEmail || "demo.user@gmail.com";
+
+            if (googleEmailReadonlyWrap) googleEmailReadonlyWrap.classList.remove('hidden');
+            if (googleEmailReadonly) googleEmailReadonly.value = inboundEmail || "demo.user@gmail.com";
+
+            if (s3) s3.classList.add('hidden');
+            if (dot3) dot3.classList.add('hidden');
+          }
+
+          // ----------------------------
+          // Step UI helpers
+          // ----------------------------
+          function setDotActive(dot) {
+            if (!dot) return;
+            dot.className = "h-2.5 w-2.5 rounded-full bg-subgreen-500";
+          }
+
+          function setDotInactive(dot) {
+            if (!dot) return;
+            dot.className = "h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600";
+          }
+
+          function setProgress(percent) {
+            if (!progressBar) return;
+            progressBar.style.width = percent + "%";
+          }
+
+          function render() {
+            if (s1) s1.classList.toggle('hidden', step !== 1);
+            if (s2) s2.classList.toggle('hidden', step !== 2);
+            if (!isGoogleSignup && s3) s3.classList.toggle('hidden', step !== 3);
+
+            if (stepText) stepText.textContent = String(step);
+
+            if (isGoogleSignup) {
+              if (step === 1) setProgress(50);
+              if (step === 2) setProgress(100);
+            } else {
+              if (step === 1) setProgress(25);
+              if (step === 2) setProgress(50);
+              if (step === 3) setProgress(100);
+            }
+
+            if (stepTitle && stepSubtitle) {
+              if (step === 1) {
+                stepTitle.textContent = "Organization";
+                stepSubtitle.textContent = "Create your workspace identity.";
+              } else if (step === 2) {
+                stepTitle.textContent = "Admin Profile";
+                stepSubtitle.textContent = "Set up the first admin employee.";
+              } else {
+                stepTitle.textContent = "Login Credentials";
+                stepSubtitle.textContent = "Create the admin login details.";
+              }
+            }
+
+            step === 1 ? setDotActive(dot1) : setDotInactive(dot1);
+            step === 2 ? setDotActive(dot2) : setDotInactive(dot2);
+            if (!isGoogleSignup) step === 3 ? setDotActive(dot3) : setDotInactive(dot3);
+
+            if (btnNextStep1) btnNextStep1.classList.toggle('hidden', step !== 1);
+            if (actionsRow23) actionsRow23.classList.toggle('hidden', step === 1);
+
+            if (isGoogleSignup) {
+              if (btnNext) btnNext.classList.add('hidden');
+              if (btnContinue) btnContinue.classList.toggle('hidden', step !== 2);
+            } else {
+              if (btnNext) btnNext.classList.toggle('hidden', step === 3);
+              if (btnContinue) btnContinue.classList.toggle('hidden', step !== 3);
+            }
+
+            if (!isGoogleSignup && step === 3) {
+              renderRecaptchaIfNeeded();
+            }
+          }
+
+          // ----------------------------
+          // Navigation events (BLOCK NEXT when invalid)
+          // ----------------------------
+          if (btnNextStep1) {
+            btnNextStep1.addEventListener('click', function () {
+              if (!validateStep1()) return;
+              step = 2;
+              render();
+            });
+          }
+
+          if (btnNext) {
+            btnNext.addEventListener('click', function () {
+              if (isGoogleSignup) return;
+
+              if (step === 1 && !validateStep1()) return;
+              if (step === 2 && !validateStep2()) return;
+
+              if (step < 3) step++;
+              render();
+            });
+          }
+
+          if (btnBack) {
+            btnBack.addEventListener('click', function () {
+              clearSignupError();
+              if (step > 1) step--;
+              render();
+            });
+          }
+
+          // ----------------------------
+          // Submit
+          // ----------------------------
+          let submitting = false;
+
+          async function submitSignup() {
+            if (submitting) return;
+            submitting = true;
+            clearSignupError();
+            if (btnContinue) {
+              btnContinue.disabled = true;
+              btnContinue.textContent = 'Processing...';
+            }
+
+            try {
+              // Validate before submit
+              if (step === 1 && !validateStep1()) return;
+              if (step === 2 && !validateStep2()) return;
+              if (!isGoogleSignup && step === 3 && !validateStep3()) return;
+
+              const orgName = getVal('orgName');
+              const orgCode = getVal('orgCode');
+
+              const first = getVal('adminFirstName');
+              const last = getVal('adminLastName');
+              const middle = getVal('adminMiddleName');
+              const adminName = [first, middle, last].filter(Boolean).join(' ').trim();
+
+              const adminEmail = isGoogleSignup ? inboundEmail : getVal('emailCred');
+              const password = isGoogleSignup ? "" : (document.getElementById('passwordInput')?.value || '');
+
+              if (!orgName || !orgCode) return showSignupError("Organization name and code are required.");
+              if (!adminName) return showSignupError("Admin name is required.");
+              if (!adminEmail) return showSignupError("Admin email is required.");
+
+              let recaptchaToken = "";
+              if (!isGoogleSignup) {
+                renderRecaptchaIfNeeded();
+                if (typeof grecaptcha === 'undefined') return showSignupError("reCAPTCHA failed to load. Please refresh.");
+                recaptchaToken = grecaptcha.getResponse(recaptchaWidgetId);
+                if (!recaptchaToken) return showSignupError("Please complete the CAPTCHA.");
+              }
+
+              const payload = {
+                orgName,
+                orgCode,
+                planId: planId,
+                attendanceMode: "QR",
+                billingCycle: "Monthly",
+                adminName,
+                adminEmail,
+                password,
+                recaptchaToken,
+                externalProvider: isGoogleSignup ? "Google" : null,
+                externalId: isGoogleSignup ? externalId : null
+              };
+
+              // Use signup-draft: no account is created until billing is completed
+              const res = await fetch(apiBaseUrl + '/api/auth/signup-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+
+              let data = null;
+              try { data = await res.json(); } catch { /* ignore */ }
+
+              if (!res.ok || !data?.ok) {
+                if (!isGoogleSignup && typeof grecaptcha !== 'undefined') grecaptcha.reset();
+                return showSignupError(data?.message || 'Signup failed. Please try again.');
+              }
+
+              if (data.draftToken) {
+                window.location.replace('/Auth/Billing?token=' + encodeURIComponent(data.draftToken));
+                return;
+              }
+
+              if (data.requiresBilling && data.signupToken) {
+                window.location.replace('/Auth/Billing?token=' + encodeURIComponent(data.signupToken));
+                return;
+              }
+
+              const loginRes = await fetch('/Auth/CompleteLogin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: data.userId, orgId: data.orgId, role: data.role, name: data.name || null, token: data.token || null })
+              });
+
+              const loginData = await loginRes.json();
+              if (!loginData.ok) return showSignupError('Failed to complete login.');
+
+              window.location.replace('/Landing/Onboarding?orgId=' + (data.orgId || ''));
+            } catch (err) {
+              if (!isGoogleSignup && typeof grecaptcha !== 'undefined') grecaptcha.reset();
+              showSignupError('Network error. Please try again.');
+            } finally {
+              submitting = false;
+              if (btnContinue) {
+                btnContinue.disabled = false;
+                btnContinue.textContent = 'Continue';
+              }
+            }
+          }
+
+          if (btnContinue) {
+            btnContinue.addEventListener('click', function () {
+              // Validate step before submit
+              if (isGoogleSignup) {
+                if (step === 1 && !validateStep1()) return;
+                if (step === 2 && !validateStep2()) return;
+              } else {
+                if (step === 1 && !validateStep1()) return;
+                if (step === 2 && !validateStep2()) return;
+                if (step === 3 && !validateStep3()) return;
+              }
+
+              submitSignup();
+            });
+          }
+
+          // Prevent Enter key from accidentally submitting mid-step
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              const tag = (e.target && e.target.tagName || '').toLowerCase();
+              if (tag === 'textarea') return;
+              e.preventDefault();
+            }
+          });
+
+          // Attach live validation (adds red border as user types / blurs)
+          attachLiveValidation();
+
+          // Kick initial render
+          render();
+        })();
+    </script>
+}

@@ -1,0 +1,334 @@
+@page
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+
+    // ==========================================
+    // 🟢 DUMMY DATA (Backend Simulation)
+    // ==========================================
+
+    // --- 1. Top Level Metrics ---
+    var totalEmployees = 150;
+    var presentToday = 132;
+    var lateArrivals = 8;
+    var onLeave = 10;
+    var pendingOT = 12;
+    var missingTimeOut = 3;
+
+    // --- 2. Line Chart Data (Weekly Trends) ---
+    var days = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+    var onTimeData = new[] { 130, 135, 128, 132, 130, 45, 20 };
+    var lateData = new[] { 12, 5, 8, 4, 8, 2, 0 };
+
+    // --- 3. Doughnut Chart Data (Department Breakdown) ---
+    // Who is actually present right now?
+    var deptLabels = new[] { "IT/Dev", "HR & Admin", "Sales", "Operations", "Support" };
+    var deptData = new[] { 45, 12, 30, 35, 10 };
+
+    // --- 4. Recent Activity Log ---
+    var recentLogs = new[] {
+        new { Name = "Sarah Jenkins", Dept = "Design", Action = "Time In", Time = "07:55 AM", Status = "Ontime", Initials = "SJ", Color = "bg-emerald-100 text-emerald-700" },
+        new { Name = "Michael Chen", Dept = "Dev", Action = "Time In", Time = "09:12 AM", Status = "Late", Initials = "MC", Color = "bg-amber-100 text-amber-700" },
+        new { Name = "Jessica Alva", Dept = "HR", Action = "Leave", Time = "08:00 AM", Status = "Sick", Initials = "JA", Color = "bg-gray-100 text-gray-600" },
+        new { Name = "Robert Fox", Dept = "Ops", Action = "OT Req", Time = "05:30 PM", Status = "Pending", Initials = "RF", Color = "bg-purple-100 text-purple-700" },
+        new { Name = "David Kim", Dept = "Support", Action = "Time Out", Time = "06:05 PM", Status = "Out", Initials = "DK", Color = "bg-blue-100 text-blue-700" },
+    };
+}
+
+<div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
+    <div class="flex flex-wrap gap-3">
+        <a href="#" class="flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-indigo-700">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            Scan Station
+        </a>
+        <a href="#" class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Reports
+        </a>
+    </div>
+</div>
+
+<div class="mb-8 grid grid-cols-2 gap-6 lg:grid-cols-3">
+
+    <div class="group relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="relative z-10 flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Workforce</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@totalEmployees</h3>
+            </div>
+            <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs font-medium text-green-600 dark:text-green-400">
+            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            <span>+2 New Hires</span>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Present Today</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@presentToday</h3>
+            </div>
+            <div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+        </div>
+        <div class="mt-4 h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-700">
+            <div class="h-1.5 rounded-full bg-emerald-500" style="width: @(Math.Round((double)presentToday / totalEmployees * 100))%"></div>
+        </div>
+        <p class="mt-2 text-right text-xs text-gray-400">@Math.Round((double)presentToday / totalEmployees * 100)% Rate</p>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Late Arrivals</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@lateArrivals</h3>
+            </div>
+            <div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+        </div>
+        <div class="mt-4 flex w-fit items-center rounded bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+            <span>Needs Review</span>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">On Leave / Absent</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@onLeave</h3>
+            </div>
+            <div class="rounded-lg bg-gray-100 p-2 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+        </div>
+        <p class="mt-4 text-xs text-gray-500">Includes Sick & Vacation</p>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Pending OT</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@pendingOT</h3>
+            </div>
+            <div class="rounded-lg bg-purple-50 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs font-medium text-purple-600 dark:text-purple-400">
+            <span class="cursor-pointer underline">Approve All</span>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Missing Out</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@missingTimeOut</h3>
+            </div>
+            <div class="rounded-lg bg-rose-50 p-2 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+        </div>
+        <p class="mt-4 text-xs text-rose-500">Previous Day Anomalies</p>
+    </div>
+
+</div>
+
+<div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-gray-700 dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Attendance Trends</h3>
+                <p class="text-xs text-gray-500">On-Time vs Late Arrivals (Past 7 Days)</p>
+            </div>
+        </div>
+        <div class="relative h-80 w-full">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Department Active</h3>
+            <p class="text-xs text-gray-500">Distribution of present staff</p>
+        </div>
+        <div class="relative flex h-60 w-full justify-center">
+            <canvas id="deptChart"></canvas>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
+            @for (int i = 0; i < deptLabels.Length; i++)
+            {
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span> @deptLabels[i]
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-700">
+        <div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Live Activity Feed</h3>
+        </div>
+        <button class="text-sm font-medium text-indigo-600 hover:text-indigo-700">View All Logs</button>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Employee</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Department</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Time</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var log in recentLogs)
+                {
+                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-9 w-9 @log.Color items-center justify-center rounded-full text-xs font-bold shadow-sm ring-2 ring-white dark:ring-gray-800">
+                                    @log.Initials
+                                </div>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">@log.Name</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                            @log.Dept
+                        </td>
+                        <td class="px-6 py-4">
+                            @if (log.Status == "Late")
+                            {
+                                <span class="rounded border border-amber-200 bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-400">LATE ARRIVAL</span>
+                            }
+                            else if (log.Status == "Pending")
+                            {
+                                <span class="rounded border border-purple-200 bg-purple-100 px-2 py-1 text-xs font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-900/40 dark:text-purple-400">OT REQUEST</span>
+                            }
+                            else if (log.Action == "Leave")
+                            {
+                                <span class="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-xs font-bold text-gray-600 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">ON LEAVE</span>
+                            }
+                            else if (log.Action == "Time Out")
+                            {
+                                <span class="rounded border border-blue-200 bg-blue-100 px-2 py-1 text-xs font-bold text-blue-700 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-400">CLOCKED OUT</span>
+                            }
+                            else
+                            {
+                                <span class="rounded border border-emerald-200 bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400">PRESENT</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-right font-mono text-sm text-gray-600 dark:text-gray-300">
+                            @log.Time
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- Shared Config ---
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? '#374151' : '#f3f4f6';
+            const textColor = isDark ? '#9ca3af' : '#6b7280';
+
+            // --- 1. Line Chart (Trends) ---
+            const ctx1 = document.getElementById('attendanceChart').getContext('2d');
+            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 300);
+            gradient1.addColorStop(0, 'rgba(16, 185, 129, 0.2)'); // Emerald
+            gradient1.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(days)),
+                    datasets: [
+                        {
+                            label: 'On Time',
+                            data: @Html.Raw(Json.Serialize(onTimeData)),
+                            borderColor: '#10b981', // Emerald 500
+                            backgroundColor: gradient1,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Late',
+                            data: @Html.Raw(Json.Serialize(lateData)),
+                            borderColor: '#f59e0b', // Amber 500
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: textColor } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+
+            // --- 2. Doughnut Chart (Departments) ---
+            const ctx2 = document.getElementById('deptChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(deptLabels)),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(deptData)),
+                        backgroundColor: [
+                            '#4f46e5', // Indigo
+                            '#10b981', // Emerald
+                            '#f59e0b', // Amber
+                            '#ec4899', // Pink
+                            '#6366f1'  // Violet
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Custom legend used in HTML
+                    },
+                    cutout: '70%'
+                }
+            });
+        });
+    </script>
+}

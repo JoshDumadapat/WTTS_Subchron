@@ -1,0 +1,128 @@
+@page
+@model Subchron.Web.Pages.App.Operations.AttendanceLogs.DetailsModel
+@{
+    ViewData["Title"] = "Log Details";
+    ViewData["PageTitle"] = "Log Details";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+    var isRejected = Model.LogId == "3";
+    var employee = Model.LogId == "1" ? "Tim Jones" : Model.LogId == "2" ? "Jane Smith" : "Alex Reyes";
+    var empId = Model.LogId == "1" ? "EMP-001" : Model.LogId == "2" ? "EMP-002" : "EMP-003";
+    var site = Model.LogId == "3" ? "Warehouse A" : "HQ Building";
+    var station = Model.LogId == "3" ? "" : "Main Lobby Kiosk";
+    var method = Model.LogId == "1" ? "QR" : Model.LogId == "2" ? "ID" : "Bio";
+    var timestamp = Model.LogId == "1" ? "Feb 21, 2025 08:32" : Model.LogId == "2" ? "Feb 21, 2025 08:45" : "Feb 21, 2025 09:00";
+    var decision = Model.LogId == "3" ? "Rejected" : "Accepted";
+    var reason = isRejected ? "Outside allowed time window" : "";
+}
+
+<div class="mx-auto max-w-2xl">
+    <div class="mb-6 flex items-center gap-3">
+        <a asp-page="/App/Operations/AttendanceLogs" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </a>
+        <div>
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Attendance Log Details</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Log #@Model.LogId</p>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Main details card -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <dl class="grid gap-4 sm:grid-cols-1">
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Employee</dt>
+                    <dd class="mt-1 flex items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(employee))&background=209030&color=fff" class="h-10 w-10 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                        <div>
+                            <span class="font-semibold text-slate-900 dark:text-white">@employee</span>
+                            <span class="ml-2 text-sm text-slate-500 dark:text-slate-400">@empId</span>
+                        </div>
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Site</dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900 dark:text-white">@site</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Station</dt>
+                    <dd class="mt-1 text-sm text-slate-700 dark:text-slate-300">@(string.IsNullOrEmpty(station) ? "—" : station)</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Method</dt>
+                    <dd class="mt-1">
+                        @if (method == "QR")
+                        {
+                            <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">QR</span>
+                        }
+                        else if (method == "ID")
+                        {
+                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">ID</span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">Bio</span>
+                        }
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Timestamp</dt>
+                    <dd class="mt-1 text-sm tabular-nums text-slate-700 dark:text-slate-300">@timestamp</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Decision</dt>
+                    <dd class="mt-1">
+                        @if (decision == "Accepted")
+                        {
+                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Accepted</span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
+                        }
+                    </dd>
+                </div>
+                @if (isRejected && !string.IsNullOrEmpty(reason))
+                {
+                    <div>
+                        <dt class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Reason</dt>
+                        <dd class="mt-1 text-sm text-slate-700 dark:text-slate-300">@reason</dd>
+                    </div>
+                }
+            </dl>
+        </div>
+
+        <!-- Optional: Add Note / Flag for Review -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Actions</h3>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a note or flag this log for supervisor review.</p>
+            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div class="flex-1">
+                    <label for="logNote" class="sr-only">Note</label>
+                    <input type="text" id="logNote" placeholder="Add a note (e.g. Verified with manager)" class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" id="btnAddNote" class="rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Add Note</button>
+                    <button type="button" id="btnFlagReview" class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200 dark:hover:bg-amber-900/50">Flag for Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    document.getElementById('btnAddNote')?.addEventListener('click', function () {
+        var note = document.getElementById('logNote');
+        if (note && note.value.trim()) {
+            alert('Note saved. (Backend not connected.)');
+            note.value = '';
+        }
+    });
+    document.getElementById('btnFlagReview')?.addEventListener('click', function () {
+        alert('Flagged for review. (Backend not connected.)');
+    });
+})();
+</script>
+}

@@ -1,0 +1,428 @@
+@page
+@model Subchron.Web.Pages.App.Employee.AddModel
+@{
+    ViewData["Title"] = "Add Employee";
+    ViewData["PageTitle"] = "Add Employee";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <a href="/App/Employee/EmployeeManagement" class="hover:text-subgreen-600 dark:hover:text-subgreen-400">Employee Directory</a>
+                <span>/</span>
+                <span class="text-slate-700 dark:text-slate-200">Add Employee</span>
+            </nav>
+            <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Add Employee</h1>
+            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Enter employee details. New employees default to Active status.</p>
+        </div>
+    </div>
+
+    <form id="addEmployeeForm" method="post" asp-page-handler="Create" class="space-y-8" data-turbo="false" target="_top">
+
+        <!-- Basic information -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Basic information</h2>
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <input type="text" name="firstName" id="addFirstName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="First name" required />
+                            <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addFirstName"></span>
+                        </div>
+                        <div>
+                            <input type="text" name="middleName" id="addMiddleName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Middle (optional)" />
+                        </div>
+                        <div>
+                            <input type="text" name="lastName" id="addLastName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Last name" required />
+                            <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addLastName"></span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="addAge" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                    <input type="number" name="age" id="addAge" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="18" max="70" />
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addAge"></span>
+                </div>
+                <div>
+                    <label for="addGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                    <select name="gender" id="addGender" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">— Select —</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Address (with autocomplete) -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Address</h2>
+            <div class="address-autocomplete relative">
+                <label for="addAddressLine1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line <span class="text-red-500">*</span></label>
+                <input type="text" name="addressLine1" id="addAddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Start typing address..." autocomplete="off" required />
+                <div id="addressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addAddressLine1"></span>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="addAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
+                    <input type="text" name="addressLine2" id="addAddressLine2" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Unit, building, etc." autocomplete="address-line2" />
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <label for="addCity" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">City <span class="text-red-500">*</span></label>
+                    <input type="text" name="city" id="addCity" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="City" autocomplete="address-level2" required />
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addCity"></span>
+                </div>
+                <div>
+                    <label for="addStateProvince" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">State / Province</label>
+                    <input type="text" name="stateProvince" id="addStateProvince" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="State / Province" autocomplete="address-level1" />
+                </div>
+                <div>
+                    <label for="addPostalCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Postal code</label>
+                    <input type="text" name="postalCode" id="addPostalCode" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Postal code" autocomplete="postal-code" />
+                </div>
+                <div>
+                    <label for="addCountry" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Country <span class="text-red-500">*</span></label>
+                    <input type="text" name="country" id="addCountry" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Country" autocomplete="country-name" required />
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addCountry"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account / Contact: Phone, then Email; Create login with email autofill + default password -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Account / contact</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Contact number</label>
+                    <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700">
+                        <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                        <input type="tel" name="phone" id="addPhone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0985 458 5456" maxlength="14" />
+                    </div>
+                </div>
+                <div>
+                    <label for="addContactEmail" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email <span class="text-red-500">*</span></label>
+                    <input type="email" name="ContactEmail" id="addContactEmail" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="employee@@company.com" required />
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addContactEmail"></span>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                <input type="checkbox" name="createAccount" id="addCreateAccount" value="true" class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
+                <label for="addCreateAccount" class="text-sm font-medium text-slate-700 dark:text-slate-300">Create login account for this employee</label>
+            </div>
+            <div id="addAccountFields" class="mt-4 hidden space-y-4 border-l-4 border-subgreen-200 pl-4 dark:border-subgreen-800">
+                <div>
+                    <label for="addLoginEmail" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Login email</label>
+                    <input type="email" name="Email" id="addLoginEmail" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Same as contact email" readonly />
+                </div>
+                <div>
+                    <label for="addDefaultPassword" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Default password <span class="text-red-500">*</span></label>
+                    <input type="text" name="DefaultPassword" id="addDefaultPassword" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. TempPass123!" autocomplete="off" />
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Share this with the employee. They can change it in Settings → Security.</p>
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addDefaultPassword"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency contact -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Emergency contact</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label for="addEmergencyContactName" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
+                    <input type="text" name="emergencyContactName" id="addEmergencyContactName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Full name" />
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                    <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700">
+                        <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                        <input type="tel" name="emergencyContactPhone" id="addEmergencyContactPhone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0985 458 5456" maxlength="14" />
+                    </div>
+                </div>
+                <div>
+                    <label for="addEmergencyContactRelation" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Relation</label>
+                    <input type="text" name="emergencyContactRelation" id="addEmergencyContactRelation" class="name-cap input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. Spouse, Parent" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Employment information: Employee ID (auto), Date Hired, Department, Role, Employment type, Base salary -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Employment information</h2>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                    <label for="addRole" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role <span class="text-red-500">*</span></label>
+                    <select name="role" id="addRole" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required>
+                        <option value="">— Select role —</option>
+                        <option value="Employee">Employee</option>
+                        <option value="HR">HR</option>
+                        <option value="Manager">Manager</option>
+                        <option value="PayrollPersonnel">Payroll Personnel</option>
+                    </select>
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addRole"></span>
+                </div>
+                <div>
+                    <label for="addEmpNumber" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label>
+                    <input type="text" name="empNumber" id="addEmpNumber" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" placeholder="Select role to auto-generate" readonly />
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Auto-generated by role when you save.</p>
+                </div>
+                <div>
+                    <label for="addDateHired" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label>
+                    <input type="date" name="dateHired" id="addDateHired" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div>
+                    <label for="addDepartmentID" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
+                    <select name="departmentID" id="addDepartmentID" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">— Select —</option>
+                        @foreach (var d in Model.Departments)
+                        {
+                            <option value="@d.DepID">@d.DepartmentName</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="addEmploymentType" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type <span class="text-red-500">*</span></label>
+                    <select name="employmentType" id="addEmploymentType" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required>
+                        <option value="">— Select —</option>
+                        <option value="Contractual">Contractual</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Regular">Regular</option>
+                    </select>
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addEmploymentType"></span>
+                </div>
+                <div>
+                    <label for="addBaseSalary" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Base salary</label>
+                    <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-700">
+                        <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">₱</span>
+                        <input type="text" name="BaseSalary" id="addBaseSalary" class="input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0.00" inputmode="decimal" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attendance QR: each employee gets a unique QR after save; view it from Employee Management (QR button). -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800" id="attendanceQrSection">
+            <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Attendance QR</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Save the employee first. After saving, you’ll be redirected to Employee Management where you can use the <strong>QR</strong> button on each row to generate or view the attendance QR. Each employee gets a unique QR for clock-in/out.</p>
+        </section>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <a href="/App/Employee/EmployeeManagement" class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</a>
+            <button type="submit" id="addEmployeeSubmitBtn" class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-6 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 hover:bg-subgreen-500 disabled:opacity-70">
+                <span id="addEmployeeSubmitText">Save Employee</span>
+                <span id="addEmployeeSubmitSpinner" class="hidden h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/ph-phone.js" asp-append-version="true"></script>
+@section Scripts {
+<script>
+(function () {
+    var form = document.getElementById('addEmployeeForm');
+    var addCreateAccount = document.getElementById('addCreateAccount');
+    var addAccountFields = document.getElementById('addAccountFields');
+    var addContactEmail = document.getElementById('addContactEmail');
+    var addLoginEmail = document.getElementById('addLoginEmail');
+    var addDefaultPassword = document.getElementById('addDefaultPassword');
+    var DEFAULT_PASSWORD = 'TempPass123!';
+
+    function showError(fieldId, message) {
+        var el = document.querySelector('.field-error[data-for="' + fieldId + '"]');
+        if (!el) return;
+        el.textContent = message || '';
+        el.classList.toggle('hidden', !message);
+        var input = document.getElementById(fieldId);
+        if (input) input.classList.toggle('border-red-500', !!message);
+    }
+    function clearAllErrors() {
+        document.querySelectorAll('.field-error').forEach(function (el) {
+            el.textContent = '';
+            el.classList.add('hidden');
+        });
+        document.querySelectorAll('.input-field').forEach(function (el) { el.classList.remove('border-red-500'); });
+    }
+
+    function capitalizeName(str) {
+        if (!str || typeof str !== 'string') return str;
+        return str.trim().replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+    document.querySelectorAll('.name-cap').forEach(function (input) {
+        input.addEventListener('blur', function () {
+            this.value = capitalizeName(this.value);
+        });
+    });
+
+    addCreateAccount.addEventListener('change', function () {
+        addAccountFields.classList.toggle('hidden', !this.checked);
+        if (this.checked) {
+            addLoginEmail.value = addContactEmail.value || '';
+            addDefaultPassword.value = DEFAULT_PASSWORD;
+        } else {
+            addLoginEmail.value = '';
+            addDefaultPassword.value = '';
+        }
+    });
+    addContactEmail.addEventListener('input', function () {
+        if (addCreateAccount.checked) addLoginEmail.value = this.value || '';
+    });
+
+    var addRole = document.getElementById('addRole');
+    var addEmpNumber = document.getElementById('addEmpNumber');
+    if (addRole && addEmpNumber) {
+        addRole.addEventListener('change', function () {
+            var role = this.value;
+            if (!role) { addEmpNumber.value = ''; return; }
+            fetch('/App/Employee/Add?handler=NextEmpNumber&role=' + encodeURIComponent(role), { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    addEmpNumber.value = (data && data.empNumber) ? data.empNumber : '';
+                })
+                .catch(function () { addEmpNumber.value = ''; });
+        });
+    }
+
+    var addressSuggestions = document.getElementById('addressSuggestions');
+    var addressLine1 = document.getElementById('addAddressLine1');
+    var addCity = document.getElementById('addCity');
+    var addStateProvince = document.getElementById('addStateProvince');
+    var addPostalCode = document.getElementById('addPostalCode');
+    var addCountry = document.getElementById('addCountry');
+    var addressDebounce = null;
+
+    addressLine1.addEventListener('input', function () {
+        clearTimeout(addressDebounce);
+        var q = this.value.trim();
+        addressSuggestions.classList.add('hidden');
+        addressSuggestions.innerHTML = '';
+        if (q.length < 3) return;
+        addressDebounce = setTimeout(function () {
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&countrycodes=ph&limit=5', {
+                headers: { 'Accept': 'application/json' }
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                addressSuggestions.innerHTML = '';
+                if (!data || data.length === 0) {
+                    addressSuggestions.classList.add('hidden');
+                    return;
+                }
+                data.forEach(function (item) {
+                    var div = document.createElement('div');
+                    div.className = 'cursor-pointer px-4 py-3 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
+                    div.textContent = item.display_name;
+                    div.addEventListener('click', function () {
+                        addressLine1.value = item.display_name;
+                        var addr = item.address || {};
+                        addCity.value = addr.city || addr.town || addr.village || addr.municipality || '';
+                        addStateProvince.value = addr.state || addr.province || '';
+                        addPostalCode.value = addr.postcode || '';
+                        addCountry.value = addr.country || 'Philippines';
+                        addressSuggestions.classList.add('hidden');
+                        addressSuggestions.innerHTML = '';
+                    });
+                    addressSuggestions.appendChild(div);
+                });
+                addressSuggestions.classList.remove('hidden');
+            }).catch(function () { addressSuggestions.classList.add('hidden'); });
+        }, 300);
+    });
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.address-autocomplete')) addressSuggestions.classList.add('hidden');
+    });
+
+    form.addEventListener('submit', function (e) {
+        clearAllErrors();
+        var valid = true;
+
+        if (!document.getElementById('addFirstName').value.trim()) {
+            showError('addFirstName', 'First name is required.'); valid = false;
+        }
+        if (!document.getElementById('addLastName').value.trim()) {
+            showError('addLastName', 'Last name is required.'); valid = false;
+        }
+        var addAge = document.getElementById('addAge');
+        if (addAge && addAge.value.trim() !== '') {
+            var ageNum = parseInt(addAge.value, 10);
+            if (isNaN(ageNum) || ageNum < 18 || ageNum > 70) {
+                showError('addAge', 'Age must be between 18 and 70.'); valid = false;
+            }
+        }
+        if (!document.getElementById('addAddressLine1').value.trim()) {
+            showError('addAddressLine1', 'Address line is required.'); valid = false;
+        }
+        if (!document.getElementById('addCity').value.trim()) {
+            showError('addCity', 'City is required.'); valid = false;
+        }
+        if (!document.getElementById('addCountry').value.trim()) {
+            showError('addCountry', 'Country is required.'); valid = false;
+        }
+        var emailVal = addContactEmail.value.trim();
+        if (!emailVal) {
+            showError('addContactEmail', 'Email is required.'); valid = false;
+        } else {
+            var at = String.fromCharCode(64);
+            var emailRegex = new RegExp('^[^\\s' + at + ']+' + at + '[^\\s' + at + ']+\\.[^\\s' + at + ']+$');
+            if (!emailRegex.test(emailVal)) {
+                showError('addContactEmail', 'Enter a valid email address.'); valid = false;
+            }
+        }
+        if (addCreateAccount.checked) {
+            if (!addDefaultPassword.value.trim()) {
+                showError('addDefaultPassword', 'Default password is required when creating account.'); valid = false;
+            }
+        }
+        if (!document.getElementById('addRole').value) {
+            showError('addRole', 'Role is required.'); valid = false;
+        }
+        if (!document.getElementById('addEmploymentType').value) {
+            showError('addEmploymentType', 'Employment type is required.'); valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+            var firstError = document.querySelector('.field-error:not(.hidden)');
+            if (firstError) {
+                var forId = firstError.getAttribute('data-for');
+                if (forId) document.getElementById(forId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        var submitBtn = document.getElementById('addEmployeeSubmitBtn');
+        var submitText = document.getElementById('addEmployeeSubmitText');
+        var submitSpinner = document.getElementById('addEmployeeSubmitSpinner');
+        if (submitText) submitText.textContent = 'Saving...';
+        if (submitSpinner) submitSpinner.classList.remove('hidden');
+        setTimeout(function () {
+            if (submitBtn) submitBtn.disabled = true;
+        }, 0);
+    });
+
+    var baseSalary = document.getElementById('addBaseSalary');
+    if (baseSalary) {
+        baseSalary.addEventListener('input', function () {
+            var v = this.value.replace(/[^\d.]/g, '');
+            var parts = v.split('.');
+            if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+            this.value = v;
+        });
+    }
+})();
+</script>
+@{
+    var addToastMessage = TempData["ToastMessage"] as string;
+    var addToastSuccess = TempData["ToastSuccess"] as bool?;
+}
+@if (addToastMessage != null)
+{
+    <script>
+        if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(addToastMessage)), @(addToastSuccess == true ? "true" : "false"));
+    </script>
+}
+}

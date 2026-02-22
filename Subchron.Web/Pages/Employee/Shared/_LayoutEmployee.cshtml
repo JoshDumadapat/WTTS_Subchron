@@ -1,0 +1,187 @@
+@using System.Security.Claims
+@using Subchron.Web.Rbac
+@{
+    var displayName = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name ?? "Employee";
+    var canAccessBackoffice = RoleModuleAccess.CanAccessBackoffice(User);
+}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Employee Portal - Subchron</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { subgreen: { 50: "#effbf1", 100: "#d9f5de", 200: "#b6eac0", 300: "#84d999", 400: "#4bc56c", 500: "#28a84d", 600: "#209030", 700: "#177027", 800: "#145923", 900: "#114a1f" } } } } };
+    </script>
+    <script>
+        (function () { var stored = localStorage.getItem("subchron-theme"); var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", stored === "dark" || (!stored && prefersDark)); })();
+    </script>
+    <style>
+        #sidebar { transition: width 0.3s ease-in-out; }
+        #sidebar nav { scrollbar-width: none; -ms-overflow-style: none; }
+        #sidebar nav::-webkit-scrollbar { display: none; }
+        .nav-item { position: relative; }
+        .nav-item.active { background-color: rgba(22, 163, 74, 0.10); color: #16a34a; font-weight: 700; }
+        .dark .nav-item.active { background-color: rgba(34, 197, 94, 0.14); color: #22c55e; }
+        .nav-item:hover { background-color: rgba(22, 163, 74, 0.10); color: #16a34a; }
+        .dark .nav-item:hover { background-color: rgba(34, 197, 94, 0.14); color: #22c55e; }
+        .nav-indicator { position: absolute; right: -14px; top: 50%; transform: translate(50%, -50%); width: 6px; height: 35px; border-radius: 9999px; background: #16a34a; opacity: 0; transition: opacity 0.2s; z-index: 5; }
+        .dark .nav-indicator { background: #22c55e; }
+        .nav-item.active .nav-indicator { opacity: 1; }
+        .profile-dropdown.open #profileDropdownMenu { display: block; }
+        @@media (max-width: 767px) {
+            #sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px !important; transform: translateX(-110%); transition: transform 0.25s; z-index: 20; }
+            .sidebar-mobile-open #sidebar { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div class="absolute -top-[10%] -left-[15%] h-[50%] w-[50%] rounded-full bg-emerald-100/20 blur-[180px] dark:bg-emerald-900/20"></div>
+        <div class="absolute top-[15%] -right-[15%] h-[45%] w-[45%] rounded-full bg-sky-100/20 blur-[180px] dark:bg-sky-900/18"></div>
+    </div>
+
+    <div id="sidebarOverlay" class="fixed inset-0 z-10 hidden bg-slate-900/40 backdrop-blur-[1px] md:hidden" aria-hidden="true"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="relative z-20 flex flex-col border-r border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800" style="width: 260px;">
+            <div class="flex h-[100px] items-center px-6">
+                <div class="profile-header flex items-center gap-3 overflow-hidden">
+                    <div class="logo-box h-12 w-12 flex-shrink-0 overflow-hidden rounded-none bg-transparent">
+                        <img src="~/images/logo/logo.png" alt="Logo" class="block h-full w-full object-cover" />
+                    </div>
+                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">Employee Portal</span>
+                </div>
+            </div>
+            <hr class="border-slate-200 dark:border-slate-700" />
+            <nav class="mt-6 flex-1 space-y-[6px] overflow-y-auto px-4 py-4">
+                <a href="/Employee/Dashboard" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Dashboard</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/MyQr" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">My QR</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/Attendance" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Time In / Out</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/Overtime" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Overtime</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/Leave" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Leave</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/MyAttendance" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Attendance & Schedule</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                <a href="/Employee/Settings" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Settings</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
+            <header class="layout-header bg-white shadow-sm dark:bg-slate-800" style="margin: 20px; border-radius: 18px; padding: 16px 24px;">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="mobileSidebarOpen" type="button" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-700" aria-label="Open menu">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <h1 class="text-lg font-bold text-slate-900 dark:text-white">@ViewData["PageTitle"]</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="themeToggle" type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                            <span id="themeIcon"></span>
+                        </button>
+                        <div id="profileDropdown" class="profile-dropdown relative">
+                            <button type="button" id="profileDropdownTrigger" class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700" aria-expanded="false" aria-haspopup="true">
+                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=209030&color=fff&bold=true" alt="" class="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-600" />
+                                <span class="max-w-[140px] truncate text-sm font-medium hidden sm:inline">@displayName</span>
+                                <svg class="h-4 w-4 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <div id="profileDropdownMenu" class="absolute right-0 top-full z-30 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                                <a href="/Employee/Settings" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700">
+                                    <svg class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    Settings
+                                </a>
+                                @if (canAccessBackoffice)
+                                {
+                                <a href="/App/Dashboard" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700">
+                                    <svg class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                    Back to Admin
+                                </a>
+                                }
+                                <hr class="my-1 border-slate-200 dark:border-slate-700" />
+                                <a href="/Auth/Logout" class="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+                                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="p-6 pt-2">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        (function () {
+            var html = document.documentElement;
+            var themeBtn = document.getElementById("themeToggle");
+            var themeIcon = document.getElementById("themeIcon");
+            function setIcon() {
+                var isDark = html.classList.contains("dark");
+                themeIcon.innerHTML = isDark ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.75 9.75 0 1021.752 15.002z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>';
+            }
+            setIcon();
+            themeBtn && themeBtn.addEventListener("click", function () { html.classList.toggle("dark"); localStorage.setItem("subchron-theme", html.classList.contains("dark") ? "dark" : "light"); setIcon(); });
+
+            var overlay = document.getElementById("sidebarOverlay");
+            var mobileOpen = document.getElementById("mobileSidebarOpen");
+            function openSidebar() { html.classList.add("sidebar-mobile-open"); overlay && overlay.classList.remove("hidden"); }
+            function closeSidebar() { html.classList.remove("sidebar-mobile-open"); overlay && overlay.classList.add("hidden"); }
+            mobileOpen && mobileOpen.addEventListener("click", openSidebar);
+            overlay && overlay.addEventListener("click", closeSidebar);
+
+            var path = window.location.pathname || "";
+            document.querySelectorAll("#sidebar a.nav-item").forEach(function (a) {
+                var href = a.getAttribute("href") || "";
+                if (href && (path === href || (href.length > 1 && path.startsWith(href)))) { a.classList.add("active"); } else { a.classList.remove("active"); }
+            });
+
+            var profileDropdown = document.getElementById("profileDropdown");
+            var profileTrigger = document.getElementById("profileDropdownTrigger");
+            var profileMenu = document.getElementById("profileDropdownMenu");
+            if (profileDropdown && profileTrigger && profileMenu) {
+                profileTrigger.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle("open");
+                });
+                document.addEventListener("click", function () {
+                    profileDropdown.classList.remove("open");
+                });
+                profileMenu.addEventListener("click", function (e) { e.stopPropagation(); });
+            }
+        })();
+    </script>
+</body>
+</html>

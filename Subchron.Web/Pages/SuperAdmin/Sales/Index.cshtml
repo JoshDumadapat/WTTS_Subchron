@@ -1,0 +1,456 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.Sales.IndexModel
+@{
+    ViewData["Title"] = "Sales & Expenses";
+    ViewData["PageTitle"] = "Sales & Expenses";
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<!-- Stats Overview (Unchanged) -->
+<div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+    <!-- Income -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">Total Income</p>
+                <p class="mt-1 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">?@Model.TotalIncome.ToString("N2")</p>
+            </div>
+            <div class="rounded-xl bg-emerald-100 p-3 text-emerald-600 ring-4 ring-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-900/20">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <!-- Expenses -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">Total Expenses</p>
+                <p class="mt-1 text-3xl font-extrabold text-red-600 dark:text-red-400">?@Model.TotalExpenses.ToString("N2")</p>
+            </div>
+            <div class="rounded-xl bg-red-100 p-3 text-red-600 ring-4 ring-red-50 dark:bg-red-900/30 dark:text-red-400 dark:ring-red-900/20">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <!-- Net Profit -->
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">Net Profit</p>
+                <p class="mt-1 text-3xl font-extrabold @(Model.NetProfit >= 0 ? "text-subblue-600 dark:text-subblue-400" : "text-amber-600 dark:text-amber-400")">
+                    ?@Model.NetProfit.ToString("N2")
+                </p>
+            </div>
+            <div class="rounded-xl bg-subblue-100 p-3 text-subblue-600 ring-4 ring-subblue-50 dark:bg-subblue-900/30 dark:text-subblue-400 dark:ring-subblue-900/20">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Section (Unchanged) -->
+<div class="mb-8 grid grid-cols-1">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-6 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Financial Analytics</h3>
+            <div class="flex space-x-2">
+                <span class="flex items-center text-xs font-bold text-slate-500"><span class="mr-1.5 h-2 w-2 rounded-full bg-emerald-500"></span>Income</span>
+                <span class="flex items-center text-xs font-bold text-slate-500"><span class="mr-1.5 h-2 w-2 rounded-full bg-red-500"></span>Expenses</span>
+            </div>
+        </div>
+        <div class="h-[300px] w-full">
+            <canvas id="financeChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <!-- Transaction List -->
+    <div class="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2 dark:border-slate-700 dark:bg-slate-800">
+        
+        <!-- Header & Filters -->
+        <div class="border-b border-slate-100 p-6 dark:border-slate-700">
+            <div class="flex flex-col gap-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
+                
+                <!-- Expanded Filter Row with Actions -->
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <!-- Filter Controls -->
+                    <form method="get" class="flex flex-1 flex-col gap-4 md:flex-row">
+                         <div class="flex-1">
+                            <input asp-for="SearchTerm" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-xs text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search ref, desc..." />
+                        </div>
+                        <div class="w-full md:w-40">
+                             <select asp-for="TypeFilter" asp-items="Model.TypeOptions" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-xs text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                                <option value="">All Types</option>
+                            </select>
+                        </div>
+                         <div class="w-full md:w-auto">
+                            <input asp-for="DateStart" type="date" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-xs text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                        </div>
+                         <div class="flex gap-2">
+                             <button type="submit" class="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700">Filter</button>
+                             <a asp-page="./Index" class="flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Reset</a>
+                        </div>
+                    </form>
+
+                    <!-- Actions (Aligned) -->
+                    <div class="flex space-x-3 border-l border-slate-200 pl-4 dark:border-slate-700">
+                        <button type="button" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+                            <svg class="mr-2 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Export CSV
+                        </button>
+                        <button type="button" onclick="window.print()" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+                            <svg class="mr-2 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2.4-4a3 3 0 01-1.4 0m0 0l-3 3m3-3l3 3m-3-3v8" /></svg>
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto p-0">
+            <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                    <tr>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Ref #</th>
+                         <th class="px-6 py-4">Description</th>
+                        <th class="px-6 py-4">Type</th>
+                        <th class="px-6 py-4 text-right">Amount</th>
+                        <th class="px-6 py-4 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    @foreach (var txn in Model.Transactions)
+                    {
+                        <tr class="transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-500">@txn.Date.ToString("MMM dd, yyyy")</td>
+                             <td class="px-6 py-4 text-xs font-mono text-slate-500">@txn.ReferenceNumber</td>
+                            <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
+                                @txn.Description
+                                <div class="text-xs font-normal text-slate-400">@txn.Category</div>
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                @if (txn.Type == Subchron.Web.Pages.SuperAdmin.Sales.IndexModel.TransactionType.Income)
+                                {
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-400">
+                                        Income
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-400">
+                                        Expense
+                                    </span>
+                                }
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4 text-right font-bold @(txn.Type == Subchron.Web.Pages.SuperAdmin.Sales.IndexModel.TransactionType.Income ? "text-emerald-600" : "text-red-600")">
+                                ?@txn.Amount.ToString("N2")
+                            </td>
+                             <td class="px-6 py-4 text-center">
+                                <button type="button" 
+                                        onclick='openDetailsModal(@Json.Serialize(txn))'
+                                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Transactions.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-500">No transactions found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1) 
+        {
+            <div class="flex items-center justify-between border-t border-slate-100 p-4 dark:border-slate-700">
+                <!-- Rows per page selector -->
+                <div class="flex items-center gap-2">
+                    <label for="rowsPerPage" class="text-sm text-slate-700 dark:text-slate-300">Rows per page:</label>
+                    <select id="rowsPerPage" class="rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="40">40</option>
+                    </select>
+                </div>
+
+                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                     <!-- Previous -->
+                    <a href="?CurrentPage=@(Model.CurrentPage -1)&SearchTerm=@Model.SearchTerm&TypeFilter=@Model.TypeFilter" 
+                       class="@(Model.CurrentPage ==1 ? "pointer-events-none opacity-50" : "") relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-slate-600 dark:hover:bg-slate-700">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" viewBox="002020" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12.795.23a.75.75001-.021.06L8.83210l3.9383.71a.75.75011-1.041.08l-4.5-4.25a.75.750010-1.08l4.5-4.25a.75.750011.06.02z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    
+                    @for (int i =1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?CurrentPage=@i&SearchTerm=@Model.SearchTerm&TypeFilter=@Model.TypeFilter" 
+                           class="@(i == Model.CurrentPage ? "relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" : "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:text-white dark:ring-slate-600 dark:hover:bg-slate-700")">
+                           @i
+                        </a>
+                    }
+
+                    <!-- Next -->
+                    <a href="?CurrentPage=@(Model.CurrentPage +1)&SearchTerm=@Model.SearchTerm&TypeFilter=@Model.TypeFilter" 
+                       class="@(Model.CurrentPage == Model.TotalPages ? "pointer-events-none opacity-50" : "") relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-slate-600 dark:hover:bg-slate-700">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" viewBox="002020" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.2114.77a.75.75001.02-1.06L11.168107.236.29a.75.750111.04-1.08l4.54.25a.75.7500101.08l-4.54.25a.75.75001-1.06-.02z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <!-- Add Expense Form -->
+    <div class="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="mb-6 text-lg font-bold text-slate-900 dark:text-white">Add Expense Record</h3>
+        <form method="post" class="space-y-4">
+             <div>
+                <label asp-for="NewTransaction.Description" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Description / Payee</label>
+                <input asp-for="NewTransaction.Description" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400" placeholder="e.g. Server Cost / Azure" required>
+                <span asp-validation-for="NewTransaction.Description" class="text-xs text-red-500"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                   <label asp-for="NewTransaction.Amount" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Amount (PHP)</label>
+                   <input asp-for="NewTransaction.Amount" type="number" step="0.01" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="0.00" required>
+                   <span asp-validation-for="NewTransaction.Amount" class="text-xs text-red-500"></span>
+                </div>
+                 <div>
+                    <label asp-for="NewTransaction.TaxAmount" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">VAT/Tax</label>
+                    <input asp-for="NewTransaction.TaxAmount" type="number" step="0.01" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                 <div>
+                    <label asp-for="NewTransaction.ReferenceNumber" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">OR / Invoice #</label>
+                    <input asp-for="NewTransaction.ReferenceNumber" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="INV-001" required>
+                    <span asp-validation-for="NewTransaction.ReferenceNumber" class="text-xs text-red-500"></span>
+                </div>
+                <div>
+                    <label asp-for="NewTransaction.Tin" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">TIN</label>
+                    <input asp-for="NewTransaction.Tin" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="000-000-000" >
+                </div>
+            </div>
+
+             <div>
+                <label asp-for="NewTransaction.Category" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Category</label>
+                <select asp-for="NewTransaction.Category" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Personnel">Personnel</option>
+                    <option value="Office">Office Supplies</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+             <div>
+                <label asp-for="NewTransaction.Notes" class="mb-2 block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Notes (BIR Reg Details)</label>
+                <textarea asp-for="NewTransaction.Notes" rows="2" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="VAT Registered / Non-VAT..."></textarea>
+            </div>
+
+            <!-- Hidden Type field, defaulted to Expense in model -->
+            <input type="hidden" asp-for="NewTransaction.Type" value="Expense" />
+
+            <button type="submit" class="w-full rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800">
+                Save Record
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center overflow-x-hidden overflow-y-auto bg-black/50 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-2xl px-4 md:h-auto">
+        <!-- Modal content -->
+        <div class="relative rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <!-- Modal header -->
+            <div class="flex items-start justify-between border-b p-4 dark:border-slate-700">
+                <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
+                    Transaction Details
+                </h3>
+                <button type="button" onclick="closeModal()" class="text-slate-400 bg-transparent hover:bg-slate-200 hover:text-slate-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-slate-600 dark:hover:text-white">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                         <p class="text-xs font-semibold uppercase text-slate-500">Transaction ID</p>
+                         <p id="modalId" class="text-sm font-medium text-slate-900 dark:text-white">#</p>
+                    </div>
+                    <div>
+                         <p class="text-xs font-semibold uppercase text-slate-500">Date Recorded</p>
+                         <p id="modalDate" class="text-sm font-medium text-slate-900 dark:text-white">--</p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/50">
+                     <p class="mb-2 text-xs font-semibold uppercase text-slate-500">Financials</p>
+                     <div class="mb-2 flex items-end justify-between">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Base Amount</span>
+                        <span id="modalAmount" class="text-lg font-bold text-slate-900 dark:text-white">?0.00</span>
+                    </div>
+                    <div class="flex items-end justify-between border-t border-slate-200 pt-2 dark:border-slate-600">
+                         <span class="text-sm text-slate-600 dark:text-slate-300">Tax / VAT</span>
+                         <span id="modalTax" class="text-sm font-medium text-slate-900 dark:text-white">?0.00</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">BIR / Tax Details</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                             <p class="text-xs text-slate-500">Reference Number (OR / SI)</p>
+                             <p id="modalRef" class="font-mono font-medium text-slate-700 dark:text-slate-300">--</p>
+                        </div>
+                         <div>
+                             <p class="text-xs text-slate-500">TIN</p>
+                             <p id="modalTin" class="font-mono font-medium text-slate-700 dark:text-slate-300">--</p>
+                        </div>
+                        <div>
+                             <p class="text-xs text-slate-500">Category</p>
+                             <p id="modalCategory" class="font-medium text-slate-700 dark:text-slate-300">--</p>
+                        </div>
+                         <div>
+                             <p class="text-xs text-slate-500">Notes</p>
+                             <p id="modalNotes" class="italic text-slate-600 dark:text-slate-400">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            
+            // Income Gradient
+            const incomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            incomeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+            incomeGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            // Expense Gradient
+            const expenseGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            expenseGradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+            expenseGradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [12000, 19000, 30000, 50000, 45000, 60000], // Updated mock scale
+                            borderColor: '#10b981',
+                            backgroundColor: incomeGradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                             pointRadius: 0,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Expenses',
+                            data: [8000, 12000, 15000, 20000, 18000, 22000], // Updated mock scale
+                            borderColor: '#ef4444',
+                            backgroundColor: expenseGradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                             pointRadius: 0,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false },
+                            grid: { color: 'rgba(0,0,0,0.05)', drawTicks: false },
+                            ticks: { 
+                                padding: 10, 
+                                color: '#94a3b8', 
+                                font: { weight: '600' },
+                                callback: function(value) { return '?' + value; }
+                            }
+                        },
+                        x: {
+                            border: { display: false },
+                            grid: { display: false },
+                            ticks: { padding: 10, color: '#94a3b8', font: { weight: '600' } }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        });
+
+        // Modal Logic
+        const modal = document.getElementById('detailsModal');
+
+        function openDetailsModal(data) {
+            document.getElementById('modalId').innerText = '#' + data.id;
+            document.getElementById('modalDate').innerText = new Date(data.date).toLocaleDateString();
+            document.getElementById('modalAmount').innerText = '?' + data.amount.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('modalTax').innerText = '?' + data.taxAmount.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('modalRef').innerText = data.referenceNumber;
+            document.getElementById('modalTin').innerText = data.tin || 'N/A';
+            document.getElementById('modalCategory').innerText = data.category || 'N/A';
+            document.getElementById('modalNotes').innerText = data.notes || 'No notes provided';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Close on outside click
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+}

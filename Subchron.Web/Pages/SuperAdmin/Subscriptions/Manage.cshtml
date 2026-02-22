@@ -1,0 +1,240 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.Subscriptions.ManageModel
+@{
+    ViewData["Title"] = $"Manage Subscription - {Model.Organization.OrgName}";
+    ViewData["PageTitle"] = "Manage Subscription";
+    ViewData["PageDescription"] = $"Subscription management for {Model.Organization.OrgName}";
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<div class="max-w-4xl">
+    <!-- Organization Info Header -->
+    <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 mb-8 dark:bg-slate-800 dark:border-slate-700">
+   <div class="flex items-center justify-between">
+      <div class="flex items-center">
+       <div class="h-12 w-12 bg-subgreen-100 rounded-full flex items-center justify-center dark:bg-subgreen-900/50">
+           <svg class="h-6 w-6 text-subgreen-600 dark:text-subgreen-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+     </svg>
+   </div>
+ <div class="ml-4">
+     <h1 class="text-xl font-bold text-slate-900 dark:text-white">@Model.Organization.OrgName</h1>
+    <p class="text-sm text-slate-600 dark:text-slate-400">@Model.Organization.OrgCode</p>
+      </div>
+        </div>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+       @(Model.Organization.Status switch {
+    "Trial" => "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+      "Active" => "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
+  "Suspended" => "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+        "Expired" => "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300",
+   _ => "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300"
+    })">
+   @Model.Organization.Status
+     </span>
+ </div>
+    </div>
+
+    <!-- Subscription Form -->
+ <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-6">Subscription Configuration</h2>
+
+<form method="post">
+         <input type="hidden" asp-for="Input.OrgID" />
+  
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Left Column -->
+  <div class="space-y-6">
+       <div>
+  <label asp-for="Input.PlanID" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+    Plan *
+     </label>
+     <select asp-for="Input.PlanID" 
+      class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+        onchange="updatePricing()">
+  <option value="">Select a plan</option>
+      @foreach (var plan in Model.AvailablePlans)
+{
+    <option value="@plan.PlanID" data-price="@plan.BasePrice" selected="@(Model.Input.PlanID == plan.PlanID)">
+        @plan.PlanName - ?@plan.BasePrice.ToString("N0")/month
+    </option>
+      }
+     </select>
+       <span asp-validation-for="Input.PlanID" class="text-red-500 text-xs mt-1"></span>
+  </div>
+
+    <div>
+         <label asp-for="Input.AttendanceMode" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+     Attendance Mode *
+      </label>
+     <select asp-for="Input.AttendanceMode" 
+      class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+    onchange="updatePricing()">
+       <option value="QR Code" data-price="0">QR Code (+?0)</option>
+ <option value="Biometric" data-price="500">Biometric (+?500)</option>
+    <option value="Geo Location" data-price="300">Geo Location (+?300)</option>
+         </select>
+       <span asp-validation-for="Input.AttendanceMode" class="text-red-500 text-xs mt-1"></span>
+        </div>
+
+       <div>
+         <label asp-for="Input.BillingCycle" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+         Billing Cycle *
+         </label>
+  <select asp-for="Input.BillingCycle" 
+      class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+   <option value="Monthly">Monthly</option>
+        <option value="Annual">Annual (Save 10%)</option>
+   </select>
+      <span asp-validation-for="Input.BillingCycle" class="text-red-500 text-xs mt-1"></span>
+  </div>
+
+  <div>
+    <label asp-for="Input.ModePrice" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+         Mode Price Override
+      </label>
+    <div class="mt-1 relative rounded-md shadow-sm">
+       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+         <span class="text-slate-500 sm:text-sm">?</span>
+      </div>
+  <input asp-for="Input.ModePrice" 
+        class="pl-7 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+      placeholder="0.00" 
+       onchange="updatePricing()" />
+        </div>
+    <p class="text-xs text-slate-500 mt-1 dark:text-slate-400">Leave empty to use default mode pricing</p>
+      <span asp-validation-for="Input.ModePrice" class="text-red-500 text-xs mt-1"></span>
+     </div>
+     </div>
+
+     <!-- Right Column -->
+       <div class="space-y-6">
+    <div class="grid grid-cols-2 gap-4">
+         <div>
+ <label asp-for="Input.StartDate" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+  Start Date *
+   </label>
+       <input asp-for="Input.StartDate" type="date"
+           class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white" />
+       <span asp-validation-for="Input.StartDate" class="text-red-500 text-xs mt-1"></span>
+ </div>
+
+        <div>
+<label asp-for="Input.EndDate" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+   End Date *
+      </label>
+     <input asp-for="Input.EndDate" type="date"
+        class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white" />
+       <span asp-validation-for="Input.EndDate" class="text-red-500 text-xs mt-1"></span>
+      </div>
+     </div>
+
+   <div>
+      <label asp-for="Input.Status" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+ Status
+     </label>
+      <select asp-for="Input.Status" 
+        class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:border-transparent dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+   <option value="Trial">Trial</option>
+         <option value="Active">Active</option>
+    <option value="Expired">Expired</option>
+        </select>
+        <span asp-validation-for="Input.Status" class="text-red-500 text-xs mt-1"></span>
+       </div>
+
+    <!-- Pricing Summary -->
+       <div class="bg-slate-50 rounded-lg p-4 dark:bg-slate-700/50">
+    <h4 class="text-sm font-medium text-slate-900 dark:text-white mb-3">Pricing Summary</h4>
+    <div class="space-y-2">
+       <div class="flex justify-between text-sm">
+      <span class="text-slate-600 dark:text-slate-400">Base Price:</span>
+     <span class="font-medium text-slate-900 dark:text-white" id="basePrice">?0.00</span>
+        </div>
+         <div class="flex justify-between text-sm">
+   <span class="text-slate-600 dark:text-slate-400">Mode Price:</span>
+       <span class="font-medium text-slate-900 dark:text-white" id="modePrice">?0.00</span>
+          </div>
+      <div class="border-t border-slate-200 dark:border-slate-600 pt-2">
+   <div class="flex justify-between">
+    <span class="font-medium text-slate-900 dark:text-white">Total Monthly:</span>
+ <span class="font-bold text-lg text-slate-900 dark:text-white" id="totalPrice">?0.00</span>
+        </div>
+      </div>
+       </div>
+   </div>
+        </div>
+      </div>
+
+       @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+   {
+           <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-800">
+        <div class="flex">
+    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg>
+         <div class="ml-3">
+       <p class="text-sm text-red-800 dark:text-red-200">@Model.ErrorMessage</p>
+           </div>
+      </div>
+  </div>
+   }
+
+    <!-- Form Actions -->
+ <div class="mt-8 flex items-center justify-between">
+    <a asp-page="/SuperAdmin/Subscriptions/Index" 
+      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+  Back to Subscriptions
+     </a>
+  
+      <div class="flex space-x-3">
+         <button type="submit" name="action" value="save"
+      class="inline-flex items-center px-4 py-2 bg-subgreen-600 text-white text-sm font-medium rounded-lg hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2">
+     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
+         </svg>
+       Save Changes
+      </button>
+       
+      @if (Model.Input.Status == "Trial")
+         {
+        <button type="submit" name="action" value="activate"
+        class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+  </svg>
+   Activate Now
+   </button>
+       }
+         </div>
+        </div>
+        </form>
+    </div>
+</div>
+
+<script>
+  function updatePricing() {
+        const planSelect = document.querySelector('select[name="Input.PlanID"]');
+       const modeSelect = document.querySelector('select[name="Input.AttendanceMode"]');
+      const modePriceInput = document.querySelector('input[name="Input.ModePrice"]');
+        
+    const selectedPlan = planSelect?.selectedOptions[0];
+       const selectedMode = modeSelect?.selectedOptions[0];
+        
+  const basePrice = parseFloat(selectedPlan?.dataset.price || '0');
+     const defaultModePrice = parseFloat(selectedMode?.dataset.price || '0');
+      const customModePrice = parseFloat(modePriceInput?.value || '0');
+        
+   const finalModePrice = customModePrice > 0 ? customModePrice : defaultModePrice;
+       const totalPrice = basePrice + finalModePrice;
+    
+      document.getElementById('basePrice').textContent = `?${basePrice.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+   document.getElementById('modePrice').textContent = `?${finalModePrice.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+      document.getElementById('totalPrice').textContent = `?${totalPrice.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+    }
+
+    // Update pricing on page load
+  document.addEventListener('DOMContentLoaded', updatePricing);
+</script>

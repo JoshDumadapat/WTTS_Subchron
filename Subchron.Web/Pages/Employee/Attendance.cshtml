@@ -1,0 +1,60 @@
+@page
+@model Subchron.Web.Pages.Employee.AttendanceModel
+@{
+    ViewData["Title"] = "Time In / Out";
+    ViewData["PageTitle"] = "Time In / Out";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+    var biometricsEnabled = false;
+}
+
+<div class="mx-auto max-w-md">
+    @if (biometricsEnabled)
+    {
+        <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Tap below and verify with your device biometrics to record time.</p>
+        <div class="space-y-4">
+            <button type="button" id="btnTimeIn" class="w-full rounded-2xl border-2 border-subgreen-200 bg-subgreen-50 py-6 text-lg font-bold text-subgreen-800 transition-all hover:border-subgreen-400 hover:bg-subgreen-100 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-200 dark:hover:bg-subgreen-900/50">
+                Time In
+            </button>
+            <button type="button" id="btnTimeOut" class="w-full rounded-2xl border-2 border-amber-200 bg-amber-50 py-6 text-lg font-bold text-amber-800 transition-all hover:border-amber-400 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200 dark:hover:bg-amber-900/50">
+                Time Out
+            </button>
+        </div>
+        <p id="attendanceMessage" class="mt-4 hidden rounded-xl bg-subgreen-100 p-3 text-sm text-subgreen-800 dark:bg-subgreen-900/40 dark:text-subgreen-200"></p>
+    }
+    else
+    {
+        <div class="rounded-2xl border border-slate-200 bg-amber-50/50 p-4 dark:border-slate-700 dark:bg-amber-900/20">
+            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">Biometrics not enabled</p>
+            <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Use your QR code at a kiosk to record time in or out.</p>
+            <a href="/Employee/MyQr" class="mt-3 inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                Show My QR
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var btnIn = document.getElementById('btnTimeIn');
+    var btnOut = document.getElementById('btnTimeOut');
+    var msg = document.getElementById('attendanceMessage');
+    function showMsg(text) {
+        if (!msg) return;
+        msg.textContent = text;
+        msg.classList.remove('hidden');
+    }
+    function doBiometricThenSubmit(action) {
+        if (typeof PublicKeyCredential !== 'undefined') {
+            alert('Biometric verification would run here. Then submit ' + action + '. (No backend.)');
+            showMsg(action + ' recorded successfully.');
+        } else {
+            alert('Simulating biometric prompt… ' + action + ' submitted. (No backend.)');
+            showMsg(action + ' recorded successfully.');
+        }
+    }
+    if (btnIn) btnIn.addEventListener('click', function () { doBiometricThenSubmit('Time In'); });
+    if (btnOut) btnOut.addEventListener('click', function () { doBiometricThenSubmit('Time Out'); });
+})();
+</script>
+}

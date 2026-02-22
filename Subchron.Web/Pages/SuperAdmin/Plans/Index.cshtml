@@ -1,0 +1,159 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.Plans.IndexModel
+@{
+    ViewData["Title"] = "Plans";
+    ViewData["PageTitle"] = "Plans";
+    ViewData["PageDescription"] = "Manage subscription plans and pricing";
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+  <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Plan Management</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">@Model.Plans.Count total plans</p>
+        </div>
+        <div class="flex items-center space-x-4 mt-4 sm:mt-0">
+      <div class="relative">
+         <select id="statusFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+           <option value="">All Plans</option>
+            <option value="true">Active</option>
+             <option value="false">Inactive</option>
+ </select>
+</div>
+    <a asp-page="/SuperAdmin/Plans/Create" 
+      class="inline-flex items-center px-4 py-2 bg-subgreen-600 text-white text-sm font-medium rounded-lg hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2">
+     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+    New Plan
+            </a>
+        </div>
+    </div>
+
+    <!-- Plans Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+     @foreach (var plan in Model.Plans)
+  {
+        <div class="border border-slate-200 rounded-2xl p-6 relative dark:border-slate-700 @(!plan.IsActive ? "opacity-60" : "")">
+       @if (!plan.IsActive)
+      {
+            <div class="absolute top-2 right-2">
+       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
+ Inactive
+         </span>
+             </div>
+}
+      
+    <div class="text-center">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">@plan.PlanName</h3>
+   <div class="mt-4 flex items-baseline justify-center">
+       <span class="text-3xl font-bold text-slate-900 dark:text-white">?@plan.BasePrice.ToString("N0")</span>
+  <span class="text-sm text-slate-500 ml-1 dark:text-slate-400">/month</span>
+        </div>
+                </div>
+
+    <div class="mt-6 space-y-4">
+               <div class="flex items-center justify-between text-sm">
+       <span class="text-slate-600 dark:text-slate-400">Max Employees</span>
+  <span class="font-medium text-slate-900 dark:text-white">
+         @(plan.MaxEmployees == 0 ? "Unlimited" : plan.MaxEmployees.ToString())
+    </span>
+         </div>
+              <div class="flex items-center justify-between text-sm">
+      <span class="text-slate-600 dark:text-slate-400">Data Retention</span>
+    <span class="font-medium text-slate-900 dark:text-white">@plan.RetentionMonths months</span>
+</div>
+   <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-600 dark:text-slate-400">Status</span>
+     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+             @(plan.IsActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" : "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300")">
+         @(plan.IsActive ? "Active" : "Inactive")
+    </span>
+    </div>
+        </div>
+
+        <div class="mt-6 flex space-x-2">
+          <a asp-page="/SuperAdmin/Plans/Edit" asp-route-id="@plan.PlanID"
+             class="flex-1 text-center px-3 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600">
+             Edit
+        </a>
+            <button onclick="togglePlanStatus(@plan.PlanID, '@plan.PlanName', @plan.IsActive.ToString().ToLower())"
+   class="flex-1 px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2
+            @(plan.IsActive ? "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500" : "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500")">
+             @(plan.IsActive ? "Deactivate" : "Activate")
+           </button>
+     </div>
+
+     <div class="mt-4 text-center">
+ <span class="text-xs text-slate-500 dark:text-slate-400">
+     @Model.GetSubscriptionCount(plan.PlanID) active subscriptions
+       </span>
+         </div>
+            </div>
+    }
+    </div>
+
+    @if (!Model.Plans.Any())
+    {
+<div class="text-center py-12">
+       <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+        <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">No plans available</h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Get started by creating your first subscription plan.</p>
+        <div class="mt-6">
+      <a asp-page="/SuperAdmin/Plans/Create"
+           class="inline-flex items-center px-4 py-2 bg-subgreen-600 text-white text-sm font-medium rounded-lg hover:bg-subgreen-700">
+             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+</svg>
+         Create Plan
+    </a>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function togglePlanStatus(planId, planName, isActive) {
+        const action = isActive ? 'deactivate' : 'activate';
+        const confirmMessage = `Are you sure you want to ${action} the "${planName}" plan?`;
+        
+        if (confirm(confirmMessage)) {
+       // TODO: Implement plan status toggle
+    fetch(`/SuperAdmin/Plans/ToggleStatus`, {
+            method: 'POST',
+        headers: {
+           'Content-Type': 'application/json',
+           },
+                body: JSON.stringify({ 
+   planId: planId, 
+       isActive: !isActive 
+          })
+     }).then(response => {
+      if (response.ok) {
+       location.reload();
+         }
+    });
+        }
+    }
+
+    // Status filter
+    document.getElementById('statusFilter')?.addEventListener('change', function(e) {
+        const filter = e.target.value;
+        const cards = document.querySelectorAll('.grid > div');
+   
+        cards.forEach(card => {
+            if (!filter) {
+      card.style.display = '';
+                return;
+     }
+            
+            const isActive = !card.classList.contains('opacity-60');
+     const showCard = (filter === 'true' && isActive) || (filter === 'false' && !isActive);
+  card.style.display = showCard ? '' : 'none';
+        });
+    });
+</script>

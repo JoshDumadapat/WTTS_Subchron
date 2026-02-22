@@ -1,0 +1,162 @@
+﻿@page
+@model AboutModel
+@{
+    ViewData["Title"] = "About";
+}
+
+<!-- Hero -->
+<section class="relative overflow-hidden bg-gradient-to-br from-subblue-50 via-white to-subgreen-50 py-20 lg:py-28 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-12 lg:grid-cols-2">
+            <div data-reveal class="reveal-base">
+                <span class="text-sm font-bold tracking-widest text-subblue-600 uppercase dark:text-subblue-400">Who we are</span>
+                <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 lg:text-5xl dark:text-slate-100">About Subchron</h1>
+                <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+                    Subchron is a Workforce Time Tracking System designed for organizations that need accurate and reliable recording of employee attendance in a physical on-site environment.
+                </p>
+                <a asp-page="/Landing/Contact" class="btn-primary-glow mt-8 inline-flex rounded-xl bg-gradient-to-r from-subgreen-500 to-subgreen-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 dark:from-subgreen-500 dark:to-subgreen-600">Get in touch</a>
+            </div>
+            <div data-reveal class="reveal-base relative hidden lg:block">
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-600 dark:ring-slate-700">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" alt="Team collaboration" class="h-72 w-full object-cover lg:h-80" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Who uses Subchron -->
+<section class="bg-slate-50 py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-14 text-center">
+            <span class="text-sm font-bold tracking-widest text-subgreen-600 uppercase dark:text-subgreen-400">User types</span>
+            <h2 class="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">Who uses Subchron</h2>
+            <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">Different roles, each with specific responsibilities.</p>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subgreen-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subgreen-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Organization Administrators</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Manage employee records, set work schedules, define day-offs and overtime rules, ensure attendance data is correct for payroll.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subblue-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subblue-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Employees</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Record time-in and time-out via QR or manual entry, view attendance and overtime history. Simple and fast process.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subgreen-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subgreen-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Supervisors / Managers</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Monitor team attendance, approve or reject overtime requests, validate attendance corrections with proper audit trails.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subblue-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subblue-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">HR Staff</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Manage employee records, schedules, day-offs, overtime rules, and ensure data correctness for payroll preparation.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subgreen-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subgreen-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Payroll Personnel</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Access approved attendance and overtime data, export in standard formats for external payroll processing.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:ring-subblue-200 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-subblue-500/50">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">System Vendor / Super Administrator</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Full system access for configuration, administration, and support.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Security -->
+<section class="bg-slate-50 py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-14 text-center">
+            <span class="text-sm font-bold tracking-widest text-subblue-600 uppercase dark:text-subblue-400">Security</span>
+            <h2 class="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">Security & access control</h2>
+        </div>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 text-center shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-subblue-100 text-subblue-600 dark:bg-subblue-900/50 dark:text-subblue-300">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Role-based auth</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Authentication and authorization by role.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 text-center shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-300">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Input validation</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Prevent incorrect data entry.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 text-center shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-subblue-100 text-subblue-600 dark:bg-subblue-900/50 dark:text-subblue-300">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Audit logging</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Record every action for transparency.</p>
+            </div>
+            <div data-reveal class="card-hover rounded-2xl border border-slate-200/80 bg-white p-6 text-center shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-300">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-slate-100">Session management</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Secure user access and sessions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Goals -->
+<section class="bg-slate-50 py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-14 text-center">
+            <span class="text-sm font-bold tracking-widest text-subgreen-600 uppercase dark:text-subgreen-400">Objectives</span>
+            <h2 class="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">What Subchron delivers</h2>
+        </div>
+        <ul class="mx-auto max-w-3xl space-y-4 text-left">
+            <li data-reveal class="reveal-base flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-subgreen-100 font-bold text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-300">1</span>
+                <span class="text-slate-700 dark:text-slate-200">Accurately record employee time-in and time-out for physical on-site attendance.</span>
+            </li>
+            <li data-reveal class="reveal-base flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-subblue-100 font-bold text-subblue-600 dark:bg-subblue-900/50 dark:text-subblue-300">2</span>
+                <span class="text-slate-700 dark:text-slate-200">Identify, validate, and manage overtime based on configurable schedules and rules.</span>
+            </li>
+            <li data-reveal class="reveal-base flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-subgreen-100 font-bold text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-300">3</span>
+                <span class="text-slate-700 dark:text-slate-200">Enable administrators to add employees, define schedules, day-offs, and overtime rates specific to their organization.</span>
+            </li>
+            <li data-reveal class="reveal-base flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-subblue-100 font-bold text-subblue-600 dark:bg-subblue-900/50 dark:text-subblue-300">4</span>
+                <span class="text-slate-700 dark:text-slate-200">Generate structured attendance reports for employees, teams, or the organization.</span>
+            </li>
+            <li data-reveal class="reveal-base flex items-start gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-subgreen-100 font-bold text-subgreen-600 dark:bg-subgreen-900/50 dark:text-subgreen-300">5</span>
+                <span class="text-slate-700 dark:text-slate-200">Provide approved attendance and overtime data for ERP or payroll export via RESTful API or CSV.</span>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<!-- Full description -->
+<section class="bg-slate-50 py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 text-center">
+            <span class="text-sm font-bold tracking-widest text-subblue-600 uppercase dark:text-subblue-400">Overview</span>
+            <h2 class="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">How Subchron helps</h2>
+        </div>
+        <div data-reveal class="reveal-base space-y-6 rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+            <p class="leading-relaxed text-slate-600 dark:text-slate-300">Subchron helps improve accuracy in attendance and overtime recording, reduces manual data entry and human errors, and makes payroll preparation faster and more reliable. It increases transparency and accountability through audit logging and promotes the use of digital and automated workforce management practices within the organization.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Tech stack -->
+<section class="bg-slate-50 py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 text-center">
+            <span class="text-sm font-bold tracking-widest text-subgreen-600 uppercase dark:text-subgreen-400">Technology</span>
+            <h2 class="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">Built with modern tools</h2>
+        </div>
+        <div data-reveal class="reveal-base space-y-6 rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+            <p class="leading-relaxed text-slate-600 dark:text-slate-300">The backend is developed using C# (.NET 9) with ASP.NET Core MVC and ASP.NET Core Web API, while Microsoft SQL Server is used for secure and reliable data storage. The frontend is created using HTML, CSS, and JavaScript for a browser-based interface. QuestPDF is used for generating professional attendance reports in PDF format. Integration with external payroll or ERP systems is handled through RESTful Web APIs and CSV file exports.</p>
+            <p class="leading-relaxed text-slate-600 dark:text-slate-300">These technologies were chosen because they match the system's needs. ASP.NET Core offers strong performance, scalability, and built-in security for handling sensitive attendance data. SQL Server ensures data consistency and efficient transaction processing. RESTful APIs allow flexible and standardized data exchange with other systems. QuestPDF supports clean and structured reporting, and the use of CSV and JSON formats ensures compatibility with many payroll software solutions.</p>
+        </div>
+    </div>
+</section>

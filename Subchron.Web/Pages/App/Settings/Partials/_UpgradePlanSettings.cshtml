@@ -1,0 +1,71 @@
+@model Subchron.Web.Pages.App.Settings.IndexModel
+@{
+    var usagePct = Model.EmployeeLimit > 0 ? Math.Min(100, (Model.EmployeesUsed * 100) / Model.EmployeeLimit) : 0;
+}
+
+<div class="space-y-6">
+    <!-- Current plan & usage -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Current plan</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Your subscription and usage.</p>
+
+        <div class="mt-6 grid gap-6 sm:grid-cols-2">
+            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/50">
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Plan</p>
+                <p class="mt-1 text-xl font-bold text-slate-900 dark:text-white">@Model.PlanName</p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Billed @Model.BillingCycle</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Next billing: @Model.NextBillingDate</p>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/50">
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Employees</p>
+                <p class="mt-1 text-xl font-bold text-slate-900 dark:text-white">@Model.EmployeesUsed <span class="text-sm font-normal text-slate-500 dark:text-slate-400">/ @Model.EmployeeLimit</span></p>
+                <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                    <div class="h-full rounded-full bg-subgreen-500 dark:bg-subgreen-400" style="width: @(usagePct)%"></div>
+                </div>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Usage limit for your plan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Billing information -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Billing information</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Update payment method and billing address.</p>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            <a href="/App/Settings?tab=UpgradePlan" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Update payment method</a>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Manage card or e-wallet for subscription</span>
+        </div>
+    </div>
+
+    <!-- Plan features (from Pricing) -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Plan features</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">What’s included in each plan. <a asp-page="/Landing/Pricing" class="font-medium text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400">View full pricing</a>.</p>
+
+        <div class="mt-6 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-600">
+            <table class="w-full min-w-[320px] text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-800/80">
+                        <th class="px-4 py-3 font-semibold text-slate-900 dark:text-white">Feature</th>
+                        <th class="px-4 py-3 font-semibold text-subblue-600 dark:text-subblue-400">Basic</th>
+                        <th class="px-4 py-3 font-semibold text-subgreen-600 dark:text-subgreen-400">Standard</th>
+                        <th class="px-4 py-3 font-semibold text-subgreen-600 dark:text-subgreen-400">Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-600">
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Price</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">₱2,499/mo</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">₱5,999/mo</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Custom</td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/30"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Employees</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Up to 150</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Up to 500</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Up to 1,500</td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Attendance</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">QR only</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">QR, BioGeo, Hybrid</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">All modes</td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/30"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Geolocation</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">—</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">✓</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">✓</td></tr>
+                    <tr class="bg-white dark:bg-slate-800"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Reports & export</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">✓</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">✓</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">✓</td></tr>
+                    <tr class="bg-slate-50/50 dark:bg-slate-700/30"><td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">Support</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Email</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">Priority</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">24/7 & SLA</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+            <a asp-page="/Landing/Pricing" class="inline-flex items-center rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">Upgrade or change plan</a>
+            <a asp-page="/Landing/Contact" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Contact sales (Enterprise)</a>
+        </div>
+    </div>
+</div>

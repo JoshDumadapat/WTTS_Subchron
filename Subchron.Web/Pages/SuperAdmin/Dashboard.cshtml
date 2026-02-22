@@ -1,0 +1,986 @@
+@page
+@model Subchron.Web.Pages.SuperAdmin.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard";
+    ViewData["PageDescription"] = "Overview of system metrics and activity";
+    Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
+
+    // ===== FRONT-END DEMO FALLBACKS =====
+    // If your model is empty/0 (demo mode), use these values so the UI always renders nicely.
+    var totalOrgs = Model.TotalOrganizations > 0 ? Model.TotalOrganizations : 42;
+    var newOrgsThisMonth = Model.NewOrgsThisMonth > 0 ? Model.NewOrgsThisMonth : 6;
+
+    var trialOrgs = Model.TrialOrganizations > 0 ? Model.TrialOrganizations : 8;
+    var trialsExpiringSoon = Model.TrialsExpiringSoon > 0 ? Model.TrialsExpiringSoon : 3;
+
+    var activeOrgs = Model.ActiveOrganizations > 0 ? Model.ActiveOrganizations : 32;
+    var newActiveThisMonth = Model.NewActiveThisMonth > 0 ? Model.NewActiveThisMonth : 4;
+
+    var pendingDemo = Model.PendingDemoRequests > 0 ? Model.PendingDemoRequests : 5;
+
+    // System Health demo values
+    var trialPct = 64;
+    var retentionPct = 91;
+    var storagePct = 38;
+
+    string FillHex(int pct)
+        => pct >= 80 ? "#22c55e" : (pct >= 50 ? "#f59e0b" : "#ef4444"); // green / yellow / red
+}
+
+<!-- DASHBOARD FILTERS -->
+<div class="filter-bar mb-6" style="border-radius: 1rem; padding: 1.25rem 1.5rem; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+
+      <!-- Filter Icon + Label -->
+        <div class="filter-icon-wrap" style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+      <svg style="height: 1.25rem; width: 1.25rem; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+      </svg>
+            <span class="filter-title" style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">Filters</span>
+        </div>
+
+  <!-- Divider -->
+        <div class="filter-divider" style="width: 1px; height: 1.75rem; flex-shrink: 0;"></div>
+
+        <!-- Search -->
+        <div style="position: relative; display: flex; align-items: center; flex-shrink: 0;">
+      <svg class="filter-input-icon" style="position: absolute; left: 0.75rem; height: 1rem; width: 1rem; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+       </svg>
+            <input id="filterSearch" type="text" placeholder="Search..." class="filter-input" style="padding-left: 2.25rem; width: 200px;" />
+        </div>
+
+        <!-- Divider -->
+  <div class="filter-divider" style="width: 1px; height: 1.75rem; flex-shrink: 0;"></div>
+
+      <!-- From Date -->
+     <div style="display: flex; align-items: center; gap: 0.375rem; flex-shrink: 0;">
+     <span class="filter-field-label" style="font-size: 0.8125rem; font-weight: 600; white-space: nowrap;">From</span>
+            <div style="position: relative; display: flex; align-items: center;">
+   <svg class="filter-input-icon" style="position: absolute; left: 0.75rem; height: 1rem; width: 1rem; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        <input id="filterDateFrom" type="date" class="filter-input" style="padding-left: 2.25rem; width: 160px;" />
+       </div>
+        </div>
+
+        <!-- To Date -->
+        <div style="display: flex; align-items: center; gap: 0.375rem; flex-shrink: 0;">
+    <span class="filter-field-label" style="font-size: 0.8125rem; font-weight: 600; white-space: nowrap;">To</span>
+   <div style="position: relative; display: flex; align-items: center;">
+          <svg class="filter-input-icon" style="position: absolute; left: 0.75rem; height: 1rem; width: 1rem; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+ <input id="filterDateTo" type="date" class="filter-input" style="padding-left: 2.25rem; width: 160px;" />
+       </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="filter-divider" style="width: 1px; height: 1.75rem; flex-shrink: 0;"></div>
+
+        <!-- Shortcut Preset Buttons -->
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+     <button type="button" class="filter-preset-btn filter-preset-active" onclick="setActivePreset(this)">Today</button>
+            <button type="button" class="filter-preset-btn" onclick="setActivePreset(this)">7 Days</button>
+   <button type="button" class="filter-preset-btn" onclick="setActivePreset(this)">30 Days</button>
+            <button type="button" class="filter-preset-btn" onclick="setActivePreset(this)">This Month</button>
+            <button type="button" class="filter-preset-btn" onclick="setActivePreset(this)">This Year</button>
+   </div>
+
+        <!-- Divider -->
+        <div class="filter-divider" style="width: 1px; height: 1.75rem; flex-shrink: 0;"></div>
+
+        <!-- Reset Filters Button -->
+        <button type="button" class="filter-reset-btn" onclick="resetFilters()">
+            <svg style="height: 0.875rem; width: 0.875rem; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+       </svg>
+ <span>Reset</span>
+        </button>
+    </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+    <!-- Card 1: Total Revenue (GREEN - Success/Revenue) -->
+    <div class="kpi-card kpi-card-green"
+    style="position: relative; overflow: hidden; border-radius: 1rem; padding: 2rem; transition: all 0.3s ease;"
+    onmouseover="this.style.transform='translateY(-2px)';"
+      onmouseout="this.style.transform='translateY(0)';">
+
+  <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
+<!-- Title (Left Aligned) -->
+    <h3 class="kpi-label" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin: 0; line-height: 1;">
+     Total Revenue
+        </h3>
+      
+            <!-- Icon (Right Aligned) -->
+     <div class="kpi-icon kpi-icon-green" style="flex-shrink: 0; border-radius: 1rem; padding: 0.75rem;">
+        <svg style="height: 1.5rem; width: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+         </svg>
+         </div>
+        </div>
+
+        <!-- Body -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+    <!-- Left Section: Growth Badge -->
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.25rem;">
+<span class="kpi-badge kpi-badge-green" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+     +12%
+      </span>
+         <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
+    this month
+     </span>
+ </div>
+          </div>
+
+            <!-- Right Section: Value -->
+   <div style="text-align: right;">
+          <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
+      ₱347.9K
+      </p>
+       </div>
+        </div>
+ </div>
+
+    <!-- Card 2: Active Users (BLUE - Activity/Users) -->
+    <div class="kpi-card kpi-card-blue"
+      style="position: relative; overflow: hidden; border-radius: 1rem; padding: 2rem; transition: all 0.3s ease;"
+ onmouseover="this.style.transform='translateY(-2px)';"
+   onmouseout="this.style.transform='translateY(0)';">
+
+        <!-- Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
+<!-- Title (Left Aligned) -->
+         <h3 class="kpi-label" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin: 0; line-height: 1;">
+ Active Users
+ </h3>
+      
+      <!-- Icon (Right Aligned) -->
+ <div class="kpi-icon kpi-icon-blue" style="flex-shrink: 0; border-radius: 1rem; padding: 0.75rem;">
+ <svg style="height: 1.5rem; width: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+ </div>
+   </div>
+
+ <!-- Body -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+     <!-- Left Section: Growth Badge -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.25rem;">
+       <span class="kpi-badge kpi-badge-blue" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+  +8%
+      </span>
+      <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
+     this month
+           </span>
+       </div>
+  </div>
+
+   <!-- Right Section: Value -->
+        <div style="text-align: right;">
+    <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
+  2,847
+     </p>
+         </div>
+        </div>
+ </div>
+
+    <!-- Card 3: Active Organizations (PURPLE - Organizations/Business Layer) -->
+    <div class="kpi-card kpi-card-purple"
+ style="position: relative; overflow: hidden; border-radius: 1rem; padding: 2rem; transition: all 0.3s ease;"
+     onmouseover="this.style.transform='translateY(-2px)';"
+   onmouseout="this.style.transform='translateY(0)';">
+
+  <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
+      <!-- Title (Left Aligned) -->
+  <h3 class="kpi-label" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin: 0; line-height: 1;">
+          Active Organizations
+       </h3>
+      
+    <!-- Icon (Right Aligned) -->
+            <div class="kpi-icon kpi-icon-purple" style="flex-shrink: 0; border-radius: 1rem; padding: 0.75rem;">
+         <svg style="height: 1.5rem; width: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+      </svg>
+     </div>
+        </div>
+
+        <!-- Body -->
+   <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+ <!-- Left Section: Growth Badge -->
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 0.25rem;">
+   <span class="kpi-badge kpi-badge-purple" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+        +15%
+     </span>
+   <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
+     this month
+       </span>
+          </div>
+     </div>
+
+ <!-- Right Section: Value -->
+       <div style="text-align: right;">
+ <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
+     184
+    </p>
+  </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Churn Rate (AMBER/RED - Risk Metrics) -->
+  <div class="kpi-card kpi-card-red"
+       style="position: relative; overflow: hidden; border-radius: 1rem; padding: 2rem; transition: all 0.3s ease;"
+         onmouseover="this.style.transform='translateY(-2px)';"
+         onmouseout="this.style.transform='translateY(0)';">
+
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
+ <!-- Title (Left Aligned) -->
+     <h3 class="kpi-label" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin: 0; line-height: 1;">
+          Churn Rate
+       </h3>
+ 
+        <!-- Icon (Right Aligned) -->
+  <div class="kpi-icon kpi-icon-red" style="flex-shrink: 0; border-radius: 1rem; padding: 0.75rem;">
+     <svg style="height: 1.5rem; width: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+   </svg>
+     </div>
+        </div>
+
+    <!-- Body -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+    <!-- Left Section: Growth Badge -->
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+  <div style="display: flex; align-items: center; gap: 0.25rem;">
+   <span class="kpi-badge kpi-badge-red" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+   -2%
+  </span>
+        <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
+     this month
+            </span>
+    </div>
+    </div>
+
+ <!-- Right Section: Value -->
+         <div style="text-align: right;">
+    <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
+       3.2%
+       </p>
+</div>
+   </div>
+    </div>
+</div>
+
+<!-- CHART + HEALTH -->
+<div class="dashboard-container" style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Chart -->
+    <div class="dashboard-card chart-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box;">
+        <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+  <h3 class="card-title" style="font-size: 1.125rem; font-weight: bold; margin: 0 0 0.25rem 0;">Organization Growth</h3>
+         <p class="card-subtitle" style="font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin: 0;">Last 6 Months</p>
+      </div>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+         <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="height: 0.625rem; width: 0.625rem; border-radius: 50%; background-color: #10b981; display: inline-block;"></span>
+        <span class="legend-text" style="font-size: 0.75rem; font-weight: 600;">New</span>
+         </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <span class="legend-dot-total" style="height: 0.625rem; width: 0.625rem; border-radius: 50%; display: inline-block;"></span>
+            <span class="legend-text" style="font-size: 0.75rem; font-weight: 600;">Total</span>
+    </div>
+            </div>
+        </div>
+
+        <div style="position: relative; width: 100%; flex: 1; min-height: 200px;">
+  <canvas id="growthChart" style="width: 100%; height: 100%; max-width: 100%;"></canvas>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="dashboard-card health-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box;">
+        <h3 class="card-title" style="margin-bottom: 1.5rem; font-size: 1.125rem; font-weight: bold; margin-top: 0;">System Health</h3>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
+
+  <!-- Trial Conversion -->
+     <div style="width: 100%;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+     <p class="metric-label" style="font-size: 0.875rem; font-weight: 600; margin: 0 0 0.5rem 0;">Trial Conversion</p>
+
+        <!-- Progress Bar -->
+         <div class="progress-bg" style="margin: 0.5rem 0; height: 0.5rem; width: 100%; overflow: hidden; border-radius: 9999px;">
+ <div style="height: 0.5rem; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); transition: all 1s ease; width: @(trialPct)%; background-color: @FillHex(trialPct);"></div>
+          </div>
+
+        <p class="metric-target" style="font-size: 0.75rem; margin: 0; font-weight: 500;">Target: 75%</p>
+        </div>
+
+ <span class="metric-value" style="font-size: 1.25rem; font-weight: 700; color: @FillHex(trialPct); white-space: nowrap;">@trialPct%</span>
+     </div>
+  </div>
+
+  <!-- Annual Retention -->
+       <div style="width: 100%">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+           <div style="flex: 1; min-width: 200px;">
+        <p class="metric-label" style="font-size: 0.875rem; font-weight: 600; margin: 0 0 0.5rem 0;">Annual Retention</p>
+
+                <div class="progress-bg" style="margin: 0.5rem 0; height: 0.5rem; width: 100%; overflow: hidden; border-radius: 9999px;">
+      <div style="height: 0.5rem; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); transition: all 1s ease; width: @(retentionPct)%; background-color: @FillHex(retentionPct);"></div>
+            </div>
+
+ <p class="metric-target" style="font-size: 0.75rem; margin: 0; font-weight: 500;">Target: 95%</p>
+  </div>
+
+       <span class="metric-value" style="font-size: 1.25rem; font-weight: 700, color: @FillHex(retentionPct); white-space: nowrap;">@retentionPct%</span>
+      </div>
+       </div>
+
+ <!-- Storage Usage -->
+            <div style="width: 100%;">
+         <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <p class="metric-label" style="font-size: 0.875rem; font-weight: 600; margin: 0 0 0.5rem 0;">Storage Usage</p>
+
+ <div class="progress-bg" style="margin: 0.5rem 0; height: 0.5rem; width: 100%; overflow: hidden; border-radius: 9999px;">
+    <div style="height: 0.5rem; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); transition: all 1s ease; width: @(storagePct)%; background-color: @FillHex(storagePct);"></div>
+        </div>
+
+            <p class="metric-target" style="font-size: 0.75rem; margin: 0; font-weight: 500;">System-wide</p>
+   </div>
+
+       <span class="metric-value" style="font-size: 1.25rem; font-weight: 700; color: @FillHex(storagePct); white-space: nowrap;">@storagePct%</span>
+   </div>
+   </div>
+
+</div>
+
+        <div class="ai-insight-box" style="margin-top: 2rem; border-radius: 0.75rem; padding: 1rem;">
+        <div class="ai-insight-header" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <svg style="height: 1rem; width: 1rem; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-3 5a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+<span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">AI Insight</span>
+    </div>
+            <p class="ai-insight-text" style="margin: 0; font-size: 0.75rem; line-height: 1.5;">
+        Growth is exceeding the quarterly forecast by <span style="font-weight: 700; color: #059669;">12.4%</span>.
+           Recommended to review server nodes capacity before end of month.
+     </p>
+  </div>
+    </div>
+</div>
+
+<style>
+    /* ===== FILTER BAR STYLES ===== */
+    .filter-bar {
+        background-color: #ffffff;
+     border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    .filter-icon-wrap {
+        color: #64748b;
+    }
+  .filter-title {
+        color: #475569;
+    }
+    .filter-field-label {
+        color: #475569;
+    }
+    .filter-divider {
+    background-color: #e2e8f0;
+    }
+    .filter-preset-btn {
+        font-size: 0.8125rem;
+ font-weight: 600;
+        padding: 0.4375rem 0.875rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    line-height: 1.2;
+    white-space: nowrap;
+    }
+    .filter-preset-btn:hover {
+        background-color: #f1f5f9;
+ color: #334155;
+        border-color: #cbd5e1;
+    }
+    .filter-preset-active {
+        background-color: #ecfdf5 !important;
+   color: #059669 !important;
+        border-color: #a7f3d0 !important;
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.08);
+    }
+    .filter-input {
+   font-size: 0.8125rem;
+    font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+     background-color: #f8fafc;
+ color: #334155;
+   outline: none;
+        transition: all 0.2s ease;
+        line-height: 1.4;
+        height: 2.25rem;
+box-sizing: border-box;
+    }
+    .filter-input:focus {
+    border-color: #a7f3d0;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12);
+    }
+    .filter-input::placeholder {
+        color: #94a3b8;
+    }
+    .filter-input-icon {
+        color: #94a3b8;
+    }
+    .filter-reset-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+    font-weight: 600;
+        padding: 0.4375rem 0.875rem;
+        border-radius: 0.5rem;
+        border: 1px solid #fecaca;
+        background-color: #fef2f2;
+        color: #dc2626;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      line-height: 1.2;
+        white-space: nowrap;
+    }
+    .filter-reset-btn:hover {
+      background-color: #fee2e2;
+    border-color: #fca5a5;
+ color: #b91c1c;
+    }
+
+    /* ===== FILTER BAR - Dark Mode ===== */
+    .dark .filter-bar {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .dark .filter-icon-wrap {
+        color: #94a3b8 !important;
+    }
+    .dark .filter-title {
+        color: #94a3b8 !important;
+    }
+    .dark .filter-field-label {
+        color: #94a3b8 !important;
+    }
+    .dark .filter-divider {
+        background-color: #334155 !important;
+    }
+ .dark .filter-preset-btn {
+        background-color: #0f172a !important;
+      border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    .dark .filter-preset-btn:hover {
+background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        border-color: #475569 !important;
+    }
+    .dark .filter-preset-active {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+        color: #34d399 !important;
+   border-color: rgba(16, 185, 129, 0.3) !important;
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1);
+    }
+    .dark .filter-input {
+        background-color: #0f172a !important;
+   border-color: #334155 !important;
+     color: #e2e8f0 !important;
+    }
+    .dark .filter-input:focus {
+     border-color: rgba(16, 185, 129, 0.4) !important;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    }
+    .dark .filter-input::placeholder {
+        color: #64748b !important;
+    }
+    .dark .filter-input-icon {
+        color: #64748b !important;
+    }
+    .dark .filter-reset-btn {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+   color: #f87171 !important;
+    }
+    .dark .filter-reset-btn:hover {
+      background-color: rgba(239, 68, 68, 0.18) !important;
+      border-color: rgba(239, 68, 68, 0.35) !important;
+        color: #fca5a5 !important;
+    }
+
+    /* ===== KPI CARD STYLES (Light Mode) ===== */
+    .kpi-card {
+        background: radial-gradient(circle at 30% 20%, #fafffe 0%, #ffffff 70%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+    }
+    .kpi-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .kpi-card-green { background: radial-gradient(circle at 30% 20%, #fafffe 0%, #ffffff 70%); }
+    .kpi-card-blue  { background: radial-gradient(circle at 30% 20%, #fafeff 0%, #ffffff 70%); }
+    .kpi-card-purple{ background: radial-gradient(circle at 30% 20%, #fdfbff 0%, #ffffff 70%); }
+    .kpi-card-red   { background: radial-gradient(circle at 30% 20%, #fffbf7 0%, #ffffff 70%); }
+
+    .kpi-label {
+        color: #94a3b8;
+    }
+    .kpi-value {
+        color: #334155;
+    }
+    .kpi-badge-subtext {
+        color: #94a3b8;
+    }
+
+    /* Icon backgrounds - Light */
+    .kpi-icon-green  { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); color: #059669; box-shadow: 0 1px 3px rgba(34, 197, 94, 0.08); }
+  .kpi-icon-blue   { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; box-shadow: 0 1px 3px rgba(59, 130, 246, 0.08); }
+    .kpi-icon-purple { background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); color: #7c3aed; box-shadow: 0 1px 3px rgba(147, 51, 234, 0.08); }
+    .kpi-icon-red    { background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); color: #dc2626; box-shadow: 0 1px 3px rgba(239, 68, 68, 0.08); }
+
+    /* Badge colors - Light */
+    .kpi-badge-green  { background: #dcfce7; color: #15803d; }
+    .kpi-badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .kpi-badge-purple { background: #e9d5ff; color: #6b21a8; }
+    .kpi-badge-red    { background: #fecaca; color: #b91c1c; }
+
+    /* ===== KPI CARD STYLES (Dark Mode) ===== */
+    .dark .kpi-card {
+        background: #1e293b !important;
+        border: 1px solid #334155 !important;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    .dark .kpi-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .dark .kpi-card-green,
+    .dark .kpi-card-blue,
+    .dark .kpi-card-purple,
+    .dark .kpi-card-red {
+        background: #1e293b !important;
+  }
+
+    .dark .kpi-label {
+        color: #94a3b8 !important;
+    }
+    .dark .kpi-value {
+        color: #f1f5f9 !important;
+    }
+    .dark .kpi-badge-subtext {
+        color: #64748b !important;
+    }
+
+    /* Icon backgrounds - Dark */
+    .dark .kpi-icon-green  { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%) !important; color: #34d399 !important; box-shadow: 0 1px 3px rgba(34, 197, 94, 0.15); }
+    .dark .kpi-icon-blue   { background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%) !important; color: #60a5fa !important; box-shadow: 0 1px 3px rgba(59, 130, 246, 0.15); }
+    .dark .kpi-icon-purple { background: linear-gradient(135deg, #3b0764 0%, #4c1d95 100%) !important; color: #a78bfa !important; box-shadow: 0 1px 3px rgba(147, 51, 234, 0.15); }
+.dark .kpi-icon-red    { background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%) !important; color: #f87171 !important; box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15); }
+
+    /* Badge colors - Dark */
+    .dark .kpi-badge-green  { background: rgba(34, 197, 94, 0.15) !important; color: #4ade80 !important; }
+    .dark .kpi-badge-blue   { background: rgba(59, 130, 246, 0.15) !important; color: #60a5fa !important; }
+    .dark .kpi-badge-purple { background: rgba(147, 51, 234, 0.15) !important; color: #c084fc !important; }
+  .dark .kpi-badge-red    { background: rgba(239, 68, 68, 0.15) !important; color: #fca5a5 !important; }
+
+    /* Light Mode (Default) - these are the BASE styles */
+    .dashboard-card {
+    background-color: #ffffff !important;
+ border: 1px solid #e2e8f0 !important;
+    }
+
+    .card-title {
+        color: #1e293b !important;
+    }
+
+    .card-subtitle {
+        color: #64748b !important;
+    }
+
+    .legend-text {
+ color: #475569 !important;
+    }
+
+    .legend-dot-total {
+   background-color: #94a3b8 !important;
+    }
+
+  .metric-label {
+        color: #334155 !important;
+    }
+
+    .metric-target {
+        color: #64748b !important;
+    }
+
+    .progress-bg {
+        background-color: #e2e8f0 !important;
+    }
+
+    .ai-insight-box {
+        background-color: #f0fdf4 !important;
+        border: 1px solid #bbf7d0 !important;
+    }
+
+    .ai-insight-header {
+        color: #15803d !important;
+    }
+
+    .ai-insight-text {
+        color: #166534 !important;
+    }
+
+    /* Desktop Layout - 60/40 split */
+    @@media (min-width: 1024px) {
+        .dashboard-container {
+     flex-direction: row !important;
+            align-items: stretch !important;
+            gap: 2rem !important;
+        }
+
+        .dashboard-card:first-child {
+            width: 60% !important;
+      }
+
+     .dashboard-card:last-child {
+            width: 40% !important;
+        }
+    }
+
+    /* Dark Mode - ONLY when .dark class is present on parent */
+    .dark .dashboard-card {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    .dark .card-title {
+   color: #f1f5f9 !important;
+    }
+
+    .dark .card-subtitle {
+        color: #94a3b8 !important;
+    }
+
+    .dark .legend-text {
+        color: #94a3b8 !important;
+    }
+
+    .dark .legend-dot-total {
+        background-color: #64748b !important;
+    }
+
+    .dark .metric-label {
+        color: #e2e8f0 !important;
+    }
+
+    .dark .metric-target {
+color: #94a3b8 !important;
+}
+
+    .dark .progress-bg {
+        background-color: #475569 !important;
+    }
+
+    .dark .ai-insight-box {
+        background-color: #0f172a !important;
+        border-color: #1e3a2f !important;
+    }
+
+    .dark .ai-insight-header {
+        color: #4ade80 !important;
+    }
+
+    .dark .ai-insight-text {
+  color: #86efac !important;
+    }
+
+    /* Mobile responsiveness */
+    @@media (max-width: 480px) {
+        .dashboard-container {
+  padding: 0 0.5rem !important;
+        }
+
+        .dashboard-card {
+            padding: 0.75rem !important;
+        }
+    }
+</style>
+
+<!-- LISTS -->
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+
+    <!-- Trials Expiring Soon -->
+    <div class="flex flex-col rounded-2xl bg-white shadow-md dark:bg-slate-800">
+
+        <div class="flex items-center justify-between p-6">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                Trials Expiring Soon
+            </h3>
+
+            <a asp-page="/SuperAdmin/Subscriptions/Index"
+               class="text-xs font-bold text-subgreen-600 uppercase hover:text-subgreen-700 dark:text-subgreen-300">
+                View All
+            </a>
+        </div>
+
+        <hr style="border: none; height: 0.3px; background-color: lightgray;">
+
+        <div class="flex-1 p-6 pt-0">
+            <div class="space-y-4">
+
+                <div class="flex items-center justify-between rounded-xl border-[0.25px] border-gray-200 bg-slate-50
+            p-3 shadow-sm sm:p-4 dark:border-slate-700
+            dark:bg-slate-900">
+
+                    <div class="flex min-w-0 items-center">
+                        <div class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-subgreen-500
+                    text-xs font-bold text-white sm:mr-5 sm:h-10 sm:w-10 sm:text-base dark:bg-subgreen-600">
+                            TE
+                        </div>
+
+                        <div class="min-w-0" style="margin-left: 20px;">
+                            <p class="truncate text-sm font-bold text-slate-900 sm:text-sm dark:text-white">
+                                TechCorp Solutions
+                            </p>
+                            <p class="text-xs font-normal text-slate-500 uppercase sm:text-xs">
+                                TECH001
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="shrink-0 text-right">
+                        <span class="inline-block rounded-md bg-amber-50 px-1.5 py-0.5 text-sm font-semibold tracking-wide text-amber-700 sm:px-2 sm:py-1 sm:text-xs dark:bg-amber-900/40 dark:text-amber-300">
+                            5 Days Left
+                        </span>
+                        <p class="mt-1 text-xs font-medium text-slate-400 sm:text-xs">
+                            Feb 13
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- System Activity -->
+    <div class="flex flex-col rounded-2xl bg-white shadow-md dark:bg-slate-800">
+
+        <div class="flex items-center justify-between p-6">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">System Activity</h3>
+
+            <a asp-page="/SuperAdmin/AuditLogs/Index"
+               class="text-xs font-bold text-subgreen-600 uppercase hover:text-subgreen-700 dark:text-subgreen-300">
+                Full History
+            </a>
+        </div>
+
+        <div class="flex-1 p-6 pt-0">
+
+            <ul class="space-y-6">
+
+                <!-- ROW -->
+                <li>
+
+                    <!-- TOP LINE (DOT + TITLE + TIME IN ONE ROW) -->
+                    <div class="flex items-center justify-between">
+
+                        <!-- LEFT GROUP -->
+                        <div class="flex items-center">
+
+                            <!-- GREEN DOT -->
+                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
+                                 style="margin-right:20px;"></div>
+
+                            <!-- TITLE -->
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">
+                                CREATE_ORG
+                            </p>
+
+                        </div>
+
+                        <!-- TIME -->
+                        <time class="text-xs font-medium text-slate-400">
+                            09:31
+                        </time>
+
+                    </div>
+
+                    <!-- SUBTEXT -->
+                    <p class="mt-1 ml-[32px] text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
+                        Affected: <span class="text-slate-700 dark:text-slate-300">Organizations</span>
+                        <span class="mx-1">•</span>
+                        Org: NewCorp
+                    </p>
+
+                </li>
+
+
+                <!-- ROW -->
+                <li>
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center">
+
+                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
+                                 style="margin-right:20px;"></div>
+
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">
+                                APPROVE_DEMO_REQUEST
+                            </p>
+
+                        </div>
+
+                        <time class="text-xs font-medium text-slate-400">
+                            07:31
+                        </time>
+
+                    </div>
+
+                    <p class="mt-1 ml-[32px] text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
+                        Affected: <span class="text-slate-700 dark:text-slate-300">DemoRequests</span>
+                        <span class="mx-1">•</span>
+                        Org: TechCorp
+                    </p>
+
+                </li>
+
+
+                <!-- ROW -->
+                <li>
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center">
+
+                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
+                                 style="margin-right:20px;"></div>
+
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">
+                                UPDATE_SUBSCRIPTION
+                            </p>
+
+                        </div>
+
+                        <time class="text-xs font-medium text-slate-400">
+                            06:12
+                        </time>
+
+                    </div>
+
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
+                        Affected: <span class="text-slate-700 dark:text-slate-300">Subscriptions</span>
+                        <span class="mx-1">•</span>
+                        Org: Digital Ventures
+                    </p>
+
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Filter preset button toggle
+      function setActivePreset(btn) {
+   document.querySelectorAll('.filter-preset-btn').forEach(b => b.classList.remove('filter-preset-active'));
+            btn.classList.add('filter-preset-active');
+        }
+
+        // Reset all filters
+        function resetFilters() {
+    // Clear search
+            const search = document.getElementById('filterSearch');
+     if (search) search.value = '';
+
+   // Clear date inputs
+         const dateFrom = document.getElementById('filterDateFrom');
+   const dateTo = document.getElementById('filterDateTo');
+            if (dateFrom) dateFrom.value = '';
+          if (dateTo) dateTo.value = '';
+
+            // Reset presets to "Today"
+            document.querySelectorAll('.filter-preset-btn').forEach(b => b.classList.remove('filter-preset-active'));
+            const firstPreset = document.querySelector('.filter-preset-btn');
+     if (firstPreset) firstPreset.classList.add('filter-preset-active');
+        }
+
+      document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+                    datasets: [{
+                        label: 'New Organizations',
+                        data: [15, 28, 22, 35, 30, 42], // demo data
+                        borderColor: '#10b981',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        backgroundColor: gradient,
+                        tension: 0.35
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { borderRadius: 8, padding: 12 } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false },
+                            grid: { color: 'rgba(148, 163, 184, 0.12)', drawBorder: false },
+                            ticks: { padding: 10, color: '#94a3b8', font: { size: 11, weight: '600' } }
+                        },
+                        x: {
+                            border: { display: false },
+                            grid: { display: false },
+                            ticks: { padding: 10, color: '#94a3b8', font: { size: 11, weight: '600' } }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        });
+    </script>
+}

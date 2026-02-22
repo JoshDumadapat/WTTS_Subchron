@@ -1,0 +1,1175 @@
+@using System.Security.Claims
+@using Subchron.Web.Rbac
+@using System.Net.Http.Headers
+@using System.Net.Http.Json
+@using Subchron.Web.Pages.Auth
+@inject IHttpClientFactory Http
+
+@functions {
+    private sealed class ProfileResponse
+    {
+        public string? Name { get; set; }
+        public string? AvatarUrl { get; set; }
+    }
+}
+
+@{
+    // Basic claim values
+    var displayName = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name ?? "User";
+    var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("role")?.Value ?? "";
+    var roleDisplay = string.IsNullOrEmpty(roleClaim)
+        ? ""
+        : System.Text.RegularExpressions.Regex.Replace(roleClaim, "([a-z])([A-Z])", "$1 $2").Trim();
+
+    // Load avatar from API
+    string? avatarUrl = null;
+    var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+
+    if (!string.IsNullOrEmpty(token))
+    {
+        try
+        {
+            var client = Http.CreateClient("Subchron.API");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var resp = await client.GetAsync("api/auth/profile");
+            if (resp.IsSuccessStatusCode)
+            {
+                var data = await resp.Content.ReadFromJsonAsync<ProfileResponse>();
+                if (data != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(data.Name)) displayName = data.Name!;
+                    avatarUrl = data.AvatarUrl;
+                }
+            }
+        }
+        catch { /* ignore */ }
+    }
+
+    var v = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin - Subchron</title>
+
+    <!-- Suppress "cdn.tailwindcss.com should not be used in production" (use Tailwind CLI/PostCSS in production) -->
+    <script>
+        (function(){var w=console.warn;if(typeof w==='function'){console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;return w.apply(console,arguments);};}})();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                subgreen: {
+                  50: "#effbf1", 100: "#d9f5de", 200: "#b6eac0", 300: "#84d999", 400: "#4bc56c",
+                  500: "#28a84d", 600: "#209030", 700: "#177027", 800: "#145923", 900: "#114a1f"
+                }
+              }
+            }
+          }
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@@hotwired/turbo@@8.0.4/dist/turbo.es2017-umd.min.js" defer></script>
+    <script>
+        (function () {
+          const stored = localStorage.getItem("subchron-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const dark = stored === "dark" || (!stored && prefersDark);
+
+          document.documentElement.classList.toggle("dark", dark);
+        })();
+    </script>
+
+    <style>
+        #sidebar {
+            transition: width 0.3s ease-in-out;
+        }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+            .submenu.open {
+                max-height: 500px;
+                transition: max-height 0.3s ease-in;
+            }
+
+        .sidebar-collapsed #sidebar {
+            width: 82px !important;
+        }
+
+        .sidebar-collapsed .sidebar-label,
+        .sidebar-collapsed .company-name {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .sidebar-collapsed .profile-header {
+            justify-content: center;
+            gap: 0;
+        }
+
+        .sidebar-label,
+        .company-name {
+            white-space: nowrap;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .nav-item {
+            position: relative;
+            overflow: visible;
+        }
+
+            .nav-item.active {
+                background-color: rgba(22, 163, 74, 0.10);
+                color: #16a34a;
+                font-weight: 700;
+            }
+
+        .dark .nav-item.active {
+            background-color: rgba(34, 197, 94, 0.14);
+            color: #22c55e;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(22, 163, 74, 0.10);
+            color: #16a34a;
+        }
+
+        .dark .nav-item:hover {
+            background-color: rgba(34, 197, 94, 0.14);
+            color: #22c55e;
+        }
+
+        .nav-indicator {
+            position: absolute;
+            right: -14px;
+            top: 50%;
+            transform: translate(50%, -50%);
+            width: 6px;
+            height: 35px;
+            border-radius: 9999px;
+            background: #16a34a;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 5;
+        }
+
+        .dark .nav-indicator {
+            background: #22c55e;
+        }
+
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+
+        .profile-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .logo-box {
+            width: 52px;
+            height: 52px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: transparent;
+        }
+
+        .profile-header img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            border: 0;
+        }
+
+        .toggle-wrap {
+            position: absolute;
+            right: -17px;
+            top: 50px;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+        }
+
+        .dark .toggle-wrap {
+            background: #0f172a;
+            border-color: rgba(51, 65, 85, 0.9);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .toggle-btn {
+            width: 26px;
+            height: 26px;
+            background: #16a34a;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 0;
+        }
+
+        .dark .toggle-btn {
+            background: #22c55e;
+        }
+
+        #sidebarToggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-collapsed #sidebarToggle svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-collapsed .sidebar-dropdown-icon {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        @@media (max-width: 767px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 260px !important;
+                transform: translateX(-110%);
+                transition: transform 0.25s ease;
+                z-index: 20;
+            }
+
+            .sidebar-mobile-open #sidebar {
+                transform: translateX(0);
+            }
+
+            .sidebar-collapsed #sidebar {
+                width: 260px !important;
+            }
+
+            .sidebar-collapsed .sidebar-label,
+            .sidebar-collapsed .company-name {
+                opacity: 1;
+                width: auto;
+                pointer-events: auto;
+            }
+
+            .toggle-wrap {
+                right: 12px;
+                top: 50px;
+                transform: translateY(-50%);
+            }
+        }
+
+        #sidebar nav {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+            #sidebar nav::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+    </style>
+</head>
+
+<body id="appRoot" class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+    <!-- Toast: defined first so showToast exists when page scripts run after redirect -->
+    <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
+    <script>
+        (function () {
+            var TOAST_DURATION_MS = 5000;
+            function showToast(message, success, type) {
+                if (!message) return;
+                var container = document.getElementById('toast-container');
+                if (!container) return;
+                var isSuccess = success === true;
+                var toastType = (typeof type === 'string' && type) ? type : (isSuccess ? 'success' : 'error');
+                var el = document.createElement('div');
+                el.className = 'pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-slate-800 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-500/20';
+                el.setAttribute('role', 'alert');
+                var iconColorClass = toastType === 'warning'
+                    ? 'text-amber-500 dark:text-amber-400'
+                    : isSuccess
+                    ? 'text-subgreen-600 dark:text-subgreen-400'
+                    : 'text-red-600 dark:text-red-400';
+                var iconWrap = document.createElement('div');
+                iconWrap.className = 'inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded ' + iconColorClass;
+                if (toastType === 'warning') {
+                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span class="sr-only">Warning</span>';
+                } else if (isSuccess) {
+                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5"/></svg><span class="sr-only">Success</span>';
+                } else {
+                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="sr-only">Error</span>';
+                }
+                var text = document.createElement('div');
+                text.className = 'ms-3 flex-1 text-sm font-normal';
+                text.textContent = message;
+                var closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'ms-auto inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200';
+                closeBtn.setAttribute('aria-label', 'Close');
+                closeBtn.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>';
+                function remove() { if (el.parentNode) el.parentNode.removeChild(el); }
+                closeBtn.addEventListener('click', remove);
+                el.appendChild(iconWrap);
+                el.appendChild(text);
+                el.appendChild(closeBtn);
+                container.appendChild(el);
+                setTimeout(remove, TOAST_DURATION_MS);
+            }
+            window.showToast = showToast;
+        })();
+    </script>
+
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div class="absolute -top-[10%] -left-[15%] h-[50%] w-[50%] rounded-full bg-emerald-100/20 blur-[180px] dark:bg-emerald-900/20"></div>
+        <div class="absolute top-[15%] -right-[15%] h-[45%] w-[45%] rounded-full bg-sky-100/20 blur-[180px] dark:bg-sky-900/18"></div>
+    </div>
+
+    <div id="sidebarOverlay"
+         class="backdrop-blur-[1px] fixed inset-0 z-10 hidden bg-slate-900/40 md:hidden"
+         aria-hidden="true"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar"
+               class="relative z-20 flex flex-col border-r border-slate-200 bg-white text-slate-600 shadow-xl dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+               style="width: 260px;">
+            <div class="toggle-wrap" aria-hidden="false">
+                <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Sidebar toggle / close">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex h-[100px] items-center px-6">
+                <div class="profile-header">
+                    <div class="logo-box" aria-hidden="true">
+
+                        @{
+                            var orgName = (await Component.InvokeAsync("OrgDisplayName"))?.ToString() ?? "Organization";
+                            var firstLetter = !string.IsNullOrWhiteSpace(orgName)
+                            ? char.ToUpperInvariant(orgName.Trim()[0]).ToString()
+                            : "O";
+                        }
+
+                        <svg viewBox="0 0 52 52"
+                             width="52"
+                             height="52"
+                             xmlns="http://www.w3.org/2000/svg"
+                             role="img"
+                             aria-label="@orgName Logo">
+
+                            <rect width="52" height="52" fill="#16a34a"></rect>
+
+                            <text x="50%"
+                                  y="54%"
+                                  text-anchor="middle"
+                                  dominant-baseline="middle"
+                                  font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+                                  font-size="24"
+                                  font-weight="700"
+                                  fill="#ffffff">
+                                @firstLetter
+                            </text>
+                        </svg>
+
+                    </div>
+
+                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">
+                        @await Component.InvokeAsync("OrgDisplayName")
+                    </span>
+                </div>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-700" />
+
+            <nav class="mt-6 flex-1 space-y-[6px] overflow-y-auto px-4 py-4">
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.Dashboard))
+                {
+                <a href="/App/Dashboard" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Dashboard</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.OrganizationSettings))
+                {
+                <a href="/App/OrgConfig/OrganizationSettings" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Organization Settings</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.EmployeeManagement))
+                {
+                <a href="/App/Employee/EmployeeManagement" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Employees</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.DepartmentManagement))
+                {
+                <a href="/App/Department/Department" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Departments</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.Operations))
+                {
+                <div>
+                    <button onclick="toggleSubmenu('ops-menu', this)"
+                            class="nav-item group flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                            type="button">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.370-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.350a1.724 1.724 0 001.066-2.573c-.940-1.543.826-3.31 2.370-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="sidebar-label font-medium whitespace-nowrap">Operations</span>
+                        </div>
+                        <svg class="sidebar-dropdown-icon h-4 w-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div id="ops-menu" class="submenu pl-4">
+                        <div class="mt-1 space-y-[6px] border-l-2 border-slate-100 dark:border-slate-700">
+                            <a href="/App/Operations/ScanStation" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Scan Station <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                            <a href="/App/Operations/AttendanceLogs" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Attendance Logs <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                            <a href="/App/Operations/OvertimeRequests" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Overtime Requests <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.Payroll) || RoleModuleAccess.CanAccessModule(User, AppModule.Reports))
+                {
+                <div>
+                    <button onclick="toggleSubmenu('payroll-menu', this)"
+                            class="nav-item group flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                            type="button">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="sidebar-label font-medium whitespace-nowrap">Payroll &amp; Reports</span>
+                        </div>
+                        <svg class="sidebar-dropdown-icon h-4 w-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div id="payroll-menu" class="submenu pl-4">
+                        <div class="mt-1 space-y-[6px] border-l-2 border-slate-100 dark:border-slate-700">
+                            <a href="/App/PayrollAndReports/Reports" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Reports <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                            <a href="/App/PayrollAndReports/Payroll" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Payroll Export <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.Archive))
+                {
+                <a href="/App/Archive/Archive" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M20 7v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2m16 0H4m6 4h4" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Archive</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.LeaveManagement) || RoleModuleAccess.CanAccessModule(User, AppModule.ShiftSchedule))
+                {
+                <div>
+                    <button onclick="toggleSubmenu('leave-shift-menu', this)"
+                            class="nav-item group flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/20"
+                            type="button">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="sidebar-label font-medium whitespace-nowrap">Shift &amp; Leave</span>
+                        </div>
+                        <svg class="sidebar-dropdown-icon h-4 w-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div id="leave-shift-menu" class="submenu pl-4">
+                        <div class="mt-1 space-y-[6px] border-l-2 border-slate-100 dark:border-slate-700">
+                            @if (RoleModuleAccess.CanAccessModule(User, AppModule.LeaveManagement))
+                            {
+                            <a href="/App/LeaveAndShift/LeaveManagement" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Leave Management <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                            }
+                            @if (RoleModuleAccess.CanAccessModule(User, AppModule.ShiftSchedule))
+                            {
+                            <a href="/App/LeaveAndShift/ShiftSchedule" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                                Shift Schedule <span class="nav-indicator" aria-hidden="true"></span>
+                            </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+
+                @if (RoleModuleAccess.CanAccessModule(User, AppModule.AuditLog))
+                {
+                <a href="/App/AuditLog" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Audit Log</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+                }
+            </nav>
+
+            @if (RoleModuleAccess.CanAccessBackoffice(User))
+            {
+            <div class="border-t border-slate-200 px-4 py-2 dark:border-slate-700">
+                <a href="/Employee/Attendance" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all" title="Time in / out and employee self-service">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">My Employee Portal</span>
+                    <span class="nav-indicator" aria-hidden="true"></span>
+                </a>
+            </div>
+            }
+
+            <div class="border-t border-slate-200 p-4 dark:border-slate-700">
+                <button id="logoutBtn"
+                        type="button"
+                        class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-slate-600 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-900/20">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v-1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
+            <header class="layout-header bg-white shadow-sm dark:bg-slate-800"
+                    style="margin:20px; border-radius:18px; padding:16px 24px;">
+                <div class="flex items-center justify-between">
+
+                    <!-- LEFT: Mobile button + Page Title -->
+                    <div class="flex items-center gap-3">
+                        <button id="mobileSidebarOpen"
+                                class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-700"
+                                type="button"
+                                aria-label="Open sidebar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+
+                        <h1 id="layoutPageTitle" class="text-lg font-bold text-slate-900 dark:text-white">
+                            @(ViewData["PageTitle"] ?? "Admin")
+                        </h1>
+                    </div>
+
+                    <!-- RIGHT: Notification dropdown + Theme + Profile (name hidden on phone) -->
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <!-- Notification dropdown -->
+                        <div class="relative" id="notificationWrap">
+                            <button id="notificationBtn"
+                                    class="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                                    title="Notifications"
+                                    type="button"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span id="notificationBadge" class="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-800"></span>
+                            </button>
+                            <div id="notificationDropdown" class="absolute right-0 top-full z-50 mt-2 hidden w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800" role="menu">
+                                <div class="border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-slate-900 dark:text-white">Notifications</span>
+                                        <a href="/App/Notifications" class="text-xs font-medium text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400">View all</a>
+                                    </div>
+                                    <div class="mt-2 flex gap-1">
+                                        <button type="button" class="notification-filter rounded-lg px-2.5 py-1 text-xs font-medium bg-subgreen-100 text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300 hover:opacity-90" data-filter="all">All</button>
+                                        <button type="button" class="notification-filter rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700" data-filter="unread">Unread</button>
+                                        <button type="button" class="notification-filter rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700" data-filter="read">Read</button>
+                                    </div>
+                                    <button type="button" id="markAllReadBtn" class="mt-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-400 dark:hover:text-slate-200">Mark all as read</button>
+                                </div>
+                                <div id="notificationList" class="max-h-72 overflow-y-auto">
+                                    <a href="/App/Notifications#1" class="notification-item block border-b border-slate-100 px-4 py-3 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50" data-id="1" data-read="false">
+                                        <p class="notif-title text-sm font-medium text-slate-900 dark:text-white">Overtime approved</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Your overtime request for Feb 20 was approved by HR.</p>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">2h ago</p>
+                                    </a>
+                                    <a href="/App/Notifications#2" class="notification-item block border-b border-slate-100 px-4 py-3 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50" data-id="2" data-read="false">
+                                        <p class="notif-title text-sm font-medium text-slate-900 dark:text-white">Leave request pending</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Your leave request (Feb 24–28) is pending manager approval.</p>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">5h ago</p>
+                                    </a>
+                                    <a href="/App/Notifications#3" class="notification-item block border-b border-slate-100 px-4 py-3 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50" data-id="3" data-read="true">
+                                        <p class="notif-title text-sm font-medium text-slate-600 dark:text-slate-300">Schedule updated</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Your Wednesday shift is now 12:00–21:00 at Warehouse.</p>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Yesterday</p>
+                                    </a>
+                                    <a href="/App/Notifications#4" class="notification-item block border-b border-slate-100 px-4 py-3 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50" data-id="4" data-read="true">
+                                        <p class="notif-title text-sm font-medium text-slate-600 dark:text-slate-300">Missing time out</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">You didn’t clock out on Feb 17. Please confirm or update in Attendance.</p>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">2 days ago</p>
+                                    </a>
+                                    <a href="/App/Notifications#5" class="notification-item block px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50" data-id="5" data-read="true">
+                                        <p class="notif-title text-sm font-medium text-slate-600 dark:text-slate-300">Payroll export ready</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Pay period Feb 1–15 export is available in Payroll Export.</p>
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">3 days ago</p>
+                                    </a>
+                                </div>
+                                <div class="border-t border-slate-200 p-2 dark:border-slate-700">
+                                    <a href="/App/Notifications" class="block rounded-lg py-2 text-center text-sm font-medium text-subgreen-600 hover:bg-subgreen-50 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">View notifications</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme toggle: default sun icon so it shows; JS updates on load and click -->
+                        <button id="themeToggle"
+                                class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                                type="button"
+                                aria-label="Toggle dark mode"
+                                style="width:38px; height:38px; display:flex; align-items:center; justify-content:center;">
+                            <span id="themeIcon" class="inline-flex h-5 w-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                            </span>
+                        </button>
+
+                        <!-- Profile: name/role hidden on phone (sm+ show name); only avatar on mobile -->
+                        <div class="relative" id="profileMenuWrap">
+                            <button id="profileMenuBtn"
+                                    type="button"
+                                    class="flex items-center gap-2 sm:gap-3 rounded-xl p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false">
+                                <div class="text-right hidden sm:block">
+                                    <div class="text-sm font-semibold text-slate-900 dark:text-white">@displayName</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">@(string.IsNullOrEmpty(roleDisplay) ? roleClaim : roleDisplay)</div>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(avatarUrl))
+                                {
+                                    <img src="@(avatarUrl + "?v=" + v)"
+                                         alt="Profile"
+                                         class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
+                                }
+                                else
+                                {
+                                    <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=16a34a&color=fff&bold=true"
+                                         alt="Profile"
+                                         class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
+                                }
+                            </button>
+
+                            <!-- Dropdown (z-50 so it shows above page content) -->
+                            <div id="profileMenu"
+                                 class="absolute right-0 z-50 mt-2 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800"
+                                 role="menu"
+                                 aria-label="Profile menu">
+                                <div class="py-2">
+
+                                    <a asp-page="/App/Settings/Index" asp-route-tab="Profile"
+                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
+                                       role="menuitem">
+                                        <!-- Edit Profile icon -->
+                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L9.832 16.82a4.5 4.5 0 01-1.897 1.13l-2.685.895.895-2.685a4.5 4.5 0 011.13-1.897L16.862 4.487z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19.5 7.125L16.875 4.5" />
+                                        </svg>
+                                        <span>Edit Profile</span>
+                                    </a>
+
+                                    <a href="/Employee/Dashboard"
+                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
+                                       role="menuitem">
+                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        <span>Employee Portal</span>
+                                    </a>
+
+                                    <a asp-page="/App/Settings/Index" asp-route-tab="UpgradePlan"
+                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
+                                       role="menuitem">
+                                        <!-- Upgrade Plan icon -->
+                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 6v12m0 0l4-4m-4 4l-4-4" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M4 4h16" />
+                                        </svg>
+                                        <span>Upgrade Plan</span>
+                                    </a>
+
+                                    <a asp-page="/App/Settings/Index" asp-route-tab="Personalization"
+                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
+                                       role="menuitem">
+                                        <!-- Personalization icon -->
+                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-11.314L7.05 7.05m11.314 11.314l-1.414-1.414" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                                        </svg>
+                                        <span>Personalization</span>
+                                    </a>
+
+                                    <a asp-page="/App/Settings/Index"
+                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
+                                       role="menuitem">
+                                        <!-- Settings icon -->
+                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span>Settings</span>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Full-page loading overlay: shown during Turbo navigation so URL and content load properly -->
+            <div id="turbo-loading-overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-50/90 dark:bg-slate-900/90" aria-live="polite" aria-busy="true" style="display: none;">
+                <div class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                    <svg class="animate-spin h-10 w-10 text-subgreen-600 dark:text-subgreen-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Loading…</p>
+                </div>
+            </div>
+
+            <div class="p-6 pt-2" data-page-title="@(ViewData["PageTitle"] ?? "Admin")">
+                @RenderBody()
+                @await RenderSectionAsync("Scripts", required: false)
+            </div>
+        </main>
+    </div>
+
+    <div id="logoutModal" class="fixed inset-0 z-[9999] hidden items-center justify-center">
+        <!-- Dim + blur backdrop (like your sidebar overlay) -->
+        <div id="logoutBackdrop"
+             class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40"
+             aria-hidden="true"></div>
+
+        <!-- Dialog -->
+        <div role="dialog" aria-modal="true" aria-labelledby="logoutTitle"
+             class="relative mx-4 w-full max-w-md rounded-xl bg-white shadow-2xl dark:bg-slate-800">
+            <div class="p-6">
+                <h3 id="logoutTitle" class="text-lg font-semibold text-slate-900 dark:text-white">
+                    Confirm logout
+                </h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    Are you sure you want to log out?
+                </p>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button id="cancelLogout" type="button"
+                            class="rounded-md bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+                        Cancel
+                    </button>
+
+                    <button id="confirmLogout" type="button"
+                            class="rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/ph-phone.js" asp-append-version="true"></script>
+
+    <script>
+        (function () {
+          const btn = document.getElementById("profileMenuBtn");
+          const menu = document.getElementById("profileMenu");
+          const wrap = document.getElementById("profileMenuWrap");
+
+          if (!btn || !menu || !wrap) return;
+
+          function openMenu() {
+            menu.classList.remove("hidden");
+            btn.setAttribute("aria-expanded", "true");
+          }
+
+          function closeMenu() {
+            menu.classList.add("hidden");
+            btn.setAttribute("aria-expanded", "false");
+          }
+
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = !menu.classList.contains("hidden");
+            if (isOpen) closeMenu();
+            else openMenu();
+          });
+
+          // Close when clicking outside
+          document.addEventListener("click", (e) => {
+            if (!wrap.contains(e.target)) closeMenu();
+          });
+
+          // Close on ESC
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeMenu();
+          });
+        })();
+
+        (function () {
+          const notifBtn = document.getElementById("notificationBtn");
+          const notifWrap = document.getElementById("notificationWrap");
+          const notifDropdown = document.getElementById("notificationDropdown");
+          const notifList = document.getElementById("notificationList");
+          const notifBadge = document.getElementById("notificationBadge");
+          const markAllReadBtn = document.getElementById("markAllReadBtn");
+          const filters = document.querySelectorAll(".notification-filter");
+
+          function updateBadge() {
+            const items = notifList?.querySelectorAll(".notification-item[data-read=\"false\"]") || [];
+            if (notifBadge) notifBadge.style.display = items.length ? "block" : "none";
+          }
+
+          function setFilter(filter) {
+            filters?.forEach(function (f) {
+              var isActive = f.getAttribute("data-filter") === filter;
+              f.classList.toggle("bg-subgreen-100", isActive);
+              f.classList.toggle("text-subgreen-700", isActive);
+              f.classList.toggle("dark:bg-subgreen-900/30", isActive);
+              f.classList.toggle("dark:text-subgreen-300", isActive);
+            });
+            notifList?.querySelectorAll(".notification-item").forEach(function (el) {
+              var read = el.getAttribute("data-read") === "true";
+              var show = filter === "all" || (filter === "unread" && !read) || (filter === "read" && read);
+              el.style.display = show ? "block" : "none";
+            });
+          }
+
+          notifBtn?.addEventListener("click", function (e) {
+            e.stopPropagation();
+            notifDropdown?.classList.toggle("hidden");
+            notifBtn?.setAttribute("aria-expanded", notifDropdown?.classList.contains("hidden") ? "false" : "true");
+          });
+
+          document.addEventListener("click", function (e) {
+            if (notifWrap && !notifWrap.contains(e.target)) notifDropdown?.classList.add("hidden");
+          });
+
+          filters?.forEach(function (btn) {
+            btn.addEventListener("click", function () { setFilter(btn.getAttribute("data-filter") || "all"); });
+          });
+          setFilter("all");
+
+          markAllReadBtn?.addEventListener("click", function () {
+            notifList?.querySelectorAll(".notification-item").forEach(function (el) {
+              el.setAttribute("data-read", "true");
+              var t = el.querySelector(".notif-title");
+              if (t) { t.classList.remove("text-slate-900", "dark:text-white"); t.classList.add("text-slate-600", "dark:text-slate-300"); }
+            });
+            updateBadge();
+            if (notifBadge) notifBadge.style.display = "none";
+          });
+
+          notifList?.querySelectorAll(".notification-item").forEach(function (el) {
+            el.addEventListener("click", function () {
+              el.setAttribute("data-read", "true");
+              var t = el.querySelector(".notif-title");
+              if (t) { t.classList.remove("text-slate-900", "dark:text-white"); t.classList.add("text-slate-600", "dark:text-slate-300"); }
+              updateBadge();
+            });
+          });
+          updateBadge();
+        })();
+
+        (function () {
+          const html = document.documentElement;
+          const btn = document.getElementById("themeToggle");
+          const icon = document.getElementById("themeIcon");
+
+          function setIcon() {
+            const isDark = html.classList.contains("dark");
+            icon.innerHTML = isDark
+              ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.75 9.75 0 1021.752 15.002z" /></svg>`
+              : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>`;
+          }
+
+          setIcon();
+
+          btn?.addEventListener("click", () => {
+            html.classList.toggle("dark");
+            localStorage.setItem("subchron-theme", html.classList.contains("dark") ? "dark" : "light");
+            setIcon();
+          });
+
+          // Show loading overlay when navigating (full-page visit so URL updates)
+          (function () {
+            var overlay = document.getElementById("turbo-loading-overlay");
+            function showOverlay() {
+              if (overlay) {
+                overlay.style.display = "flex";
+                overlay.classList.remove("hidden");
+              }
+            }
+            function hideOverlay() {
+              if (overlay) {
+                overlay.style.display = "none";
+                overlay.classList.add("hidden");
+              }
+            }
+            document.addEventListener("turbo:before-visit", showOverlay);
+            document.addEventListener("turbo:load", hideOverlay);
+            document.addEventListener("turbo:render", hideOverlay);
+            document.addEventListener("turbo:fetch-request-error", hideOverlay);
+          })();
+
+          window.toggleSubmenu = function (id, btnEl) {
+            const submenu = document.getElementById(id);
+            const iconEl = btnEl?.querySelector(".sidebar-dropdown-icon");
+            const isOpen = submenu?.classList.contains("open");
+
+            submenu?.classList.toggle("open", !isOpen);
+            if (iconEl) iconEl.style.transform = !isOpen ? "rotate(180deg)" : "rotate(0deg)";
+          };
+
+          const htmlRoot = document.getElementById("htmlRoot");
+          const sidebarToggle = document.getElementById("sidebarToggle");
+          const overlay = document.getElementById("sidebarOverlay");
+          const mobileOpenBtn = document.getElementById("mobileSidebarOpen");
+
+          function openMobileSidebar() {
+            htmlRoot?.classList.remove("sidebar-collapsed");
+            htmlRoot?.classList.add("sidebar-mobile-open");
+            overlay?.classList.remove("hidden");
+          }
+
+          function closeMobileSidebar() {
+            htmlRoot?.classList.remove("sidebar-mobile-open");
+            overlay?.classList.add("hidden");
+          }
+
+          mobileOpenBtn?.addEventListener("click", openMobileSidebar);
+
+          sidebarToggle?.addEventListener("click", () => {
+            const isMobile = window.matchMedia("(max-width: 767px)").matches;
+            if (isMobile) return closeMobileSidebar();
+
+            htmlRoot?.classList.toggle("sidebar-collapsed");
+
+            if (htmlRoot?.classList.contains("sidebar-collapsed")) {
+              document.querySelectorAll(".submenu").forEach((el) => el.classList.remove("open"));
+              document.querySelectorAll(".sidebar-dropdown-icon").forEach((el) => (el.style.transform = "rotate(0deg)"));
+            }
+          });
+
+          overlay?.addEventListener("click", closeMobileSidebar);
+
+          window.addEventListener("resize", () => {
+            const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+            if (isDesktop) closeMobileSidebar();
+          });
+
+          // ========= FIX: active indicator transfers + persists across navigation =========
+          (function setupSidebarActiveTransfer() {
+            const sidebarNav = document.querySelector("#sidebar nav");
+            if (!sidebarNav) return;
+
+            function clearActive() {
+              sidebarNav.querySelectorAll(".nav-item.active").forEach((el) => el.classList.remove("active"));
+            }
+
+            function setActive(el) {
+              if (!el) return;
+              clearActive();
+              el.classList.add("active");
+            }
+
+            // Click delegation: only for <a.nav-item ...> so buttons (submenu toggles) are untouched.
+            sidebarNav.addEventListener("click", (e) => {
+              const link = e.target?.closest("a.nav-item");
+              if (!link || !sidebarNav.contains(link)) return;
+
+              // Persist last clicked (so Dashboard hard-coded active won't override after reload)
+              try {
+                localStorage.setItem("subchron-active-href", link.getAttribute("href") || "");
+              } catch (_) { /* no-op */ }
+
+              setActive(link);
+
+              // If a submenu link is clicked, keep its submenu open and rotate its parent icon (visual consistency).
+              const submenu = link.closest(".submenu");
+              if (submenu && !submenu.classList.contains("open")) {
+                submenu.classList.add("open");
+                const container = submenu.closest("div");
+                const toggleBtn = container?.querySelector('button.nav-item[onclick*="toggleSubmenu"]');
+                const iconEl = toggleBtn?.querySelector(".sidebar-dropdown-icon");
+                if (iconEl) iconEl.style.transform = "rotate(180deg)";
+              }
+
+              // On mobile, close sidebar after selecting a link (optional UX; does not affect indicator logic)
+              const isMobile = window.matchMedia("(max-width: 767px)").matches;
+              if (isMobile) closeMobileSidebar();
+            });
+
+            // On load: URL match first, else restore last clicked from localStorage.
+            try {
+              const path = window.location.pathname || "";
+              const links = Array.from(sidebarNav.querySelectorAll("a.nav-item[href]"));
+
+              const byUrl = links
+                .filter(a => {
+                  const href = a.getAttribute("href") || "";
+                  if (!href || href === "#") return false;
+                  return path === href || (href.length > 1 && path.startsWith(href));
+                })
+                .sort((a, b) => (b.getAttribute("href") || "").length - (a.getAttribute("href") || "").length);
+
+              if (byUrl.length) {
+                setActive(byUrl[0]);
+              } else {
+                const lastHref = localStorage.getItem("subchron-active-href");
+                if (lastHref) {
+                  const saved = links.find(a => (a.getAttribute("href") || "") === lastHref);
+                  if (saved) setActive(saved);
+                }
+              }
+
+              // Ensure: if the active item is inside a submenu, keep that submenu open.
+              const activeLink = sidebarNav.querySelector("a.nav-item.active");
+              const submenu = activeLink?.closest(".submenu");
+              if (submenu && !submenu.classList.contains("open")) {
+                submenu.classList.add("open");
+                const container = submenu.closest("div");
+                const toggleBtn = container?.querySelector('button.nav-item[onclick*="toggleSubmenu"]');
+                const iconEl = toggleBtn?.querySelector(".sidebar-dropdown-icon");
+                if (iconEl) iconEl.style.transform = "rotate(180deg)";
+              }
+            } catch (_) { /* no-op */ }
+          })();
+          // ========= END FIX =========
+        })();
+
+        (function () {
+          const logoutBtn = document.getElementById("logoutBtn");
+          const logoutModal = document.getElementById("logoutModal");
+          const cancelBtn = document.getElementById("cancelLogout");
+          const confirmBtn = document.getElementById("confirmLogout");
+
+          function showModal() {
+            if (!logoutModal) return;
+            logoutModal.classList.remove("hidden");
+            logoutModal.classList.add("flex");
+            cancelBtn?.focus();
+            document.addEventListener("keydown", onKeyDown);
+          }
+
+          function hideModal() {
+            if (!logoutModal) return;
+            logoutModal.classList.add("hidden");
+            logoutModal.classList.remove("flex");
+            document.removeEventListener("keydown", onKeyDown);
+          }
+
+          function onKeyDown(e) {
+            if (e.key === "Escape") hideModal();
+          }
+
+          logoutBtn?.addEventListener("click", (e) => {
+            e.preventDefault();
+            showModal();
+          });
+
+          cancelBtn?.addEventListener("click", (e) => {
+            e.preventDefault();
+            hideModal();
+          });
+
+          confirmBtn?.addEventListener("click", (e) => {
+            e.preventDefault();
+            // navigate to the server logout handler that redirects to login
+            window.location.href = "/Auth/Logout";
+          });
+
+          logoutModal?.addEventListener("click", (e) => {
+            if (e.target === logoutModal) hideModal();
+          });
+        })();
+    </script>
+</body>
+</html>

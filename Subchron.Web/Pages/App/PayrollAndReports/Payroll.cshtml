@@ -1,0 +1,154 @@
+@page
+@model Subchron.Web.Pages.App.PayrollAndReports.PayrollModel
+@{
+    ViewData["Title"] = "Payroll Export";
+    ViewData["PageTitle"] = "Payroll Export";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Payroll Export</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a pay period, generate a preview from attendance logs and approved OT, resolve exceptions, then export to CSV or Excel.</p>
+        </div>
+    </div>
+
+    <!-- Pay period -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Pay period</h3>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="periodStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period start</label>
+                <input type="date" id="periodStart" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+            <div>
+                <label for="periodEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period end</label>
+                <input type="date" id="periodEnd" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+        </div>
+        <div class="mt-6">
+            <button type="button" id="btnGeneratePreview" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Generate preview
+            </button>
+        </div>
+    </div>
+
+    <!-- Preview: Attendance + Approved OT -->
+    <div id="previewSection" class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
+        <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Preview — Attendance logs &amp; approved OT</h3>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Data that will be included in the export.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employee</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time In</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time Out</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Hours</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">OT (approved)</th>
+                    </tr>
+                </thead>
+                <tbody id="previewTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Tim Jones</td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-18</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">08:00</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">17:30</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">9.5</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">—</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Tim Jones</td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-20</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">08:00</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">22:00</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">14.0</td>
+                        <td class="px-5 py-3 text-sm text-subgreen-600 dark:text-subgreen-400">3.0</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Jane Smith</td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-19</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">09:00</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">18:00</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">9.0</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Exceptions (MVP: just flag) -->
+    <div id="exceptionsSection" class="mb-6 rounded-2xl border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/20" style="display: none;">
+        <div class="border-b border-amber-200 px-5 py-4 dark:border-amber-800">
+            <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-200">Exceptions</h3>
+            <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-300">Review before export. MVP: flagged only; resolve/ignore can be added later.</p>
+        </div>
+        <ul id="exceptionsList" class="divide-y divide-amber-200 px-5 py-3 dark:divide-amber-800">
+            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
+                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Missing OUT</strong> — Alex Reyes, 2025-02-21 (no time-out recorded)</span>
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
+            </li>
+            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
+                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Overlap</strong> — Tim Jones, 2025-02-20: two entries overlap (08:00–17:00 and 14:00–22:00)</span>
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
+            </li>
+            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
+                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Rejected event</strong> — Jane Smith, OT request 2025-02-17 (rejected; excluded from export)</span>
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Export actions -->
+    <div id="exportSection" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
+        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Export</h3>
+        <div class="flex flex-wrap gap-3">
+            <button type="button" id="btnExportCsv" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export CSV</button>
+            <button type="button" id="btnExportExcel" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export Excel</button>
+        </div>
+        <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">Optional: Export record can be saved to Archive/Audit for compliance.</p>
+    </div>
+
+    <p id="payrollEmpty" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Select pay period and click Generate preview to continue.</p>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var periodStart = document.getElementById('periodStart');
+    var periodEnd = document.getElementById('periodEnd');
+    var btnGeneratePreview = document.getElementById('btnGeneratePreview');
+    var previewSection = document.getElementById('previewSection');
+    var exceptionsSection = document.getElementById('exceptionsSection');
+    var exportSection = document.getElementById('exportSection');
+    var payrollEmpty = document.getElementById('payrollEmpty');
+    var btnExportCsv = document.getElementById('btnExportCsv');
+    var btnExportExcel = document.getElementById('btnExportExcel');
+
+    function setDefaultPeriod() {
+        var today = new Date();
+        var start = new Date(today);
+        start.setDate(1);
+        periodStart.value = start.toISOString().slice(0, 10);
+        periodEnd.value = today.toISOString().slice(0, 10);
+    }
+    setDefaultPeriod();
+
+    btnGeneratePreview.addEventListener('click', function () {
+        previewSection.style.display = 'block';
+        exceptionsSection.style.display = 'block';
+        exportSection.style.display = 'block';
+        payrollEmpty.style.display = 'none';
+    });
+
+    btnExportCsv.addEventListener('click', function () { alert('Export CSV (backend not connected).'); });
+    btnExportExcel.addEventListener('click', function () { alert('Export Excel (backend not connected).'); });
+})();
+</script>
+}

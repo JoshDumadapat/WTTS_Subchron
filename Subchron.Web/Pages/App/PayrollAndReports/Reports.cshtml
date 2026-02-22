@@ -1,0 +1,176 @@
+@page
+@model Subchron.Web.Pages.App.PayrollAndReports.ReportsModel
+@{
+    ViewData["Title"] = "Reports";
+    ViewData["PageTitle"] = "Reports";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Reports</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Generate attendance, lates, absences, or OT summary reports. Apply filters and export to CSV or PDF.</p>
+        </div>
+    </div>
+
+    <!-- Filters card -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Report options</h3>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="reportType" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Report type</label>
+                <select id="reportType" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                    <option value="AttendanceSummary">Attendance Summary</option>
+                    <option value="Lates">Lates</option>
+                    <option value="Absences">Absences</option>
+                    <option value="OTSummary">OT Summary</option>
+                </select>
+            </div>
+            <div>
+                <label for="dateFrom" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Date from</label>
+                <input type="date" id="dateFrom" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+            <div>
+                <label for="dateTo" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Date to</label>
+                <input type="date" id="dateTo" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+        </div>
+        <div class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+                <label for="filterSite" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Site</label>
+                <select id="filterSite" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                    <option value="">All sites</option>
+                    <option value="main">Main Office</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="branch1">Branch 1</option>
+                </select>
+            </div>
+            <div>
+                <label for="filterDept" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
+                <select id="filterDept" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                    <option value="">All departments</option>
+                    <option value="ops">Operations</option>
+                    <option value="hr">HR</option>
+                    <option value="it">IT</option>
+                </select>
+            </div>
+            <div>
+                <label for="filterEmployee" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Employee</label>
+                <select id="filterEmployee" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                    <option value="">All employees</option>
+                    <option value="1">Tim Jones</option>
+                    <option value="2">Jane Smith</option>
+                    <option value="3">Alex Reyes</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-3">
+            <button type="button" id="btnGenerate" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Generate
+            </button>
+        </div>
+    </div>
+
+    <!-- Report table -->
+    <div id="reportSection" class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+            <h3 id="reportTitle" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Report results</h3>
+            <div class="flex gap-2">
+                <button type="button" id="btnExportCsv" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export CSV</button>
+                <button type="button" id="btnExportPdf" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export PDF</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50" id="reportTableHead">
+                        <!-- Filled by JS or server -->
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <!-- Filled by JS or server -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p id="reportEmpty" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Select options and click Generate to view the report.</p>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var reportType = document.getElementById('reportType');
+    var dateFrom = document.getElementById('dateFrom');
+    var dateTo = document.getElementById('dateTo');
+    var btnGenerate = document.getElementById('btnGenerate');
+    var reportSection = document.getElementById('reportSection');
+    var reportEmpty = document.getElementById('reportEmpty');
+    var reportTitle = document.getElementById('reportTitle');
+    var thead = document.getElementById('reportTableHead');
+    var tbody = document.getElementById('reportTableBody');
+    var btnExportCsv = document.getElementById('btnExportCsv');
+    var btnExportPdf = document.getElementById('btnExportPdf');
+
+    function setDefaultDates() {
+        var today = new Date();
+        var first = new Date(today.getFullYear(), today.getMonth(), 1);
+        dateFrom.value = first.toISOString().slice(0, 10);
+        dateTo.value = today.toISOString().slice(0, 10);
+    }
+    setDefaultDates();
+
+    function getDemoHeaders(type) {
+        if (type === 'AttendanceSummary') return ['Employee', 'Date', 'Time In', 'Time Out', 'Hours', 'Site'];
+        if (type === 'Lates') return ['Employee', 'Date', 'Scheduled', 'Actual In', 'Minutes Late'];
+        if (type === 'Absences') return ['Employee', 'Date', 'Type', 'Reason', 'Status'];
+        if (type === 'OTSummary') return ['Employee', 'Period', 'OT Hours', 'Approved', 'Reason'];
+        return ['Column 1', 'Column 2', 'Column 3'];
+    }
+    function getDemoRows(type) {
+        if (type === 'AttendanceSummary') return [
+            ['Tim Jones', '2025-02-20', '08:00', '17:30', '9.5', 'Main Office'],
+            ['Jane Smith', '2025-02-20', '09:00', '18:00', '9.0', 'Warehouse'],
+            ['Alex Reyes', '2025-02-21', '08:00', '—', '—', 'Main Office']
+        ];
+        if (type === 'Lates') return [
+            ['Tim Jones', '2025-02-18', '08:00', '08:23', '23'],
+            ['Jane Smith', '2025-02-19', '09:00', '09:15', '15']
+        ];
+        if (type === 'Absences') return [
+            ['Alex Reyes', '2025-02-21', 'Sick', 'Flu', 'Approved'],
+            ['Tim Jones', '2025-02-14', 'Leave', 'Personal', 'Approved']
+        ];
+        if (type === 'OTSummary') return [
+            ['Tim Jones', 'Feb 1–15', '6.0', 'Yes', 'Project deadline'],
+            ['Jane Smith', 'Feb 1–15', '4.0', 'Yes', 'Inventory count']
+        ];
+        return [['Demo', '—', '—']];
+    }
+
+    function renderReport() {
+        var type = reportType.value;
+        var headers = getDemoHeaders(type);
+        var rows = getDemoRows(type);
+        reportTitle.textContent = 'Report results (' + reportType.options[reportType.selectedIndex].text + ')';
+        thead.innerHTML = '<th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">' + headers.map(function (h) { return h; }).join('</th><th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">') + '</th>';
+        tbody.innerHTML = rows.map(function (row) {
+            return '<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">' + row.map(function (cell) {
+                return '<td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">' + cell + '</td>';
+            }).join('') + '</tr>';
+        }).join('');
+        reportSection.style.display = 'block';
+        reportEmpty.style.display = 'none';
+    }
+
+    btnGenerate.addEventListener('click', function () {
+        renderReport();
+    });
+
+    btnExportCsv.addEventListener('click', function () { alert('Export CSV (backend not connected).'); });
+    btnExportPdf.addEventListener('click', function () { alert('Export PDF (backend not connected).'); });
+})();
+</script>
+}

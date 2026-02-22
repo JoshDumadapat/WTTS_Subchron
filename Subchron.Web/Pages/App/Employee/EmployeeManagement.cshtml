@@ -1,0 +1,741 @@
+@page
+@model Subchron.Web.Pages.App.Employee.EmployeeManagementModel
+@{
+    ViewData["Title"] = "Employee Management";
+    ViewData["PageTitle"] = "Employee Management";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Employee Directory</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your organization's team members.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a asp-page="/App/Archive/Archive" class="inline-flex items-center rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                <svg class="mr-2 h-4 w-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                View Archive
+            </a>
+            <a asp-page="/App/Employee/Add" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Add Employee
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <!-- Stats: equal width, numbers right-aligned -->
+        <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</p>
+                <p class="mt-0.5 text-right text-lg font-semibold text-slate-900 dark:text-white" id="statTotal">@Model.Employees.Count</p>
+            </div>
+            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Active (WorkState)</p>
+                <p class="mt-0.5 text-right text-lg font-semibold text-subgreen-600 dark:text-subgreen-400" id="statActive">@Model.Employees.Count(e => e.WorkState == "Active")</p>
+            </div>
+            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Other (On Leave, etc.)</p>
+                <p class="mt-0.5 text-right text-lg font-semibold text-amber-600 dark:text-amber-400" id="statInactive">@Model.Employees.Count(e => e.WorkState != "Active")</p>
+            </div>
+            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Archived</p>
+                <p class="mt-0.5 text-right text-lg font-semibold text-slate-600 dark:text-slate-400" id="statArchived">—</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-slate-50/50 p-4 dark:bg-slate-800/30">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </span>
+                    <input type="text" id="searchInput" class="h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" placeholder="Search by name, email, or employee number...">
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <select id="filterStatus" class="h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
+                        <option value="">All work state</option>
+                        <option value="Active">Active</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Suspended">Suspended</option>
+                        <option value="Probation">Probation</option>
+                        <option value="Training">Training</option>
+                    </select>
+                    <select id="filterDepartment" class="h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
+                        <option value="">All Departments</option>
+                        @foreach (var d in Model.Departments)
+                        {
+                            <option value="@d.DepID">@d.DepartmentName</option>
+                        }
+                    </select>
+                    <button type="button" id="resetFilters" class="h-11 rounded-xl border border-gray-300 bg-white px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Team Member</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Role & Department</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Address</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date Hired</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @{
+                        string Initials(string fn, string ln) => string.Concat((fn?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant(), (ln?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant()).Trim();
+                        string FullName(string fn, string? mn, string ln) => string.Join(" ", new[] { fn, mn, ln }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                        string Addr(string? line, string? city, string? country) => string.Join(", ", new[] { line, city, country }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                    }
+                    @foreach (var e in Model.Employees)
+                    {
+                        var name = FullName(e.FirstName, e.MiddleName, e.LastName);
+                        var initial = string.IsNullOrWhiteSpace(name) ? "—" : Initials(e.FirstName, e.LastName);
+                        var address = Addr(e.AddressLine1, e.City, e.Country);
+                        var status = e.WorkState ?? "Active";
+                        var isActive = string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase);
+                        var joined = e.DateHired?.ToString("MMM dd, yyyy") ?? "—";
+                        var ageStr = e.Age.HasValue ? e.Age.Value.ToString() : "—";
+                        var genderStr = string.IsNullOrWhiteSpace(e.Gender) ? "—" : e.Gender;
+                        <tr class="employee-row group transition-all hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-emp-id="@e.EmpID" data-emp-number="@e.EmpNumber" data-status="@status" data-name="@name" data-email="" data-department="@(e.DepartmentName ?? "—")" data-department-id="@(e.DepartmentID?.ToString() ?? "")" data-role="@e.Role" data-address="@address" data-joined="@joined" data-date-hired="@(e.DateHired?.ToString("yyyy-MM-dd") ?? "")" data-phone="@(e.Phone ?? "—")" data-age="@ageStr" data-gender="@genderStr" data-ec-name="—" data-ec-phone="—" data-ec-relation="—">
+                            <td class="px-5 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-400">@initial</div>
+                                    <div>
+                                        <div class="text-sm font-medium text-slate-900 dark:text-white">@name</div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">@e.EmpNumber</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3">
+                                <div class="text-sm font-medium text-slate-900 dark:text-white">@e.Role</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">@(e.DepartmentName ?? "—")</div>
+                            </td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(string.IsNullOrWhiteSpace(address) ? "—" : address)</td>
+                            <td class="px-5 py-3">
+                                <div class="relative inline-block" data-emp-id="@e.EmpID">
+                                    <button type="button" onclick="toggleStatusMenu(this); event.stopPropagation();" class="status-badge inline-flex items-center rounded-md border-0 px-2 py-0.5 text-xs font-medium @(isActive ? "text-subgreen-700 dark:text-subgreen-300 bg-subgreen-50 dark:bg-subgreen-900/30" : "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400")">@status</button>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">@joined</td>
+                            <td class="px-5 py-3 text-right">
+                                <div class="flex justify-end gap-1 flex-wrap">
+                                    <button type="button" onclick="openQrModal(@e.EmpID, '@(name.Replace("'", "\\'"))')" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 transition-all hover:bg-subgreen-200 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-800/50" title="Generate / View QR">QR</button>
+                                    <button type="button" onclick="openViewModal(@e.EmpID)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50" title="View"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button>
+                                    <button type="button" onclick="openEditModal(@e.EmpID)" class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50" title="Edit"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L6 18l.8-2.685a4.5 4.5 0 011.897-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>Edit</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    <tr id="employeeEmptyPlaceholder" class="empty-placeholder @(Model.Employees.Any() ? "hidden" : "")" aria-live="polite">
+                        <td colspan="6" class="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">No employees yet. Add an employee to get started.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="paginationShowing">5</span> of <span id="paginationTotal">5</span>
+                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">Rows</span>
+                    <select id="rowsPerPage" class="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button type="button" id="paginationPrev" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" aria-label="Previous">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <div class="flex items-center gap-1" id="paginationNumbers"></div>
+                <button type="button" id="paginationNext" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" aria-label="Next">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status dropdown portal: fixed on top so it is never clipped by table -->
+<div id="statusDropdownPortal" class="fixed z-[350] hidden min-w-[160px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+    <button type="button" class="status-portal-action w-full px-4 py-2.5 text-left text-sm font-medium text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-900/20" data-action="workstate">Work state</button>
+    <button type="button" class="status-portal-action w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" data-action="archive">Archive</button>
+</div>
+
+<!-- Unified Status Modal: Work state (yellow) or Archive (red) -->
+<div id="statusActionModal" class="fixed inset-0 z-[200] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStatusActionModal()"></div>
+        <div id="statusModalPanel" class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <!-- Work state mode (yellow) -->
+            <div id="statusModalWorkState" class="hidden">
+                <div class="border-b border-amber-200 bg-amber-50/80 px-6 py-5 dark:border-amber-900/40 dark:bg-amber-900/20">
+                    <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-100">Work state</h3>
+                    <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Choose the current work state for this employee.</p>
+                </div>
+                <form id="workStateForm" method="post" asp-page-handler="UpdateWorkState" data-turbo="false" class="p-6">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="workStateEmpId" value="" />
+                    <label for="workStateSelect" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Reason <span class="text-red-500">*</span></label>
+                    <select name="workState" id="workStateSelect" required class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                        <option value="Active">Active</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Suspended">Suspended</option>
+                        <option value="Probation">Probation</option>
+                        <option value="Training">Training</option>
+                    </select>
+                    <div class="mt-6 flex flex-row-reverse gap-3">
+                        <button type="submit" id="workStateSubmitBtn" class="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-70 disabled:cursor-not-allowed">Update work state</button>
+                        <button type="button" onclick="closeStatusActionModal()" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Archive mode (red) -->
+            <div id="statusModalArchive" class="hidden">
+                <div class="border-b border-rose-200 bg-rose-50/80 px-6 py-5 dark:border-rose-900/40 dark:bg-rose-900/20">
+                    <h3 class="text-lg font-semibold text-rose-900 dark:text-rose-100">Archive employee</h3>
+                    <p class="mt-1 text-sm text-rose-700 dark:text-rose-300">Provide a reason (e.g. Resigned, Terminated). This will be stored and recorded in the audit log.</p>
+                </div>
+                <form id="archiveForm" method="post" asp-page-handler="Archive" data-turbo="false" class="p-6">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="archiveEmpId" value="" />
+                    <label for="archiveReasonInput" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Archive reason <span class="text-red-500">*</span></label>
+                    <textarea name="reason" id="archiveReasonInput" required maxlength="200" rows="3" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Resigned, Terminated, End of contract"></textarea>
+                    <div class="mt-6 flex flex-row-reverse gap-3">
+                        <button type="submit" id="archiveSubmitBtn" class="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-70 disabled:cursor-not-allowed">Archive</button>
+                        <button type="button" onclick="closeStatusActionModal()" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance QR Modal -->
+<div id="qrModal" class="fixed inset-0 z-[200] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeQrModal()"></div>
+        <div class="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 id="qrModalTitle" class="text-lg font-semibold text-slate-900 dark:text-white">Attendance QR</h3>
+                <button type="button" onclick="closeQrModal()" class="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400" aria-label="Close">&times;</button>
+            </div>
+            <p class="mb-3 text-xs text-slate-600 dark:text-slate-400">Scan at kiosk or use in employee portal for clock-in/out.</p>
+            <div class="flex justify-center rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-slate-800">
+                <img id="qrModalImage" src="" alt="Attendance QR" class="h-52 w-52 object-contain" />
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button type="button" onclick="closeQrModal()" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Employee Modal -->
+<div id="editModal" class="fixed inset-0 z-[200] hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
+        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-gray-100 px-8 py-6 dark:border-gray-800">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit Employee</h3>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Update employee details.</p>
+            </div>
+            <form id="editEmployeeForm" method="post" asp-page-handler="UpdateEmployee" data-turbo="false" class="p-8">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editEmpID" value="" />
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div class="md:col-span-2">
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <input type="text" name="FirstName" id="editFirstName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="First name" required />
+                            </div>
+                            <div>
+                                <input type="text" name="MiddleName" id="editMiddleName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Middle (optional)" />
+                            </div>
+                            <div>
+                                <input type="text" name="LastName" id="editLastName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Last name" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label>
+                        <input type="text" name="EmpNumber" id="editEmpNumber" class="h-11 w-full rounded-xl border border-gray-200 bg-slate-50 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400" readonly />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
+                        <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            <option value="">— Select —</option>
+                            @foreach (var d in Model.Departments)
+                            {
+                                <option value="@d.DepID">@d.DepartmentName</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                        <input type="number" name="age" id="editAge" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" min="1" max="120" />
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                        <select name="gender" id="editGender" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            <option value="">— Select —</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role</label>
+                        <select name="role" id="editRole" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            <option value="Employee">Employee</option>
+                            <option value="HR">HR</option>
+                            <option value="Manager">Manager</option>
+                            <option value="PayrollPersonnel">Payroll Personnel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type</label>
+                        <select name="EmploymentType" id="editEmploymentType" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            <option value="Regular">Regular</option>
+                            <option value="Contractual">Contractual</option>
+                            <option value="Part-Time">Part-Time</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Work state</label>
+                        <select name="workState" id="editWorkState" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            <option value="Active">Active</option>
+                            <option value="OnLeave">On Leave</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Probation">Probation</option>
+                            <option value="Training">Training</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label>
+                        <input type="date" name="dateHired" id="editDateHired" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="sm:col-span-2"><input type="text" name="AddressLine1" id="editAddressLine1" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Address line 1" /></div>
+                            <div class="sm:col-span-2"><input type="text" name="AddressLine2" id="editAddressLine2" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Address line 2 (optional)" /></div>
+                            <div><input type="text" name="City" id="editCity" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="City" /></div>
+                            <div><input type="text" name="StateProvince" id="editStateProvince" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="State / Province" /></div>
+                            <div><input type="text" name="PostalCode" id="editPostalCode" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Postal code" /></div>
+                            <div><input type="text" name="Country" id="editCountry" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Country" /></div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><label class="mb-1 block text-xs text-slate-500">Phone</label><div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-800"><span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span><input type="tel" name="Phone" id="editPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" /></div></div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><label class="mb-1 block text-xs text-slate-500">Name</label><input type="text" name="EmergencyContactName" id="editEmergencyContactName" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Full name" /></div>
+                            <div><label class="mb-1 block text-xs text-slate-500">Phone</label><div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-800"><span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span><input type="tel" name="EmergencyContactPhone" id="editEmergencyContactPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" /></div></div>
+                            <div><label class="mb-1 block text-xs text-slate-500">Relation</label><input type="text" name="EmergencyContactRelation" id="editEmergencyContactRelation" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Spouse, Parent" /></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <button type="button" onclick="closeEditModal()" class="h-12 flex-1 rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
+                    <button type="submit" id="editEmployeeSubmitBtn" class="h-12 flex-1 rounded-xl bg-subgreen-600 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 hover:bg-subgreen-500 disabled:opacity-70 disabled:cursor-not-allowed">Update Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Employee Modal (read-only) -->
+<div id="viewModal" class="fixed inset-0 z-[200] hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeViewModal()"></div>
+        <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div class="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Employee information</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View only. Use Edit to change details.</p>
+            </div>
+            <div class="p-6 space-y-6">
+                <section>
+                    <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Personal info</h4>
+                    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div><dt class="text-xs text-slate-500">Full name</dt><dd id="viewName" class="text-sm font-medium text-slate-900 dark:text-white">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Employee ID</dt><dd id="viewEmpNumber" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Email</dt><dd id="viewEmail" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Age</dt><dd id="viewAge" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Gender</dt><dd id="viewGender" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Role</dt><dd id="viewRole" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Department</dt><dd id="viewDepartment" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Status</dt><dd id="viewStatus" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Employment type</dt><dd id="viewEmploymentType" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Date Hired</dt><dd id="viewJoined" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                    </dl>
+                </section>
+                <section>
+                    <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
+                    <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <div class="sm:col-span-2"><dt class="text-xs text-slate-500">Address line 1</dt><dd id="viewAddressLine1" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div class="sm:col-span-2"><dt class="text-xs text-slate-500">Address line 2</dt><dd id="viewAddressLine2" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">City</dt><dd id="viewCity" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">State / Province</dt><dd id="viewStateProvince" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Postal code</dt><dd id="viewPostalCode" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Country</dt><dd id="viewCountry" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                    </dl>
+                </section>
+                <section>
+                    <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
+                    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div><dt class="text-xs text-slate-500">Phone</dt><dd id="viewPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                    </dl>
+                </section>
+                <section>
+                    <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
+                    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div><dt class="text-xs text-slate-500">Name</dt><dd id="viewEcName" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Phone</dt><dd id="viewEcPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                        <div><dt class="text-xs text-slate-500">Relation</dt><dd id="viewEcRelation" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
+                    </dl>
+                </section>
+            </div>
+            <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <button type="button" onclick="closeViewModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const rows = document.querySelectorAll('.employee-row');
+        const searchInput = document.getElementById('searchInput');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterDepartment = document.getElementById('filterDepartment');
+        const resetFilters = document.getElementById('resetFilters');
+        const rowsPerPage = document.getElementById('rowsPerPage');
+        let currentPage = 1;
+        let totalRows = rows.length;
+        const ROWS = 10;
+
+        function getVisibleRows() {
+            const search = (searchInput?.value || '').toLowerCase();
+            const status = (filterStatus?.value || '').toLowerCase();
+            const dept = (filterDepartment?.value || '').toLowerCase();
+            return Array.from(rows).filter(function (tr) {
+                const name = (tr.getAttribute('data-name') || '').toLowerCase();
+                const email = (tr.getAttribute('data-email') || '').toLowerCase();
+                const rowStatus = (tr.getAttribute('data-status') || '').toLowerCase();
+                const department = (tr.getAttribute('data-department') || '').toLowerCase();
+                const matchSearch = !search || name.includes(search) || email.includes(search);
+                const matchStatus = !status || rowStatus === status;
+                const deptId = tr.getAttribute('data-department-id') || '';
+                const matchDept = !dept || deptId === dept || department.toLowerCase().includes(dept);
+                return matchSearch && matchStatus && matchDept;
+            });
+        }
+
+        function filterRows() {
+            const visible = getVisibleRows();
+            const perPage = parseInt(rowsPerPage?.value || '10', 10) || 10;
+            const totalPages = Math.max(1, Math.ceil(visible.length / perPage));
+            currentPage = Math.min(currentPage, totalPages) || 1;
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            rows.forEach(function (tr) {
+                tr.style.display = 'none';
+            });
+            visible.slice(start, end).forEach(function (tr) {
+                tr.style.display = '';
+            });
+            var emptyRow = document.getElementById('employeeEmptyPlaceholder');
+            if (emptyRow) {
+                var hasFilter = (searchInput && searchInput.value.trim()) || (filterStatus && filterStatus.value) || (filterDepartment && filterDepartment.value);
+                if (visible.length === 0) {
+                    emptyRow.classList.remove('hidden');
+                    emptyRow.querySelector('td').textContent = hasFilter ? 'No results match your filters. Try adjusting search or filters.' : 'No employees yet. Add an employee to get started.';
+                } else {
+                    emptyRow.classList.add('hidden');
+                }
+            }
+            var showing = visible.length === 0 ? 0 : visible.slice(start, end).length;
+            document.getElementById('paginationShowing').textContent = showing;
+            document.getElementById('paginationTotal').textContent = visible.length;
+            var container = document.getElementById('paginationNumbers');
+            if (container) {
+                container.innerHTML = '';
+                for (var i = 1; i <= totalPages; i++) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'h-9 min-w-[36px] rounded-lg border px-3 text-sm font-bold ' + (i === currentPage ? 'border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-900/40 dark:bg-subgreen-900/20 dark:text-subgreen-300' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800');
+                    btn.textContent = i;
+                    (function (p) { btn.addEventListener('click', function () { currentPage = p; filterRows(); }); })(i);
+                    container.appendChild(btn);
+                }
+            }
+            document.getElementById('paginationPrev').disabled = currentPage <= 1;
+            document.getElementById('paginationNext').disabled = currentPage >= totalPages;
+        }
+
+        rowsPerPage?.addEventListener('change', function () { currentPage = 1; filterRows(); });
+        document.getElementById('paginationPrev')?.addEventListener('click', function () { if (currentPage > 1) { currentPage--; filterRows(); } });
+        document.getElementById('paginationNext')?.addEventListener('click', function () { currentPage++; filterRows(); });
+        searchInput?.addEventListener('input', function () { currentPage = 1; filterRows(); });
+        filterStatus?.addEventListener('change', function () { currentPage = 1; filterRows(); });
+        filterDepartment?.addEventListener('change', function () { currentPage = 1; filterRows(); });
+        resetFilters?.addEventListener('click', function () {
+            if (searchInput) searchInput.value = '';
+            if (filterStatus) filterStatus.value = '';
+            if (filterDepartment) filterDepartment.value = '';
+            currentPage = 1;
+            rows.forEach(function (r) { r.style.display = ''; });
+            filterRows();
+        });
+        filterRows();
+    })();
+
+    var statusPortalRow = null;
+    function toggleStatusMenu(btn) {
+        var portal = document.getElementById('statusDropdownPortal');
+        if (!portal) return;
+        var wrap = btn.closest('[data-emp-id]');
+        var row = wrap ? wrap.closest('tr') : null;
+        var id = wrap ? wrap.getAttribute('data-emp-id') : null;
+        var empId = id ? parseInt(id, 10) : 0;
+        if (!empId) return;
+        statusPortalRow = row;
+        var rect = btn.getBoundingClientRect();
+        portal.style.left = rect.left + 'px';
+        portal.style.top = (rect.bottom + 4) + 'px';
+        portal.dataset.empId = String(empId);
+        portal.classList.remove('hidden');
+    }
+    function closeStatusPortal() {
+        var portal = document.getElementById('statusDropdownPortal');
+        if (portal) portal.classList.add('hidden');
+        statusPortalRow = null;
+    }
+    document.getElementById('statusDropdownPortal').addEventListener('click', function (e) {
+        var b = e.target.closest('.status-portal-action');
+        if (!b) return;
+        e.stopPropagation();
+        var action = b.getAttribute('data-action');
+        var empId = parseInt(this.dataset.empId || '0', 10);
+        var row = statusPortalRow;
+        closeStatusPortal();
+        if (action === 'workstate' && empId) openStatusActionModal('workstate', empId, row);
+        else if (action === 'archive' && empId) openStatusActionModal('archive', empId, row);
+    });
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#statusDropdownPortal') || e.target.closest('.status-badge')) return;
+        closeStatusPortal();
+    });
+
+    function openStatusActionModal(mode, empId, row) {
+        var modal = document.getElementById('statusActionModal');
+        var workStatePanel = document.getElementById('statusModalWorkState');
+        var archivePanel = document.getElementById('statusModalArchive');
+        if (mode === 'workstate') {
+            document.getElementById('workStateEmpId').value = empId;
+            var currentStatus = row ? (row.getAttribute('data-status') || 'Active') : 'Active';
+            var sel = document.getElementById('workStateSelect');
+            if (sel) { sel.value = currentStatus; }
+            workStatePanel.classList.remove('hidden');
+            archivePanel.classList.add('hidden');
+        } else {
+            document.getElementById('archiveEmpId').value = empId;
+            document.getElementById('archiveReasonInput').value = '';
+            workStatePanel.classList.add('hidden');
+            archivePanel.classList.remove('hidden');
+        }
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    function closeStatusActionModal() {
+        document.getElementById('statusActionModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function openQrModal(empId, employeeName) {
+        var modal = document.getElementById('qrModal');
+        var titleEl = document.getElementById('qrModalTitle');
+        var imgEl = document.getElementById('qrModalImage');
+        if (titleEl) titleEl.textContent = (employeeName && employeeName.length > 0) ? (employeeName + ' – Attendance QR') : 'Attendance QR';
+        if (imgEl) {
+            imgEl.src = '';
+            imgEl.alt = 'Loading…';
+            var url = window.location.pathname + '?handler=AttendanceQr&id=' + encodeURIComponent(empId);
+            imgEl.src = url;
+            imgEl.alt = 'Attendance QR';
+        }
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    function closeQrModal() {
+        document.getElementById('qrModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function openViewModal(id) {
+        var modal = document.getElementById('viewModal');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        function set(elId, val) {
+            var el = document.getElementById(elId);
+            if (el) el.textContent = (val != null && val !== '') ? val : '—';
+        }
+        set('viewName', 'Loading…');
+        set('viewEmpNumber', '');
+        set('viewEmail', '');
+        set('viewAge', '');
+        set('viewGender', '');
+        set('viewRole', '');
+        set('viewDepartment', '');
+        set('viewStatus', '');
+        set('viewEmploymentType', '');
+        set('viewJoined', '');
+        set('viewAddressLine1', '');
+        set('viewAddressLine2', '');
+        set('viewCity', '');
+        set('viewStateProvince', '');
+        set('viewPostalCode', '');
+        set('viewCountry', '');
+        set('viewPhone', '');
+        set('viewEcName', '');
+        set('viewEcPhone', '');
+        set('viewEcRelation', '');
+        fetch('/App/Employee/EmployeeManagement?handler=Employee&id=' + encodeURIComponent(id), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (emp) {
+                if (!emp) return;
+                var e = emp;
+                var fn = e.FirstName || e.firstName || '';
+                var mn = e.MiddleName || e.middleName || '';
+                var ln = e.LastName || e.lastName || '';
+                var fullName = [fn, mn, ln].filter(Boolean).join(' ') || '—';
+                var dateHired = e.DateHired || e.dateHired;
+                var dateStr = dateHired ? (typeof dateHired === 'string' ? dateHired.substring(0, 10) : '') : '';
+                set('viewName', fullName);
+                set('viewEmpNumber', e.EmpNumber || e.empNumber);
+                set('viewEmail', e.Email || e.email);
+                set('viewAge', e.Age != null ? e.Age : e.age);
+                set('viewGender', e.Gender || e.gender);
+                set('viewRole', e.Role || e.role);
+                set('viewDepartment', e.DepartmentName || e.departmentName);
+                set('viewStatus', e.WorkState || e.workState);
+                set('viewEmploymentType', e.EmploymentType || e.employmentType);
+                set('viewJoined', dateStr);
+                set('viewAddressLine1', e.AddressLine1 || e.addressLine1);
+                set('viewAddressLine2', e.AddressLine2 || e.addressLine2);
+                set('viewCity', e.City || e.city);
+                set('viewStateProvince', e.StateProvince || e.stateProvince);
+                set('viewPostalCode', e.PostalCode || e.postalCode);
+                set('viewCountry', e.Country || e.country);
+                set('viewPhone', e.Phone || e.phone);
+                set('viewEcName', e.EmergencyContactName || e.emergencyContactName);
+                set('viewEcPhone', e.EmergencyContactPhone || e.emergencyContactPhone);
+                set('viewEcRelation', e.EmergencyContactRelation || e.emergencyContactRelation);
+            })
+            .catch(function () {
+                set('viewName', 'Failed to load.');
+            });
+    }
+    function closeViewModal() {
+        document.getElementById('viewModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+    function openEditModal(id) {
+        document.getElementById('editEmpID').value = id;
+        document.getElementById('editModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        fetch('/App/Employee/EmployeeManagement?handler=Employee&id=' + encodeURIComponent(id), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (emp) {
+                if (!emp || (emp.empID == null && emp.EmpID == null)) return;
+                var e = emp.EmpID != null ? emp : emp;
+                document.getElementById('editFirstName').value = (e.FirstName || e.firstName) || '';
+                document.getElementById('editMiddleName').value = (e.MiddleName || e.middleName) || '';
+                document.getElementById('editLastName').value = (e.LastName || e.lastName) || '';
+                document.getElementById('editEmpNumber').value = (e.EmpNumber || e.empNumber) || '';
+                var deptId = e.DepartmentID != null ? e.DepartmentID : e.departmentID;
+                document.getElementById('editDepartmentID').value = deptId != null ? deptId : '';
+                var roleEl = document.getElementById('editRole');
+                if (roleEl) roleEl.value = (e.Role || e.role) || 'Employee';
+                document.getElementById('editEmploymentType').value = (e.EmploymentType || e.employmentType) || 'Regular';
+                var workStateEl = document.getElementById('editWorkState');
+                if (workStateEl) workStateEl.value = (e.WorkState || e.workState) || 'Active';
+                var ageVal = e.Age != null ? e.Age : e.age;
+                document.getElementById('editAge').value = ageVal != null ? ageVal : '';
+                document.getElementById('editGender').value = (e.Gender || e.gender) || '';
+                var dh = e.DateHired || e.dateHired;
+                document.getElementById('editDateHired').value = dh ? (typeof dh === 'string' ? dh.substring(0, 10) : '') : '';
+                document.getElementById('editAddressLine1').value = (e.AddressLine1 || e.addressLine1) || '';
+                document.getElementById('editAddressLine2').value = (e.AddressLine2 || e.addressLine2) || '';
+                document.getElementById('editCity').value = (e.City || e.city) || '';
+                document.getElementById('editStateProvince').value = (e.StateProvince || e.stateProvince) || '';
+                document.getElementById('editPostalCode').value = (e.PostalCode || e.postalCode) || '';
+                document.getElementById('editCountry').value = (e.Country || e.country) || '';
+                document.getElementById('editPhone').value = (e.Phone || e.phone) || '';
+                document.getElementById('editEmergencyContactName').value = (e.EmergencyContactName || e.emergencyContactName) || '';
+                document.getElementById('editEmergencyContactPhone').value = (e.EmergencyContactPhone || e.emergencyContactPhone) || '';
+                document.getElementById('editEmergencyContactRelation').value = (e.EmergencyContactRelation || e.emergencyContactRelation) || '';
+            })
+            .catch(function () { });
+    }
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    var loadingHtml = '<span class="inline-flex items-center gap-2"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing…</span>';
+    function setSubmitButtonLoading(btn) {
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        btn.dataset.originalText = btn.textContent;
+        btn.innerHTML = loadingHtml;
+    }
+    document.getElementById('workStateForm')?.addEventListener('submit', function () {
+        document.body.classList.remove('overflow-hidden');
+        setSubmitButtonLoading(document.getElementById('workStateSubmitBtn'));
+    });
+    document.getElementById('archiveForm')?.addEventListener('submit', function () {
+        document.body.classList.remove('overflow-hidden');
+        setSubmitButtonLoading(document.getElementById('archiveSubmitBtn'));
+    });
+    document.getElementById('editEmployeeForm')?.addEventListener('submit', function () {
+        setSubmitButtonLoading(document.getElementById('editEmployeeSubmitBtn'));
+    });
+</script>
+@{
+    var toastMessage = TempData["ToastMessage"] as string;
+    var toastSuccess = TempData["ToastSuccess"] as bool?;
+    var toastFromQuery = Request.Query["toast"].FirstOrDefault();
+    if (toastFromQuery == "success" && toastMessage == null) { toastMessage = "Employee created successfully."; toastSuccess = true; }
+}
+@if (toastMessage != null)
+{
+    <script>
+        (function () {
+            if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(toastMessage)), @(toastSuccess == true ? "true" : "false"));
+        })();
+    </script>
+}

@@ -1,0 +1,102 @@
+@page
+@model Subchron.Web.Pages.App.Operations.OvertimeRequestsModel
+@{
+    ViewData["Title"] = "Overtime Requests";
+    ViewData["PageTitle"] = "Overtime Requests";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto max-w-7xl">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Overtime Requests</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Review and approve or reject employee overtime requests.</p>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="border-b border-slate-100 bg-slate-50/50 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Review queue (Pending)</p>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Click a request to view details and approve or reject.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employee</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Start – End</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="1" data-employee="Tim Jones" data-date="2025-02-22" data-start="18:00" data-end="21:00" data-reason="Project deadline" data-status="Pending">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Tim+Jones&background=209030&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <span class="text-sm font-medium text-slate-900 dark:text-white">Tim Jones</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 22, 2025</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Project deadline</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="1" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="2" data-employee="Jane Smith" data-date="2025-02-21" data-start="17:00" data-end="20:00" data-reason="Inventory count" data-status="Pending">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=0060B0&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <span class="text-sm font-medium text-slate-900 dark:text-white">Jane Smith</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 21, 2025</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">17:00 – 20:00</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Inventory count</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="2" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="3" data-employee="Alex Reyes" data-date="2025-02-20" data-start="19:00" data-end="22:00" data-reason="Deployment support" data-status="Approved">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=Alex+Reyes&background=6b7280&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
+                                <span class="text-sm font-medium text-slate-900 dark:text-white">Alex Reyes</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 20, 2025</td>
+                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
+                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Deployment support</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="3" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    document.getElementById('otTableBody')?.addEventListener('click', function (e) {
+        if (e.target.closest('a[href*="Details"]')) return;
+        var row = e.target.closest('tr.ot-row');
+        if (row) window.location.href = '/App/Operations/OvertimeRequests/Details?id=' + encodeURIComponent(row.getAttribute('data-id'));
+    });
+})();
+</script>
+}

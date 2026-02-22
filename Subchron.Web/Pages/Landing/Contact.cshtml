@@ -1,0 +1,111 @@
+﻿@page
+@model ContactModel
+@{
+    ViewData["Title"] = "Contact";
+}
+
+<section class="bg-slate-50 py-14 lg:py-20 dark:bg-slate-800/40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
+            <!-- Left: text -->
+            <div data-reveal class="reveal-base lg:sticky lg:top-28">
+                <span class="inline-block rounded-full border border-subgreen-200 bg-subgreen-50 px-3 py-1.5 text-sm font-semibold text-subgreen-700 dark:border-subgreen-700 dark:bg-subgreen-900/40 dark:text-subgreen-300">Get in touch</span>
+                <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl dark:text-slate-100">Request a Demo</h1>
+                <p class="mt-4 max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                    Ask about Enterprise integration, pricing, or how Subchron fits your attendance workflow.
+                </p>
+                <ul class="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-subgreen-500"></span> Enterprise support</li>
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-subblue-500"></span> Custom onboarding</li>
+                </ul>
+            </div>
+            <!-- Right: form -->
+            <div data-reveal class="reveal-base rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-8 dark:border-slate-600 dark:bg-slate-800/90 dark:ring-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Submit your request</h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">We’ll get back to you within 1–2 business days.</p>
+                <form class="mt-8 space-y-6">
+                    <!-- Organization Name -->
+                    <div>
+                        <label for="orgName" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Organization name</label>
+                        <input id="orgName" name="OrgName" type="text"
+                               class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                               placeholder="Your organization" required />
+                    </div>
+
+                    <!-- Contact + Email -->
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="contactName" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Contact name</label>
+                            <input id="contactName" name="ContactName" type="text"
+                                   class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                                   placeholder="Juan Dela Cruz" required />
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
+                            <input id="email" name="Email" type="email"
+                                   class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                                   placeholder="juan@company.com" required />
+                        </div>
+                    </div>
+
+                    <!-- Phone + Organization Size -->
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone number <span class="text-slate-400">(optional)</span></label>
+                            <input id="phone" name="Phone" type="tel"
+                                   class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                                   placeholder="+63 912 345 6789" />
+                        </div>
+                        <div>
+                            <label for="orgSize" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Organization size <span class="text-slate-400">(optional)</span></label>
+                            <select id="orgSize" name="OrgSize"
+                                    class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                                <option value="">Select size</option>
+                                <option value="1-50">1–50</option>
+                                <option value="51-200">51–200</option>
+                                <option value="201-500">201–500</option>
+                                <option value="500+">500+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Desired Demo Mode -->
+                    <div>
+                        <label for="desiredMode" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Desired demo mode</label>
+                        <select id="desiredMode" name="DesiredMode" required
+                                class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                            <option value="">Select a mode</option>
+                            <option value="QR">QR</option>
+                            <option value="BioGeo">BioGeo</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <!-- Message / Notes -->
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Message / notes <span class="text-slate-400">(optional)</span></label>
+                        <textarea id="message" name="Message" rows="4"
+                                  class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                                  placeholder="Tell us about your needs or questions..."></textarea>
+                    </div>
+
+                    <div class="flex flex-col items-start gap-3 pt-2">
+                        <button type="submit"
+                                class="w-full rounded-lg bg-gradient-to-r from-subgreen-500 to-subgreen-600
+               px-8 py-3.5 text-sm font-bold text-white shadow-md transition
+               hover:from-subgreen-600 hover:to-subgreen-700
+               focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
+               focus:outline-none dark:focus:ring-offset-slate-800">
+                            Send Request
+                        </button>
+
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            By submitting, you consent to be contacted regarding your inquiry.
+                        </p>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>

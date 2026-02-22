@@ -1,0 +1,217 @@
+﻿@{
+    var pageVal = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var currentPage = pageVal.TrimStart('/').Replace("/Index", "Index");
+    if (string.IsNullOrEmpty(currentPage)) { currentPage = "Index"; }
+
+    var navItems = new[]
+    {
+        ("/Index", "Home"),
+        ("/Landing/About", "About"),
+        ("/Landing/Pricing", "Pricing"),
+        ("/Landing/FAQ", "FAQ"),
+        ("/Landing/Contact", "Contact"),
+    };
+
+    var productItems = new[]
+    {
+        ("/Landing/Services", "Services", "Modules and capabilities for every workflow."),
+        ("/Landing/Features", "Features", "Security, audit logs, roles, and controls."),
+        ("/Landing/HowItWorks", "How It Works", "Setup steps from org to daily tracking."),
+    };
+
+    string Normalize(string p) => (p ?? "").TrimStart('/').Replace("/Index", "Index");
+    bool IsActive(string target) => string.Equals(Normalize(currentPage), Normalize(target), StringComparison.OrdinalIgnoreCase);
+    var isProductActive = productItems.Any(x => IsActive(x.Item1));
+}
+
+<nav class="flex h-20 items-center justify-between">
+    <!-- Logo -->
+    <a asp-page="/Index" class="group flex items-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+        <img src="~/images/logo/logo.png" alt="Subchron" class="h-10 w-auto transition-transform duration-300 group-hover:brightness-110" />
+    </a>
+
+    <!-- Desktop nav -->
+    <div class="hidden items-center gap-1 md:flex">
+        @foreach (var (navPage, label) in navItems.Take(2))
+        {
+            var isActive = IsActive(navPage);
+            var linkClass = isActive
+            ? "rounded-lg px-3 py-2 text-sm font-bold text-subblue-600 dark:text-subblue-400"
+            : "link-underline rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-subgreen-600 dark:text-slate-300 dark:hover:text-subgreen-400";
+
+            <a asp-page="@navPage" class="@linkClass">@label</a>
+        }
+
+        @* Product dropdown (Dynamic Width) *@
+        <div class="relative">
+            <button id="productBtn"
+                    type="button"
+                    class="@(isProductActive
+                                                    ? "rounded-lg px-3 py-2 text-sm font-bold text-subblue-600 dark:text-subblue-400"
+                                                    : "link-underline rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-subgreen-600 dark:text-slate-300 dark:hover:text-subgreen-400")
+                           inline-flex items-center gap-2"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                Product
+                <svg class="h-4 w-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                </svg>
+            </button>
+
+            <!-- w-max expands the card based on content width -->
+            <div id="productMenu"
+                 class="animate-fade-in-up absolute top-full left-0 z-50 mt-3 hidden w-max min-w-full">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xl ring-1 ring-slate-900/5
+                dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+                    <div class="px-3 pt-2 pb-3">
+                        <div class="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                            Explore Product
+                        </div>
+                        <!-- whitespace-nowrap prevents the sentence from breaking into a new line -->
+                        <div class="mt-1 text-sm whitespace-nowrap text-slate-600 dark:text-slate-300">
+                            Comprehensive attendance solutions, security features, and optimized workflow setup.
+                        </div>
+                    </div>
+
+                    <div class="mt-2 grid gap-2">
+                        @foreach (var (navPage, title, desc) in productItems)
+                        {
+                            var active = IsActive(navPage);
+                            <a asp-page="@navPage"
+                               class="group flex items-start gap-4 rounded-xl p-4 transition
+                                  @(active
+                                                                ? "bg-subblue-50/70 ring-1 ring-subblue-200 dark:bg-slate-700/60 dark:ring-slate-600"
+                                                                : "hover:bg-slate-50 dark:hover:bg-slate-700")">
+
+                            <!-- Background and rings removed from icon container -->
+                            <div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center
+                                            text-slate-700 group-hover:text-subgreen-700
+                                            dark:text-slate-200 dark:group-hover:text-subgreen-300">
+                                @if (title == "Services")
+                                    {
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 0 0-2-2h-6M4 11V7a2 2 0 0 1 2-2h2" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11h8M8 15h6" />
+                                        </svg>
+                                    }
+                                    else if (title == "Features")
+                                    {
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V7l7-4z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+                                        </svg>
+                                    }
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-sm font-bold text-slate-900 dark:text-slate-100">@title</div>
+                                        <!-- Arrow icon removed -->
+                                    </div>
+                                    <!-- whitespace-nowrap added to prevent description wrap -->
+                                    <div class="mt-1 text-xs leading-relaxed whitespace-nowrap text-slate-600 dark:text-slate-300">@desc</div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @foreach (var (navPage, label) in navItems.Skip(2))
+        {
+            var isActive = IsActive(navPage);
+            var linkClass = isActive
+            ? "rounded-lg px-3 py-2 text-sm font-bold text-subblue-600 dark:text-subblue-400"
+            : "link-underline rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-subgreen-600 dark:text-slate-300 dark:hover:text-subgreen-400";
+
+            <a asp-page="@navPage" class="@linkClass">@label</a>
+        }
+
+        <div class="ml-4 flex items-center gap-2 border-l border-slate-200 pl-6 dark:border-slate-600">
+            <button type="button" class="theme-toggle rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
+                <svg data-sun class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg data-moon class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+
+            <a asp-page="/Auth/Login" class="rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-600 transition-all hover:border-subblue-400 hover:text-subblue-600 dark:border-slate-500 dark:text-slate-300">Sign In</a>
+            <a asp-page="/Auth/Signup" class="btn-primary-glow rounded-full bg-gradient-to-r from-subgreen-500 to-subgreen-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg">Get Started</a>
+        </div>
+    </div>
+
+    <!-- Mobile buttons -->
+    <div class="flex items-center gap-1 md:hidden">
+        <button type="button" class="theme-toggle rounded-xl p-2.5 text-slate-600 dark:text-slate-300" aria-label="Toggle dark mode">
+            <svg data-sun class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <svg data-moon class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+        </button>
+        <button id="menuBtn" class="rounded-xl p-2.5 text-slate-600 dark:text-slate-300"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16m-7 6h7" /></svg></button>
+    </div>
+</nav>
+
+<!-- Mobile menu (Untouched) -->
+<div id="mobileMenu" class="animate-fade-in-up hidden pb-6 md:hidden">
+    <div class="flex flex-col gap-1 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700">
+        @foreach (var (navPage, label) in navItems)
+        {
+            var isActive = IsActive(navPage);
+            <a asp-page="@navPage" class="rounded-xl px-4 py-3 font-medium @(isActive ? "text-subblue-600 font-bold dark:text-subblue-400" : "text-slate-700 dark:text-slate-200")">@label</a>
+        }
+        <button id="mobileProductBtn" class="mt-1 flex w-full items-center justify-between rounded-xl px-4 py-3 font-medium @(isProductActive ? "text-subblue-600 font-bold dark:text-subblue-400" : "text-slate-700 dark:text-slate-200")">
+            <span>Product</span>
+            <svg id="mobileProductChevron" class="h-5 w-5 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" /></svg>
+        </button>
+        <div id="mobileProductMenu" class="hidden">
+            <div class="mt-1 grid gap-1 rounded-2xl border border-slate-200/60 bg-slate-50 p-2 dark:border-slate-600 dark:bg-slate-900/20">
+                @foreach (var (navPage, title, desc) in productItems)
+                {
+                    var active = IsActive(navPage);
+                    <a asp-page="@navPage" class="rounded-xl px-4 py-3 @(active ? "bg-white font-bold text-subblue-600 dark:bg-slate-800 dark:text-subblue-400" : "text-slate-700 dark:text-slate-200")">
+                        <div class="text-sm">@title</div>
+                        <div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">@desc</div>
+                    </a>
+                }
+            </div>
+        </div>
+        <a asp-page="/Auth/Login" class="mt-2 rounded-xl border border-slate-300 px-4 py-3 text-center font-semibold text-slate-600 dark:text-slate-300">Sign In</a>
+        <a asp-page="/Auth/Signup" class="mt-2 rounded-xl bg-gradient-to-r from-subgreen-500 to-subgreen-600 px-4 py-3 text-center font-bold text-white">Get Started</a>
+    </div>
+</div>
+
+<script>
+    (() => {
+      const btn = document.getElementById('productBtn');
+      const menu = document.getElementById('productMenu');
+      if (btn && menu) {
+        const chevron = btn.querySelector('svg');
+        const close = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); if (chevron) chevron.classList.remove('rotate-180'); };
+        const open = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); if (chevron) chevron.classList.add('rotate-180'); };
+        btn.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.contains('hidden') ? open() : close(); });
+        document.addEventListener('click', () => close());
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+        menu.addEventListener('click', (e) => e.stopPropagation());
+      }
+      const mBtn = document.getElementById('mobileProductBtn');
+      const mMenu = document.getElementById('mobileProductMenu');
+      const mChevron = document.getElementById('mobileProductChevron');
+      if (mBtn && mMenu) {
+        mBtn.addEventListener('click', () => {
+          const isHidden = mMenu.classList.contains('hidden');
+          mMenu.classList.toggle('hidden');
+          if (mChevron) mChevron.classList.toggle('rotate-180', isHidden);
+        });
+      }
+    })();
+</script>

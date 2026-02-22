@@ -1,0 +1,44 @@
+@page
+@model Subchron.Web.Pages.Employee.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard";
+    Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
+}
+
+<div class="mx-auto max-w-4xl">
+    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">Quick actions for attendance and overtime.</p>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <a href="/Employee/MyQr" class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-subgreen-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-subgreen-600">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+            </div>
+            <span class="text-center font-semibold text-slate-900 dark:text-white">Show My QR</span>
+        </a>
+        <a href="/Employee/Attendance" class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-subgreen-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-subgreen-600">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/40 dark:text-subgreen-400">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+            </div>
+            <span class="text-center font-semibold text-slate-900 dark:text-white">Time In / Out</span>
+        </a>
+        <a href="/Employee/Overtime" class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-subgreen-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-subgreen-600">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <span class="text-center font-semibold text-slate-900 dark:text-white">Overtime</span>
+        </a>
+        <a href="/Employee/Leave" class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-subgreen-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-subgreen-600">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
+            <span class="text-center font-semibold text-slate-900 dark:text-white">Leave</span>
+        </a>
+        <a href="/Employee/MyAttendance" class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-subgreen-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-subgreen-600">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            </div>
+            <span class="text-center font-semibold text-slate-900 dark:text-white">Attendance & Schedule</span>
+        </a>
+    </div>
+</div>

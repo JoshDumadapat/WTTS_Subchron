@@ -1,0 +1,225 @@
+﻿@page
+@{
+    ViewData["Title"] = "Organization Settings";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+
+    // Dummy Data
+    var orgName = "Acme Corp Logistics";
+
+    // If your Profile partial needs this value, set it here (calling logic only)
+    ViewData["OrgName"] = orgName;
+}
+
+<div class="mx-auto max-w-7xl px-4 py-6">
+
+    <!-- Header + Subheader (outside the card container) -->
+    <div class="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Organization Settings</h1>
+            <p class="text-base text-gray-500 dark:text-gray-400">Manage profile, policies, and locations.</p>
+        </div>
+
+        <!-- Mobile nav stays the same -->
+        <div class="block w-full sm:hidden">
+            <label for="mobile-nav" class="sr-only">Navigate</label>
+            <div class="relative">
+                <select id="mobile-nav" onchange="switchTab(this.value)"
+                        class="block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-emerald-500 focus:ring-emerald-500 focus:outline-none sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                    <option value="tab-profile">Profile & Branding</option>
+                    <option value="tab-attendance">Attendance Rules</option>
+                    <option value="tab-locations">Locations & Map</option>
+                    <option value="tab-shifts">Shift Rules</option>
+                    <option value="tab-leave">Leave Rules</option>
+                    <option value="tab-pay">Pay Rules</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card container: LEFT tabs + RIGHT content -->
+    <div class="flex min-h-[720px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm sm:flex-row dark:border-gray-700 dark:bg-gray-800">
+
+        <!-- LEFT: NAV (tabs) -->
+        <aside class="order-1 hidden flex-shrink-0 border-b border-gray-200 bg-gray-50/50 sm:block sm:basis-[20%] sm:border-r sm:border-b-0 dark:border-gray-700 dark:bg-gray-900/30">
+            <nav class="space-y-1 p-4">
+
+                <button onclick="switchTab('tab-profile')" id="nav-profile"
+                        class="nav-item active flex w-full items-center rounded-lg bg-emerald-50 px-3 py-3 text-sm font-medium text-emerald-700 transition-colors dark:bg-emerald-900/20 dark:text-emerald-400">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Profile
+                </button>
+
+                <button onclick="switchTab('tab-attendance')" id="nav-attendance"
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Attendance
+                </button>
+
+                <button onclick="switchTab('tab-locations')" id="nav-locations"
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Locations
+                </button>
+
+                <button onclick="switchTab('tab-shifts')" id="nav-shifts"
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Shifts
+                </button>
+
+                <button onclick="switchTab('tab-leave')" id="nav-leave"
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Leave
+                </button>
+
+                <button onclick="switchTab('tab-pay')" id="nav-pay"
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Pay
+                </button>
+
+            </nav>
+        </aside>
+
+        <!-- RIGHT: CONTENT -->
+        <main class="order-2 max-h-[900px] flex-1 overflow-y-auto bg-white p-[10px] sm:basis-[90%] dark:bg-gray-800">
+
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabProfile.cshtml" />
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabAttendance.cshtml" />
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabLocations.cshtml" />
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabShifts.cshtml" />
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabLeave.cshtml" />
+            <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabPay.cshtml" />
+
+        </main>
+    </div>
+</div>
+
+<style>
+    /* UTILITY CLASSES FOR REUSABILITY */
+    .input-field {
+        @@apply block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-3 px-4;
+    }
+
+    .btn-primary {
+        @@apply inline-flex justify-center rounded-md border border-transparent bg-emerald-500 py-3 px-6 text-sm font-medium text-white shadow-sm hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all active:scale-95;
+    }
+
+    .toggle-checkbox {
+        @@apply h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:ring-offset-gray-800;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+            // Show selected content
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // --- Update Desktop Sidebar (local page nav) ---
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400', 'active');
+                btn.classList.add('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+            });
+
+            const navId = 'nav-' + tabId.replace('tab-', '');
+            const activeBtn = document.getElementById(navId);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400', 'active');
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+            }
+
+            // --- Update Mobile Dropdown ---
+            const mobileSelect = document.getElementById('mobile-nav');
+            if (mobileSelect.value !== tabId) {
+                mobileSelect.value = tabId;
+            }
+
+            // Ensure the global left Admin layout sidebar shows Organization Settings as active
+            try {
+                const sidebarNav = document.querySelector('#sidebar nav');
+                const orgHref = '/App/OrgConfig/OrganizationSettings';
+                if (sidebarNav) {
+                    // clear other active anchors
+                    sidebarNav.querySelectorAll('a.nav-item').forEach(a => a.classList.remove('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400'));
+                    const mainLink = sidebarNav.querySelector(`a.nav-item[href="${orgHref}"]`) || sidebarNav.querySelector(`a.nav-item[href^="${orgHref}"]`);
+                    if (mainLink) {
+                        mainLink.classList.add('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
+                        mainLink.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+                        try { mainLink.focus({preventScroll: true}); } catch (e) { /* no-op */ }
+                        try { localStorage.setItem('subchron-active-href', orgHref); } catch (e) { /* no-op */ }
+                    }
+                }
+            } catch (e) {
+                // no-op
+            }
+
+            // Optional: reflect tab in URL hash (calling logic only)
+            window.location.hash = tabId;
+        }
+
+        // Optional: restore tab from URL hash on load (calling logic only)
+        document.addEventListener("DOMContentLoaded", () => {
+            const hash = (window.location.hash || "").replace("#", "");
+            if (hash && document.getElementById(hash)) {
+                switchTab(hash);
+            } else {
+                switchTab("tab-profile");
+            }
+
+            // When this page loads, ensure the global admin sidebar highlights "Organization Settings"
+            (function ensureGlobalSidebarActive() {
+                try {
+                    const sidebarNav = document.querySelector('#sidebar nav');
+                    const orgHref = '/App/OrgConfig/OrganizationSettings';
+                    if (!sidebarNav) return;
+
+                    const mainLink = sidebarNav.querySelector(`a.nav-item[href="${orgHref}"]`) || sidebarNav.querySelector(`a.nav-item[href^="${orgHref}"]`);
+                    if (!mainLink) return;
+
+                    // Clear any active states and set the Organization Settings anchor active.
+                    sidebarNav.querySelectorAll('a.nav-item').forEach(a => a.classList.remove('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400'));
+                    mainLink.classList.add('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
+                    mainLink.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+
+                    // Persist so the layout's restore logic keeps it after reloads
+                    try { localStorage.setItem('subchron-active-href', orgHref); } catch (e) { /* no-op */ }
+
+                    // Focus for accessibility (keyboard users)
+                    try { mainLink.focus({preventScroll: true}); } catch (e) { /* no-op */ }
+                } catch (e) {
+                    // no-op
+                }
+            })();
+        });
+
+        // Mock function to simulate clicking the map to get coordinates
+        function simulateMapClick() {
+            // Generate random nearby coord variations
+            const lat = (14.5995 + (Math.random() * 0.001)).toFixed(6);
+            const lng = (120.9842 + (Math.random() * 0.001)).toFixed(6);
+
+            document.getElementById('input-lat').value = lat;
+            document.getElementById('input-lng').value = lng;
+
+            alert("Map clicked! Coordinates set to: " + lat + ", " + lng);
+        }
+    </script>
+}

@@ -1,0 +1,745 @@
+@model Subchron.Web.Pages.App.Settings.IndexModel
+
+<div class="space-y-6">
+    <!-- Change password (step-by-step) -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Change password</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Update your account password. You will be asked for your current password first, then to set a new one.</p>
+
+        <!-- Step 1: Start -->
+        <div id="changePwdStep1" class="mt-6">
+            <button type="button" id="btnStartChangePwd"
+                    class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                Change password
+            </button>
+        </div>
+
+        <!-- Step 2: Current password -->
+        <div id="changePwdStep2" class="mt-6 hidden max-w-md">
+            <p class="mb-1 text-xs font-medium uppercase tracking-wide text-subgreen-600 dark:text-subgreen-400">Step 1 of 2</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Enter your current password to continue.</p>
+            <label for="currentPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Current password</label>
+            <input type="password" id="currentPassword" autocomplete="current-password" placeholder="Enter current password"
+                   class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            <p class="mt-2">
+                <a asp-page="/Auth/ForgotPassword" class="text-sm font-medium text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400">Forgot password?</a>
+                <span class="text-slate-400 dark:text-slate-500"> — Request a reset link to your email</span>
+            </p>
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" id="btnContinueToNewPwd" class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                    Continue
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+                <button type="button" id="btnCancelChangePwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: New password -->
+        <form id="changePwdForm" method="post" asp-page-handler="ChangePassword" class="mt-6 hidden max-w-md space-y-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="currentPassword" id="hiddenCurrentPassword" />
+            <p class="text-xs font-medium uppercase tracking-wide text-subgreen-600 dark:text-subgreen-400">Step 2 of 2</p>
+            <div>
+                <label for="newPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">New password</label>
+                <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters"
+                       class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm new password</label>
+                <input type="password" id="confirmPassword" autocomplete="new-password" placeholder="Confirm new password"
+                       class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                <p id="changePwdMismatch" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden">Passwords do not match.</p>
+            </div>
+            <div id="changePwdError" class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"></div>
+            <div id="changePwdSuccess" class="hidden rounded-lg border border-subgreen-200 bg-subgreen-50 px-3 py-2 text-sm text-subgreen-800 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300">Password updated successfully.</div>
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+                <button type="submit" id="btnSubmitChangePwd" class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                    Update password
+                </button>
+                <button type="button" id="btnCancelNewPwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Forgot password (standalone section) -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Forgot password?</h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">If you don’t remember your password, request a reset link to your email (same flow as on the login page).</p>
+        <p class="mt-4">
+            <a asp-page="/Auth/ForgotPassword" class="inline-flex items-center gap-2 rounded-lg border border-subgreen-200 bg-subgreen-50 px-4 py-2.5 text-sm font-medium text-subgreen-700 hover:bg-subgreen-100 hover:border-subgreen-300 dark:border-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-900/50">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                Send password reset link
+            </a>
+        </p>
+    </div>
+</div>
+
+<!-- Two-factor authentication (TOTP) -->
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 mt-6" id="totpSection">
+    @Html.AntiForgeryToken()
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Two-factor authentication (2FA)</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Add an extra layer of security using an authenticator app (TOTP).
+            </p>
+        </div>
+
+        <!-- Status pill -->
+        <span id="totpStatusPill"
+              class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold
+                     bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-100">
+            Disabled
+        </span>
+    </div>
+
+    <!-- Disabled state -->
+    <div id="totpDisabledState" class="mt-5">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">2FA is currently disabled.</p>
+        <button type="button" id="btnEnableTotp"
+                class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
+                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70">
+            <svg id="btnEnableTotpSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <svg id="btnEnableTotpIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <span id="btnEnableTotpText">Enable 2FA</span>
+        </button>
+    </div>
+
+    <!-- Wizard container -->
+    <div id="totpWizard" class="mt-6 hidden">
+        <!-- Stepper -->
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span id="totpStepDot1" class="h-6 w-6 rounded-full bg-subgreen-600 text-white text-xs font-bold grid place-items-center">1</span>
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Scan</span>
+            </div>
+            <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex items-center gap-2">
+                <span id="totpStepDot2" class="h-6 w-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold grid place-items-center dark:bg-slate-700 dark:text-slate-200">2</span>
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Verify</span>
+            </div>
+            <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex items-center gap-2">
+                <span id="totpStepDot3" class="h-6 w-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold grid place-items-center dark:bg-slate-700 dark:text-slate-200">3</span>
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Recovery codes</span>
+            </div>
+        </div>
+
+        <!-- STEP 1: QR + manual key -->
+        <div id="totpStep1" class="mt-6">
+            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Scan this QR code with your app</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Use Google Authenticator, Microsoft Authenticator, 1Password, etc.
+            </p>
+
+            <div class="mt-5 grid gap-6 md:grid-cols-2">
+                <!-- QR box -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/30">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">QR code</p>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btnDownloadQrPng"
+                                    class="text-xs font-semibold text-subgreen-700 hover:text-subgreen-800 dark:text-subgreen-300 hidden">
+                                Download PNG
+                            </button>
+                            <button type="button" id="btnPrintTotp"
+                                    class="text-xs font-semibold text-subgreen-700 hover:text-subgreen-800 dark:text-subgreen-300"
+                                    disabled>
+                                Print / Save as PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid place-items-center">
+                        <!-- Replace src with Model.TotpQrCodeDataUrl when wired -->
+                        <img id="totpQrImg"
+                             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='100%25' height='100%25' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='Arial' font-size='12'%3EQR%20CODE%3C/text%3E%3C/svg%3E"
+                             alt="TOTP QR code"
+                             class="h-44 w-44 rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-800" />
+                    </div>
+
+                    <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                        Can’t scan? Use the manual setup key on the right.
+                    </p>
+                </div>
+
+                <!-- Manual key box -->
+                <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Manual setup key</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Enter this in your authenticator app if you can’t use the QR code.
+                    </p>
+
+                    <div class="mt-4 flex items-stretch gap-2">
+                        <input id="totpManualKey"
+                               type="text"
+                               readonly
+                               value="XXXX XXXX XXXX XXXX"
+                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm
+                                      focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                        <button type="button" id="btnCopyManualKey"
+                                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50
+                                       dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                            Copy
+                        </button>
+                    </div>
+
+                    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+                        Save the QR code or key somewhere safe before continuing.
+                    </div>
+
+                    <div class="mt-5 flex justify-end gap-3">
+                        <button type="button" id="btnCancelTotp1"
+                                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                                       dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                            Cancel
+                        </button>
+                        <button type="button" id="btnGoTotpStep2"
+                                class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
+                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                            Continue
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Verify code -->
+        <div id="totpStep2" class="mt-6 hidden max-w-md">
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">Enter the six-digit code from the application</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                After scanning/adding the key, your authenticator app will show a 6-digit code.
+            </p>
+
+            <div class="mt-4">
+                <label for="totpCode" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Authentication code</label>
+                <input id="totpCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6"
+                       class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm
+                              focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20
+                              dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                <p id="totpVerifyError"
+                   class="mt-2 hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700
+                          dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"></p>
+            </div>
+
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" id="btnBackTotp2"
+                        class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                               dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Back
+                </button>
+                <button type="button" id="btnVerifyTotp"
+                        class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
+                               focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70">
+                    <svg id="btnVerifyTotpSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span id="btnVerifyTotpText">Verify & enable</span>
+                </button>
+                <button type="button" id="btnCancelTotp2"
+                        class="ml-auto rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                               dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Recovery codes -->
+        <div id="totpStep3" class="mt-6 hidden">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Recovery codes</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                        Store these somewhere safe. Each code can be used once if you lose your device.
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" id="btnCopyRecovery"
+                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50
+                                   dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                        Copy
+                    </button>
+                    <button type="button" id="btnDownloadRecovery"
+                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50
+                                   dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/30">
+                <div id="totpRecoveryList" class="grid gap-2 sm:grid-cols-2 font-mono text-sm text-slate-900 dark:text-slate-100">
+                    <!-- Replace with server output once wired -->
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">ABCD-EFGH</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">IJKL-MNOP</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">QRST-UVWX</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">YZ12-3456</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">7890-ABCD</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">EFGH-IJKL</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">MNOP-QRST</div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">UVWX-YZ12</div>
+                </div>
+            </div>
+
+            <label class="mt-4 flex items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <input id="chkSavedRecovery" type="checkbox"
+                       class="mt-1 h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500 dark:border-slate-600 dark:bg-slate-700" />
+                <span>
+                    I have saved my recovery codes in a safe place.
+                    <span class="block text-xs text-slate-500 dark:text-slate-400">
+                        You won’t be able to view these codes again.
+                    </span>
+                </span>
+            </label>
+
+            <div class="mt-5 flex justify-end gap-3">
+                <button type="button" id="btnFinishTotp"
+                        class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
+                               focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+                        disabled>
+                    Finish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enabled state actions (optional) -->
+    <div id="totpEnabledActions" class="mt-6 hidden border-t border-slate-200 pt-5 dark:border-slate-700">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm text-slate-600 dark:text-slate-400">
+                2FA is enabled on your account.
+            </p>
+            <button type="button" id="btnDisableTotp"
+                    class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100
+                           dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30 disabled:opacity-70">
+                <svg id="btnDisableTotpSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span id="btnDisableTotpText">Disable 2FA</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Only run when Security tab is in DOM (avoid null refs when Turbo or other tab is shown)
+        const btnEnableTotpEl = document.getElementById('btnEnableTotp');
+        if (!btnEnableTotpEl) return;
+
+        function getRequestVerificationToken() {
+            return document.querySelector('#totpSection input[name="__RequestVerificationToken"]')?.value
+                || document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        // Elements
+        const wizard = document.getElementById('totpWizard');
+        const step1 = document.getElementById('totpStep1');
+        const step2 = document.getElementById('totpStep2');
+        const step3 = document.getElementById('totpStep3');
+
+        const dot1 = document.getElementById('totpStepDot1');
+        const dot2 = document.getElementById('totpStepDot2');
+        const dot3 = document.getElementById('totpStepDot3');
+
+        const disabledState = document.getElementById('totpDisabledState');
+        const enabledActions = document.getElementById('totpEnabledActions');
+        const statusPill = document.getElementById('totpStatusPill');
+
+        const qrImg = document.getElementById('totpQrImg');
+        const manualKeyInput = document.getElementById('totpManualKey');
+
+        const btnEnableTotp = document.getElementById('btnEnableTotp');
+        const btnCancelTotp1 = document.getElementById('btnCancelTotp1');
+        const btnGoTotpStep2 = document.getElementById('btnGoTotpStep2');
+        const btnCopyManualKey = document.getElementById('btnCopyManualKey');
+
+        const totpCode = document.getElementById('totpCode');
+        const verifyError = document.getElementById('totpVerifyError');
+
+        const btnBackTotp2 = document.getElementById('btnBackTotp2');
+        const btnVerifyTotp = document.getElementById('btnVerifyTotp');
+        const btnCancelTotp2 = document.getElementById('btnCancelTotp2');
+
+        const recoveryList = document.getElementById('totpRecoveryList');
+        const chkSavedRecovery = document.getElementById('chkSavedRecovery');
+        const btnFinishTotp = document.getElementById('btnFinishTotp');
+        const btnCopyRecovery = document.getElementById('btnCopyRecovery');
+
+        const btnDisableTotp = document.getElementById('btnDisableTotp');
+        const btnPrintTotp = document.getElementById('btnPrintTotp');
+        const btnDownloadQrPng = document.getElementById('btnDownloadQrPng');
+        const btnDownloadRecovery = document.getElementById('btnDownloadRecovery');
+
+        // State
+        let currentRecoveryCodes = [];
+        let currentQrDataUrl = '';
+
+        function setStepper(active) {
+            // Reset all to idle
+            [dot1, dot2, dot3].forEach(d => {
+                d.classList.remove('bg-subgreen-600', 'text-white');
+                d.classList.add('bg-slate-200', 'text-slate-600', 'dark:bg-slate-700', 'dark:text-slate-200');
+            });
+
+            // Set active dot
+            const dot = active === 1 ? dot1 : active === 2 ? dot2 : dot3;
+            dot.classList.remove('bg-slate-200', 'text-slate-600', 'dark:bg-slate-700', 'dark:text-slate-200');
+            dot.classList.add('bg-subgreen-600', 'text-white');
+        }
+
+        function showStep(n) {
+            step1.classList.toggle('hidden', n !== 1);
+            step2.classList.toggle('hidden', n !== 2);
+            step3.classList.toggle('hidden', n !== 3);
+            setStepper(n);
+        }
+
+        function setEnabledUI(enabled) {
+            if (enabled) {
+                statusPill.textContent = 'Enabled';
+                statusPill.className =
+                    "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-subgreen-100 text-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-200";
+                disabledState.classList.add('hidden');
+                wizard.classList.add('hidden');
+                enabledActions.classList.remove('hidden');
+            } else {
+                statusPill.textContent = 'Disabled';
+                statusPill.className =
+                    "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-100";
+                enabledActions.classList.add('hidden');
+                wizard.classList.add('hidden');
+                disabledState.classList.remove('hidden');
+            }
+        }
+
+        function resetWizardUI() {
+            verifyError.classList.add('hidden');
+            verifyError.textContent = '';
+            totpCode.value = '';
+            chkSavedRecovery.checked = false;
+            btnFinishTotp.disabled = true;
+            currentRecoveryCodes = [];
+            currentQrDataUrl = '';
+            recoveryList.innerHTML = '';
+            if (btnPrintTotp) btnPrintTotp.disabled = true;
+            if (btnDownloadQrPng) btnDownloadQrPng.classList.add('hidden');
+            if (btnDownloadRecovery) btnDownloadRecovery.disabled = true;
+            showStep(1);
+        }
+
+        function showVerifyError(msg) {
+            verifyError.textContent = msg || 'Something went wrong.';
+            verifyError.classList.remove('hidden');
+        }
+
+        async function copyText(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch {
+                // ignore
+            }
+        }
+
+        function renderRecoveryCodes(codes) {
+            currentRecoveryCodes = Array.isArray(codes) ? codes : [];
+            recoveryList.innerHTML = '';
+            for (const c of currentRecoveryCodes) {
+                const div = document.createElement('div');
+                div.className =
+                    "rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800";
+                div.textContent = c;
+                recoveryList.appendChild(div);
+            }
+            if (btnDownloadRecovery) {
+                btnDownloadRecovery.disabled = currentRecoveryCodes.length === 0;
+            }
+        }
+
+        function setButtonLoading(btn, spinnerId, textId, loading, label) {
+            if (!btn) return;
+            btn.disabled = loading;
+            var spinner = document.getElementById(spinnerId);
+            var textEl = document.getElementById(textId);
+            if (spinner) spinner.classList.toggle('hidden', !loading);
+            if (textEl) textEl.textContent = loading ? 'Please wait…' : label;
+        }
+
+        function downloadQrAsPng() {
+            if (!currentQrDataUrl || !qrImg) return;
+            var a = document.createElement('a');
+            a.href = currentQrDataUrl;
+            a.download = 'subchron-2fa-qr.png';
+            a.click();
+        }
+
+        function printOrPdfQr() {
+            if (!currentQrDataUrl || !manualKeyInput) return;
+            var w = window.open('', '_blank', 'width=480,height=520');
+            if (!w) { alert('Please allow pop-ups to print or save as PDF.'); return; }
+            var key = (manualKeyInput.value || '').replace(/\s+/g, '');
+            var bodyClose = '<' + '/body>';
+            var htmlClose = '<' + '/html>';
+            w.document.write(
+                '<!DOCTYPE html><html><head><title>2FA Setup - Subchron</title><' + '/head><body style="font-family:sans-serif;padding:24px;text-align:center">' +
+                '<h1 style="font-size:18px">Two-Factor Authentication Setup</h1>' +
+                '<p style="font-size:14px;color:#666">Scan the QR code with your authenticator app, or enter the manual setup key below.</p>' +
+                '<p><img src="' + currentQrDataUrl + '" alt="QR" style="max-width:220px;height:auto" /></p>' +
+                '<p style="font-size:12px;font-weight:600;color:#334155;margin-top:20px;margin-bottom:4px">Manual setup key</p>' +
+                '<p style="font-family:monospace;font-size:12px;word-break:break-all;margin:0 0 24px 0;padding:10px;background:#f1f5f9;border-radius:6px">' + (key || '') + '</p>' +
+                '<p style="font-size:12px;color:#999;margin-top:24px">Subchron – Keep this in a safe place.</p>' +
+                bodyClose + htmlClose
+            );
+            w.document.close();
+            w.focus();
+            setTimeout(function() { w.print(); w.close(); }, 250);
+        }
+
+        function downloadRecoveryCodes() {
+            if (currentRecoveryCodes.length === 0) return;
+            var text = 'Subchron Recovery Codes\nGenerated: ' + new Date().toISOString().slice(0, 10) + '\n\n' + currentRecoveryCodes.join('\n') + '\n\nKeep these safe. Each code can be used once.';
+            var blob = new Blob([text], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'subchron-recovery-codes.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // --- API calls (via Razor Page handlers) ---
+        async function fetchTotpStatus() {
+            const res = await fetch('?handler=TotpStatus', { method: 'GET' });
+            let data = null;
+            try { data = await res.json(); } catch { }
+            if (!res.ok) return { ok: false, enabled: false, message: data?.message || 'Failed to load status.' };
+            return data;
+        }
+
+        async function beginTotp() {
+            const res = await fetch('?handler=BeginTotp', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': getRequestVerificationToken() }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to begin 2FA setup.');
+            return data; // { ok, manualKey, otpAuthUri, qrDataUrl }
+        }
+
+        async function verifyEnableTotp(code) {
+            const res = await fetch('?handler=VerifyEnableTotp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': getRequestVerificationToken()
+                },
+                body: JSON.stringify({ totpCode: code })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) throw new Error(data.message || 'Invalid code.');
+            return data; // { ok, recoveryCodes }
+        }
+
+        async function disableTotp() {
+            const res = await fetch('?handler=DisableTotp', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': getRequestVerificationToken() }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) throw new Error(data.message || 'Failed to disable 2FA.');
+            return data;
+        }
+
+        // --- Wire UI ---
+        btnEnableTotp.addEventListener('click', async function() {
+            disabledState.classList.add('hidden');
+            wizard.classList.remove('hidden');
+            resetWizardUI();
+            setButtonLoading(btnEnableTotp, 'btnEnableTotpSpinner', 'btnEnableTotpText', true, 'Enable 2FA');
+            try {
+                const data = await beginTotp();
+                currentQrDataUrl = data.qrDataUrl || '';
+                qrImg.src = currentQrDataUrl || qrImg.src;
+                manualKeyInput.value = data.manualKey || '';
+                if (btnPrintTotp) { btnPrintTotp.disabled = !currentQrDataUrl; }
+                if (btnDownloadQrPng) { btnDownloadQrPng.classList.toggle('hidden', !currentQrDataUrl); }
+            } catch (e) {
+                setEnabledUI(false);
+                alert(e?.message || 'Failed to start 2FA setup.');
+            }
+            setButtonLoading(btnEnableTotp, 'btnEnableTotpSpinner', 'btnEnableTotpText', false, 'Enable 2FA');
+        });
+
+        if (btnPrintTotp) btnPrintTotp.addEventListener('click', printOrPdfQr);
+        if (btnDownloadQrPng) btnDownloadQrPng.addEventListener('click', downloadQrAsPng);
+
+        btnCancelTotp1.addEventListener('click', function() {
+            setEnabledUI(false);
+        });
+
+        btnCopyManualKey.addEventListener('click', function() {
+            copyText((manualKeyInput.value || '').replace(/\s+/g, ''));
+        });
+
+        btnGoTotpStep2.addEventListener('click', function() {
+            showStep(2);
+            totpCode.focus();
+        });
+
+        btnBackTotp2.addEventListener('click', function() {
+            showStep(1);
+        });
+
+        btnCancelTotp2.addEventListener('click', function() {
+            setEnabledUI(false);
+        });
+
+        btnVerifyTotp.addEventListener('click', async function() {
+            verifyError.classList.add('hidden');
+            verifyError.textContent = '';
+            const code = (totpCode.value || '').trim();
+            if (!/^\d{6}$/.test(code)) {
+                showVerifyError('Enter a valid 6-digit code.');
+                return;
+            }
+            setButtonLoading(btnVerifyTotp, 'btnVerifyTotpSpinner', 'btnVerifyTotpText', true, 'Verify & enable');
+            try {
+                const data = await verifyEnableTotp(code);
+                renderRecoveryCodes(data.recoveryCodes || []);
+                showStep(3);
+            } catch (e) {
+                showVerifyError(e?.message || 'Invalid code. Try again.');
+            }
+            setButtonLoading(btnVerifyTotp, 'btnVerifyTotpSpinner', 'btnVerifyTotpText', false, 'Verify & enable');
+        });
+
+        chkSavedRecovery.addEventListener('change', function() {
+            btnFinishTotp.disabled = !chkSavedRecovery.checked;
+        });
+
+        btnCopyRecovery.addEventListener('click', function() {
+            copyText((currentRecoveryCodes || []).join('\n'));
+        });
+
+        if (btnDownloadRecovery) btnDownloadRecovery.addEventListener('click', downloadRecoveryCodes);
+
+        btnFinishTotp.addEventListener('click', function() {
+            setEnabledUI(true);
+            resetWizardUI();
+        });
+
+        btnDisableTotp.addEventListener('click', async function() {
+            setButtonLoading(btnDisableTotp, 'btnDisableTotpSpinner', 'btnDisableTotpText', true, 'Disable 2FA');
+            try {
+                await disableTotp();
+                setEnabledUI(false);
+            } catch (e) {
+                alert(e?.message || 'Failed to disable 2FA.');
+            }
+            setButtonLoading(btnDisableTotp, 'btnDisableTotpSpinner', 'btnDisableTotpText', false, 'Disable 2FA');
+        });
+
+        // Initial load status
+        (async function init() {
+            try {
+                const st = await fetchTotpStatus();
+                setEnabledUI(st.enabled === true);
+            } catch {
+                setEnabledUI(false);
+            }
+        })();
+    })();
+</script>
+
+<script>
+(function() {
+    // Only run when Security tab content is in DOM
+    const step1 = document.getElementById('changePwdStep1');
+    if (!step1) return;
+
+    const step2 = document.getElementById('changePwdStep2');
+    const form = document.getElementById('changePwdForm');
+    const currentPassword = document.getElementById('currentPassword');
+    const hiddenCurrent = document.getElementById('hiddenCurrentPassword');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const mismatchMsg = document.getElementById('changePwdMismatch');
+    const errorDiv = document.getElementById('changePwdError');
+    const successDiv = document.getElementById('changePwdSuccess');
+
+    function showStep1() {
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+        form.classList.add('hidden');
+        currentPassword.value = '';
+        hiddenCurrent.value = '';
+        newPassword.value = '';
+        confirmPassword.value = '';
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        mismatchMsg.classList.add('hidden');
+    }
+    function showStep2() {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        form.classList.add('hidden');
+        currentPassword.focus();
+    }
+    function showStep3() {
+        step2.classList.add('hidden');
+        form.classList.remove('hidden');
+        hiddenCurrent.value = currentPassword.value;
+        newPassword.focus();
+    }
+
+    document.getElementById('btnStartChangePwd').addEventListener('click', function() { showStep2(); });
+    document.getElementById('btnCancelChangePwd').addEventListener('click', function() { showStep1(); });
+    document.getElementById('btnContinueToNewPwd').addEventListener('click', function() {
+        if (!currentPassword.value.trim()) return;
+        showStep3();
+    });
+    document.getElementById('btnCancelNewPwd').addEventListener('click', function() { showStep1(); });
+
+    confirmPassword.addEventListener('input', function() {
+        mismatchMsg.classList.toggle('hidden', !confirmPassword.value || newPassword.value === confirmPassword.value);
+    });
+    newPassword.addEventListener('input', function() {
+        mismatchMsg.classList.toggle('hidden', !confirmPassword.value || newPassword.value === confirmPassword.value);
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (newPassword.value !== confirmPassword.value) {
+            mismatchMsg.classList.remove('hidden');
+            return;
+        }
+        mismatchMsg.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        const btn = document.getElementById('btnSubmitChangePwd');
+        btn.disabled = true;
+        const formData = new FormData(form);
+        formData.set('currentPassword', hiddenCurrent.value);
+        formData.set('newPassword', newPassword.value);
+        try {
+            const res = await fetch(form.action, { method: 'POST', body: formData });
+            const data = await res.json().catch(function() { return {}; });
+            if (res.ok && data.ok) {
+                successDiv.classList.remove('hidden');
+                setTimeout(showStep1, 2000);
+            } else {
+                errorDiv.textContent = data.message || 'Failed to update password.';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (err) {
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+        }
+        btn.disabled = false;
+    });
+})();
+</script>
