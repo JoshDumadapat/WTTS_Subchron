@@ -40,9 +40,9 @@ public class PlansController : ControllerBase
     {
         return planName switch
         {
-            "Basic" => 2999m,
+            "Basic" => 2499m,
             "Standard" => 5999m,
-            "Enterprise" => 14999m,
+            "Enterprise" => 8999m,
             _ => 0m
         };
     }

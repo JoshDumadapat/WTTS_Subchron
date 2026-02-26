@@ -21,15 +21,31 @@ public class DepartmentModel : PageModel
     public string? Error { get; set; }
     public string ApiBaseUrl { get; set; } = "";
 
-    public async Task OnGetAsync()
+    public Task OnGetAsync()
+    {
+        ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
+        Error = null;
+        Departments = new List<DepartmentItem>();
+        return Task.CompletedTask;
+    }
+
+    public async Task<IActionResult> OnGetDataAsync()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
         await LoadDepartmentsAsync();
+        return new JsonResult(new { departments = Departments });
     }
 
     private string GetApiBaseUrl()
     {
         return (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
+    }
+
+    private HttpClient CreateAuthorizedApiClient(string token)
+    {
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return client;
     }
 
     private async Task LoadDepartmentsAsync()
@@ -40,14 +56,14 @@ public class DepartmentModel : PageModel
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
             Departments = list ?? new List<DepartmentItem>();
         }
         catch (Exception)
         {
             Departments = new List<DepartmentItem>();
+            Error ??= "Unable to load departments right now.";
         }
     }
 
@@ -63,9 +79,8 @@ public class DepartmentModel : PageModel
             return JsonError("API URL is not configured (ApiBaseUrl in appsettings).", 500);
         try
         {
-            var client = _http.CreateClient("Subchron.API");
+            var client = CreateAuthorizedApiClient(token);
             client.Timeout = TimeSpan.FromSeconds(10);
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             var resp = await client.PostAsJsonAsync(baseUrl + "/api/departments", new { DepartmentName = departmentName.Trim() });
             if (!resp.IsSuccessStatusCode)
             {
@@ -111,9 +126,8 @@ public class DepartmentModel : PageModel
             return JsonError("API URL is not configured.", 500);
         try
         {
-            var client = _http.CreateClient("Subchron.API");
+            var client = CreateAuthorizedApiClient(token);
             client.Timeout = TimeSpan.FromSeconds(10);
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             var resp = await client.PutAsJsonAsync(baseUrl + $"/api/departments/{id}", new { DepartmentName = departmentName.Trim() });
             if (!resp.IsSuccessStatusCode)
             {
@@ -143,7 +157,6 @@ public class DepartmentModel : PageModel
         {
             TempData["ToastMessage"] = "Not authenticated.";
             TempData["ToastSuccess"] = false;
-            await LoadDepartmentsAsync();
             return RedirectToPage();
         }
         var baseUrl = GetApiBaseUrl();
@@ -151,13 +164,11 @@ public class DepartmentModel : PageModel
         {
             TempData["ToastMessage"] = "API URL is not configured (ApiBaseUrl in appsettings).";
             TempData["ToastSuccess"] = false;
-            await LoadDepartmentsAsync();
             return RedirectToPage();
         }
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var payload = new { IsActive = isActive, Reason = reason?.Trim() ?? "" };
             var resp = await client.PatchAsJsonAsync(baseUrl + $"/api/departments/{id}/status", payload);
             if (!resp.IsSuccessStatusCode)
@@ -176,7 +187,6 @@ public class DepartmentModel : PageModel
                 catch { /* use default errMsg */ }
                 TempData["ToastMessage"] = errMsg;
                 TempData["ToastSuccess"] = false;
-                await LoadDepartmentsAsync();
                 return RedirectToPage();
             }
             TempData["ToastMessage"] = isActive ? "Department activated successfully." : "Department deactivated successfully.";
@@ -187,7 +197,6 @@ public class DepartmentModel : PageModel
         {
             TempData["ToastMessage"] = "Failed to update department status. Check that the API is running.";
             TempData["ToastSuccess"] = false;
-            await LoadDepartmentsAsync();
             return RedirectToPage();
         }
     }

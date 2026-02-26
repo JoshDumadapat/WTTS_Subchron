@@ -6,165 +6,305 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-800 dark:text-white sm:text-2xl">Departments</h1>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Define your organization's internal structure. Use the description to record reasons for activation or deactivation.</p>
+<div id="deptPageHost" class="mx-auto" aria-busy="true">
+    <div id="deptSkeleton" class="space-y-6 animate-pulse">
+        <div class="mb-6 flex items-center justify-between gap-4">
+            <div class="h-8 w-40 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+            <div class="h-10 w-36 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
         </div>
-        <button type="button" onclick="openDeptModal(null)" class="inline-flex items-center rounded-xl bg-subgreen-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500">
-            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Add Department
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div class="p-4"><div class="h-6 w-24 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+            <div class="space-y-3 border-t border-slate-100 p-4 dark:border-slate-800">
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deptContent" class="hidden">
+    <div class="mb-6 flex flex-row items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-400 dark:text-white sm:text-2xl">Departments</h1>
+        </div>
+
+        <button type="button" onclick="openDeptModal(null)"
+                class="inline-flex items-center justify-center rounded-xl bg-subgreen-600 p-2 sm:px-4 sm:py-2 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500 whitespace-nowrap">
+
+            <svg class="h-5 w-5 sm:mr-2 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+
+            <span class="hidden sm:inline">Add Department</span>
         </button>
     </div>
 
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+            @Model.Error
+        </div>
+    }
+
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800 lg:col-span-4">
-                <p class="text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">Total</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-slate-800 dark:text-white" id="deptStatTotal">@Model.Departments.Count</p>
+        <div class="grid border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
+            <div class="flex items-center justify-between border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800 lg:col-span-4">
+
+                <!-- Label LEFT -->
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Total
+                </p>
+
+                <!-- Number RIGHT -->
+                <p class="text-lg font-semibold text-slate-800 dark:text-white" id="deptStatTotal">
+                    @Model.Departments.Count
+                </p>
+
             </div>
         </div>
 
+        <!-- Filters -->
         <div class="border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
-                <div class="relative flex-1">
+
+                <!-- Search -->
+                <div class="relative w-full lg:flex-1">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </span>
-                    <input type="text" id="deptSearch" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm text-slate-800 placeholder-slate-500 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400" placeholder="Search departments..." />
+                    <input type="text" id="deptSearch"
+                           class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm text-slate-800 placeholder-slate-500
+                          focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                          dark:border-slate-600 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400"
+                           placeholder="Search departments..." />
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <select id="deptFilterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
+
+                <!-- Controls -->
+                <div class="flex w-full items-center gap-3 lg:w-auto lg:justify-end">
+
+                    <select id="deptFilterStatus"
+                            class="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700
+                           dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
                         <option value="">All status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
-                    <button type="button" id="deptResetFilters" class="h-10 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Reset</button>
+
+                    <button type="button" id="deptResetFilters"
+                            class="h-10 flex-1 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-700
+                           hover:bg-slate-50
+                           dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        Reset
+                    </button>
+
                 </div>
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
+        <!-- Table (Responsive scroll) -->
+        <div class="overflow-x-auto no-scrollbar">
+            <table class="w-full min-w-[900px] text-left">
                 <thead>
                     <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Department Name</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employees</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Description / Reason</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Created</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
-                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            Department Name
+                        </th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            Employees
+                        </th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                            Description / Reason
+                        </th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            Created
+                        </th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            Status
+                        </th>
+                        <!-- Optional: sticky actions on horizontal scroll -->
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap sticky right-0 bg-slate-50/50 dark:bg-slate-900/50">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="deptTableBody">
-                    @foreach (var d in Model.Departments)
-                    {
-                        <tr class="dept-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-status="@(d.IsActive ? "Active" : "Inactive")" data-dept-id="@d.DepID" data-name="@d.DepartmentName">
-                            <td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">@d.DepartmentName</td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@d.EmployeeCount</td>
-                            <td class="max-w-[200px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="@d.Description">@(d.Description ?? "—")</td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@d.CreatedAt.ToString("MMM dd, yyyy")</td>
-                            <td class="px-5 py-3">
-                                <div class="relative inline-block">
-                                    <button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center rounded-md border-0 px-2 py-0.5 text-xs font-medium @(d.IsActive ? "text-subgreen-700 dark:text-subgreen-300 bg-subgreen-50 dark:bg-subgreen-900/30" : "bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400")">
-                                        @(d.IsActive ? "Active" : "Inactive")
-                                    </button>
-                                </div>
-                            </td>
-                            <td class="px-5 py-3 text-right">
-                                <button type="button" onclick="openDeptEditModal(@d.DepID, '@d.DepartmentName.Replace("'", "\\'")')" class="rounded-lg p-2 text-amber-600 transition-all hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300" title="Edit">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                    <tr id="deptEmptyPlaceholder" class="empty-placeholder @(Model.Departments.Any() ? "hidden" : "")" aria-live="polite">
-                        <td colspan="6" class="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">No departments yet. Create one to get started.</td>
+                    <!-- Rows injected by JS from handler=Data -->
+                    <tr id="deptEmptyPlaceholder" class="empty-placeholder" aria-live="polite">
+                        <td colspan="6"
+                            class="px-4 sm:px-5 py-10 sm:py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                            No departments yet. Create one to get started.
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex flex-wrap items-center gap-3">
+        <!-- Pagination (Responsive + Subgreen focus) -->
+        <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+            <!-- Left block: showing + rows -->
+            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:flex-wrap">
                 <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Showing <span class="font-semibold text-slate-800 dark:text-white" id="deptPaginationRange">0–0</span> of <span id="deptPaginationTotal">0</span>
+                    Showing <span class="font-semibold text-slate-800 dark:text-white" id="deptPaginationRange">0–0</span>
+                    of <span id="deptPaginationTotal">0</span>
                 </span>
+
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Rows</span>
-                    <select id="deptRowsPerPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    <select id="deptRowsPerPage"
+                            class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600
+                               focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                               dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50" selected>50</option>
                     </select>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+
+            <!-- Right block: page + controls -->
+            <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
                 <span id="deptPageOf" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
-                <button type="button" id="deptPaginationPrev" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <button type="button" id="deptPaginationNext" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" id="deptPaginationPrev"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50
+                               focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 focus:border-subgreen-500
+                               disabled:pointer-events-none disabled:opacity-50
+                               dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                            aria-label="Previous">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <button type="button" id="deptPaginationNext"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50
+                               focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 focus:border-subgreen-500
+                               disabled:pointer-events-none disabled:opacity-50
+                               dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                            aria-label="Next">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Add/Edit Department modal -->
-<div id="deptModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex min-h-screen items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptModal()"></div>
-        <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-            <div class="border-b border-slate-100 px-8 py-5 dark:border-slate-800">
-                <h3 id="deptModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">Add Department</h3>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Department name is required.</p>
-            </div>
-            <form id="deptForm" method="post" action="?handler=Create" class="p-8" data-turbo="false">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="deptEditId" name="id" value="" />
-                <div class="space-y-5">
-                    <div>
-                        <label for="deptName" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department name <span class="text-red-500">*</span></label>
-                        <input type="text" id="deptName" name="departmentName" required maxlength="100" placeholder="e.g. Finance, Human Resources" class="dept-input h-10 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400" />
-                        <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptName"></span>
+    </div>
+
+    <div id="deptModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptModal()"></div>
+
+            <!-- Make modal fit small screens: w-full + max-w + safe padding already -->
+            <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                <div class="border-b border-slate-100 px-6 sm:px-8 py-5 dark:border-slate-800">
+                    <h3 id="deptModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">Add Department</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Department name is required.</p>
+                </div>
+
+                <form id="deptForm" method="post" action="?handler=Create" class="p-6 sm:p-8" data-turbo="false">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deptEditId" name="id" value="" />
+
+                    <div class="space-y-5">
+                        <div>
+                            <label for="deptName" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                Department name <span class="text-red-500">*</span>
+                            </label>
+
+                            <input type="text" id="deptName" name="departmentName"
+                                   required maxlength="100" placeholder="e.g. Finance, Human Resources"
+                                   class="dept-input h-10 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800
+                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                      dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400" />
+                            <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptName"></span>
+                        </div>
                     </div>
-                </div>
-                <div class="mt-6 flex flex-row-reverse gap-3 border-t border-slate-100 pt-6 dark:border-slate-800">
-                    <button type="submit" id="deptSubmitBtn" name="handler" value="Create" class="dept-save-btn inline-flex items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 disabled:pointer-events-none disabled:opacity-70">Save Department</button>
-                    <button type="button" onclick="closeDeptModal()" class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
-                </div>
-            </form>
+
+                    <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-6 dark:border-slate-800 sm:flex-row-reverse sm:items-center">
+                        <button type="submit" id="deptSubmitBtn" name="handler" value="Create"
+                                class="dept-save-btn inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5
+                                       text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500
+                                       disabled:pointer-events-none disabled:opacity-70">
+                            Save Department
+                        </button>
+
+                        <button type="button" onclick="closeDeptModal()"
+                                class="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                                       dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Activate / Deactivate confirmation modal -->
-<div id="deptStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
-    <div class="flex min-h-screen items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptStatusModal()"></div>
-        <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-            <div class="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                <h3 id="deptStatusModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">Deactivate Department</h3>
-                <p id="deptStatusModalSubtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-400">Provide a reason for deactivating (required). Stored in description for audit.</p>
+    <div id="deptStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptStatusModal()"></div>
+
+            <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                <div class="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                    <h3 id="deptStatusModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">
+                        Deactivate Department
+                    </h3>
+                    <p id="deptStatusModalSubtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                        Provide a reason for deactivating (required). Stored in description for audit.
+                    </p>
+                </div>
+
+                <form id="deptStatusForm" method="post" asp-page-handler="SetStatus"
+                      class="p-6"
+                      data-turbo="false"
+                      data-status-action="@Url.Page("/App/Department/Department", null, new { handler = "SetStatus" })">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deptStatusId" name="id" value="" />
+                    <input type="hidden" id="deptStatusIsActive" name="isActive" value="" />
+
+                    <div>
+                        <label for="deptStatusReason" id="deptStatusReasonLabel"
+                               class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span>
+                        </label>
+
+                        <textarea id="deptStatusReason" name="reason" maxlength="200" rows="3"
+                                  placeholder="e.g. Restructuring; department merged with Operations."
+                                  class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-500
+                                     focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
+                                     dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"></textarea>
+
+                        <p class="mt-1 text-xs text-slate-600 dark:text-slate-400" id="deptStatusReasonHint">
+                            Stored in description. Max 200 characters.
+                        </p>
+                        <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptStatusReason"></span>
+                    </div>
+
+                    <div class="mt-6 flex flex-col gap-3 sm:flex-row-reverse sm:items-center">
+                        <button type="submit" id="deptStatusConfirmBtn"
+                                class="dept-status-confirm-btn inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5
+                                       text-sm font-semibold text-white hover:bg-subgreen-500
+                                       disabled:pointer-events-none disabled:opacity-70">
+                            Confirm
+                        </button>
+
+                        <button type="button" onclick="closeDeptStatusModal()"
+                                class="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
+                                       dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form id="deptStatusForm" method="post" asp-page-handler="SetStatus" class="p-6" data-turbo="false" data-status-action="@Url.Page("/App/Department/Department", null, new { handler = "SetStatus" })">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="deptStatusId" name="id" value="" />
-                <input type="hidden" id="deptStatusIsActive" name="isActive" value="" />
-                <div>
-                    <label for="deptStatusReason" id="deptStatusReasonLabel" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span></label>
-                    <textarea id="deptStatusReason" name="reason" maxlength="200" rows="3" placeholder="e.g. Restructuring; department merged with Operations." class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-500 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"></textarea>
-                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-400" id="deptStatusReasonHint">Stored in description. Max 200 characters.</p>
-                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptStatusReason"></span>
-                </div>
-                <div class="mt-6 flex flex-row-reverse gap-3">
-                    <button type="submit" id="deptStatusConfirmBtn" class="dept-status-confirm-btn inline-flex items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-subgreen-500 disabled:pointer-events-none disabled:opacity-70">Confirm</button>
-                    <button type="button" onclick="closeDeptStatusModal()" class="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -172,6 +312,103 @@
 @section Scripts {
 <script>
 (function () {
+    var host = document.getElementById('deptPageHost');
+    var skeleton = document.getElementById('deptSkeleton');
+    var content = document.getElementById('deptContent');
+    var tbody = document.getElementById('deptTableBody');
+    var placeholder = document.getElementById('deptEmptyPlaceholder');
+    if (!host || !skeleton || !content || !tbody) return;
+
+    var shownAt = Date.now();
+    var revealTimer = null;
+    var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+
+    function showSkeleton() {
+        if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+        shownAt = Date.now();
+        host.setAttribute('aria-busy', 'true');
+        skeleton.classList.remove('hidden');
+        content.classList.add('hidden');
+    }
+
+    function revealDeptContent() {
+        var elapsed = Date.now() - shownAt;
+        var wait = Math.max(0, minVisibleMs - elapsed);
+        revealTimer = setTimeout(function () {
+            skeleton.classList.add('hidden');
+            content.classList.remove('hidden');
+            host.setAttribute('aria-busy', 'false');
+            revealTimer = null;
+        }, wait);
+    }
+
+    function esc(s) {
+        if (s == null || s === undefined) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function formatDate(d) {
+        if (!d) return '—';
+        var dt = new Date(d);
+        if (isNaN(dt.getTime())) return '—';
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
+    }
+    function buildDeptRow(d) {
+        var depId = d.depID != null ? d.depID : d.DepID;
+        var name = d.departmentName || d.DepartmentName || '—';
+        var desc = d.description || d.Description || '—';
+        var isActive = (d.isActive != null ? d.isActive : d.IsActive) !== false;
+        var status = isActive ? 'Active' : 'Inactive';
+        var statusClass = isActive ? 'text-subgreen-700 dark:text-subgreen-300 bg-subgreen-50 dark:bg-subgreen-900/30' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400';
+        var createdAt = formatDate(d.createdAt || d.CreatedAt);
+        var empCount = d.employeeCount != null ? d.employeeCount : (d.EmployeeCount != null ? d.EmployeeCount : 0);
+        var nameEsc = name.replace(/'/g, "\\'");
+        var tr = document.createElement('tr');
+        tr.className = 'dept-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10';
+        tr.setAttribute('data-status', status);
+        tr.setAttribute('data-dept-id', depId);
+        tr.setAttribute('data-name', name);
+        tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">' + esc(name) + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + empCount + '</td><td class="max-w-[140px] sm:max-w-[200px] md:max-w-[260px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(desc) + '">' + (desc ? esc(desc) : '—') + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(createdAt) + '</td><td class="px-5 py-3 whitespace-nowrap"><div class="relative inline-block"><button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center rounded-md border-0 px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + status + '</button></div></td><td class="px-5 py-3 text-right sticky right-0 bg-white dark:bg-slate-900"><button type="button" onclick="openDeptEditModal(' + depId + ', \'' + nameEsc + '\')" class="rounded-lg p-2 text-amber-600 transition-all hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300" title="Edit"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button></td>';
+        return tr;
+    }
+
+    showSkeleton();
+    function onDataReady() {
+        fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var departments = (data && data.departments) ? data.departments : [];
+                var existingRows = tbody.querySelectorAll('.dept-row');
+                existingRows.forEach(function (r) { r.remove(); });
+                departments.forEach(function (d) {
+                    tbody.insertBefore(buildDeptRow(d), placeholder);
+                });
+                if (placeholder) {
+                    placeholder.classList.toggle('hidden', departments.length > 0);
+                    var td = placeholder.querySelector('td');
+                    if (td) td.textContent = departments.length === 0 ? 'No departments yet. Create one to get started.' : '';
+                }
+                var statTotal = document.getElementById('deptStatTotal');
+                if (statTotal) statTotal.textContent = departments.length;
+                if (typeof render === 'function') render();
+                revealDeptContent();
+            })
+            .catch(function () {
+                if (placeholder) {
+                    placeholder.classList.remove('hidden');
+                    var td = placeholder.querySelector('td');
+                    if (td) td.textContent = 'Unable to load departments. Check that the API is running.';
+                }
+                revealDeptContent();
+            });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
+    } else {
+        onDataReady();
+    }
+    document.addEventListener('turbo:before-cache', showSkeleton);
+
     function openDeptModal(editId, editName) {
         window.openDeptModal = openDeptModal;
         var modal = document.getElementById('deptModal');

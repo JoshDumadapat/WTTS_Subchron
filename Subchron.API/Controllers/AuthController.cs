@@ -31,6 +31,7 @@ public class AuthController : ControllerBase
     private readonly ILogger<AuthController> _logger;
     private readonly ICloudinaryService _cloudinary;
     private readonly IOptions<CloudinarySettings> _cloudinaryOpts;
+    private readonly IConfiguration _config;
 
     // Track failed login attempts per IP
     private static readonly ConcurrentDictionary<string, (int Count, DateTime LastAttempt)> _loginAttempts = new();
@@ -51,6 +52,7 @@ public class AuthController : ControllerBase
         ILogger<AuthController> logger,
         ICloudinaryService cloudinary,
         IOptions<CloudinarySettings> cloudinaryOpts,
+        IConfiguration config,
         PayMongoService? payMongo = null)
     {
         _db = db;
@@ -61,8 +63,12 @@ public class AuthController : ControllerBase
         _logger = logger;
         _cloudinary = cloudinary;
         _cloudinaryOpts = cloudinaryOpts;
+        _config = config;
         _payMongo = payMongo;
     }
+
+    // Edit trial length here: 10080 = 7 days; use minutes for testing (e.g. 5).
+    private int GetTrialDurationMinutes() => _config.GetValue("Trial:DurationMinutes", 10080);
 
     // Tells the client whether login should show reCAPTCHA
     [HttpGet("captcha-required")]
@@ -1308,6 +1314,8 @@ public class AuthController : ControllerBase
                     RoundRule = "None"
                 });
 
+                var startDate = DateTime.UtcNow.Date;
+                var isTrialPlan = (plan.PlanName ?? "").Equals("Standard", StringComparison.OrdinalIgnoreCase);
                 _db.Subscriptions.Add(new Subscription
                 {
                     OrgID = org.OrgID,
@@ -1317,7 +1325,8 @@ public class AuthController : ControllerBase
                     ModePrice = 0m,
                     FinalPrice = plan.BasePrice,
                     BillingCycle = billing,
-                    StartDate = DateTime.UtcNow.Date,
+                    StartDate = startDate,
+                    EndDate = isTrialPlan ? DateTime.UtcNow.AddMinutes(GetTrialDurationMinutes()) : (DateTime?)null,
                     Status = "Trial"
                 });
 
@@ -1468,6 +1477,8 @@ public class AuthController : ControllerBase
                     AttendanceMode = mode,
                     RoundRule = "None"
                 });
+                var startDate = DateTime.UtcNow.Date;
+                var isTrialPlan = planName.Equals("Standard", StringComparison.OrdinalIgnoreCase);
                 _db.Subscriptions.Add(new Subscription
                 {
                     OrgID = org.OrgID,
@@ -1477,7 +1488,8 @@ public class AuthController : ControllerBase
                     ModePrice = 0m,
                     FinalPrice = plan.BasePrice,
                     BillingCycle = billing,
-                    StartDate = DateTime.UtcNow.Date,
+                    StartDate = startDate,
+                    EndDate = isTrialPlan ? DateTime.UtcNow.AddMinutes(GetTrialDurationMinutes()) : (DateTime?)null,
                     Status = "Trial"
                 });
 
@@ -1523,6 +1535,31 @@ public class AuthController : ControllerBase
                 });
                 await _db.SaveChangesAsync();
 
+                int? trialTxnId = null;
+                if (isFreeTrial)
+                {
+                    var createdSub = await _db.Subscriptions.Where(s => s.OrgID == org.OrgID).OrderByDescending(s => s.StartDate).FirstOrDefaultAsync();
+                    if (createdSub != null)
+                    {
+                        var trialTxn = new PaymentTransaction
+                        {
+                            OrgID = org.OrgID,
+                            UserID = user.UserID,
+                            SubscriptionID = createdSub.SubscriptionID,
+                            Amount = 0m,
+                            Currency = "PHP",
+                            Status = "paid",
+                            PayMongoPaymentIntentId = "trial-" + org.OrgID + "-" + createdSub.SubscriptionID + "-" + Guid.NewGuid().ToString("N")[..8],
+                            Description = "Trial start (0 PHP)",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _db.PaymentTransactions.Add(trialTxn);
+                        await _db.SaveChangesAsync();
+                        trialTxnId = trialTxn.Id;
+                        await UpsertBillingRecordFromRequestAsync(trialTxn.Id, org.OrgID, user.UserID, req);
+                    }
+                }
+
                 if (!isFreeTrial && !string.IsNullOrWhiteSpace(req.PaymentIntentId))
                 {
                     var paymentTxn = await _db.PaymentTransactions
@@ -1548,6 +1585,22 @@ public class AuthController : ControllerBase
                     var paymentTxn = await _db.PaymentTransactions.FirstOrDefaultAsync(pt => pt.PayMongoPaymentIntentId == req.PaymentIntentId);
                     if (paymentTxn != null)
                         await UpsertBillingRecordFromRequestAsync(paymentTxn.Id, org.OrgID, user.UserID, req);
+                    var sub = await _db.Subscriptions.FirstOrDefaultAsync(s => s.OrgID == org.OrgID && s.Status == "Trial");
+                    if (sub != null) { sub.Status = "Active"; sub.EndDate = DateTime.UtcNow.AddMonths(1); await _db.SaveChangesAsync(); }
+                }
+
+                var receiptTo = (req.BillingEmail ?? email)?.Trim();
+                if (!string.IsNullOrEmpty(receiptTo))
+                {
+                    string amountLine;
+                    if (isFreeTrial) amountLine = "7-day free trial";
+                    else
+                    {
+                        var pt = string.IsNullOrWhiteSpace(req.PaymentIntentId) ? null : await _db.PaymentTransactions.FirstOrDefaultAsync(x => x.PayMongoPaymentIntentId == req.PaymentIntentId);
+                        amountLine = pt != null ? "₱" + pt.Amount.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("en-PH")) : "—";
+                    }
+                    try { await _email.SendAsync(receiptTo, "Your Subchron receipt", EmailTemplates.GetReceiptHtml(planName, amountLine, isFreeTrial, receiptTo)); }
+                    catch { /* best effort */ }
                 }
 
                 var accessToken = _jwt.CreateToken(user, null);
@@ -1647,9 +1700,9 @@ public class AuthController : ControllerBase
     {
         return planName switch
         {
-            "Basic" => 2999m,
+            "Basic" => 2499m,
             "Standard" => 5999m,
-            "Enterprise" => 14999m,
+            "Enterprise" => 8999m,
             _ => 0m
         };
     }

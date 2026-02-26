@@ -18,12 +18,14 @@ public class BillingController : ControllerBase
     private readonly JwtTokenService _jwt;
     private readonly PayMongoService _payMongo;
     private readonly SubchronDbContext _db;
+    private readonly EmailService _email;
 
-    public BillingController(JwtTokenService jwt, PayMongoService payMongo, SubchronDbContext db)
+    public BillingController(JwtTokenService jwt, PayMongoService payMongo, SubchronDbContext db, EmailService email)
     {
         _jwt = jwt;
         _payMongo = payMongo;
         _db = db;
+        _email = email;
     }
 
     // Returns current organization's plan and usage (employees used/limit). Requires JWT with orgId (OrgAdmin/HR/Manager).
@@ -44,13 +46,11 @@ public class BillingController : ControllerBase
         var plan = subscription?.Plan;
         var planName = plan?.PlanName ?? "—";
         var employeeLimit = plan?.MaxEmployees ?? 0;
-
         var employeesUsed = await _db.Employees.CountAsync(e => e.OrgID == orgId);
-
         var billingCycle = subscription?.BillingCycle ?? "—";
-        var nextBillingDate = subscription?.EndDate.HasValue == true
-            ? subscription.EndDate.Value.ToString("yyyy-MM-dd")
-            : "—";
+        var nextBillingDate = subscription?.EndDate.HasValue == true ? subscription.EndDate!.Value.ToString("yyyy-MM-dd") : "—";
+        var trialEndDate = subscription?.EndDate.HasValue == true ? subscription.EndDate!.Value.ToString("yyyy-MM-ddTHH:mm:ssZ") : (string?)null;
+        var trialExpired = subscription != null && subscription.Status == "Trial" && subscription.EndDate.HasValue && subscription.EndDate.Value < DateTime.UtcNow;
 
         return Ok(new
         {
@@ -58,11 +58,71 @@ public class BillingController : ControllerBase
             employeesUsed,
             employeeLimit,
             billingCycle,
-            nextBillingDate
+            nextBillingDate,
+            trialExpired,
+            trialEndDate
         });
     }
 
-    // Returns billing summary (subtotal, tax, total, formatted) for the billing page.
+    [Authorize]
+    [HttpPost("create-upgrade-token")]
+    public async Task<IActionResult> CreateUpgradeToken()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var orgIdClaim = User.FindFirstValue("orgId");
+        var roleClaim = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue("role");
+        if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(orgIdClaim) || !int.TryParse(orgIdClaim, out var orgId) || !int.TryParse(userIdClaim, out var userId))
+            return BadRequest(new { ok = false, message = "Invalid session." });
+        var sub = await _db.Subscriptions.Include(s => s.Plan).Where(s => s.OrgID == orgId && s.Status == "Trial").OrderByDescending(s => s.StartDate).FirstOrDefaultAsync();
+        if (sub?.Plan == null) return BadRequest(new { ok = false, message = "No trial subscription found." });
+        var planName = sub.Plan.PlanName ?? "";
+        var token = _jwt.CreateOnboardingToken(userId, orgId, roleClaim ?? "OrgAdmin", sub.PlanID, planName, false);
+        return Ok(new { ok = true, token });
+    }
+
+    [Authorize]
+    [HttpPost("cancel-subscription")]
+    public async Task<IActionResult> CancelSubscription()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var orgIdClaim = User.FindFirstValue("orgId");
+        if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(orgIdClaim) ||
+            !int.TryParse(userIdClaim, out var userId) || !int.TryParse(orgIdClaim, out var orgId))
+            return BadRequest(new { ok = false, message = "Invalid session." });
+
+        var sub = await _db.Subscriptions
+            .Where(s => s.OrgID == orgId && (s.Status == "Trial" || s.Status == "Active"))
+            .OrderByDescending(s => s.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (sub == null)
+            return BadRequest(new { ok = false, message = "No active subscription found." });
+
+        sub.Status = "Cancelled";
+        if (!sub.EndDate.HasValue || sub.EndDate.Value > DateTime.UtcNow)
+            sub.EndDate = DateTime.UtcNow;
+
+        var org = await _db.Organizations.FirstOrDefaultAsync(o => o.OrgID == orgId);
+        if (org != null)
+            org.Status = "Cancelled";
+
+        await _db.SaveChangesAsync();
+
+        _db.AuditLogs.Add(new AuditLog
+        {
+            OrgID = orgId,
+            UserID = userId,
+            Action = "SubscriptionCancelled",
+            EntityName = "Subscription",
+            EntityID = sub.SubscriptionID,
+            Details = "Subscription cancelled by user from trial-expired modal.",
+            CreatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { ok = true, status = "Cancelled" });
+    }
+
     [HttpGet("summary")]
     public IActionResult GetSummary([FromQuery] decimal amount, [FromQuery] bool isFreeTrial = false, [FromQuery] string? planName = null)
     {
@@ -81,12 +141,16 @@ public class BillingController : ControllerBase
         string planName;
         bool isFreeTrial;
         bool isDraft = false;
+        bool freeTrialEligible = false;
 
         var payload = _jwt.ValidateOnboardingToken(token);
         if (payload != null)
         {
             planName = payload.PlanName;
             isFreeTrial = payload.IsFreeTrial;
+            // Existing accounts coming from onboarding/upgrade tokens are not eligible
+            // to restart a free trial.
+            freeTrialEligible = false;
         }
         else
         {
@@ -98,8 +162,13 @@ public class BillingController : ControllerBase
             if (plan is null)
                 return BadRequest(new { ok = false, message = "Invalid plan." });
             planName = plan.PlanName ?? "";
-            isFreeTrial = planName == "Standard";
+            freeTrialEligible = true;
+            isFreeTrial = freeTrialEligible && planName == "Standard";
         }
+
+        // Never allow free-trial flag when session is not eligible.
+        if (!freeTrialEligible)
+            isFreeTrial = false;
 
         if (req.PlanId.HasValue && req.PlanId.Value > 0)
         {
@@ -107,10 +176,54 @@ public class BillingController : ControllerBase
             if (plan == null)
                 return BadRequest(new { ok = false, message = "Invalid plan selected." });
             planName = plan.PlanName ?? "";
-            isFreeTrial = planName == "Standard";
+            isFreeTrial = freeTrialEligible && planName == "Standard";
         }
 
         string? billingEmail = null;
+        string? billingPhone = null;
+        string? nameOnCard = null;
+        string? brand = null;
+        string? expiry = null;
+        string? last4 = null;
+        string preferredMethod = "card";
+
+        if (payload != null)
+        {
+            var latestBilling = await _db.BillingRecords
+                .AsNoTracking()
+                .Where(b => b.OrgID == payload.OrgId && b.UserID == payload.UserId)
+                .OrderByDescending(b => b.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (latestBilling != null)
+            {
+                billingEmail = latestBilling.BillingEmail;
+                billingPhone = latestBilling.BillingPhone;
+                nameOnCard = latestBilling.NameOnCard;
+                brand = latestBilling.Brand;
+                expiry = latestBilling.Expiry;
+                last4 = latestBilling.Last4;
+
+                if (!string.IsNullOrWhiteSpace(brand))
+                {
+                    var b = brand.Trim().ToLowerInvariant();
+                    preferredMethod = b switch
+                    {
+                        "gcash" => "gcash",
+                        "paymaya" => "paymaya",
+                        "maya" => "paymaya",
+                        _ => "card"
+                    };
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(billingEmail))
+            {
+                var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserID == payload.UserId);
+                billingEmail = user?.Email;
+            }
+        }
+
         if (isDraft)
         {
             var draft = SignupDraftStore.Get(token);
@@ -128,7 +241,14 @@ public class BillingController : ControllerBase
                 clientKey = (string?)null,
                 paymentIntentId = (string?)null,
                 isDraft,
-                billingEmail
+                billingEmail,
+                billingPhone,
+                nameOnCard,
+                brand,
+                expiry,
+                last4,
+                preferredMethod,
+                freeTrialEligible
             });
         }
 
@@ -161,7 +281,14 @@ public class BillingController : ControllerBase
                 clientKey = result.ClientKey,
                 paymentIntentId = result.Id,
                 isDraft,
-                billingEmail
+                billingEmail,
+                billingPhone,
+                nameOnCard,
+                brand,
+                expiry,
+                last4,
+                preferredMethod,
+                freeTrialEligible
             });
         }
         catch (InvalidOperationException ex)
@@ -220,17 +347,31 @@ public class BillingController : ControllerBase
             userId: payload.UserId
         );
 
-        // Save billing record if billing data provided
         if (payload.OrgId > 0 && payload.UserId > 0)
         {
             var tx = await _db.PaymentTransactions.FirstOrDefaultAsync(t => t.PayMongoPaymentIntentId == req.PaymentIntentId);
             if (tx != null)
                 await UpsertBillingRecordAsync(tx.Id, payload.OrgId, payload.UserId, req);
+            var sub = await _db.Subscriptions.FirstOrDefaultAsync(s => s.OrgID == payload.OrgId && s.Status == "Trial");
+            if (sub != null)
+            {
+                sub.Status = "Active";
+                sub.EndDate = DateTime.UtcNow.AddMonths(1);
+                await _db.SaveChangesAsync();
+            }
         }
 
         var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserID == payload.UserId);
         var userName = user?.Name;
         var jwtToken = user != null ? _jwt.CreateToken(user, null) : null;
+        var to = (req.BillingEmail ?? user?.Email)?.Trim();
+        if (!string.IsNullOrEmpty(to))
+        {
+            var amountPesos = intent.Amount / 100m;
+            var amountLine = "₱" + amountPesos.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("en-PH"));
+            try { _ = _email.SendAsync(to, "Your Subchron receipt", EmailTemplates.GetReceiptHtml(payload.PlanName ?? "Subscription", amountLine, false, to)); }
+            catch { /* best effort */ }
+        }
         return Ok(new { ok = true, userId = payload.UserId, orgId = payload.OrgId, role = payload.Role, name = userName, token = jwtToken });
     }
 
@@ -293,9 +434,9 @@ public class BillingController : ControllerBase
     {
         return planName switch
         {
-            "Basic" => 2999m,
+            "Basic" => 2499m,
             "Standard" => 5999m,
-            "Enterprise" => 14999m,
+            "Enterprise" => 8999m,
             _ => 0m
         };
     }

@@ -538,4 +538,31 @@ The {AppName} Team
 © {year} {AppName}. All rights reserved.
 ";
     }
+
+    public static string GetReceiptHtml(string planName, string amountLine, bool isTrial, string toEmail)
+    {
+        var year = DateTime.UtcNow.Year.ToString();
+        var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + " UTC";
+        var body = isTrial
+            ? $"Your 7-day free trial for <strong>{planName}</strong> has started."
+            : $"Plan: <strong>{planName}</strong><br/>Amount: {amountLine}<br/>Date: {dateStr}";
+        return $@"
+<!doctype html><html lang=""en""><head><meta charset=""utf-8""/><meta name=""viewport"" content=""width=device-width,initial-scale=1""/><title>Receipt - {AppName}</title></head>
+<body style=""margin:0;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;"">
+<table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""background:#f5f7fb;""><tr><td align=""center"" style=""padding:32px 16px;"">
+<table role=""presentation"" width=""480"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""max-width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 4px 16px rgba(15,23,42,.06);"">
+<tr><td style=""padding:32px 28px;"">
+<div style=""font-size:22px;font-weight:800;""><span style=""color:#22c55e;"">Sub</span><span style=""color:#0052a3;"">chron</span></div>
+<div style=""height:24px;""></div>
+<div style=""font-size:20px;font-weight:700;color:#0f172a;"">Payment receipt</div>
+<div style=""height:12px;""></div>
+<div style=""font-size:14px;color:#64748b;"">Thank you for your purchase. A copy has been sent to {toEmail}.</div>
+<div style=""height:16px;""></div>
+<div style=""font-size:14px;color:#334155;line-height:22px;"">{body}</div>
+<div style=""height:24px;""></div>
+<div style=""font-size:13px;color:#334155;"">Thank you,<br/><span style=""font-weight:700;"">The {AppName} Team</span></div>
+</td></tr></table>
+<div style=""margin-top:20px;font-size:11px;color:#94a3b8;"">© {year} {AppName}. All rights reserved.</div>
+</td></tr></table></body></html>";
+    }
 }

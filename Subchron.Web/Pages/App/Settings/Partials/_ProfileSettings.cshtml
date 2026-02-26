@@ -59,10 +59,10 @@
 
             <!-- Name + Email (NOT editable) -->
             <div class="min-w-0">
-                <h2 class="truncate text-xl font-semibold text-slate-900 dark:text-white">
+                <h2 id="settingsProfileDisplayName" class="truncate text-xl font-semibold text-slate-900 dark:text-white">
                     @(string.IsNullOrWhiteSpace(displayName) ? "Unnamed User" : displayName)
                 </h2>
-                <p class="truncate text-sm text-slate-600 dark:text-slate-400">@email</p>
+                <p id="settingsProfileEmail" class="truncate text-sm text-slate-600 dark:text-slate-400">@email</p>
             </div>
         </div>
 
@@ -95,8 +95,7 @@
         }
     </div>
 
-    @if (Model.HasEmployee)
-    {
+    <div id="settingsEmployeeSection" class="@(Model.HasEmployee ? "" : "hidden")">
         <!-- ONE FORM: avatar + employee fields -->
         <form id="employeeForm"
               method="post"
@@ -306,7 +305,7 @@
                 </div>
             </div>
         </form>
-    }
+    </div>
 </div>
 
 <script>

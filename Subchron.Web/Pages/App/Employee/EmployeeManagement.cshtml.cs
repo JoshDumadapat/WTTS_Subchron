@@ -22,14 +22,48 @@ public class EmployeeManagementModel : PageModel
     public string? Error { get; set; }
     public string ApiBaseUrl { get; set; } = "";
 
-    public async Task OnGetAsync()
+    public Task OnGetAsync()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
-        await LoadDepartmentsAsync();
-        await LoadEmployeesAsync(archivedOnly: false);
+        Error = null;
+        Employees = new List<EmployeeItem>();
+        Departments = new List<DepartmentItem>();
+        return Task.CompletedTask;
+    }
+
+    public async Task<IActionResult> OnGetDataAsync()
+    {
+        ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
+        await Task.WhenAll(
+            LoadDepartmentsAsync(),
+            LoadEmployeesAsync(archivedOnly: false)
+        );
+        return new JsonResult(new { employees = Employees, departments = Departments });
     }
 
     private string GetApiBaseUrl() => (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
+
+    private HttpClient CreateAuthorizedApiClient(string token)
+    {
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return client;
+    }
+
+    private static async Task<string?> TryGetMessageAsync(HttpResponseMessage resp)
+    {
+        try
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(body) || !body.Contains("message", StringComparison.OrdinalIgnoreCase))
+                return null;
+            var doc = System.Text.Json.JsonDocument.Parse(body);
+            if (doc.RootElement.TryGetProperty("message", out var m))
+                return m.GetString();
+        }
+        catch { }
+        return null;
+    }
 
     private async Task LoadDepartmentsAsync()
     {
@@ -39,14 +73,14 @@ public class EmployeeManagementModel : PageModel
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
             Departments = list ?? new List<DepartmentItem>();
         }
         catch
         {
             Departments = new List<DepartmentItem>();
+            Error ??= "Unable to load departments right now.";
         }
     }
 
@@ -58,8 +92,7 @@ public class EmployeeManagementModel : PageModel
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var url = baseUrl + "/api/employees" + (archivedOnly ? "?archivedOnly=true" : "");
             var list = await client.GetFromJsonAsync<List<EmployeeItem>>(url);
             Employees = list ?? new List<EmployeeItem>();
@@ -67,10 +100,11 @@ public class EmployeeManagementModel : PageModel
         catch
         {
             Employees = new List<EmployeeItem>();
+            Error ??= "Unable to load employees right now.";
         }
     }
 
-    /// <summary>Proxies API GET /api/employees/{id}/attendance-qr and returns PNG for the Generate QR modal.</summary>
+    // Proxies API GET /api/employees/{id}/attendance-qr and returns PNG for the Generate QR modal.
     public async Task<IActionResult> OnGetAttendanceQrAsync(int id)
     {
         var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
@@ -81,8 +115,7 @@ public class EmployeeManagementModel : PageModel
             return NotFound();
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var resp = await client.GetAsync(baseUrl + $"/api/employees/{id}/attendance-qr");
             if (!resp.IsSuccessStatusCode)
                 return NotFound();
@@ -105,8 +138,7 @@ public class EmployeeManagementModel : PageModel
             return new JsonResult(new { });
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var resp = await client.GetAsync(baseUrl + "/api/employees/" + id);
             if (!resp.IsSuccessStatusCode)
                 return new JsonResult(new { });
@@ -144,8 +176,7 @@ public class EmployeeManagementModel : PageModel
         }
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var payload = new
             {
                 FirstName = firstName,
@@ -173,18 +204,7 @@ public class EmployeeManagementModel : PageModel
             var resp = await client.PutAsJsonAsync(baseUrl + "/api/employees/" + id, payload);
             if (!resp.IsSuccessStatusCode)
             {
-                var msg = "Failed to update employee.";
-                try
-                {
-                    var body = await resp.Content.ReadAsStringAsync();
-                    if (body.Contains("message", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var doc = System.Text.Json.JsonDocument.Parse(body);
-                        if (doc.RootElement.TryGetProperty("message", out var m))
-                            msg = m.GetString() ?? msg;
-                    }
-                }
-                catch { /* ignore */ }
+                var msg = await TryGetMessageAsync(resp) ?? "Failed to update employee.";
                 TempData["ToastMessage"] = msg;
                 TempData["ToastSuccess"] = false;
                 return RedirectToPage();
@@ -226,23 +246,11 @@ public class EmployeeManagementModel : PageModel
         }
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var resp = await client.PutAsJsonAsync(baseUrl + "/api/employees/" + id, new { WorkState = ws });
             if (!resp.IsSuccessStatusCode)
             {
-                var msg = "Failed to update work state.";
-                try
-                {
-                    var body = await resp.Content.ReadAsStringAsync();
-                    if (body.Contains("message", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var doc = System.Text.Json.JsonDocument.Parse(body);
-                        if (doc.RootElement.TryGetProperty("message", out var m))
-                            msg = m.GetString() ?? msg;
-                    }
-                }
-                catch { /* ignore */ }
+                var msg = await TryGetMessageAsync(resp) ?? "Failed to update work state.";
                 TempData["ToastMessage"] = msg;
                 TempData["ToastSuccess"] = false;
                 return RedirectToPage();
@@ -286,23 +294,11 @@ public class EmployeeManagementModel : PageModel
         }
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var client = CreateAuthorizedApiClient(token);
             var resp = await client.PatchAsJsonAsync(baseUrl + $"/api/employees/{id}/archive", new { Reason = r });
             if (!resp.IsSuccessStatusCode)
             {
-                var msg = "Failed to archive employee.";
-                try
-                {
-                    var body = await resp.Content.ReadAsStringAsync();
-                    if (body.Contains("message", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var doc = System.Text.Json.JsonDocument.Parse(body);
-                        if (doc.RootElement.TryGetProperty("message", out var m))
-                            msg = m.GetString() ?? msg;
-                    }
-                }
-                catch { /* ignore */ }
+                var msg = await TryGetMessageAsync(resp) ?? "Failed to archive employee.";
                 TempData["ToastMessage"] = msg;
                 TempData["ToastSuccess"] = false;
                 return RedirectToPage();

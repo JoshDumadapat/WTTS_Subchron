@@ -6,9 +6,9 @@
     var currentTab = Model.CurrentTab;
 }
 
-<div class="mx-auto max-w-7xl px-4 py-6">
+<div class="mx-auto">
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
+        <h1 class="text-2xl font-bold text-subgreen-500 dark:text-white">Settings</h1>
         <p class="text-base text-slate-500 dark:text-slate-400">Manage your account, plan, and preferences.</p>
     </div>
 
@@ -40,25 +40,206 @@
         </aside>
 
         <!-- Right: content -->
-        <div class="min-w-0 flex-1">
-            @switch (currentTab)
-            {
-                case IndexModel.TabSecurity:
-                    @await Html.PartialAsync("Partials/_SecuritySettings", Model)
-                    break;
-                case IndexModel.TabUpgradePlan:
-                    @await Html.PartialAsync("Partials/_UpgradePlanSettings", Model)
-                    break;
-                case IndexModel.TabPersonalization:
-                    @await Html.PartialAsync("Partials/_PersonalizationSettings", Model)
-                    break;
-                case IndexModel.TabResources:
-                    @await Html.PartialAsync("Partials/_ResourcesSettings", Model)
-                    break;
-                default:
-                    @await Html.PartialAsync("Partials/_ProfileSettings", Model)
-                    break;
-            }
+        <div id="settingsPanelHost" class="min-w-0 flex-1" aria-busy="true">
+            <div id="settingsPanelSkeleton" class="animate-pulse">
+                @switch (currentTab)
+                {
+                    case IndexModel.TabSecurity:
+                        <div class="space-y-4">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                                <div class="h-6 w-52 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-4 h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-3 h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-4 h-11 w-44 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                                <div class="h-6 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-4 h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-4 h-11 w-36 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                        </div>
+                        break;
+                    case IndexModel.TabUpgradePlan:
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <div class="h-56 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-56 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                                <div class="h-5 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-3 h-4 w-72 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-4 h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                        </div>
+                        break;
+                    case IndexModel.TabResources:
+                        <div class="space-y-3 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                            <div class="h-14 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-14 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-14 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-14 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                        </div>
+                        break;
+                    default:
+                        <div class="space-y-5 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="h-24 w-24 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-5 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                        <div class="h-4 w-56 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                    </div>
+                                </div>
+                                <div class="h-10 w-24 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                        </div>
+                        break;
+                }
+            </div>
+
+            <div id="settingsPanelContent" class="hidden">
+                <div id="settingsLoadError" class="mb-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300"></div>
+
+                @switch (currentTab)
+                {
+                    case IndexModel.TabSecurity:
+                        @await Html.PartialAsync("Partials/_SecuritySettings", Model)
+                        break;
+                    case IndexModel.TabUpgradePlan:
+                        @await Html.PartialAsync("Partials/_UpgradePlanSettings", Model)
+                        break;
+                    case IndexModel.TabPersonalization:
+                        @await Html.PartialAsync("Partials/_PersonalizationSettings", Model)
+                        break;
+                    case IndexModel.TabResources:
+                        @await Html.PartialAsync("Partials/_ResourcesSettings", Model)
+                        break;
+                    default:
+                        @await Html.PartialAsync("Partials/_ProfileSettings", Model)
+                        break;
+                }
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+(function () {
+    var panel = document.getElementById('settingsPanelHost');
+    var skeleton = document.getElementById('settingsPanelSkeleton');
+    var content = document.getElementById('settingsPanelContent');
+    if (!panel || !skeleton || !content) return;
+
+    var revealTimer = null;
+    var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+    var shownAt = Date.now();
+
+    function showSkeleton() {
+        if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+        shownAt = Date.now();
+        panel.setAttribute('aria-busy', 'true');
+        skeleton.classList.remove('hidden');
+        content.classList.add('hidden');
+    }
+
+    function setEl(id, value, attr) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var v = value != null && value !== undefined ? value : '';
+        if (attr === 'value') el.value = v;
+        else if (attr === 'src') { el.src = v; el.classList.toggle('hidden', !v); }
+        else if (attr === 'style') el.setAttribute('style', v);
+        else el.textContent = v;
+    }
+
+    function applyData(data) {
+        if (!data) return;
+        var errEl = document.getElementById('settingsLoadError');
+        if (errEl) {
+            if (data.loadError) {
+                errEl.textContent = data.loadError;
+                errEl.classList.remove('hidden');
+            } else {
+                errEl.textContent = '';
+                errEl.classList.add('hidden');
+            }
+        }
+        setEl('settingsProfileDisplayName', data.profileName || 'Unnamed User');
+        setEl('settingsProfileEmail', data.profileEmail || '');
+        var avatarEl = document.getElementById('profileAvatarImg');
+        if (avatarEl && data.profileAvatarUrl) {
+            avatarEl.src = data.profileAvatarUrl + (data.profileAvatarUrl.indexOf('?') !== -1 ? '&' : '?') + 'v=' + Date.now();
+            avatarEl.classList.remove('hidden');
+        }
+        setEl('settingsPlanName', data.planName);
+        setEl('settingsEmployeesUsed', data.employeesUsed);
+        setEl('settingsEmployeeLimit', data.employeeLimit);
+        setEl('settingsBillingCycle', data.billingCycle);
+        setEl('settingsNextBillingDate', data.nextBillingDate);
+        var usageBar = document.getElementById('settingsUsageBar');
+        if (usageBar && data.employeeLimit > 0) {
+            var pct = Math.min(100, Math.round((data.employeesUsed || 0) * 100 / data.employeeLimit));
+            usageBar.style.width = pct + '%';
+        }
+        var empSection = document.getElementById('settingsEmployeeSection');
+        if (empSection) empSection.classList.toggle('hidden', !data.hasEmployee);
+        var form = content.querySelector('form#employeeForm');
+        if (form && data.hasEmployee) {
+            var names = ['FirstName', 'MiddleName', 'LastName', 'AddressLine1', 'AddressLine2', 'City', 'StateProvince', 'PostalCode', 'Country', 'Phone', 'EmergencyContactName', 'EmergencyContactPhone', 'EmergencyContactRelation'];
+            var keys = ['empFirstName', 'empMiddleName', 'empLastName', 'empAddressLine1', 'empAddressLine2', 'empCity', 'empStateProvince', 'empPostalCode', 'empCountry', 'empPhone', 'empEmergencyContactName', 'empEmergencyContactPhone', 'empEmergencyContactRelation'];
+            for (var i = 0; i < names.length; i++) {
+                var input = form.querySelector('[name="' + names[i] + '"]');
+                if (input && data[keys[i]] != null) input.value = data[keys[i]];
+            }
+        }
+    }
+
+    function revealSettingsContent() {
+        var elapsed = Date.now() - shownAt;
+        var wait = Math.max(0, minVisibleMs - elapsed);
+        revealTimer = setTimeout(function () {
+            skeleton.classList.add('hidden');
+            content.classList.remove('hidden');
+            panel.setAttribute('aria-busy', 'false');
+            revealTimer = null;
+        }, wait);
+    }
+
+    showSkeleton();
+    function onDataReady() {
+        var params = new URLSearchParams(window.location.search);
+        var tab = params.get('tab') || '@(currentTab)';
+        var url = window.location.pathname + '?handler=Data&tab=' + encodeURIComponent(tab);
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                applyData(data);
+                revealSettingsContent();
+            })
+            .catch(function () {
+                setEl('settingsLoadError', 'Unable to load settings.');
+                document.getElementById('settingsLoadError').classList.remove('hidden');
+                revealSettingsContent();
+            });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
+    } else {
+        onDataReady();
+    }
+    document.addEventListener('turbo:before-cache', showSkeleton);
+})();
+</script>
+}

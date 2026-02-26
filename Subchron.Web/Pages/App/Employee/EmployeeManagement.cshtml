@@ -6,11 +6,36 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<div id="employeePageHost" class="mx-auto" aria-busy="true">
+    <div id="employeeSkeleton" class="space-y-6 animate-pulse">
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="h-8 w-56 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-28 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+        </div>
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
+                <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+                <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+                <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+                <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+            </div>
+            <div class="space-y-3 p-4">
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="employeeContent" class="hidden">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Employee Directory</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your organization's team members.</p>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Employee Directory</h1>
         </div>
         <div class="flex items-center gap-3">
             <a asp-page="/App/Archive/Archive" class="inline-flex items-center rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
@@ -23,6 +48,13 @@
             </a>
         </div>
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+            @Model.Error
+        </div>
+    }
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <!-- Stats: equal width, numbers right-aligned -->
@@ -65,10 +97,6 @@
                     </select>
                     <select id="filterDepartment" class="h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
                         <option value="">All Departments</option>
-                        @foreach (var d in Model.Departments)
-                        {
-                            <option value="@d.DepID">@d.DepartmentName</option>
-                        }
                     </select>
                     <button type="button" id="resetFilters" class="h-11 rounded-xl border border-gray-300 bg-white px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                         Reset
@@ -169,6 +197,8 @@
             </div>
         </div>
     </div>
+</div>
+
 </div>
 
 <!-- Status dropdown portal: fixed on top so it is never clipped by table -->
@@ -281,10 +311,6 @@
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
                         <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="">— Select —</option>
-                            @foreach (var d in Model.Departments)
-                            {
-                                <option value="@d.DepID">@d.DepartmentName</option>
-                            }
                         </select>
                     </div>
                     <div>
@@ -427,17 +453,170 @@
 
 <script>
     (function () {
-        const rows = document.querySelectorAll('.employee-row');
+        var host = document.getElementById('employeePageHost');
+        var skeleton = document.getElementById('employeeSkeleton');
+        var content = document.getElementById('employeeContent');
+        var tbody = document.getElementById('employeeTableBody');
+        var placeholder = document.getElementById('employeeEmptyPlaceholder');
+        if (!host || !skeleton || !content || !tbody) return;
+
+        var shownAt = Date.now();
+        var revealTimer = null;
+        var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+
+        function showSkeleton() {
+            if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+            shownAt = Date.now();
+            host.setAttribute('aria-busy', 'true');
+            skeleton.classList.remove('hidden');
+            content.classList.add('hidden');
+        }
+
+        function revealEmployeeContent() {
+            var elapsed = Date.now() - shownAt;
+            var wait = Math.max(0, minVisibleMs - elapsed);
+            revealTimer = setTimeout(function () {
+                skeleton.classList.add('hidden');
+                content.classList.remove('hidden');
+                host.setAttribute('aria-busy', 'false');
+                revealTimer = null;
+            }, wait);
+        }
+
+        function esc(s) {
+            if (s == null || s === undefined) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function initials(fn, ln) {
+            var f = (fn && fn.trim()) ? fn.trim().charAt(0).toUpperCase() : ' ';
+            var l = (ln && ln.trim()) ? ln.trim().charAt(0).toUpperCase() : ' ';
+            return (f + l).trim() || '—';
+        }
+        function fullName(fn, mn, ln) {
+            return [fn, mn, ln].filter(Boolean).join(' ').trim() || '—';
+        }
+        function addr(line, city, country) {
+            return [line, city, country].filter(Boolean).join(', ').trim() || '—';
+        }
+        function buildRow(e) {
+            var name = fullName(e.firstName || e.FirstName, e.middleName || e.MiddleName, e.lastName || e.LastName);
+            var initial = name === '—' ? '—' : initials(e.firstName || e.FirstName, e.lastName || e.LastName);
+            var address = addr(e.addressLine1 || e.AddressLine1, e.city || e.City, e.country || e.Country);
+            var status = (e.workState || e.WorkState || 'Active').trim() || 'Active';
+            var isActive = status.toLowerCase() === 'active';
+            var joined = e.dateHired || e.DateHired;
+            var joinedStr = '—';
+            if (joined) {
+                var d = new Date(joined);
+                if (!isNaN(d.getTime())) {
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    joinedStr = months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+            }
+            var empId = e.empID != null ? e.empID : e.EmpID;
+            var empNumber = e.empNumber || e.EmpNumber || '';
+            var role = e.role || e.Role || '';
+            var deptName = e.departmentName || e.DepartmentName || '—';
+            var deptId = (e.departmentID != null ? e.departmentID : e.DepartmentID);
+            var ageStr = (e.age != null ? e.age : e.Age) != null ? String(e.age != null ? e.age : e.Age) : '—';
+            var genderStr = (e.gender || e.Gender) || '—';
+            var nameEsc = name.replace(/'/g, "\\'");
+            var statusClass = isActive ? 'text-subgreen-700 dark:text-subgreen-300 bg-subgreen-50 dark:bg-subgreen-900/30' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+            var tr = document.createElement('tr');
+            tr.className = 'employee-row group transition-all hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10';
+            tr.setAttribute('data-emp-id', empId);
+            tr.setAttribute('data-emp-number', empNumber);
+            tr.setAttribute('data-status', status);
+            tr.setAttribute('data-name', name);
+            tr.setAttribute('data-email', '');
+            tr.setAttribute('data-department', deptName);
+            tr.setAttribute('data-department-id', deptId != null ? String(deptId) : '');
+            tr.setAttribute('data-role', role);
+            tr.setAttribute('data-address', address);
+            tr.setAttribute('data-joined', joinedStr);
+            tr.setAttribute('data-date-hired', (joined && typeof joined === 'string') ? joined.substring(0, 10) : '');
+            tr.setAttribute('data-phone', (e.phone || e.Phone) || '—');
+            tr.setAttribute('data-age', ageStr);
+            tr.setAttribute('data-gender', genderStr);
+            tr.setAttribute('data-ec-name', '—');
+            tr.setAttribute('data-ec-phone', '—');
+            tr.setAttribute('data-ec-relation', '—');
+            tr.innerHTML = '<td class="px-5 py-3"><div class="flex items-center gap-3"><div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-400">' + esc(initial) + '</div><div><div class="text-sm font-medium text-slate-900 dark:text-white">' + esc(name) + '</div><div class="text-xs text-slate-500 dark:text-slate-400">' + esc(empNumber) + '</div></div></div></td><td class="px-5 py-3"><div class="text-sm font-medium text-slate-900 dark:text-white">' + esc(role) + '</div><div class="text-xs text-slate-500 dark:text-slate-400">' + esc(deptName) + '</div></td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + (address ? esc(address) : '—') + '</td><td class="px-5 py-3"><div class="relative inline-block" data-emp-id="' + empId + '"><button type="button" onclick="toggleStatusMenu(this); event.stopPropagation();" class="status-badge inline-flex items-center rounded-md border-0 px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + esc(status) + '</button></div></td><td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">' + esc(joinedStr) + '</td><td class="px-5 py-3 text-right"><div class="flex justify-end gap-1 flex-wrap"><button type="button" onclick="openQrModal(' + empId + ', \'' + nameEsc + '\')" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 transition-all hover:bg-subgreen-200 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-800/50" title="Generate / View QR">QR</button><button type="button" onclick="openViewModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50" title="View"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button><button type="button" onclick="openEditModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50" title="Edit"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L6 18l.8-2.685a4.5 4.5 0 011.897-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>Edit</button></div></td>';
+            return tr;
+        }
+
+        showSkeleton();
+        function onDataReady() {
+            var filterDept = document.getElementById('filterDepartment');
+            var editDept = document.getElementById('editDepartmentID');
+            fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var employees = (data && data.employees) ? data.employees : [];
+                    var departments = (data && data.departments) ? data.departments : [];
+                    if (filterDept) {
+                        filterDept.innerHTML = '<option value="">All Departments</option>';
+                        departments.forEach(function (d) {
+                            var opt = document.createElement('option');
+                            opt.value = (d.depID != null ? d.depID : d.DepID);
+                            opt.textContent = d.departmentName || d.DepartmentName || '';
+                            filterDept.appendChild(opt);
+                        });
+                    }
+                    if (editDept) {
+                        editDept.innerHTML = '<option value="">— Select —</option>';
+                        departments.forEach(function (d) {
+                            var opt = document.createElement('option');
+                            opt.value = (d.depID != null ? d.depID : d.DepID);
+                            opt.textContent = d.departmentName || d.DepartmentName || '';
+                            editDept.appendChild(opt);
+                        });
+                    }
+                    var existingRows = tbody.querySelectorAll('.employee-row');
+                    existingRows.forEach(function (r) { r.remove(); });
+                    employees.forEach(function (e) {
+                        tbody.insertBefore(buildRow(e), placeholder);
+                    });
+                    if (placeholder) {
+                        placeholder.classList.toggle('hidden', employees.length > 0);
+                        placeholder.querySelector('td').textContent = employees.length === 0 ? 'No employees yet. Add an employee to get started.' : '';
+                    }
+                    var statTotal = document.getElementById('statTotal');
+                    var statActive = document.getElementById('statActive');
+                    var statInactive = document.getElementById('statInactive');
+                    if (statTotal) statTotal.textContent = employees.length;
+                    var activeCount = employees.filter(function (e) { return ((e.workState || e.WorkState) || '').toLowerCase() === 'active'; }).length;
+                    if (statActive) statActive.textContent = activeCount;
+                    if (statInactive) statInactive.textContent = employees.length - activeCount;
+                    if (typeof filterRows === 'function') filterRows();
+                    revealEmployeeContent();
+                })
+                .catch(function () {
+                    if (placeholder) {
+                        placeholder.classList.remove('hidden');
+                        placeholder.querySelector('td').textContent = 'Unable to load employees. Check that the API is running.';
+                    }
+                    revealEmployeeContent();
+                });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
+        } else {
+            onDataReady();
+        }
+        document.addEventListener('turbo:before-cache', showSkeleton);
+
+        function getRows() { return document.querySelectorAll('.employee-row'); }
         const searchInput = document.getElementById('searchInput');
         const filterStatus = document.getElementById('filterStatus');
         const filterDepartment = document.getElementById('filterDepartment');
         const resetFilters = document.getElementById('resetFilters');
         const rowsPerPage = document.getElementById('rowsPerPage');
         let currentPage = 1;
-        let totalRows = rows.length;
         const ROWS = 10;
 
         function getVisibleRows() {
+            var rows = getRows();
             const search = (searchInput?.value || '').toLowerCase();
             const status = (filterStatus?.value || '').toLowerCase();
             const dept = (filterDepartment?.value || '').toLowerCase();
@@ -461,7 +640,7 @@
             currentPage = Math.min(currentPage, totalPages) || 1;
             const start = (currentPage - 1) * perPage;
             const end = start + perPage;
-            rows.forEach(function (tr) {
+            getRows().forEach(function (tr) {
                 tr.style.display = 'none';
             });
             visible.slice(start, end).forEach(function (tr) {
@@ -507,7 +686,7 @@
             if (filterStatus) filterStatus.value = '';
             if (filterDepartment) filterDepartment.value = '';
             currentPage = 1;
-            rows.forEach(function (r) { r.style.display = ''; });
+            getRows().forEach(function (r) { r.style.display = ''; });
             filterRows();
         });
         filterRows();

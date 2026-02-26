@@ -34,7 +34,7 @@ public class User
 
     // 2FA
     public bool TotpEnabled { get; set; } = false;
-    public byte[]? TotpSecret { get; set; }         // varbinary
+    public byte[]? TotpSecret { get; set; }         
     public string? RecoveryCodesHash { get; set; }
 
     public string? ExternalProvider { get; set; }

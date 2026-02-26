@@ -1,17 +1,7 @@
 @using System.Security.Claims
 @using Subchron.Web.Rbac
-@using System.Net.Http.Headers
-@using System.Net.Http.Json
 @using Subchron.Web.Pages.Auth
-@inject IHttpClientFactory Http
-
-@functions {
-    private sealed class ProfileResponse
-    {
-        public string? Name { get; set; }
-        public string? AvatarUrl { get; set; }
-    }
-}
+@inject IConfiguration Config
 
 @{
     // Basic claim values
@@ -21,38 +11,17 @@
         ? ""
         : System.Text.RegularExpressions.Regex.Replace(roleClaim, "([a-z])([A-Z])", "$1 $2").Trim();
 
-    // Load avatar from API
-    string? avatarUrl = null;
+    // Defer profile/avatar to client so initial HTML is not blocked by API
     var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
-
-    if (!string.IsNullOrEmpty(token))
-    {
-        try
-        {
-            var client = Http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.GetAsync("api/auth/profile");
-            if (resp.IsSuccessStatusCode)
-            {
-                var data = await resp.Content.ReadFromJsonAsync<ProfileResponse>();
-                if (data != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(data.Name)) displayName = data.Name!;
-                    avatarUrl = data.AvatarUrl;
-                }
-            }
-        }
-        catch { /* ignore */ }
-    }
-
-    var v = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    // Hide full-page overlay on Turbo in-app nav so only the module skeleton shows; show it only on full load (login/signup/reload).
+    var isTurboVisit = Context.Request.Headers.ContainsKey("Turbo-Request-Id") || Context.Request.Headers.ContainsKey("X-Turbo-Request-Id");
 }
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth" id="htmlRoot">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="turbo-cache-control" content="no-preview" />
     <title>@ViewData["Title"] - Admin - Subchron</title>
 
     <!-- Suppress "cdn.tailwindcss.com should not be used in production" (use Tailwind CLI/PostCSS in production) -->
@@ -88,6 +57,10 @@
     </script>
 
     <style>
+        .turbo-progress-bar {
+            display: none !important;
+        }
+
         #sidebar {
             transition: width 0.3s ease-in-out;
         }
@@ -301,7 +274,7 @@
     </style>
 </head>
 
-<body id="appRoot" class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+<body id="appRoot" class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
     <!-- Toast: defined first so showToast exists when page scripts run after redirect -->
     <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
     <script>
@@ -347,6 +320,28 @@
                 setTimeout(remove, TOAST_DURATION_MS);
             }
             window.showToast = showToast;
+        })();
+    </script>
+    <script>
+        (function () {
+            var appRoot = document.getElementById("appRoot");
+            if (!appRoot) return;
+            var apiBase = (appRoot.getAttribute("data-api-base") || "").trim().replace(/\/$/, "");
+            var token = appRoot.getAttribute("data-access-token") || "";
+            if (!apiBase || !token) return;
+            fetch(apiBase + "/api/auth/profile", { headers: { "Authorization": "Bearer " + token } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) {
+                    if (!data) return;
+                    var nameEl = document.getElementById("layoutProfileName");
+                    if (nameEl && data.name) nameEl.textContent = data.name;
+                    var avatarEl = document.getElementById("layoutProfileAvatar");
+                    if (avatarEl && data.avatarUrl) {
+                        var v = new Date().getTime();
+                        avatarEl.src = data.avatarUrl + (data.avatarUrl.indexOf("?") !== -1 ? "&" : "?") + "v=" + v;
+                    }
+                })
+                .catch(function () {});
         })();
     </script>
 
@@ -608,7 +603,7 @@
         </aside>
 
         <main class="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
-            <header class="layout-header bg-white shadow-sm dark:bg-slate-800"
+            <header class="layout-header bg-white shadow-lg dark:bg-slate-800"
                     style="margin:20px; border-radius:18px; padding:16px 24px;">
                 <div class="flex items-center justify-between">
 
@@ -624,9 +619,9 @@
                             </svg>
                         </button>
 
-                        <h1 id="layoutPageTitle" class="text-lg font-bold text-slate-900 dark:text-white">
+                        <div id="layoutPageTitle" class="text-sm font-normal text-slate-500 dark:text-slate-400">
                             @(ViewData["PageTitle"] ?? "Admin")
-                        </h1>
+                        </div>
                     </div>
 
                     <!-- RIGHT: Notification dropdown + Theme + Profile (name hidden on phone) -->
@@ -711,21 +706,13 @@
                                     aria-haspopup="menu"
                                     aria-expanded="false">
                                 <div class="text-right hidden sm:block">
-                                    <div class="text-sm font-semibold text-slate-900 dark:text-white">@displayName</div>
+                                    <div id="layoutProfileName" class="text-sm font-semibold text-slate-900 dark:text-white">@displayName</div>
                                     <div class="text-xs text-slate-500 dark:text-slate-400">@(string.IsNullOrEmpty(roleDisplay) ? roleClaim : roleDisplay)</div>
                                 </div>
-                                @if (!string.IsNullOrWhiteSpace(avatarUrl))
-                                {
-                                    <img src="@(avatarUrl + "?v=" + v)"
-                                         alt="Profile"
-                                         class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
-                                }
-                                else
-                                {
-                                    <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=16a34a&color=fff&bold=true"
-                                         alt="Profile"
-                                         class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
-                                }
+                                <img id="layoutProfileAvatar"
+                                     src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=16a34a&color=fff&bold=true"
+                                     alt="Profile"
+                                     class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
                             </button>
 
                             <!-- Dropdown (z-50 so it shows above page content) -->
@@ -770,19 +757,6 @@
                                         <span>Upgrade Plan</span>
                                     </a>
 
-                                    <a asp-page="/App/Settings/Index" asp-route-tab="Personalization"
-                                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
-                                       role="menuitem">
-                                        <!-- Personalization icon -->
-                                        <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-11.314L7.05 7.05m11.314 11.314l-1.414-1.414" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                                        </svg>
-                                        <span>Personalization</span>
-                                    </a>
-
                                     <a asp-page="/App/Settings/Index"
                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700/60"
                                        role="menuitem">
@@ -803,15 +777,9 @@
                 </div>
             </header>
 
-            <!-- Full-page loading overlay: shown during Turbo navigation so URL and content load properly -->
-            <div id="turbo-loading-overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-50/90 dark:bg-slate-900/90" aria-live="polite" aria-busy="true" style="display: none;">
-                <div class="flex flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
-                    <svg class="animate-spin h-10 w-10 text-subgreen-600 dark:text-subgreen-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Loading…</p>
-                </div>
+            <!-- Full-page logo overlay: only on full load (login/signup/reload). Hidden for Turbo in-app nav so only module skeleton shows. -->
+            <div id="turbo-loading-overlay" data-turbo-permanent class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-100 dark:bg-slate-900 @(isTurboVisit ? "hidden" : "")" style="@(isTurboVisit ? "display:none" : "")" aria-live="polite" aria-busy="true">
+                <img src="~/images/logo/logo.png" alt="Subchron" class="h-40 w-40 sm:h-48 sm:w-48 object-contain animate-pulse" />
             </div>
 
             <div class="p-6 pt-2" data-page-title="@(ViewData["PageTitle"] ?? "Admin")">
@@ -821,8 +789,18 @@
         </main>
     </div>
 
+    <div id="trialExpiredModal" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-slate-900/70 p-4" aria-modal="true" role="dialog" aria-labelledby="trialExpiredTitle">
+        <div class="relative mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-slate-800">
+            <h2 id="trialExpiredTitle" class="text-xl font-bold text-slate-900 dark:text-white">Your trial is done</h2>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">To continue using Subchron, please subscribe.</p>
+            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button type="button" id="trialExpiredCancelBtn" class="w-full rounded-lg border border-slate-300 bg-white py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">Cancel subscription</button>
+                <button type="button" id="trialExpiredPayBtn" class="w-full rounded-lg bg-subgreen-500 py-3 text-center text-sm font-semibold text-white hover:bg-subgreen-600">Subscribe</button>
+            </div>
+        </div>
+    </div>
+
     <div id="logoutModal" class="fixed inset-0 z-[9999] hidden items-center justify-center">
-        <!-- Dim + blur backdrop (like your sidebar overlay) -->
         <div id="logoutBackdrop"
              class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40"
              aria-hidden="true"></div>
@@ -890,6 +868,39 @@
           // Close on ESC
           document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") closeMenu();
+          });
+        })();
+
+        (function () {
+          var apiBase = (document.getElementById("appRoot").getAttribute("data-api-base") || "").trim().replace(/\/$/, "");
+          var token = document.getElementById("appRoot").getAttribute("data-access-token") || "";
+          if (!apiBase || !token) return;
+          fetch(apiBase + "/api/billing/usage", { headers: { "Authorization": "Bearer " + token } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+              if (data && data.trialExpired === true) {
+                var modal = document.getElementById("trialExpiredModal");
+                if (modal) { modal.classList.remove("hidden"); modal.classList.add("flex"); }
+              }
+            })
+            .catch(function () {});
+          document.getElementById("trialExpiredPayBtn")?.addEventListener("click", function () {
+            fetch(apiBase + "/api/billing/create-upgrade-token", { method: "POST", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" } })
+              .then(function (r) { return r.json(); })
+              .then(function (data) {
+                if (data && data.ok && data.token) window.location.href = "/Auth/Billing?token=" + encodeURIComponent(data.token);
+              });
+          });
+
+          document.getElementById("trialExpiredCancelBtn")?.addEventListener("click", function () {
+            fetch(apiBase + "/api/billing/cancel-subscription", { method: "POST", headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" } })
+              .then(function (r) { return r.json(); })
+              .then(function (data) {
+                if (data && data.ok) {
+                  window.location.href = "/Auth/Logout";
+                }
+              })
+              .catch(function () {});
           });
         })();
 
@@ -978,25 +989,37 @@
             setIcon();
           });
 
-          // Show loading overlay when navigating (full-page visit so URL updates)
+          // Full-page logo overlay only on full load (after login/signup or reload). On in-app Turbo nav we do not show it — only the module skeleton is shown.
           (function () {
-            var overlay = document.getElementById("turbo-loading-overlay");
-            function showOverlay() {
-              if (overlay) {
-                overlay.style.display = "flex";
-                overlay.classList.remove("hidden");
-              }
-            }
+            var shownAt = Date.now();
+            var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var minVisibleMs = reduceMotion ? 0 : 180;
+            var fadeMs = reduceMotion ? 0 : 180;
+            var hidden = false;
             function hideOverlay() {
-              if (overlay) {
-                overlay.style.display = "none";
-                overlay.classList.add("hidden");
-              }
+              var overlay = document.getElementById("turbo-loading-overlay");
+              if (!overlay || hidden) return;
+              hidden = true;
+              var elapsed = Date.now() - shownAt;
+              var wait = Math.max(0, minVisibleMs - elapsed);
+              setTimeout(function () {
+                var o = document.getElementById("turbo-loading-overlay");
+                if (!o) return;
+                if (fadeMs > 0) {
+                  o.classList.add("transition-opacity", "duration-200", "opacity-0");
+                  setTimeout(function () {
+                    o.style.display = "none";
+                    o.classList.add("hidden");
+                  }, fadeMs);
+                } else {
+                  o.style.display = "none";
+                  o.classList.add("hidden");
+                }
+              }, wait);
             }
-            document.addEventListener("turbo:before-visit", showOverlay);
-            document.addEventListener("turbo:load", hideOverlay);
-            document.addEventListener("turbo:render", hideOverlay);
+            window.addEventListener("load", hideOverlay);
             document.addEventListener("turbo:fetch-request-error", hideOverlay);
+            document.addEventListener("turbo:load", hideOverlay);
           })();
 
           window.toggleSubmenu = function (id, btnEl) {

@@ -68,49 +68,60 @@
         </form>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date &amp; Time</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">User</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Action</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Record Type</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Record ID</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Summary</th>
-                    </tr>
-                </thead>
-                <tbody id="auditLogTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                    <tr id="auditLogLoadingRow">
-                        <td colspan="6" class="px-5 py-8 text-center text-slate-500 dark:text-slate-400">
-                            <span class="inline-flex items-center gap-2"><svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Loading…</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="auditLogFooter" class="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex flex-wrap items-center gap-3">
-                <p class="text-sm text-slate-600 dark:text-slate-400">Showing <span id="auditLogRange">0–0</span> of <span id="auditLogTotal">0</span></p>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Rows</span>
-                    <select id="auditLogPageSize" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50" selected>50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
+    <div id="auditLogDataHost" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900" aria-busy="true" aria-live="polite">
+        <div id="auditLogDataSkeleton" class="p-5 animate-pulse">
+            <div class="space-y-3">
+                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
             </div>
-            <div class="flex items-center gap-2">
-                <span id="auditLogPageOf" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
-                <a id="auditLogPrev" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous" style="display:none;">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </a>
-                <a id="auditLogNext" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next" style="display:none;">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </a>
+            <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+                <div class="h-5 w-48 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-8 w-24 rounded bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+        </div>
+
+        <div id="auditLogDataContent" class="hidden">
+            <div id="auditLogState" class="hidden px-5 pt-4 text-sm"></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date &amp; Time</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">User</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Action</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Record Type</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Record ID</th>
+                            <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Summary</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditLogTableBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                </table>
+            </div>
+            <div id="auditLogFooter" class="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex flex-wrap items-center gap-3">
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Showing <span id="auditLogRange">0–0</span> of <span id="auditLogTotal">0</span></p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Rows</span>
+                        <select id="auditLogPageSize" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50" selected>50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="auditLogPageOf" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
+                    <a id="auditLogPrev" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous" style="display:none;">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </a>
+                    <a id="auditLogNext" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next" style="display:none;">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -161,9 +172,53 @@
 
 <script>
 (function () {
+    var host = document.getElementById('auditLogDataHost');
+    var skeleton = document.getElementById('auditLogDataSkeleton');
+    var content = document.getElementById('auditLogDataContent');
+    var stateEl = document.getElementById('auditLogState');
     var tbody = document.getElementById('auditLogTableBody');
-    var loadingRow = document.getElementById('auditLogLoadingRow');
-    if (!tbody) return;
+    if (!tbody || !host || !skeleton || !content) return;
+
+    var shownAt = Date.now();
+    var revealTimer = null;
+    var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+
+    function setState(type, message) {
+        if (!stateEl) return;
+        if (!message) {
+            stateEl.className = 'hidden px-5 pt-4 text-sm';
+            stateEl.textContent = '';
+            return;
+        }
+        if (type === 'error') {
+            stateEl.className = 'px-5 pt-4 text-sm text-red-700 dark:text-red-300';
+        } else if (type === 'empty') {
+            stateEl.className = 'px-5 pt-4 text-sm text-slate-600 dark:text-slate-400';
+        } else {
+            stateEl.className = 'px-5 pt-4 text-sm text-slate-600 dark:text-slate-400';
+        }
+        stateEl.textContent = message;
+    }
+
+    function showLoadingState() {
+        if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+        shownAt = Date.now();
+        host.setAttribute('aria-busy', 'true');
+        skeleton.classList.remove('hidden');
+        content.classList.add('hidden');
+        setState(null, '');
+    }
+
+    function revealContent() {
+        var elapsed = Date.now() - shownAt;
+        var wait = Math.max(0, minVisibleMs - elapsed);
+        revealTimer = setTimeout(function () {
+            skeleton.classList.add('hidden');
+            content.classList.remove('hidden');
+            host.setAttribute('aria-busy', 'false');
+            revealTimer = null;
+        }, wait);
+    }
     function buildParams() {
         var params = new URLSearchParams(window.location.search);
         params.set('handler', 'Data');
@@ -242,11 +297,11 @@
         document.body.classList.remove('overflow-hidden');
     };
     function loadAuditLog() {
+        showLoadingState();
         var params = buildParams();
         fetch('/App/AuditLog?' + params.toString(), { headers: { 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (loadingRow) loadingRow.remove();
                 var logs = data.logs || [];
                 var total = data.totalCount || 0;
                 var page = parseInt(params.get('page') || '1', 10);
@@ -254,8 +309,10 @@
                 var totalPages = Math.max(1, Math.ceil(total / pageSize));
                 tbody.innerHTML = '';
                 if (logs.length === 0) {
+                    setState('empty', 'No audit entries found.');
                     tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="6" class="px-5 py-8 text-center text-slate-600 dark:text-slate-400">No audit entries found.</td></tr>');
                 } else {
+                    setState(null, '');
                     logs.forEach(function (log) {
                         var date = formatDateTable(log.createdAt);
                         var user = log.userName || (log.userID ? 'User #' + log.userID : '—');
@@ -314,11 +371,13 @@
                 }
                 var sel = document.getElementById('auditLogPageSize');
                 if (sel) sel.value = String(pageSize);
+                revealContent();
             })
             .catch(function () {
-                if (loadingRow) loadingRow.remove();
                 tbody.innerHTML = '';
+                setState('error', 'Failed to load audit log.');
                 tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="6" class="px-5 py-8 text-center text-red-600 dark:text-red-400">Failed to load audit log.</td></tr>');
+                revealContent();
             });
     }
     var pageSizeEl = document.getElementById('auditLogPageSize');
@@ -333,6 +392,7 @@
             window.location.href = url;
         });
     }
+    document.addEventListener('turbo:before-cache', showLoadingState);
     loadAuditLog();
 })();
 </script>

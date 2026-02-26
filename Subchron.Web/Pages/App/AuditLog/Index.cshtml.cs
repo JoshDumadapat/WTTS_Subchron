@@ -27,7 +27,7 @@ public class IndexModel : PageModel
     public int CurrentPage { get; set; } = 1;
     public int PageSize { get; set; } = 50;
 
-    public async Task OnGetAsync(DateTime? from, DateTime? to, string? action, string? entityName, string? search, int page = 1, int pageSize = 50)
+    public Task OnGetAsync(DateTime? from, DateTime? to, string? action, string? entityName, string? search, int page = 1, int pageSize = 50)
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
         CurrentPage = Math.Max(1, page);
@@ -38,6 +38,7 @@ public class IndexModel : PageModel
         EntityFilter = entityName;
         SearchFilter = search;
         Logs = new List<AuditLogItem>();
+        return Task.CompletedTask;
     }
 
     public async Task<IActionResult> OnGetDataAsync(DateTime? from, DateTime? to, string? action, string? entityName, string? search, int page = 1, int pageSize = 50)

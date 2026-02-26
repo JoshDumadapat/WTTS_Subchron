@@ -5,31 +5,23 @@
     Layout = "_LayoutLogin";
 }
 
-<div class="w-full max-w-6xl mx-auto px-4">
+<div class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
     <!-- Logo + brand -->
     <div class="flex flex-col items-center gap-2">
         <a asp-page="/Index" class="inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 rounded-lg">
-            <img src="~/images/logo/logo.png" alt="Subchron" class="h-12 w-auto object-contain" loading="eager" />
+            <img src="~/images/logo/logo.png" alt="Subchron" class="h-10 sm:h-12 w-auto object-contain" loading="eager" />
         </a>
-        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200" aria-hidden="true">Subchron</span>
+        <span class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200" aria-hidden="true">Subchron</span>
     </div>
 
-    <h1 id="billingTitle" class="mt-6 text-center text-2xl font-bold text-slate-900 dark:text-white">
+    <h1 id="billingTitle" class="mt-4 sm:mt-6 text-center text-xl sm:text-2xl font-bold text-slate-900 dark:text-white px-2">
         Complete your payment
     </h1>
 
-    <!-- Layout: summary LEFT, form RIGHT (no stacking on md+) -->
-    <div class="mt-6 flex flex-col md:flex-row md:gap-8 md:items-start max-w-6xl mx-auto">
-        <!-- Left: payment summary (darker card) -->
-        <div id="receiptPanel" class="hidden w-full md:w-[360px] md:flex-shrink-0 order-2 md:order-1">
-            <div class="sticky top-8 rounded-2xl border border-slate-300 bg-slate-100 p-6 shadow-lg dark:border-slate-600 dark:bg-slate-800/90">
-                <div class="flex items-center gap-3 mb-5">
-                    <img src="~/images/logo/logo.png" alt="" class="h-8 w-auto object-contain flex-shrink-0" aria-hidden="true" />
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Paying</p>
-                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Subchron</p>
-                    </div>
-                </div>
+    <!-- Phone: receipt on top, form below. Desktop: summary left, form right -->
+    <div class="mt-4 sm:mt-6 flex flex-col md:flex-row md:gap-8 md:items-start max-w-6xl mx-auto gap-6 md:gap-8">
+        <div id="receiptPanel" class="hidden w-full md:w-[360px] md:flex-shrink-0 order-1 md:order-1">
+            <div class="md:sticky md:top-8 rounded-xl sm:rounded-2xl border border-slate-300 bg-slate-100 p-4 sm:p-6 shadow-lg dark:border-slate-600 dark:bg-slate-800/90">
                 <p id="receiptPlanName" class="text-lg font-semibold text-slate-900 dark:text-white">—</p>
                 <p id="receiptAmountPerMonth" class="mt-1 text-2xl font-bold text-subgreen-600 dark:text-subgreen-400">—</p>
                 <p id="receiptPerMonthLabel" class="text-xs text-slate-500 dark:text-slate-400">per month</p>
@@ -58,21 +50,11 @@
             </div>
         </div>
 
-        <!-- Right: form -->
-        <div class="flex-1 min-w-0 order-1 md:order-2">
-    <div id="billingCard" class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+        <div class="flex-1 min-w-0 order-2 md:order-2">
+    <div id="billingCard" class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 shadow-lg dark:border-slate-700 dark:bg-slate-800"
          data-token="@Model.Token"
          data-return-payment-intent-id="@Model.ReturnPaymentIntentId"
          data-api-base-url="@Model.ApiBaseUrl">
-
-        <!-- Payment processing header: Subchron logo + label -->
-        <div class="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
-            <img src="~/images/logo/logo.png" alt="" class="h-9 w-auto object-contain flex-shrink-0" aria-hidden="true" />
-            <div class="min-w-0">
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Payment processing</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Secured by Subchron</p>
-            </div>
-        </div>
 
         <!-- Always-visible error when create-intent fails or token invalid -->
         <div id="billingPageError" class="mb-4 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"></div>
@@ -97,15 +79,15 @@
         <div id="paymentFormWrap" class="hidden">
             <!-- Payment method: icon cards (Card = Visa + Mastercard) -->
             <p class="mb-3 text-sm font-medium text-slate-700 dark:text-slate-200">Payment method</p>
-            <div class="mb-6 grid grid-cols-3 gap-3">
+            <div class="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
                 <button type="button" id="tabCard" data-method="card"
-                        class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium transition
+                        class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-4 sm:px-4 text-sm font-medium transition
                                hover:border-subgreen-400 hover:bg-subgreen-50/50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20
                                data-[active=true]:border-subgreen-500 data-[active=true]:bg-subgreen-50 data-[active=true]:ring-2 data-[active=true]:ring-subgreen-500/30
                                dark:data-[active=true]:border-subgreen-400 dark:data-[active=true]:bg-subgreen-900/30 dark:data-[active=true]:ring-subgreen-400/30">
-                    <span class="flex items-center gap-1">
-                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-7 w-auto object-contain" aria-hidden="true" />
-                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-7 w-auto object-contain" aria-hidden="true" />
+                    <span class="flex items-center justify-center gap-1.5 sm:gap-2 shrink-0">
+                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-6 w-8 object-contain shrink-0" aria-hidden="true" />
+                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-6 w-8 object-contain shrink-0" aria-hidden="true" />
                     </span>
                     <span>Card</span>
                 </button>
@@ -292,15 +274,45 @@
     </div>
 </div>
 
+<!-- Success: receipt + confetti + Continue (shown after purchase, before login redirect) -->
+<div id="successPanel" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 p-4 sm:p-6 overflow-y-auto" aria-modal="true" role="dialog" aria-labelledby="successTitle">
+    <div class="w-full max-w-md my-auto rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-slate-600 dark:bg-slate-800">
+        <div id="successReceipt" class="space-y-3 text-center">
+            <h2 id="successTitle" class="text-xl font-bold text-slate-900 dark:text-white">Subscription complete</h2>
+            <p id="successPlanName" class="text-lg font-semibold text-subgreen-600 dark:text-subgreen-400">—</p>
+            <p id="successAmount" class="text-2xl font-bold text-slate-900 dark:text-white">—</p>
+            <p id="successSummary" class="text-xs text-slate-500 dark:text-slate-400"></p>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-left text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/40 dark:text-slate-300">
+                <p><span class="font-semibold text-slate-700 dark:text-slate-200">Email:</span> <span id="successEmail">—</span></p>
+                <p><span class="font-semibold text-slate-700 dark:text-slate-200">Payment method:</span> <span id="successMethod">—</span></p>
+                <div class="mt-2 space-y-1 border-t border-slate-200 pt-2 dark:border-slate-600">
+                    <p class="flex items-center justify-between"><span>Subtotal</span><span id="successSubtotal">—</span></p>
+                    <p class="flex items-center justify-between"><span>Tax</span><span id="successTax">—</span></p>
+                    <p class="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-100"><span>Total paid</span><span id="successTotal">—</span></p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300">An invoice was sent to your email.</p>
+        </div>
+        <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">Thank you for your purchase. Click below to go to your dashboard.</p>
+        <button type="button" id="successContinueBtn" class="mt-6 w-full rounded-lg bg-subgreen-500 py-3.5 text-center text-sm font-semibold text-white shadow-md hover:bg-subgreen-600">
+            Continue to Dashboard
+        </button>
+    </div>
+</div>
+
 @section Scripts {
     @if (!Model.IsManagePaymentOnly)
     {
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" async></script>
     <script>
         (function () {
             const card = document.getElementById('billingCard');
             const apiBaseUrl = (card && card.getAttribute('data-api-base-url')) || '';
             const payMongoPublicKey = '@Model.PayMongoPublicKey';
-            const signupToken = (card && card.getAttribute('data-token')) || '';
+            let signupToken = (card && card.getAttribute('data-token')) || '';
+            try {
+                signupToken = decodeURIComponent(signupToken);
+            } catch (e) { }
             const returnPaymentIntentId = (card && card.getAttribute('data-return-payment-intent-id')) || '';
 
             const loadingState = document.getElementById('loadingState');
@@ -315,6 +327,23 @@
             const billingError = document.getElementById('billingError');
             const billingPageError = document.getElementById('billingPageError');
             const btnPay = document.getElementById('btnPay');
+            const receiptPanel = document.getElementById('receiptPanel');
+            const receiptPlanName = document.getElementById('receiptPlanName');
+            const receiptAmountPerMonth = document.getElementById('receiptAmountPerMonth');
+            const receiptSubtotal = document.getElementById('receiptSubtotal');
+            const receiptTax = document.getElementById('receiptTax');
+            const receiptTotal = document.getElementById('receiptTotal');
+            const receiptExchangeNote = document.getElementById('receiptExchangeNote');
+            const receiptPlanDescription = document.getElementById('receiptPlanDescription');
+            const receiptBilledLabel = document.getElementById('receiptBilledLabel');
+            const receiptAnnualBlock = document.getElementById('receiptAnnualBlock');
+            const receiptPerMonthLabel = document.getElementById('receiptPerMonthLabel');
+
+            const successEmailEl = document.getElementById('successEmail');
+            const successMethodEl = document.getElementById('successMethod');
+            const successSubtotalEl = document.getElementById('successSubtotal');
+            const successTaxEl = document.getElementById('successTax');
+            const successTotalEl = document.getElementById('successTotal');
 
             let clientKey = '';
             let paymentIntentId = '';
@@ -494,8 +523,97 @@
                 } else {
                     var ewalletNameEl = document.getElementById('ewalletNameInput');
                     nameOnCard = (ewalletNameEl && ewalletNameEl.value && ewalletNameEl.value.trim()) || '';
+                    brand = selectedMethod === 'gcash' ? 'gcash' : (selectedMethod === 'paymaya' ? 'paymaya' : '');
                 }
                 return { billingEmail: billingEmail, billingPhone: phone11, nameOnCard: nameOnCard, last4: last4, expiry: expiry, brand: brand };
+            }
+
+            function formatPhoneForInput(phoneDigits, country) {
+                var d = (phoneDigits || '').replace(/\D/g, '');
+                if (country === 'US') {
+                    if (d.length > 10) d = d.slice(-10);
+                    if (d.length <= 3) return d;
+                    if (d.length <= 6) return d.substring(0, 3) + ' ' + d.substring(3);
+                    return d.substring(0, 3) + ' ' + d.substring(3, 6) + ' ' + d.substring(6);
+                }
+                if (d.length > 11) d = d.slice(-11);
+                if (d.length <= 4) return d;
+                if (d.length <= 7) return d.substring(0, 4) + ' ' + d.substring(4);
+                return d.substring(0, 4) + ' ' + d.substring(4, 7) + ' ' + d.substring(7);
+            }
+
+            function applySavedBillingFields(data) {
+                if (data.billingEmail) {
+                    var be = document.getElementById('billingEmail');
+                    if (be) be.value = data.billingEmail;
+                }
+
+                if (data.billingPhone) {
+                    var raw = String(data.billingPhone).replace(/\D/g, '');
+                    var phoneCountry = 'PH';
+                    var phoneDigits = raw;
+                    if (raw.length === 11 && raw.charAt(0) === '1') {
+                        phoneCountry = 'US';
+                        phoneDigits = raw.substring(1);
+                    }
+                    var countryEl = document.getElementById('billingPhoneCountry');
+                    if (countryEl) {
+                        countryEl.value = phoneCountry;
+                        countryEl.dispatchEvent(new Event('change'));
+                    }
+                    var phoneEl = document.getElementById('billingPhone');
+                    if (phoneEl) phoneEl.value = formatPhoneForInput(phoneDigits, phoneCountry);
+                }
+
+                if (data.nameOnCard) {
+                    var cn = document.getElementById('cardName');
+                    if (cn) cn.value = data.nameOnCard;
+                    var en = document.getElementById('ewalletNameInput');
+                    if (en) en.value = data.nameOnCard;
+                }
+
+                if (data.expiry) {
+                    var exp = document.getElementById('cardExp');
+                    if (exp) exp.value = data.expiry;
+                }
+            }
+
+            var successDataForContinue = null;
+
+            function formatPeso(value) {
+                return '₱' + Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            }
+
+            function getMethodLabel(method) {
+                if (method === 'gcash') return 'GCash';
+                if (method === 'paymaya') return 'Maya';
+                return 'Card';
+            }
+
+            function buildSuccessContext(planNameVal, amountVal, freeTrialVal, opts) {
+                var options = opts || {};
+                var fallbackAmount = amountVal != null ? Number(amountVal) : Number(amount || 0);
+                var subtotal = options.subtotalText || (receiptSubtotal ? receiptSubtotal.textContent : '') || (freeTrialVal ? '₱0.00' : formatPeso(fallbackAmount));
+                var tax = options.taxText || (receiptTax ? receiptTax.textContent : '') || '₱0.00';
+                var total = options.totalText || (receiptTotal ? receiptTotal.textContent : '') || (freeTrialVal ? '₱0.00' : formatPeso(fallbackAmount));
+                var billingEmail = options.billingEmail || (document.getElementById('billingEmail') && document.getElementById('billingEmail').value.trim()) || '—';
+                var methodLabel = getMethodLabel(options.method || selectedMethod);
+                return {
+                    planName: planNameVal || planName || 'Subscription',
+                    amountText: freeTrialVal ? '7-day free trial' : formatPeso(fallbackAmount),
+                    subtotalText: subtotal,
+                    taxText: tax,
+                    totalText: total,
+                    billingEmail: billingEmail,
+                    methodLabel: methodLabel
+                };
+            }
+
+            function getBillingSummary(amountVal, freeTrialVal, planNameVal) {
+                var q = '?amount=' + encodeURIComponent(amountVal || 0) + '&isFreeTrial=' + encodeURIComponent(freeTrialVal ? 'true' : 'false') + '&planName=' + encodeURIComponent(planNameVal || 'Subscription');
+                return fetch(apiUrl + '/api/billing/summary' + q)
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .catch(function () { return null; });
             }
 
             function completeLoginAndRedirect(data) {
@@ -510,6 +628,56 @@
                         setError('Could not complete login.');
                 });
             }
+
+            function fireConfetti() {
+                if (typeof confetti !== 'function') return;
+                var count = 500;
+                var defaults = { origin: { y: 0.5, x: 0.5 } };
+                function fire(particleRatio, opts) {
+                    confetti(Object.assign({}, defaults, opts, { particleCount: Math.floor(count * particleRatio) }));
+                }
+                fire(0.25, { spread: 26, startVelocity: 55 });
+                fire(0.2, { spread: 60 });
+                fire(0.35, { spread: 100, decay: 0.91, scalar: 0.4 });
+                fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                fire(0.1, { spread: 120, startVelocity: 45 });
+            }
+
+            function showPurchaseSuccess(data, planNameVal, amountVal, isFreeTrial) {
+                successDataForContinue = data;
+                sessionStorage.removeItem('billingPayload');
+                sessionStorage.removeItem('billingCheckoutMeta');
+                var mainWrap = document.querySelector('.max-w-6xl');
+                if (mainWrap) mainWrap.classList.add('hidden');
+                var sp = document.getElementById('successPanel');
+                if (sp) {
+                    sp.classList.remove('hidden');
+                    sp.classList.add('flex');
+                }
+                var planEl = document.getElementById('successPlanName');
+                var amountEl = document.getElementById('successAmount');
+                var summaryEl = document.getElementById('successSummary');
+                var successCtx = buildSuccessContext(planNameVal, amountVal, isFreeTrial, data && data.successContext ? data.successContext : null);
+                if (planEl) planEl.textContent = successCtx.planName;
+                if (amountEl) amountEl.textContent = successCtx.amountText;
+                if (successEmailEl) successEmailEl.textContent = successCtx.billingEmail || '—';
+                if (successMethodEl) successMethodEl.textContent = successCtx.methodLabel;
+                if (successSubtotalEl) successSubtotalEl.textContent = successCtx.subtotalText;
+                if (successTaxEl) successTaxEl.textContent = successCtx.taxText;
+                if (successTotalEl) successTotalEl.textContent = successCtx.totalText;
+                if (summaryEl) {
+                    if (isFreeTrial) {
+                        summaryEl.textContent = 'Your 7-day free trial has started. No payment was charged today.';
+                    } else {
+                        summaryEl.textContent = 'Total paid today: ' + successCtx.totalText;
+                    }
+                }
+                setTimeout(fireConfetti, 300);
+            }
+
+            document.getElementById('successContinueBtn')?.addEventListener('click', function () {
+                if (successDataForContinue) completeLoginAndRedirect(successDataForContinue);
+            });
 
             if (!signupToken) {
                 loadingState?.classList.add('hidden');
@@ -533,16 +701,34 @@
                 });
             }
 
-            // If we have returnPaymentIntentId we came back from e-wallet redirect — complete signup
+            // If we have returnPaymentIntentId we came back from e-wallet redirect — complete signup (include saved billing data)
             if (returnPaymentIntentId && signupToken) {
                 loadingState?.classList.remove('hidden');
                 var loadingSpan = loadingState?.querySelector('span');
                 if (loadingSpan) loadingSpan.textContent = 'Completing signup...';
                 var useDraft = sessionStorage.getItem('billingIsDraft') === '1';
                 var completeUrl = useDraft ? (apiUrl + '/api/auth/complete-signup-with-billing') : (apiUrl + '/api/billing/complete-signup');
-                var completeBody = useDraft
-                    ? JSON.stringify({ draftToken: signupToken, paymentIntentId: returnPaymentIntentId })
-                    : JSON.stringify({ signupToken: signupToken, paymentIntentId: returnPaymentIntentId });
+                var billingPayload = {};
+                var checkoutMeta = {};
+                try {
+                    var stored = sessionStorage.getItem('billingPayload');
+                    if (stored) billingPayload = JSON.parse(stored);
+                } catch (e) { }
+                try {
+                    var storedMeta = sessionStorage.getItem('billingCheckoutMeta');
+                    if (storedMeta) checkoutMeta = JSON.parse(storedMeta);
+                } catch (e) { }
+                if (checkoutMeta && checkoutMeta.isDraft === true) {
+                    useDraft = true;
+                    completeUrl = apiUrl + '/api/auth/complete-signup-with-billing';
+                } else if (checkoutMeta && checkoutMeta.isDraft === false) {
+                    useDraft = false;
+                    completeUrl = apiUrl + '/api/billing/complete-signup';
+                }
+                sessionStorage.removeItem('billingPayload');
+                sessionStorage.removeItem('billingCheckoutMeta');
+                var completeBase = useDraft ? { draftToken: signupToken, paymentIntentId: returnPaymentIntentId } : { signupToken: signupToken, paymentIntentId: returnPaymentIntentId };
+                var completeBody = JSON.stringify(Object.assign(completeBase, billingPayload));
                 fetch(completeUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -553,7 +739,22 @@
                         var data = result.data;
                         if (!data || !data.ok) throw new Error((data && data.message) || 'Payment not completed');
                         sessionStorage.removeItem('billingIsDraft');
-                        return completeLoginAndRedirect(data);
+                        loadingState?.classList.add('hidden');
+                        var paidAmount = checkoutMeta.amount != null ? Number(checkoutMeta.amount) : Number(amount || 0);
+                        var paidPlanName = checkoutMeta.planName || planName || 'Subscription';
+                        getBillingSummary(paidAmount, false, paidPlanName).then(function (summary) {
+                            var subtotal = (summary && (summary.subtotalFormatted || summary.SubtotalFormatted)) || formatPeso(paidAmount);
+                            var tax = (summary && (summary.taxFormatted || summary.TaxFormatted)) || '₱0.00';
+                            var total = (summary && (summary.totalDueTodayFormatted || summary.TotalDueTodayFormatted)) || formatPeso(paidAmount);
+                            data.successContext = {
+                                billingEmail: billingPayload.billingEmail || '',
+                                method: checkoutMeta.method || selectedMethod,
+                                subtotalText: subtotal,
+                                taxText: tax,
+                                totalText: total
+                            };
+                            showPurchaseSuccess(data, paidPlanName, paidAmount, false);
+                        });
                     })
                     .catch(err => {
                         setPageError(err.message || 'Something went wrong.');
@@ -565,18 +766,7 @@
             var planSelect = document.getElementById('planSelect');
             var planSelectorWrap = document.getElementById('planSelectorWrap');
             var plansList = [];
-
-            var receiptPanel = document.getElementById('receiptPanel');
-            var receiptPlanName = document.getElementById('receiptPlanName');
-            var receiptAmountPerMonth = document.getElementById('receiptAmountPerMonth');
-            var receiptSubtotal = document.getElementById('receiptSubtotal');
-            var receiptTax = document.getElementById('receiptTax');
-            var receiptTotal = document.getElementById('receiptTotal');
-            var receiptExchangeNote = document.getElementById('receiptExchangeNote');
-            var receiptPlanDescription = document.getElementById('receiptPlanDescription');
-            var receiptBilledLabel = document.getElementById('receiptBilledLabel');
-            var receiptAnnualBlock = document.getElementById('receiptAnnualBlock');
-            var receiptPerMonthLabel = document.getElementById('receiptPerMonthLabel');
+            var freeTrialEligible = true;
 
             function getPlanDescription(name) {
                 return name === 'Basic' ? 'Time tracking, attendance, and basic reporting for small teams.' :
@@ -613,10 +803,8 @@
                     if (billingTitle) billingTitle.textContent = 'Billing details';
                     clientKey = '';
                     paymentIntentId = '';
-                    setTabs('card');
-                    if (data.billingEmail) {
-                        var be = document.getElementById('billingEmail'); if (be) be.value = data.billingEmail;
-                    }
+                    setTabs(data.preferredMethod === 'gcash' ? 'gcash' : data.preferredMethod === 'paymaya' ? 'paymaya' : 'card');
+                    applySavedBillingFields(data);
                     return;
                 }
                 if (!data.clientKey) {
@@ -625,10 +813,8 @@
                 }
                 clientKey = data.clientKey;
                 paymentIntentId = data.paymentIntentId;
-                setTabs('card');
-                if (data.billingEmail) {
-                    var be = document.getElementById('billingEmail'); if (be) be.value = data.billingEmail;
-                }
+                setTabs(data.preferredMethod === 'gcash' ? 'gcash' : data.preferredMethod === 'paymaya' ? 'paymaya' : 'card');
+                applySavedBillingFields(data);
             }
 
             function loadCreateIntent(planIdVal) {
@@ -656,14 +842,19 @@
                         return;
                     }
                     var data = intentResult.data;
+                    freeTrialEligible = data.freeTrialEligible !== false;
                     isDraft = data.isDraft === true;
                     if (isDraft) sessionStorage.setItem('billingIsDraft', '1');
+                    else sessionStorage.removeItem('billingIsDraft');
                     if (planSelectorWrap && planSelect && plansList.length > 0) {
                         planSelect.innerHTML = '';
                         plansList.forEach(function (p) {
                             var opt = document.createElement('option');
                             opt.value = p.planId || p.planID;
-                            var label = (p.planName || p.PlanName) + (p.isFreeTrial ? ' (7-day free trial)' : ' - ₱' + (p.basePrice || p.BasePrice || 0).toLocaleString() + '/mo');
+                            var planTitle = p.planName || p.PlanName;
+                            var supportsTrial = p.isFreeTrial === true || p.IsFreeTrial === true;
+                            var showTrial = freeTrialEligible && supportsTrial;
+                            var label = planTitle + (showTrial ? ' (7-day free trial)' : ' - ₱' + (p.basePrice || p.BasePrice || 0).toLocaleString() + '/mo');
                             opt.textContent = label;
                             if (p.planName === data.planName) opt.selected = true;
                             planSelect.appendChild(opt);
@@ -705,6 +896,19 @@
                 if (btnPay) btnPay.disabled = loading;
                 if (btnPayText) btnPayText.classList.toggle('hidden', loading);
                 if (btnPaySpinner) btnPaySpinner.classList.toggle('hidden', !loading);
+            }
+
+            function persistCheckoutState() {
+                try {
+                    sessionStorage.setItem('billingPayload', JSON.stringify(getBillingPayload()));
+                    sessionStorage.setItem('billingCheckoutMeta', JSON.stringify({
+                        planName: planName,
+                        amount: amount,
+                        method: selectedMethod,
+                        isFreeTrial: isFreeTrial,
+                        isDraft: isDraft
+                    }));
+                } catch (e) { }
             }
 
             function validatePolicy() {
@@ -760,7 +964,8 @@
                         .then(function (r) { return parseJsonResponse(r); })
                         .then(function (data) {
                             if (!data || !data.ok) throw new Error((data && data.message) || 'Could not complete.');
-                            return completeLoginAndRedirect(data);
+                            setPayButtonLoading(false);
+                            showPurchaseSuccess(data, planName, 0, true);
                         })
                         .catch(function (err) {
                             setError(err.message || 'Something went wrong.');
@@ -864,6 +1069,7 @@
                             return;
                         }
                         if (status === 'awaiting_next_action' && nextAction?.redirect?.url) {
+                            persistCheckoutState();
                             window.location.href = nextAction.redirect.url;
                             return;
                         }
@@ -927,6 +1133,7 @@
                         const nextAction = attachData?.data?.attributes?.next_action;
                         if (nextAction?.redirect?.url) {
                             pendingEwalletRedirect = nextAction.redirect.url;
+                            persistCheckoutState();
                             var amtStr = '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
                             if (ewalletSimAmount) ewalletSimAmount.textContent = amtStr;
                             if (ewalletSimMessage) ewalletSimMessage.innerHTML = 'You will be redirected to <strong>' + (selectedMethod === 'gcash' ? 'GCash' : 'Maya') + '</strong> to authorize payment of <strong>' + amtStr + '</strong>.';
@@ -961,18 +1168,8 @@
                             setPayButtonLoading(false);
                             return;
                         }
-                        return fetch('/Auth/CompleteLogin', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: data.userId, orgId: data.orgId, role: data.role, name: data.name, token: data.token || null })
-                        }).then(r => r.json());
-                    })
-                    .then(loginData => {
-                        if (loginData && loginData.ok)
-                            window.location.replace('/App/Dashboard');
-                        else
-                            setError('Could not complete login.');
                         setPayButtonLoading(false);
+                        showPurchaseSuccess(data, planName, amount, isFreeTrial);
                     })
                     .catch(() => {
                         setError('Network error.');

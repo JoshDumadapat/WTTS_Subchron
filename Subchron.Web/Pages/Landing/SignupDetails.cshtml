@@ -55,10 +55,12 @@
         </div>
 
 
-        <!-- Selected plan (visible when planId in URL) -->
-        <div id="selectedPlanWrap" class="mb-4 hidden rounded-xl border border-subgreen-200 bg-subgreen-50/50 p-3 dark:border-subgreen-800 dark:bg-subgreen-900/20">
+        <!-- Selected plan: dropdown to change at any time (same banner design) -->
+        <div id="selectedPlanWrap" class="mb-4 rounded-xl border border-subgreen-200 bg-subgreen-50/50 p-3 dark:border-subgreen-800 dark:bg-subgreen-900/20">
             <p class="text-xs font-medium text-slate-600 dark:text-slate-400">Selected plan</p>
-            <p id="selectedPlanText" class="mt-1 text-sm font-semibold text-subgreen-700 dark:text-subgreen-300">—</p>
+            <select id="selectedPlanSelect" aria-label="Change subscription plan" class="mt-1.5 w-full rounded-lg border border-subgreen-300 bg-white px-3 py-2.5 text-sm font-semibold text-subgreen-700 shadow-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/30 dark:border-subgreen-600 dark:bg-slate-800 dark:text-subgreen-300 dark:focus:border-subgreen-400 dark:focus:ring-subgreen-400/30">
+                <option value="">Loading plans...</option>
+            </select>
         </div>
 
         <p class="mt-0 mb-4 text-center text-sm text-slate-600 dark:text-slate-300">
@@ -397,9 +399,8 @@
           const externalId = (params.get("externalId") || "").trim();
           const externalName = (params.get("name") || "").trim();
 
-          // ✅ Plan (auto-fill)
-          // Priority: query param planId -> default 1
-          const planId = (() => {
+          // ✅ Plan (dynamic: from URL initially, then from dropdown)
+          let planId = (() => {
             const raw = params.get("planId");
             const n = parseInt(raw || "1", 10);
             return Number.isFinite(n) && n > 0 ? n : 1;
@@ -715,29 +716,37 @@
           }
 
           // ----------------------------
-          // Selected plan display
+          // Selected plan: dropdown (dynamic, changeable anytime)
           // ----------------------------
-          const selectedPlanWrap = document.getElementById('selectedPlanWrap');
-          const selectedPlanText = document.getElementById('selectedPlanText');
+          const selectedPlanSelect = document.getElementById('selectedPlanSelect');
           fetch(apiBaseUrl + '/api/plans')
             .then(r => r.json())
             .then(plans => {
-              const plan = Array.isArray(plans) && plans.find(p => (p.planId ?? p.planID ?? p.PlanID) === planId);
-              if (plan && selectedPlanWrap && selectedPlanText) {
-                selectedPlanWrap.classList.remove('hidden');
-                const priceVal = plan.basePrice ?? plan.BasePrice ?? 0;
-                const trialDays = plan.trialDays ?? plan.TrialDays ?? 0;
-                const isFreeTrial = plan.isFreeTrial ?? plan.IsFreeTrial;
-                const planName = plan.planName ?? plan.PlanName;
-                let price;
+              if (!Array.isArray(plans) || !selectedPlanSelect) return;
+              selectedPlanSelect.innerHTML = '';
+              plans.forEach(p => {
+                const id = p.planId ?? p.planID ?? p.PlanID;
+                const priceVal = p.basePrice ?? p.BasePrice ?? 0;
+                const trialDays = p.trialDays ?? p.TrialDays ?? 0;
+                const isFreeTrial = p.isFreeTrial ?? p.IsFreeTrial;
+                const planName = p.planName ?? p.PlanName ?? 'Plan';
+                let label = planName;
                 if (isFreeTrial && trialDays > 0)
-                  price = trialDays + '-day free trial, then ₱' + Number(priceVal).toLocaleString() + '/mo';
+                  label += ' — ' + trialDays + '-day free trial, then ₱' + Number(priceVal).toLocaleString() + '/mo';
                 else
-                  price = '₱' + Number(priceVal).toLocaleString() + '/mo';
-                selectedPlanText.textContent = planName + ' — ' + price;
-              }
+                  label += ' — ₱' + Number(priceVal).toLocaleString() + '/mo';
+                const opt = document.createElement('option');
+                opt.value = String(id);
+                opt.textContent = label;
+                if (id === planId) opt.selected = true;
+                selectedPlanSelect.appendChild(opt);
+              });
+              selectedPlanSelect.addEventListener('change', function () {
+                const v = parseInt(this.value, 10);
+                if (Number.isFinite(v) && v > 0) planId = v;
+              });
             })
-            .catch(() => {});
+            .catch(() => { if (selectedPlanSelect) selectedPlanSelect.innerHTML = '<option value="">Could not load plans</option>'; });
 
           // ----------------------------
           // Org code: uppercase only + auto-generate from org name

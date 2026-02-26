@@ -191,8 +191,14 @@ app.Use(async (ctx, next) =>
     var path = (ctx.Request.Path.Value ?? "").ToLowerInvariant();
     var isAuth = ctx.User?.Identity?.IsAuthenticated == true;
 
-    // Don't redirect from logout page
     if (path.Contains("/auth/logout"))
+    {
+        await next();
+        return;
+    }
+
+    // Allow /Auth/Billing when token is present (trial-expired → Subscribe flow)
+    if (path.StartsWith("/auth/billing") && !string.IsNullOrWhiteSpace(ctx.Request.Query["token"]))
     {
         await next();
         return;

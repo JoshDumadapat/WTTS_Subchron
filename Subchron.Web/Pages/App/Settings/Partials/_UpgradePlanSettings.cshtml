@@ -12,15 +12,15 @@
         <div class="mt-6 grid gap-6 sm:grid-cols-2">
             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/50">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Plan</p>
-                <p class="mt-1 text-xl font-bold text-slate-900 dark:text-white">@Model.PlanName</p>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Billed @Model.BillingCycle</p>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Next billing: @Model.NextBillingDate</p>
+                <p id="settingsPlanName" class="mt-1 text-xl font-bold text-slate-900 dark:text-white">@Model.PlanName</p>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Billed <span id="settingsBillingCycle">@Model.BillingCycle</span></p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Next billing: <span id="settingsNextBillingDate">@Model.NextBillingDate</span></p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/50">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Employees</p>
-                <p class="mt-1 text-xl font-bold text-slate-900 dark:text-white">@Model.EmployeesUsed <span class="text-sm font-normal text-slate-500 dark:text-slate-400">/ @Model.EmployeeLimit</span></p>
+                <p class="mt-1 text-xl font-bold text-slate-900 dark:text-white"><span id="settingsEmployeesUsed">@Model.EmployeesUsed</span> <span class="text-sm font-normal text-slate-500 dark:text-slate-400">/ <span id="settingsEmployeeLimit">@Model.EmployeeLimit</span></span></p>
                 <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-                    <div class="h-full rounded-full bg-subgreen-500 dark:bg-subgreen-400" style="width: @(usagePct)%"></div>
+                    <div id="settingsUsageBar" class="h-full rounded-full bg-subgreen-500 dark:bg-subgreen-400" style="width: @(usagePct)%"></div>
                 </div>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Usage limit for your plan</p>
             </div>
