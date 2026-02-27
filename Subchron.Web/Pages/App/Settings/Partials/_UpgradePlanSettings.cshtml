@@ -32,8 +32,134 @@
         <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Billing information</h2>
         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Update payment method and billing address.</p>
         <div class="mt-4 flex flex-wrap items-center gap-3">
-            <a href="/App/Settings?tab=UpgradePlan" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Update payment method</a>
+            <button type="button" id="btnEditBilling" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Update billing information</button>
             <span class="text-xs text-slate-500 dark:text-slate-400">Manage card or e-wallet for subscription</span>
+        </div>
+
+        <!-- Inline billing edit panel (hidden by default) -->
+        <div id="billingEditPanel" class="mt-6 hidden border-t pt-4">
+            <div id="billingEditError" class="mb-3 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"></div>
+
+            <!-- Payment method tabs -->
+            <p class="mb-3 text-sm font-medium text-slate-700 dark:text-slate-200">Payment method</p>
+            <div class="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
+                <button type="button" id="tabCard" data-method="card" class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-4 text-sm font-medium hover:border-subgreen-400 hover:bg-subgreen-50/50 focus:border-subgreen-400 focus:bg-subgreen-50/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800"> 
+                    <span class="flex items-center justify-center gap-1.5 sm:gap-2 shrink-0">
+                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-6 w-8 object-contain shrink-0" aria-hidden="true" />
+                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-6 w-8 object-contain shrink-0" aria-hidden="true" />
+                    </span>
+                    <span>Card</span>
+                </button>
+                <button type="button" id="tabGcash" data-method="gcash" class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium hover:border-subgreen-400 hover:bg-subgreen-50/50 focus:border-subgreen-400 focus:bg-subgreen-50/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800">
+                    <img src="~/images/payment/gcashicon.png" alt="" class="h-8 w-auto object-contain" aria-hidden="true" />
+                    <span>GCash</span>
+                </button>
+                <button type="button" id="tabPaymaya" data-method="paymaya" class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-sm font-medium hover:border-subgreen-400 hover:bg-subgreen-50/50 focus:border-subgreen-400 focus:bg-subgreen-50/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800">
+                    <img src="~/images/payment/mayaicon.png" alt="" class="h-8 w-auto object-contain" aria-hidden="true" />
+                    <span>Maya</span>
+                </button>
+            </div>
+
+            <!-- Contact info -->
+            <div class="mb-4">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Contact information</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="billingEmail" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email address <span class="text-red-500">*</span></label>
+                        <input id="billingEmail" type="email" placeholder="email@example.com" autocomplete="email" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        <p id="billingEmailError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+                    <div>
+                        <label for="billingPhone" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Phone number (optional)</label>
+                        <div class="mt-1.5 flex rounded-lg border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900">
+                            <div class="inline-flex items-center rounded-l-lg border-r border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800 px-3">
+                                <select id="billingPhoneCountry" aria-label="Country" class="border-0 bg-transparent py-3 pr-2 text-sm font-medium text-slate-700 dark:text-slate-200 focus:ring-0">
+                                    <option value="PH" data-prefix="+63">🇵🇭 +63</option>
+                                    <option value="US" data-prefix="+1">🇺🇸 +1</option>
+                                </select>
+                            </div>
+                            <input id="billingPhone" type="tel" placeholder="0956 585 8754" autocomplete="tel" maxlength="14" class="w-full min-w-0 rounded-r-lg border-0 bg-transparent px-4 py-3 text-sm dark:text-slate-100 focus:ring-2 focus:ring-inset focus:ring-subgreen-500" data-country="PH" />
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">PH: 11 digits (e.g. 0956 585 8754). Stored as 11 digits only.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card form -->
+            <div id="panelCard" class="space-y-5 hidden">
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-600">
+                    <p class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                        <img src="~/images/payment/cardvisaicon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                        <img src="~/images/payment/cardmastericon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                        Card information
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">You can update card metadata and billing address here. Replacing the card number is not supported from Settings for security reasons — contact support to replace a card or use the dedicated billing flow.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="cardExp" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Expiry (MM/YY)</label>
+                                    <input id="cardExp" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="12/24" maxlength="5" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                                </div>
+                                <div>
+                                    <label for="cardName" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name on card</label>
+                                    <input id="cardName" type="text" autocomplete="cc-name" placeholder="Juan Dela Cruz" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 pt-2">Billing address</p>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label for="cardAddressLine1" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 1</label>
+                        <input id="cardAddressLine1" type="text" placeholder="Start typing address — suggestions from OpenStreetMap" autocomplete="off" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                    </div>
+                    <div>
+                        <label for="cardAddressLine2" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 2 (optional)</label>
+                        <input id="cardAddressLine2" type="text" placeholder="Unit, building" autocomplete="address-line2" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cardBillingCity" class="block text-sm font-medium text-slate-700 dark:text-slate-200">City</label>
+                            <input id="cardBillingCity" type="text" placeholder="City" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label for="cardBillingProvince" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Province</label>
+                            <input id="cardBillingProvince" type="text" placeholder="Province" autocomplete="address-level1" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="cardBillingPostal" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Postal code</label>
+                            <input id="cardBillingPostal" type="text" placeholder="Postal code" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label for="cardBillingCountry" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Country</label>
+                            <input id="cardBillingCountry" type="text" placeholder="Philippines" value="Philippines" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-wallet panel -->
+            <div id="panelEwallet" class="hidden space-y-4">
+                <p class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    <img id="panelEwalletIcon" src="~/images/payment/gcashicon.png" alt="" class="h-5 w-5 object-contain" aria-hidden="true" />
+                    <span>Customer information</span>
+                </p>
+                <div>
+                    <label for="ewalletNameInput" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name <span class="text-red-500">*</span></label>
+                    <input id="ewalletNameInput" type="text" placeholder="John Doe" autocomplete="name" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                    <p id="ewalletNameError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400"></p>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300">This will only update the e-wallet customer information on file. No payment will be initiated.</p>
+            </div>
+
+            <div class="mt-4 flex gap-3">
+                <button type="button" id="billingSaveBtn" class="inline-flex items-center rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700">Save changes</button>
+                <button type="button" id="billingCancelBtn" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
+            </div>
         </div>
     </div>
 

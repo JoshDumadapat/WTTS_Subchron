@@ -289,11 +289,18 @@
                 </div>
 
                 <!-- Save/Cancel (hidden until Edit) -->
-                <div id="editActions" class="mt-8 hidden items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex">
+                <div id="editActions" class="mt-8 hidden items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-700">
                     <button type="submit"
+                            id="saveBtn"
                             class="rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
                                        focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
-                        Save changes
+                        <span class="button-content flex items-center gap-2">
+                            <svg class="button-spinner hidden h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="button-text">Save changes</span>
+                        </span>
                     </button>
 
                     <button type="button"
@@ -317,11 +324,17 @@
         var editToggleBtn = document.getElementById('editToggleBtn');
         var editBtnText = document.getElementById('editBtnText');
         var cancelEditBtn = document.getElementById('cancelEditBtn');
+        var saveBtn = document.getElementById('saveBtn');
+        var employeeForm = document.getElementById('employeeForm');
 
         var cameraBtn = document.getElementById('cameraBtn');
         var avatarInput = document.getElementById('profileAvatar');
         var img = document.getElementById('profileAvatarImg');
         var initials = document.getElementById('profileAvatarInitials');
+
+        // Layout header elements (update in real-time when profile changes)
+        var layoutNameEl = document.getElementById('layoutProfileName');
+        var layoutAvatarEl = document.getElementById('layoutProfileAvatar');
 
         var editActions = document.getElementById('editActions');
         var empFields = document.querySelectorAll('.emp-field');
@@ -349,11 +362,34 @@
                 }
             }
 
-            // Show/hide Save/Cancel
-            if (editActions) editActions.classList.toggle('hidden', !on);
+            // Show/hide Save/Cancel (ensure responsive utility doesn't override hidden)
+            if (editActions) {
+                if (on) {
+                    editActions.classList.remove('hidden');
+                    editActions.classList.add('flex');
+                } else {
+                    editActions.classList.add('hidden');
+                    editActions.classList.remove('flex');
+                }
+            }
 
             // Edit button text
             if (editBtnText) editBtnText.textContent = on ? 'Editing' : 'Edit';
+        }
+
+        function showSpinner(show) {
+            if (!saveBtn) return;
+            var spinner = saveBtn.querySelector('.button-spinner');
+            var text = saveBtn.querySelector('.button-text');
+            if (show) {
+                saveBtn.disabled = true;
+                if (spinner) spinner.classList.remove('hidden');
+                if (text) text.textContent = 'Saving...';
+            } else {
+                saveBtn.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+                if (text) text.textContent = 'Save changes';
+            }
         }
 
         function takeSnapshot() {
@@ -367,6 +403,9 @@
             });
             if (img) snapshot._avatarSrc = img.src || '';
             if (initials) snapshot._avatarShowInitials = !initials.classList.contains('hidden');
+            // Snapshot layout header name/avatar so Cancel restores them too
+            if (layoutNameEl) snapshot._layoutName = layoutNameEl.textContent || '';
+            if (layoutAvatarEl) snapshot._layoutAvatarSrc = layoutAvatarEl.src || '';
         }
 
         function restoreSnapshot() {
@@ -387,6 +426,9 @@
                 if (snapshot._avatarShowInitials) initials.classList.remove('hidden'); else initials.classList.add('hidden');
             }
             if (avatarInput) avatarInput.value = '';
+            // Restore layout header name/avatar
+            if (layoutNameEl && snapshot._layoutName !== undefined) layoutNameEl.textContent = snapshot._layoutName;
+            if (layoutAvatarEl && snapshot._layoutAvatarSrc !== undefined) layoutAvatarEl.src = snapshot._layoutAvatarSrc;
         }
 
         // Default: view mode
@@ -410,6 +452,35 @@
             });
         }
 
+        // Form submission with spinner
+        if (employeeForm) {
+            employeeForm.addEventListener('submit', function() {
+                // Update layout header immediately with edited name so header reflects change while saving
+                try {
+                    if (layoutNameEl) {
+                        var fn = (employeeForm.querySelector('[name=FirstName]') || {}).value || '';
+                        var mn = (employeeForm.querySelector('[name=MiddleName]') || {}).value || '';
+                        var ln = (employeeForm.querySelector('[name=LastName]') || {}).value || '';
+                        var parts = [fn, mn, ln].map(function(s){ return (s || '').trim(); }).filter(Boolean);
+                        var newName = parts.join(' ');
+                        if (!newName) {
+                            // fallback to email shown on page
+                            var emailEl = document.getElementById('settingsProfileEmail');
+                            newName = emailEl ? (emailEl.textContent || '').trim() : newName;
+                        }
+                        if (newName) layoutNameEl.textContent = newName;
+                    }
+                    // If avatar preview exists in the profile card, copy it to layout avatar
+                    if (layoutAvatarEl && img && img.src) {
+                        var v = new Date().getTime();
+                        layoutAvatarEl.src = img.src + (img.src.indexOf('?') !== -1 ? '&' : '?') + 'v=' + v;
+                    }
+                } catch (e) {}
+
+                showSpinner(true);
+            });
+        }
+
         // Avatar preview (only works when enabled)
         if (avatarInput) {
             avatarInput.addEventListener('change', function() {
@@ -419,10 +490,14 @@
                     r.onload = function() {
                         if (img) { img.src = r.result; img.classList.remove('hidden'); img.alt = 'Profile'; }
                         if (initials) initials.classList.add('hidden');
+                        // Mirror preview into layout header avatar so it updates immediately
+                        try {
+                            if (layoutAvatarEl) layoutAvatarEl.src = r.result;
+                        } catch (e) {}
                     };
                     r.readAsDataURL(this.files[0]);
                 }
             });
         }
     })();
-</script>   
+</script>

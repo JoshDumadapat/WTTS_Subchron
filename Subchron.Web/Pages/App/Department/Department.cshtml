@@ -145,55 +145,52 @@
             </table>
         </div>
 
-        <!-- Pagination (Responsive + Subgreen focus) -->
-        <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-            <!-- Left block: showing + rows -->
-            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:flex-wrap">
-                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Showing <span class="font-semibold text-slate-800 dark:text-white" id="deptPaginationRange">0–0</span>
-                    of <span id="deptPaginationTotal">0</span>
-                </span>
+        <!-- Pagination (Employee-style) -->
+        <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+
+            <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="deptPaginationShowing">0</span> of <span id="deptPaginationTotal" class="font-semibold text-slate-900 dark:text-white">0</span>
+                </div>
 
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Rows</span>
-                    <select id="deptRowsPerPage"
-                            class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600
-                               focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
-                               dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
+
+                    <select id="deptRowsPerPage" class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-subgreen-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
+                        <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50" selected>50</option>
                     </select>
+
+                    <div class="relative inline-block sm:hidden">
+                        <button id="deptRowsPerPageBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white" aria-haspopup="listbox" aria-expanded="false">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+                        </button>
+                        <div id="deptRowsPerPageMenu" class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
+                            <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="5">5</button>
+                            <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="10">10</button>
+                            <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="25">25</button>
+                            <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="50">50</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right block: page + controls -->
-            <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
-                <span id="deptPageOf" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
-
-                <div class="flex items-center gap-2">
-                    <button type="button" id="deptPaginationPrev"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50
-                               focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 focus:border-subgreen-500
-                               disabled:pointer-events-none disabled:opacity-50
-                               dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                            aria-label="Previous">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
+            <div class="flex items-center justify-center gap-0 sm:justify-end">
+                <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
+                    <button type="button" id="deptPaginationPrev" class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                     </button>
 
-                    <button type="button" id="deptPaginationNext"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50
-                               focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 focus:border-subgreen-500
-                               disabled:pointer-events-none disabled:opacity-50
-                               dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                            aria-label="Next">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
+                    <div id="deptPaginationNumbers" class="inline-flex -space-x-px text-sm"></div>
+
+                    <button type="button" id="deptPaginationNext" class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                     </button>
-                </div>
+                </nav>
             </div>
         </div>
     </div>
@@ -666,17 +663,38 @@
                 emptyRow.classList.add('hidden');
             }
         }
-        var rangeEl = document.getElementById('deptPaginationRange');
+        var showingEl = document.getElementById('deptPaginationShowing');
         var totalEl = document.getElementById('deptPaginationTotal');
-        if (rangeEl) rangeEl.textContent = visible.length === 0 ? '0–0' : (start + 1) + '–' + Math.min(start + perPage, visible.length);
+        if (showingEl) showingEl.textContent = visible.length === 0 ? '0' : (start + 1) + '–' + Math.min(start + perPage, visible.length);
         if (totalEl) totalEl.textContent = visible.length;
         if (statTotal) statTotal.textContent = visible.length;
-        var pageOfEl = document.getElementById('deptPageOf');
-        if (pageOfEl) pageOfEl.textContent = 'Page ' + currentPage + ' of ' + totalPages;
         var prevBtn = document.getElementById('deptPaginationPrev');
         var nextBtn = document.getElementById('deptPaginationNext');
         if (prevBtn) prevBtn.disabled = currentPage <= 1;
         if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+        var numbersEl = document.getElementById('deptPaginationNumbers');
+        if (numbersEl) {
+            numbersEl.innerHTML = '';
+            var maxButtons = 5;
+            var half = Math.floor(maxButtons / 2);
+            var startPage = Math.max(1, currentPage - half);
+            var endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+            for (var p = startPage; p <= endPage; p++) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = p;
+                if (p === currentPage) {
+                    btn.className = 'relative z-10 inline-flex items-center border border-subgreen-600 bg-subgreen-50 px-4 py-2 text-sm font-semibold text-subgreen-600 focus:z-20 dark:bg-subgreen-900/20 dark:text-subgreen-300 dark:border-subgreen-700';
+                } else {
+                    btn.className = 'relative inline-flex items-center border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white';
+                }
+                (function (page) {
+                    btn.addEventListener('click', function () { currentPage = page; render(); });
+                }(p));
+                numbersEl.appendChild(btn);
+            }
+        }
     }
     if (search) search.addEventListener('input', function () { currentPage = 1; render(); });
     if (filterStatus) filterStatus.addEventListener('change', function () { currentPage = 1; render(); });
@@ -691,6 +709,30 @@
     var nextBtn = document.getElementById('deptPaginationNext');
     if (prevBtn) prevBtn.addEventListener('click', function () { if (currentPage > 1) { currentPage--; render(); } });
     if (nextBtn) nextBtn.addEventListener('click', function () { if (currentPage < Math.ceil(getVisible().length / (parseInt(rowsPerPageEl && rowsPerPageEl.value || '50', 10) || 50))) { currentPage++; render(); } });
+
+    // Mobile rows-per-page dropdown
+    var deptRowsBtn = document.getElementById('deptRowsPerPageBtn');
+    var deptRowsMenu = document.getElementById('deptRowsPerPageMenu');
+    if (deptRowsMenu) {
+        deptRowsMenu.querySelectorAll('.dept-rows-option').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var val = this.getAttribute('data-value');
+                if (rowsPerPageEl) { rowsPerPageEl.value = val; rowsPerPageEl.dispatchEvent(new Event('change')); }
+                deptRowsMenu.classList.add('hidden');
+                if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+    if (deptRowsBtn && deptRowsMenu) {
+        deptRowsBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var expanded = deptRowsMenu.classList.toggle('hidden') === false;
+            deptRowsBtn.setAttribute('aria-expanded', String(expanded));
+        });
+        document.addEventListener('click', function () { deptRowsMenu.classList.add('hidden'); if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false'); });
+    }
+
     render();
 
     @{

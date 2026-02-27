@@ -1,0 +1,369 @@
+@model Subchron.Web.Pages.App.Settings.IndexModel
+@using System.Security.Claims
+@{
+    var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("role")?.Value ?? "";
+    var isAdmin = roleClaim.Contains("Admin", StringComparison.OrdinalIgnoreCase)
+               || roleClaim.Contains("Owner", StringComparison.OrdinalIgnoreCase)
+               || roleClaim.Contains("Manager", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="space-y-6">
+
+    <!-- ── Font Size ─────────────────────────────────────────────────── -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-subgreen-50 dark:bg-subgreen-900/20">
+                <svg class="h-5 w-5 text-subgreen-600 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h7" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Font Size</h2>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Adjust the text size across the entire application to suit your reading preference.</p>
+
+                <div class="mt-5 flex flex-wrap gap-3" id="fontSizeGroup" role="radiogroup" aria-label="Font size">
+                    @foreach (var (label, value, desc) in new[] {
+                        ("Small",   "small",   "Compact text"),
+                        ("Default", "default", "Standard text"),
+                        ("Medium",  "medium",  "Slightly larger"),
+                        ("Large",   "large",   "Easiest to read"),
+                    })
+                    {
+                        <button type="button"
+                                data-font-size="@value"
+                                role="radio"
+                                aria-checked="false"
+                                class="font-size-option group relative flex flex-col items-center gap-1.5 rounded-xl border-2 border-slate-200 bg-slate-50 px-5 py-4 text-center transition
+                                       hover:border-subgreen-400 hover:bg-subgreen-50
+                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
+                                       dark:border-slate-700 dark:bg-slate-700/50 dark:hover:border-subgreen-600 dark:hover:bg-subgreen-900/20
+                                       aria-checked:border-subgreen-600 aria-checked:bg-subgreen-50 aria-checked:dark:bg-subgreen-900/20 aria-checked:dark:border-subgreen-500">
+                            <span class="text-sm font-semibold text-slate-800 group-[.selected]:text-subgreen-700 dark:text-slate-200">@label</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">@desc</span>
+                            <span class="absolute right-2 top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-subgreen-600 selected-check">
+                                <svg class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                        </button>
+                    }
+                </div>
+                <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">Preview: <span id="fontSizePreviewText" class="font-medium text-slate-600 dark:text-slate-300">The quick brown fox jumps over the lazy dog.</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Interface Density ──────────────────────────────────────────── -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-subgreen-50 dark:bg-subgreen-900/20">
+                <svg class="h-5 w-5 text-subgreen-600 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Interface Density</h2>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Choose how much spacing and padding is used in tables, cards, and lists.</p>
+
+                <div class="mt-5 flex flex-wrap gap-3" id="densityGroup" role="radiogroup" aria-label="Interface density">
+                    @foreach (var (label, value, icon) in new[] {
+                        ("Compact",     "compact",     "M4 6h16M4 10h16M4 14h16M4 18h16"),
+                        ("Comfortable", "comfortable", "M4 6h16M4 12h16M4 18h16"),
+                        ("Spacious",    "spacious",    "M4 5h16M4 12h16M4 19h16"),
+                    })
+                    {
+                        <button type="button"
+                                data-density="@value"
+                                role="radio"
+                                aria-checked="false"
+                                class="density-option group relative flex items-center gap-3 rounded-xl border-2 border-slate-200 bg-slate-50 px-5 py-3.5 transition
+                                       hover:border-subgreen-400 hover:bg-subgreen-50
+                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
+                                       dark:border-slate-700 dark:bg-slate-700/50 dark:hover:border-subgreen-600 dark:hover:bg-subgreen-900/20">
+                            <svg class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="@icon" />
+                            </svg>
+                            <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">@label</span>
+                            <span class="ml-auto hidden h-4 w-4 items-center justify-center rounded-full bg-subgreen-600 selected-check">
+                                <svg class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Sidebar Style ──────────────────────────────────────────────── -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-subgreen-50 dark:bg-subgreen-900/20">
+                <svg class="h-5 w-5 text-subgreen-600 dark:text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8M4 18h16" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Sidebar Style</h2>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Choose how the navigation sidebar looks and behaves.</p>
+
+                <div class="mt-5 flex flex-wrap gap-3" id="sidebarStyleGroup" role="radiogroup" aria-label="Sidebar style">
+                    @foreach (var (label, value, desc) in new[] {
+                        ("Expanded",     "expanded",     "Always visible with labels"),
+                        ("Collapsed",    "collapsed",    "Icon-only, hover to expand"),
+                        ("Floating",     "floating",     "Overlay on top of content"),
+                    })
+                    {
+                        <button type="button"
+                                data-sidebar-style="@value"
+                                role="radio"
+                                aria-checked="false"
+                                class="sidebar-style-option group relative flex flex-col items-center gap-1.5 rounded-xl border-2 border-slate-200 bg-slate-50 px-5 py-4 text-center transition
+                                       hover:border-subgreen-400 hover:bg-subgreen-50
+                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
+                                       dark:border-slate-700 dark:bg-slate-700/50 dark:hover:border-subgreen-600 dark:hover:bg-subgreen-900/20">
+                            <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">@label</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">@desc</span>
+                            <span class="absolute right-2 top-2 hidden h-4 w-4 items-center justify-center rounded-full bg-subgreen-600 selected-check">
+                                <svg class="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isAdmin)
+    {
+    <!-- -- Color Theme (Admin only) ------------------------------------- -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20">
+                <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Primary Color Theme</h2>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        Admin only
+                    </span>
+                </div>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Choose the primary accent color for buttons, badges, and interactive elements across the app.</p>
+
+                <div class="mt-5 flex flex-wrap gap-3" id="colorThemeGroup" role="radiogroup" aria-label="Primary color theme">
+                    @{
+                        var colors = new[] {
+                            ("Subchron Green", "green",  "#16a34a", "#dcfce7"),
+                            ("Ocean Blue",     "blue",   "#2563eb", "#dbeafe"),
+                            ("Royal Purple",   "purple", "#7c3aed", "#ede9fe"),
+                            ("Sunset Orange",  "orange", "#ea580c", "#ffedd5"),
+                            ("Rose Red",       "rose",   "#e11d48", "#ffe4e6"),
+                            ("Slate Gray",     "slate",  "#475569", "#f1f5f9"),
+                            ("Teal",           "teal",   "#0d9488", "#ccfbf1"),
+                            ("Gold",           "gold",   "#d97706", "#fef3c7"),
+                        };
+                    }
+                    @foreach (var (label, value, hex, lightHex) in colors)
+                    {
+                        <button type="button"
+                                data-color-theme="@value"
+                                data-color-hex="@hex"
+                                data-color-light="@lightHex"
+                                role="radio"
+                                aria-checked="false"
+                                title="@label"
+                                class="color-theme-option group relative flex w-[90px] flex-col items-center gap-2 rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3.5 text-center transition hover:border-slate-400 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-700/50 dark:hover:bg-slate-700">
+                            <span class="h-8 w-8 rounded-full shadow-sm ring-2 ring-white dark:ring-slate-800" style="background-color: @hex;"></span>
+                            <span class="text-xs font-medium leading-tight text-slate-700 dark:text-slate-300">@label</span>
+                            <span class="selected-check absolute right-1.5 top-1.5 hidden h-4 w-4 items-center justify-center rounded-full bg-slate-800 dark:bg-white">
+                                <svg class="h-2.5 w-2.5 text-white dark:text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                        </button>
+                    }
+                </div>
+
+                <div class="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Preview</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button" id="colorPreviewBtn"
+                                class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
+                                style="background-color:#16a34a;">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            Primary Button
+                        </button>
+                        <span id="colorPreviewBadge"
+                              class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+                              style="background-color:#dcfce7;color:#16a34a;">
+                            Badge
+                        </span>
+                        <span id="colorPreviewLink"
+                              class="cursor-pointer text-sm font-medium underline underline-offset-2"
+                              style="color:#16a34a;">
+                            Link text
+                        </span>
+                    </div>
+                </div>
+
+                <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">
+                    <svg class="mr-1 inline h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Color theme changes will apply to all admin users in your organization.
+                </p>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- -- Save Bar ----------------------------------------------------- -->
+    <div class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            <svg class="mr-1 inline h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Preferences are saved locally on this device.
+        </p>
+        <div class="flex items-center gap-3">
+            <button type="button" id="personalizationResetBtn"
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Reset to Default
+            </button>
+            <button type="button" id="personalizationSaveBtn"
+                    class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                Save Preferences
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="personalizationToast" class="pointer-events-none fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-xl opacity-0 transition-opacity duration-300 dark:bg-slate-700">
+    <svg class="h-4 w-4 text-subgreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+    <span id="personalizationToastMsg">Preferences saved!</span>
+</div>
+
+<script>
+(function () {
+    var STORAGE_KEY = 'subchron_personalization';
+
+    function loadPrefs() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+    }
+
+    function showToast(msg) {
+        var t = document.getElementById('personalizationToast');
+        var m = document.getElementById('personalizationToastMsg');
+        if (!t) return;
+        if (m) m.textContent = msg || 'Preferences saved!';
+        t.style.opacity = '1';
+        t.classList.remove('pointer-events-none');
+        setTimeout(function () {
+            t.style.opacity = '0';
+            t.classList.add('pointer-events-none');
+        }, 2500);
+    }
+
+    function initRadioGroup(groupId, optionClass, dataAttr, storedValue, onSelect) {
+        var group = document.getElementById(groupId);
+        if (!group) return;
+        var buttons = group.querySelectorAll('.' + optionClass);
+
+        function selectBtn(value) {
+            buttons.forEach(function (b) {
+                var isMatch = b.getAttribute(dataAttr) === value;
+                b.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+                var check = b.querySelector('.selected-check');
+                if (check) check.style.display = isMatch ? 'flex' : 'none';
+            });
+            if (onSelect) onSelect(value);
+        }
+
+        buttons.forEach(function (b) {
+            var check = b.querySelector('.selected-check');
+            if (check) check.style.display = 'none';
+            b.addEventListener('click', function () {
+                selectBtn(this.getAttribute(dataAttr));
+            });
+        });
+
+        selectBtn(storedValue || (buttons.length ? buttons[0].getAttribute(dataAttr) : ''));
+    }
+
+    var prefs = loadPrefs();
+
+    var fontSizeMap = { small: '0.8125rem', default: '0.9375rem', medium: '1.0625rem', large: '1.1875rem' };
+    function applyFontSize(value) {
+        var preview = document.getElementById('fontSizePreviewText');
+        if (preview) preview.style.fontSize = fontSizeMap[value] || fontSizeMap['default'];
+    }
+    initRadioGroup('fontSizeGroup', 'font-size-option', 'data-font-size', prefs.fontSize || 'default', applyFontSize);
+    initRadioGroup('densityGroup', 'density-option', 'data-density', prefs.density || 'comfortable', null);
+    initRadioGroup('sidebarStyleGroup', 'sidebar-style-option', 'data-sidebar-style', prefs.sidebarStyle || 'expanded', null);
+
+    var colorGroup = document.getElementById('colorThemeGroup');
+    var previewBtn   = document.getElementById('colorPreviewBtn');
+    var previewBadge = document.getElementById('colorPreviewBadge');
+    var previewLink  = document.getElementById('colorPreviewLink');
+
+    if (colorGroup) {
+        function applyColorPreview(value) {
+            var swatch = colorGroup.querySelector('[data-color-theme="' + value + '"]');
+            if (!swatch) return;
+            var hex   = swatch.getAttribute('data-color-hex') || '#16a34a';
+            var light = swatch.getAttribute('data-color-light') || '#dcfce7';
+            if (previewBtn)   previewBtn.style.backgroundColor = hex;
+            if (previewBadge) { previewBadge.style.backgroundColor = light; previewBadge.style.color = hex; }
+            if (previewLink)  previewLink.style.color = hex;
+        }
+        initRadioGroup('colorThemeGroup', 'color-theme-option', 'data-color-theme', prefs.colorTheme || 'green', applyColorPreview);
+    }
+
+    var saveBtn = document.getElementById('personalizationSaveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function () {
+            var saved = {};
+            var fa = document.querySelector('.font-size-option[aria-checked="true"]');
+            if (fa) saved.fontSize = fa.getAttribute('data-font-size');
+            var da = document.querySelector('.density-option[aria-checked="true"]');
+            if (da) saved.density = da.getAttribute('data-density');
+            var sa = document.querySelector('.sidebar-style-option[aria-checked="true"]');
+            if (sa) saved.sidebarStyle = sa.getAttribute('data-sidebar-style');
+            var ca = document.querySelector('.color-theme-option[aria-checked="true"]');
+            if (ca) saved.colorTheme = ca.getAttribute('data-color-theme');
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+            showToast('Preferences saved!');
+        });
+    }
+
+    var resetBtn2 = document.getElementById('personalizationResetBtn');
+    if (resetBtn2) {
+        resetBtn2.addEventListener('click', function () {
+            localStorage.removeItem(STORAGE_KEY);
+            var defaults = {
+                fontSizeGroup:     ['font-size-option',    'data-font-size',     'default'],
+                densityGroup:      ['density-option',      'data-density',       'comfortable'],
+                sidebarStyleGroup: ['sidebar-style-option','data-sidebar-style', 'expanded'],
+                colorThemeGroup:   ['color-theme-option',  'data-color-theme',   'green']
+            };
+            Object.keys(defaults).forEach(function (gId) {
+                var g = document.getElementById(gId);
+                if (!g) return;
+                var d = defaults[gId];
+                g.querySelectorAll('.' + d[0]).forEach(function (b) {
+                    var isMatch = b.getAttribute(d[1]) === d[2];
+                    b.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+                    var check = b.querySelector('.selected-check');
+                    if (check) check.style.display = isMatch ? 'flex' : 'none';
+                });
+            });
+            applyFontSize('default');
+            if (colorGroup) {
+                if (previewBtn)   previewBtn.style.backgroundColor = '#16a34a';
+                if (previewBadge) { previewBadge.style.backgroundColor = '#dcfce7'; previewBadge.style.color = '#16a34a'; }
+                if (previewLink)  previewLink.style.color = '#16a34a';
+            }
+            showToast('Preferences reset to default.');
+        });
+    }
+}());
+</script>

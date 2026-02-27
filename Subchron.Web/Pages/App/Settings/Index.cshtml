@@ -31,6 +31,11 @@
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     <span>Security</span>
                 </a>
+                <a asp-page="/App/Settings/Index" asp-route-tab="@IndexModel.TabPersonalization"
+                   class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition @(currentTab == IndexModel.TabPersonalization ? "bg-subgreen-100 text-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300" : "text-slate-600 hover:bg-subgreen-50/50 dark:text-slate-300 dark:hover:bg-subgreen-900/10")">
+                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    <span>Personalization</span>
+                </a>
                 <a asp-page="/App/Settings/Index" asp-route-tab="@IndexModel.TabResources"
                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition @(currentTab == IndexModel.TabResources ? "bg-subgreen-100 text-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300" : "text-slate-600 hover:bg-subgreen-50/50 dark:text-slate-300 dark:hover:bg-subgreen-900/10")">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
@@ -69,6 +74,30 @@
                                 <div class="h-5 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
                                 <div class="mt-3 h-4 w-72 rounded bg-slate-200 dark:bg-slate-700"></div>
                                 <div class="mt-4 h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                        </div>
+                        break;
+                    case IndexModel.TabPersonalization:
+                        <div class="space-y-4">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                                <div class="h-5 w-36 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-2 h-4 w-64 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-5 flex gap-3">
+                                    <div class="h-16 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-16 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-16 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-16 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+                                <div class="h-5 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-2 h-4 w-72 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    <div class="h-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                    <div class="h-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                                </div>
                             </div>
                         </div>
                         break;
@@ -204,6 +233,10 @@
                 if (input && data[keys[i]] != null) input.value = data[keys[i]];
             }
         }
+        var pwdSection = document.getElementById('securityPasswordSection');
+        var googleSection = document.getElementById('securityGoogleSection');
+        if (pwdSection) pwdSection.classList.toggle('hidden', !!data.isGoogleUser);
+        if (googleSection) googleSection.classList.toggle('hidden', !data.isGoogleUser);
     }
 
     function revealSettingsContent() {
@@ -240,6 +273,178 @@
         onDataReady();
     }
     document.addEventListener('turbo:before-cache', showSkeleton);
+})();
+</script>
+<script>
+// Inline billing edit: fetch current billing info and allow saving (metadata-only)
+(function () {
+    var btn = document.getElementById('btnEditBilling');
+    var panel = document.getElementById('billingEditPanel');
+    var cancel = document.getElementById('billingCancelBtn');
+    var saveBtn = document.getElementById('billingSaveBtn');
+    var errEl = document.getElementById('billingEditError');
+
+    if (!btn || !panel) return;
+
+    function showError(msg) {
+        if (!errEl) return;
+        errEl.textContent = msg || '';
+        errEl.classList.toggle('hidden', !msg);
+    }
+
+    function openPanel() {
+        panel.classList.remove('hidden');
+        showError('');
+        var url = window.location.pathname + '?handler=BillingCurrent';
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t || ('Status ' + r.status)); });
+                return r.json();
+            })
+            .then(function (data) {
+                try {
+                    // Contact
+                    document.getElementById('billingEmail').value = data.billingEmail || data.email || '';
+                    document.getElementById('billingPhone').value = data.billingPhone || data.phone || '';
+
+                    // Determine method (support both 'method' and 'brand')
+                    var method = (data.method || data.brand || 'card');
+                    setTabs(method);
+
+                    if (method === 'card') {
+                        // Show card metadata (masked)
+                        var brand = (data.brand || '').toString();
+                        var last4 = (data.last4 || data.cardLast4 || data.maskedLast4 || '').toString();
+                        var cardOnFile = document.getElementById('cardOnFile');
+                        if (cardOnFile) {
+                            if (last4) cardOnFile.textContent = (brand ? brand + ' ' : '') + 'ending in ' + last4;
+                            else cardOnFile.textContent = 'Card on file';
+                        }
+
+                        // Prefill editable metadata fields (name, expiry, address)
+                        document.getElementById('cardName').value = data.nameOnCard || data.name || '';
+                        document.getElementById('cardExp').value = data.expiry || '';
+                        document.getElementById('cardBillingCity').value = (data.address && data.address.city) || data.city || '';
+                        document.getElementById('cardBillingProvince').value = (data.address && data.address.state) || data.province || data.stateProvince || '';
+                        document.getElementById('cardBillingPostal').value = (data.address && data.address.postal_code) || data.postalCode || data.postal || '';
+                        document.getElementById('cardBillingCountry').value = (data.address && data.address.country) || data.country || '';
+                        document.getElementById('cardAddressLine1').value = (data.address && data.address.line1) || data.addressLine1 || '';
+                        document.getElementById('cardAddressLine2').value = (data.address && data.address.line2) || data.addressLine2 || '';
+                    } else {
+                        // e-wallets: prefill customer name/email if available
+                        document.getElementById('ewalletNameInput').value = data.customerName || data.nameOnCard || data.name || '';
+                        // show a short note about linked account (if available)
+                        var panelIcon = document.getElementById('panelEwalletIcon');
+                        if (panelIcon) panelIcon.src = method === 'gcash' ? '/images/payment/gcashicon.png' : '/images/payment/mayaicon.png';
+                    }
+                } catch (e) { console.warn('populate error', e); }
+            })
+            .catch(function (err) {
+                showError('Could not load current billing information. You can still enter new details.');
+                console.warn('billing fetch error:', err && err.message ? err.message : err);
+            });
+    }
+
+    btn.addEventListener('click', function () { openPanel(); });
+    cancel?.addEventListener('click', function () { panel.classList.add('hidden'); });
+
+    // payment tabs
+    var tabCard = document.getElementById('tabCard');
+    var tabGcash = document.getElementById('tabGcash');
+    var tabPaymaya = document.getElementById('tabPaymaya');
+    var panelCard = document.getElementById('panelCard');
+    var panelEwallet = document.getElementById('panelEwallet');
+    var panelEwalletIcon = document.getElementById('panelEwalletIcon');
+    function setTabs(method) {
+        var activeClassList = ['border-subgreen-400', 'bg-subgreen-50/50'];
+        [tabCard, tabGcash, tabPaymaya].forEach(function (t) {
+            if (!t) return;
+            var isActive = (t.dataset.method === method);
+            t.dataset.active = isActive ? 'true' : '';
+            // Toggle visual classes to match hover state when selected
+            activeClassList.forEach(function (c) {
+                if (isActive) t.classList.add(c); else t.classList.remove(c);
+            });
+        });
+        if (panelCard) panelCard.classList.toggle('hidden', method !== 'card');
+        if (panelEwallet) panelEwallet.classList.toggle('hidden', method === 'card');
+        if (panelEwalletIcon) panelEwalletIcon.src = method === 'gcash' ? '/images/payment/gcashicon.png' : '/images/payment/mayaicon.png';
+    }
+    tabCard?.addEventListener('click', function () { setTabs('card'); });
+    tabGcash?.addEventListener('click', function () { setTabs('gcash'); });
+    tabPaymaya?.addEventListener('click', function () { setTabs('paymaya'); });
+
+    function getActiveMethod() {
+        var tabs = [tabCard, tabGcash, tabPaymaya];
+        for (var i = 0; i < tabs.length; i++) {
+            var t = tabs[i];
+            if (!t) continue;
+            if (t.dataset.active === 'true' || t.getAttribute('data-active') === 'true') return t.dataset.method;
+        }
+        return 'card';
+    }
+
+    saveBtn?.addEventListener('click', function () {
+        showError('');
+        if (!saveBtn) return;
+        var email = (document.getElementById('billingEmail')?.value || '').trim();
+        var phone = (document.getElementById('billingPhone')?.value || '').trim();
+        var method = getActiveMethod();
+
+        if (!email) { showError('Email is required.'); return; }
+
+        var addr1 = (document.getElementById('cardAddressLine1')?.value || '').trim();
+        var addr2 = (document.getElementById('cardAddressLine2')?.value || '').trim();
+        var city = (document.getElementById('cardBillingCity')?.value || '').trim();
+        var province = (document.getElementById('cardBillingProvince')?.value || '').trim();
+        var postal = (document.getElementById('cardBillingPostal')?.value || '').trim();
+        var country = (document.getElementById('cardBillingCountry')?.value || '').trim();
+        var ewalletName = (document.getElementById('ewalletNameInput')?.value || '').trim();
+
+        saveBtn.disabled = true;
+        var origText = saveBtn.textContent;
+        saveBtn.textContent = 'Saving...';
+
+        var payload = {
+            billingEmail: email,
+            billingPhone: phone,
+            method: method,
+            address: {
+                line1: addr1 || undefined,
+                line2: addr2 || undefined,
+                city: city || undefined,
+                state: province || undefined,
+                postal_code: postal || undefined,
+                country: country || undefined
+            }
+        };
+        if (method !== 'card') {
+            payload.customerName = ewalletName || undefined;
+        }
+
+        fetch(window.location.pathname + '?handler=UpdateBilling', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error(t || ('Status ' + r.status)); });
+                return r.json().catch(function () { return { ok: true }; });
+            })
+            .then(function (data) {
+                if (typeof showToast === 'function') showToast('Billing information updated.', true);
+                panel.classList.add('hidden');
+                setTimeout(function () { location.reload(); }, 600);
+            })
+            .catch(function (err) {
+                var msg = err && err.message ? err.message : 'Could not save billing information.';
+                showError(msg);
+            })
+            .finally(function () {
+                saveBtn.disabled = false;
+                saveBtn.textContent = origText;
+            });
+    });
 })();
 </script>
 }

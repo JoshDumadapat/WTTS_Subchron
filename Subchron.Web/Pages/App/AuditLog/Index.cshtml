@@ -100,27 +100,46 @@
                     <tbody id="auditLogTableBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
                 </table>
             </div>
-            <div id="auditLogFooter" class="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex flex-wrap items-center gap-3">
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Showing <span id="auditLogRange">0–0</span> of <span id="auditLogTotal">0</span></p>
+            <div id="auditLogFooter" class="flex flex-col gap-4 border-t border-slate-100 px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+
+                <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Showing <span class="font-semibold text-slate-900 dark:text-white" id="auditLogRange">0–0</span> of <span id="auditLogTotal" class="font-semibold text-slate-900 dark:text-white">0</span>
+                    </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Rows</span>
-                        <select id="auditLogPageSize" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                        <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
+                        <select id="auditLogPageSize" class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-subgreen-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50" selected>50</option>
                             <option value="100">100</option>
                         </select>
+                        <div class="relative inline-block sm:hidden">
+                            <button id="auditLogRowsBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white" aria-haspopup="listbox" aria-expanded="false">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+                            </button>
+                            <div id="auditLogRowsMenu" class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
+                                <button type="button" class="audit-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="10">10</button>
+                                <button type="button" class="audit-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="25">25</button>
+                                <button type="button" class="audit-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="50">50</button>
+                                <button type="button" class="audit-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="100">100</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span id="auditLogPageOf" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
-                    <a id="auditLogPrev" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous" style="display:none;">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                    </a>
-                    <a id="auditLogNext" href="#" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next" style="display:none;">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    </a>
+
+                <div class="flex items-center justify-center gap-0 sm:justify-end">
+                    <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
+                        <button type="button" id="auditLogPrev" class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <div id="auditLogPageNumbers" class="inline-flex -space-x-px text-sm"></div>
+                        <button type="button" id="auditLogNext" class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -340,34 +359,55 @@
                 var totalEl = document.getElementById('auditLogTotal');
                 if (rangeEl) rangeEl.textContent = start + '–' + end;
                 if (totalEl) totalEl.textContent = total;
-                var pageOfEl = document.getElementById('auditLogPageOf');
-                if (pageOfEl) pageOfEl.textContent = 'Page ' + page + ' of ' + totalPages;
-                var base = '?pageSize=' + pageSize + (params.get('from') ? '&from=' + params.get('from') : '') + (params.get('to') ? '&to=' + params.get('to') : '') + (params.get('action') ? '&action=' + encodeURIComponent(params.get('action')) : '') + (params.get('entityName') ? '&entityName=' + encodeURIComponent(params.get('entityName')) : '') + (params.get('search') ? '&search=' + encodeURIComponent(params.get('search')) : '');
                 var prevEl = document.getElementById('auditLogPrev');
                 var nextEl = document.getElementById('auditLogNext');
                 if (prevEl) {
-                    prevEl.style.display = page > 1 ? '' : 'none';
-                    prevEl.href = page > 1 ? '#' : '#';
-                    prevEl.onclick = function (e) {
+                    prevEl.disabled = page <= 1;
+                    prevEl.onclick = function () {
                         if (page <= 1) return;
-                        e.preventDefault();
-                        var params = new URLSearchParams(window.location.search);
-                        params.set('page', String(page - 1));
-                        window.history.replaceState({}, '', '/App/AuditLog?' + params.toString());
+                        var p = new URLSearchParams(window.location.search);
+                        p.set('page', String(page - 1));
+                        window.history.replaceState({}, '', '/App/AuditLog?' + p.toString());
                         loadAuditLog();
                     };
                 }
                 if (nextEl) {
-                    nextEl.style.display = page < totalPages ? '' : 'none';
-                    nextEl.href = page >= totalPages ? '#' : '#';
-                    nextEl.onclick = function (e) {
+                    nextEl.disabled = page >= totalPages;
+                    nextEl.onclick = function () {
                         if (page >= totalPages) return;
-                        e.preventDefault();
-                        var params = new URLSearchParams(window.location.search);
-                        params.set('page', String(page + 1));
-                        window.history.replaceState({}, '', '/App/AuditLog?' + params.toString());
+                        var p = new URLSearchParams(window.location.search);
+                        p.set('page', String(page + 1));
+                        window.history.replaceState({}, '', '/App/AuditLog?' + p.toString());
                         loadAuditLog();
                     };
+                }
+                var numbersEl = document.getElementById('auditLogPageNumbers');
+                if (numbersEl) {
+                    numbersEl.innerHTML = '';
+                    var maxButtons = 5;
+                    var half = Math.floor(maxButtons / 2);
+                    var startPage = Math.max(1, page - half);
+                    var endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                    if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+                    for (var pg = startPage; pg <= endPage; pg++) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = pg;
+                        if (pg === page) {
+                            btn.className = 'relative z-10 inline-flex items-center border border-subgreen-600 bg-subgreen-50 px-4 py-2 text-sm font-semibold text-subgreen-600 focus:z-20 dark:bg-subgreen-900/20 dark:text-subgreen-300 dark:border-subgreen-700';
+                        } else {
+                            btn.className = 'relative inline-flex items-center border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white';
+                        }
+                        (function (targetPage) {
+                            btn.addEventListener('click', function () {
+                                var p = new URLSearchParams(window.location.search);
+                                p.set('page', String(targetPage));
+                                window.history.replaceState({}, '', '/App/AuditLog?' + p.toString());
+                                loadAuditLog();
+                            });
+                        }(pg));
+                        numbersEl.appendChild(btn);
+                    }
                 }
                 var sel = document.getElementById('auditLogPageSize');
                 if (sel) sel.value = String(pageSize);
@@ -388,10 +428,34 @@
             params.set('pageSize', this.value);
             params.set('page', '1');
             params.delete('handler');
-            var url = '/App/AuditLog?' + params.toString();
-            window.location.href = url;
+            window.history.replaceState({}, '', '/App/AuditLog?' + params.toString());
+            loadAuditLog();
         });
     }
+
+    // Mobile rows-per-page dropdown
+    var auditRowsBtn = document.getElementById('auditLogRowsBtn');
+    var auditRowsMenu = document.getElementById('auditLogRowsMenu');
+    if (auditRowsMenu) {
+        auditRowsMenu.querySelectorAll('.audit-rows-option').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var val = this.getAttribute('data-value');
+                if (pageSizeEl) { pageSizeEl.value = val; pageSizeEl.dispatchEvent(new Event('change')); }
+                auditRowsMenu.classList.add('hidden');
+                if (auditRowsBtn) auditRowsBtn.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+    if (auditRowsBtn && auditRowsMenu) {
+        auditRowsBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var expanded = auditRowsMenu.classList.toggle('hidden') === false;
+            auditRowsBtn.setAttribute('aria-expanded', String(expanded));
+        });
+        document.addEventListener('click', function () { auditRowsMenu.classList.add('hidden'); if (auditRowsBtn) auditRowsBtn.setAttribute('aria-expanded', 'false'); });
+    }
+
     document.addEventListener('turbo:before-cache', showLoadingState);
     loadAuditLog();
 })();

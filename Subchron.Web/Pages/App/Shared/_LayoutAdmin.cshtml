@@ -274,7 +274,7 @@
     </style>
 </head>
 
-<body id="appRoot" class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
+<body id="appRoot" class="min-h-screen bg-slate-200 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
     <!-- Toast: defined first so showToast exists when page scripts run after redirect -->
     <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
     <script>
@@ -340,6 +340,11 @@
                         var v = new Date().getTime();
                         avatarEl.src = data.avatarUrl + (data.avatarUrl.indexOf("?") !== -1 ? "&" : "?") + "v=" + v;
                     }
+                    // Also set data attributes so client code on profile page can update them
+                    try {
+                        if (nameEl && data.name) nameEl.setAttribute('data-initial-value', data.name);
+                        if (avatarEl && data.avatarUrl) avatarEl.setAttribute('data-initial-src', data.avatarUrl);
+                    } catch (e) {}
                 })
                 .catch(function () {});
         })();

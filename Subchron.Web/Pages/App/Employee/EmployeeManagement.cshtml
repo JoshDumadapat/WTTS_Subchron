@@ -37,14 +37,14 @@
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Employee Directory</h1>
         </div>
-        <div class="flex items-center gap-3">
-            <a asp-page="/App/Archive/Archive" class="inline-flex items-center rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                <svg class="mr-2 h-4 w-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-                View Archive
+        <div class="flex items-center gap-3 w-full justify-end sm:w-auto sm:justify-end">
+            <a asp-page="/App/Archive/Archive" aria-label="View archive" class="inline-flex items-center rounded-xl border border-gray-300 bg-white px-3 sm:px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                <svg class="mr-0 sm:mr-2 h-4 w-4 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                <span class="hidden sm:inline">View Archive</span>
             </a>
-            <a asp-page="/App/Employee/Add" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                Add Employee
+            <a asp-page="/App/Employee/Add" aria-label="Add employee" class="inline-flex items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-3 sm:px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                <span class="hidden sm:inline">Add Employee</span>
             </a>
         </div>
     </div>
@@ -58,36 +58,36 @@
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <!-- Stats: equal width, numbers right-aligned -->
-        <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+        <div class="grid grid-cols-2 divide-y divide-slate-100 border-b border-slate-100 lg:grid-cols-4 lg:divide-y-0 dark:divide-slate-800 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-800">
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-slate-900 dark:text-white" id="statTotal">@Model.Employees.Count</p>
+                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-900 dark:text-white" id="statTotal">@Model.Employees.Count</p>
             </div>
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-800">
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Active (WorkState)</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-subgreen-600 dark:text-subgreen-400" id="statActive">@Model.Employees.Count(e => e.WorkState == "Active")</p>
+                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-subgreen-600 dark:text-subgreen-400" id="statActive">@Model.Employees.Count(e => e.WorkState == "Active")</p>
             </div>
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-800">
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Other (On Leave, etc.)</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-amber-600 dark:text-amber-400" id="statInactive">@Model.Employees.Count(e => e.WorkState != "Active")</p>
+                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-amber-600 dark:text-amber-400" id="statInactive">@Model.Employees.Count(e => e.WorkState != "Active")</p>
             </div>
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800">
+            <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-800">
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Archived</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-slate-600 dark:text-slate-400" id="statArchived">—</p>
+                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-600 dark:text-slate-400" id="statArchived">—</p>
             </div>
         </div>
 
         <!-- Filters -->
         <div class="bg-slate-50/50 p-4 dark:bg-slate-800/30">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="text" id="searchInput" class="h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" placeholder="Search by name, email, or employee number...">
+                    <input type="text" id="searchInput" class="h-11 w-full rounded-xl border border-gray-200 bg-white pl-10 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" placeholder="search...">
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <select id="filterStatus" class="h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
+                    <select id="filterStatus" class="hidden sm:inline-block h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
                         <option value="">All work state</option>
                         <option value="Active">Active</option>
                         <option value="On Leave">On Leave</option>
@@ -95,11 +95,12 @@
                         <option value="Probation">Probation</option>
                         <option value="Training">Training</option>
                     </select>
-                    <select id="filterDepartment" class="h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
+                    <select id="filterDepartment" class="hidden sm:inline-block h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300">
                         <option value="">All Departments</option>
                     </select>
-                    <button type="button" id="resetFilters" class="h-11 rounded-xl border border-gray-300 bg-white px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                        Reset
+                    <button type="button" id="resetFilters" aria-label="Reset filters" class="h-11 rounded-xl border border-gray-300 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white inline-flex items-center gap-2">
+                        <svg class="h-4 w-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span class="hidden sm:inline">Reset</span>
                     </button>
                 </div>
             </div>
@@ -170,32 +171,56 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="paginationShowing">5</span> of <span id="paginationTotal">5</span>
-                </span>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">Rows</span>
-                    <select id="rowsPerPage" class="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                        <option value="5">5</option>
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                    </select>
+            <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+
+                <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Showing <span class="font-semibold text-slate-900 dark:text-white" id="paginationShowing">0</span> of <span id="paginationTotal" class="font-semibold text-slate-900 dark:text-white">0</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
+
+                        <select id="rowsPerPage" class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+
+                        <div class="relative inline-block sm:hidden">
+                            <button id="rowsPerPageBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white" aria-haspopup="listbox" aria-expanded="false">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+                            </button>
+                            <div id="rowsPerPageMenu" class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
+                                <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="5">5</button>
+                                <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="10">10</button>
+                                <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="20">20</button>
+                                <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="50">50</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-0 sm:justify-end">
+                    <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
+                        <button type="button" id="paginationPrev" class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+
+                        <div id="paginationNumbers" class="inline-flex -space-x-px text-sm">
+                            <button class="relative z-10 inline-flex items-center border border-blue-600 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 focus:z-20 dark:bg-blue-900/20">1</button>
+                            <button class="relative inline-flex items-center border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white">2</button>
+                        </div>
+
+                        <button type="button" id="paginationNext" class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </nav>
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-2">
-                <button type="button" id="paginationPrev" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" aria-label="Previous">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <div class="flex items-center gap-1" id="paginationNumbers"></div>
-                <button type="button" id="paginationNext" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" aria-label="Next">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -659,23 +684,56 @@
             var showing = visible.length === 0 ? 0 : visible.slice(start, end).length;
             document.getElementById('paginationShowing').textContent = showing;
             document.getElementById('paginationTotal').textContent = visible.length;
-            var container = document.getElementById('paginationNumbers');
-            if (container) {
-                container.innerHTML = '';
-                for (var i = 1; i <= totalPages; i++) {
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'h-9 min-w-[36px] rounded-lg border px-3 text-sm font-bold ' + (i === currentPage ? 'border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-900/40 dark:bg-subgreen-900/20 dark:text-subgreen-300' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800');
-                    btn.textContent = i;
-                    (function (p) { btn.addEventListener('click', function () { currentPage = p; filterRows(); }); })(i);
-                    container.appendChild(btn);
-                }
-            }
+             var container = document.getElementById('paginationNumbers');
+             if (container) {
+                 container.innerHTML = '';
+                 for (var i = 1; i <= totalPages; i++) {
+                     var btn = document.createElement('button');
+                     btn.type = 'button';
+                     btn.className = (i === currentPage ? 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-900/40 dark:bg-subgreen-900/20 dark:text-subgreen-300' : 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800');
+                     btn.textContent = i;
+                     (function (p) { btn.addEventListener('click', function () { currentPage = p; filterRows(); }); })(i);
+                     container.appendChild(btn);
+                 }
+             }
             document.getElementById('paginationPrev').disabled = currentPage <= 1;
             document.getElementById('paginationNext').disabled = currentPage >= totalPages;
         }
 
         rowsPerPage?.addEventListener('change', function () { currentPage = 1; filterRows(); });
+        // Phone rows-per-page menu handling
+        var rowsPerPageBtn = document.getElementById('rowsPerPageBtn');
+        var rowsPerPageMenu = document.getElementById('rowsPerPageMenu');
+        if (rowsPerPageMenu) {
+            rowsPerPageMenu.querySelectorAll('.rows-option').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var val = this.getAttribute('data-value');
+                    var sel = document.getElementById('rowsPerPage');
+                    if (sel) { sel.value = val; sel.dispatchEvent(new Event('change')); }
+                    rowsPerPageMenu.classList.add('hidden');
+                    if (rowsPerPageBtn) rowsPerPageBtn.setAttribute('aria-expanded', 'false');
+                });
+            });
+        }
+        if (rowsPerPageBtn && rowsPerPageMenu) {
+            rowsPerPageBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var expanded = rowsPerPageMenu.classList.contains('hidden') === false;
+                rowsPerPageMenu.classList.toggle('hidden', expanded);
+                rowsPerPageBtn.setAttribute('aria-expanded', String(!expanded));
+            });
+            rowsPerPageMenu.addEventListener('click', function (e) {
+                var b = e.target.closest('button[data-val]');
+                if (!b) return;
+                var v = b.getAttribute('data-val');
+                if (rowsPerPage) rowsPerPage.value = v;
+                rowsPerPageBtn.setAttribute('aria-expanded', 'false');
+                rowsPerPageMenu.classList.add('hidden');
+                currentPage = 1; filterRows();
+            });
+            document.addEventListener('click', function () { rowsPerPageMenu.classList.add('hidden'); rowsPerPageBtn.setAttribute('aria-expanded', 'false'); });
+        }
         document.getElementById('paginationPrev')?.addEventListener('click', function () { if (currentPage > 1) { currentPage--; filterRows(); } });
         document.getElementById('paginationNext')?.addEventListener('click', function () { currentPage++; filterRows(); });
         searchInput?.addEventListener('input', function () { currentPage = 1; filterRows(); });

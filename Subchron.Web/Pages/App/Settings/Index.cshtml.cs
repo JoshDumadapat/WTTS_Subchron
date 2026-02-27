@@ -61,6 +61,9 @@ public class IndexModel : PageModel
     public string BillingCycle { get; set; } = "Monthly";
     public string NextBillingDate { get; set; } = "—";
 
+    /// <summary>True when the user signed in with Google (or another external provider); password change / forgot password are not available.</summary>
+    public bool IsGoogleUser { get; set; }
+
     public Task OnGetAsync(string? tab = null)
     {
         if (!string.IsNullOrWhiteSpace(tab))
@@ -72,6 +75,46 @@ public class IndexModel : PageModel
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
         LoadError = null;
         return Task.CompletedTask;
+    }
+
+    public async Task<IActionResult> OnGetBillingCurrentAsync()
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Unauthorized" }) { StatusCode = 401 };
+
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            var resp = await client.GetAsync("api/billing/current");
+            var body = await resp.Content.ReadAsStringAsync();
+            return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+        }
+        catch
+        {
+            return new JsonResult(new { ok = false, message = "Could not fetch billing information." }) { StatusCode = 500 };
+        }
+    }
+
+    public async Task<IActionResult> OnPostUpdateBillingAsync([FromBody] JsonElement req)
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Unauthorized" }) { StatusCode = 401 };
+
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            // Proxy the payload to API (PUT /api/billing)
+            var content = new StringContent(req.GetRawText(), System.Text.Encoding.UTF8, "application/json");
+            var resp = await client.PutAsync("api/billing", content);
+            var body = await resp.Content.ReadAsStringAsync();
+            return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+        }
+        catch
+        {
+            return new JsonResult(new { ok = false, message = "Could not update billing information." }) { StatusCode = 500 };
+        }
     }
 
     public async Task<IActionResult> OnGetDataAsync(string? tab = null)
@@ -91,6 +134,7 @@ public class IndexModel : PageModel
         {
             currentTab = CurrentTab,
             loadError = LoadError,
+            isGoogleUser = IsGoogleUser,
             profileName = ProfileName,
             profileEmail = ProfileEmail,
             profileAvatarUrl = ProfileAvatarUrl,
@@ -145,6 +189,7 @@ public class IndexModel : PageModel
             ProfileName = data.Name ?? "";
             ProfileEmail = data.Email ?? "";
             ProfileAvatarUrl = data.AvatarUrl;
+            IsGoogleUser = string.Equals(data.LoginProvider, "Google", StringComparison.OrdinalIgnoreCase);
         }
         catch { LoadError ??= "Some profile details could not be loaded."; }
     }
@@ -154,6 +199,7 @@ public class IndexModel : PageModel
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? AvatarUrl { get; set; }
+        public string? LoginProvider { get; set; }
     }
 
     private async Task LoadEmployeeInfoAsync()

@@ -521,12 +521,12 @@ public class AuthController : ControllerBase
 
         var user = await _db.Users.AsNoTracking()
             .Where(u => u.UserID == userId)
-            .Select(u => new { u.Name, u.Email, u.AvatarUrl })
+            .Select(u => new { u.Name, u.Email, u.AvatarUrl, u.ExternalProvider })
             .FirstOrDefaultAsync();
         if (user is null)
             return Unauthorized(new { ok = false, message = "User not found." });
 
-        return Ok(new { name = user.Name, email = user.Email, avatarUrl = user.AvatarUrl });
+        return Ok(new { name = user.Name, email = user.Email, avatarUrl = user.AvatarUrl, loginProvider = user.ExternalProvider });
     }
 
     [Authorize]
@@ -710,6 +710,16 @@ public class AuthController : ControllerBase
         if (req?.EmergencyContactRelation != null) { 
             var s = req.EmergencyContactRelation.Trim(); 
             emp.EmergencyContactRelation = s.Length > 50 ? s[..50] : (s.Length > 0 ? s : null); 
+        }
+
+        // Keep User.Name in sync with employee full name so profile/header display name updates
+        var user = await _db.Users.FindAsync(userId);
+        if (user != null)
+        {
+            var parts = new[] { emp.FirstName?.Trim(), emp.MiddleName?.Trim(), emp.LastName?.Trim() }
+                .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+            if (parts.Count > 0)
+                user.Name = string.Join(" ", parts);
         }
 
         await _db.SaveChangesAsync();
