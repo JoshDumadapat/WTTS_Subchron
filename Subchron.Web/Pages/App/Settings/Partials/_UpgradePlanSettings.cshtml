@@ -111,9 +111,11 @@
                 </div>
                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 pt-2">Billing address</p>
                 <div class="space-y-4">
-                    <div class="relative">
+                    <div class="address-autocomplete relative">
                         <label for="cardAddressLine1" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 1</label>
-                        <input id="cardAddressLine1" type="text" placeholder="Start typing address — suggestions from OpenStreetMap" autocomplete="off" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        <input id="cardAddressLine1" type="text" placeholder="Start typing address — suggestions from LocationIQ" autocomplete="off" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" />
+                        <div id="settingsBillingAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Select an address to auto-fill city, province, postal code, and country.</p>
                     </div>
                     <div>
                         <label for="cardAddressLine2" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Address line 2 (optional)</label>
@@ -157,8 +159,8 @@
             </div>
 
             <div class="mt-4 flex gap-3">
-                <button type="button" id="billingSaveBtn" class="inline-flex items-center rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700">Save changes</button>
-                <button type="button" id="billingCancelBtn" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="button" id="billingSaveBtn" class="btn-primary px-4">Save changes</button>
+                <button type="button" id="billingCancelBtn" class="btn-secondary px-4">Cancel</button>
             </div>
         </div>
     </div>
@@ -190,8 +192,8 @@
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3">
-            <a asp-page="/Landing/Pricing" class="inline-flex items-center rounded-lg bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">Upgrade or change plan</a>
-            <a asp-page="/Landing/Contact" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Contact sales (Enterprise)</a>
+            <a asp-page="/Landing/Pricing" class="btn-primary px-4 focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">Upgrade or change plan</a>
+            <a asp-page="/Landing/Contact" class="btn-secondary px-4">Contact sales (Enterprise)</a>
         </div>
     </div>
 </div>

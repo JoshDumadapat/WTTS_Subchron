@@ -42,7 +42,7 @@
                 <div id="scanPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95 p-4 text-slate-400">
                     <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     <p class="text-center text-sm font-medium">Hold QR code or ID in front of camera</p>
-                    <button type="button" id="btnStartCamera" class="rounded-xl bg-subgreen-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                    <button type="button" id="btnStartCamera" class="btn-primary px-6 py-3 text-base shadow-lg">
                         Start camera
                     </button>
                     <p id="scanError" class="hidden text-center text-sm text-red-400"></p>
@@ -57,7 +57,7 @@
                 <p class="mt-6 text-xl font-semibold text-slate-800 dark:text-slate-200">Enter ID</p>
                 <div class="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row">
                     <input type="text" id="employeeIdInput" placeholder="Employee ID" class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-lg text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500" />
-                    <button type="button" id="btnSubmitId" class="rounded-xl bg-subgreen-600 px-6 py-3 text-lg font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Submit</button>
+                    <button type="button" id="btnSubmitId" class="btn-primary px-6 py-3 text-lg">Submit</button>
                 </div>
             }
         </div>

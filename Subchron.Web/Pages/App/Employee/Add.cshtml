@@ -6,20 +6,32 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <a href="/App/Employee/EmployeeManagement" class="hover:text-subgreen-600 dark:hover:text-subgreen-400">Employee Directory</a>
-                <span>/</span>
-                <span class="text-slate-700 dark:text-slate-200">Add Employee</span>
-            </nav>
-            <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Add Employee</h1>
-            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Enter employee details. New employees default to Active status.</p>
+<div class="px-4 py-6 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Add Employee</h1>
+        <div class="flex items-center gap-3">
+            <button type="button" class="btn-secondary h-10 gap-2 px-4 text-sm">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export Template
+            </button>
+            <button type="button" class="btn-primary h-10 gap-2 px-4 text-sm">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                Batch Import
+            </button>
         </div>
     </div>
 
-    <form id="addEmployeeForm" method="post" asp-page-handler="Create" class="space-y-8" data-turbo="false" target="_top">
+    <form id="addEmployeeForm" method="post" asp-page-handler="Create" enctype="multipart/form-data" data-turbo="false" target="_top" data-unique-url="@Url.Page("./Add", pageHandler: "CheckUnique")">
+    <!-- 2-column layout: fields left, image cards right -->
+    <div class="flex gap-6 items-start">
+
+        <!-- LEFT COLUMN: field sections, page scrolls naturally via main -->
+        <div class="flex-1 min-w-0 space-y-6">
 
         <!-- Basic information -->
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -43,7 +55,7 @@
                 </div>
                 <div>
                     <label for="addAge" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
-                    <input type="number" name="age" id="addAge" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="18" max="70" />
+                    <input type="number" name="age" id="addAge" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="19" max="70" />
                     <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addAge"></span>
                 </div>
                 <div>
@@ -64,33 +76,31 @@
             <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Address</h2>
             <div class="address-autocomplete relative">
                 <label for="addAddressLine1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line <span class="text-red-500">*</span></label>
-                <input type="text" name="addressLine1" id="addAddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Start typing address..." autocomplete="off" required />
+                        <input type="text" name="addressLine1" id="addAddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Street address (e.g., 123 Rizal St.)" autocomplete="off" required />
                 <div id="addressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
                 <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addAddressLine1"></span>
             </div>
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                    <label for="addAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
-                    <input type="text" name="addressLine2" id="addAddressLine2" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Unit, building, etc." autocomplete="address-line2" />
-                </div>
+            <div class="mt-4">
+                <label for="addAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
+                <input type="text" name="addressLine2" id="addAddressLine2" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Unit, building, etc." autocomplete="address-line2" />
             </div>
             <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <label for="addCity" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">City <span class="text-red-500">*</span></label>
-                    <input type="text" name="city" id="addCity" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="City" autocomplete="address-level2" required />
+                    <input type="text" name="city" id="addCity" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="City" autocomplete="address-level2" required />
                     <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addCity"></span>
                 </div>
                 <div>
                     <label for="addStateProvince" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">State / Province</label>
-                    <input type="text" name="stateProvince" id="addStateProvince" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="State / Province" autocomplete="address-level1" />
+                    <input type="text" name="stateProvince" id="addStateProvince" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="State / Province" autocomplete="address-level1" />
                 </div>
                 <div>
                     <label for="addPostalCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Postal code</label>
-                    <input type="text" name="postalCode" id="addPostalCode" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Postal code" autocomplete="postal-code" />
+                    <input type="text" name="postalCode" id="addPostalCode" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Postal code" autocomplete="postal-code" />
                 </div>
                 <div>
                     <label for="addCountry" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Country <span class="text-red-500">*</span></label>
-                    <input type="text" name="country" id="addCountry" class="input-field h-10 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Country" autocomplete="country-name" required />
+                    <input type="text" name="country" id="addCountry" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Country" autocomplete="country-name" required />
                     <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addCountry"></span>
                 </div>
             </div>
@@ -106,6 +116,7 @@
                         <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
                         <input type="tel" name="phone" id="addPhone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0985 458 5456" maxlength="14" />
                     </div>
+                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addPhone"></span>
                 </div>
                 <div>
                     <label for="addContactEmail" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email <span class="text-red-500">*</span></label>
@@ -210,21 +221,184 @@
         <!-- Attendance QR: each employee gets a unique QR after save; view it from Employee Management (QR button). -->
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800" id="attendanceQrSection">
             <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Attendance QR</h2>
-            <p class="text-sm text-slate-600 dark:text-slate-400">Save the employee first. After saving, you’ll be redirected to Employee Management where you can use the <strong>QR</strong> button on each row to generate or view the attendance QR. Each employee gets a unique QR for clock-in/out.</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Save the employee first. After saving, you'll be redirected to Employee Management where you can use the <strong>QR</strong> button on each row to generate or view the attendance QR. Each employee gets a unique QR for clock-in/out.</p>
         </section>
 
-        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <a href="/App/Employee/EmployeeManagement" class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</a>
-            <button type="submit" id="addEmployeeSubmitBtn" class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-6 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 hover:bg-subgreen-500 disabled:opacity-70">
+        <!-- Submit actions -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end pb-6">
+            <a href="/App/Employee/EmployeeManagement" class="btn-secondary h-12 px-6">Cancel</a>
+            <button type="submit" id="addEmployeeSubmitBtn" class="btn-primary h-12 gap-2 px-6 disabled:opacity-70">
                 <span id="addEmployeeSubmitText">Save Employee</span>
                 <span id="addEmployeeSubmitSpinner" class="hidden h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
             </button>
         </div>
+
+        </div>
+        <!-- END LEFT COLUMN -->
+
+        <!-- RIGHT COLUMN: normal flow (no sticky, no overflow), scrolls with the page -->
+        <div class="w-80 flex-shrink-0 flex flex-col gap-4">
+
+            <!-- Profile / ID Picture Card -->
+            <!-- Frame: standard 2×2 in ID photo = 1:1.25 portrait (width:height) -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-0.5 text-sm font-semibold text-slate-900 dark:text-white">Profile / ID Picture</h2>
+                <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Standard 2×2 ID photo · portrait</p>
+
+                <!-- Portrait frame — 4:5 ratio (close to standard ID/passport 2"×2.5") -->
+                <div id="profilePicDropzone"
+                     class="group relative mx-auto cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-subgreen-400 hover:bg-subgreen-50 dark:border-slate-600 dark:bg-slate-700/40 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/10"
+                     style="width: 100%; aspect-ratio: 4/5;"
+                     onclick="document.getElementById('profilePicInput').click()">
+                    <!-- Preview: object-cover + object-top so face is always visible and centred -->
+                    <img id="profilePicPreview" src="" alt="Profile preview"
+                         class="hidden absolute inset-0 h-full w-full object-cover object-top" />
+                    <div id="profilePicPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-600">
+                            <svg class="h-6 w-6 text-slate-400 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Click or drag photo here</p>
+                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Clear, front-facing photo</p>
+                        </div>
+                        <div class="w-full rounded-lg bg-slate-100 px-3 py-2 text-left dark:bg-slate-700/60">
+                            <p class="text-xs font-medium text-slate-600 dark:text-slate-300">JPG · PNG · WEBP &nbsp;·&nbsp; Max 5 MB</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Size: <span class="font-medium text-slate-600 dark:text-slate-300">2×2 in / passport-size</span></p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Min: <span class="font-medium text-slate-600 dark:text-slate-300">400×500 px</span> · plain background</p>
+                        </div>
+                    </div>
+                    <input type="file" id="profilePicInput" name="profilePicture" accept="image/png,image/jpeg,image/webp" class="hidden" />
+                </div>
+
+                <div id="profilePicActions" class="mt-3 hidden flex items-center justify-between gap-2">
+                    <span id="profilePicFileName" class="truncate text-xs text-slate-500 dark:text-slate-400"></span>
+                    <button type="button" id="profilePicClear"
+                            class="flex-shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Signature Card -->
+            <!-- Frame: wide landscape rectangle — typical signature is ~3:1 wide -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-0.5 text-sm font-semibold text-slate-900 dark:text-white">Signature</h2>
+                <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Scanned or digital · landscape</p>
+
+                <!-- Landscape frame — 3:1 wide, gives a clear visible signature area -->
+                <div id="signatureDropzone"
+                     class="group relative w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-white transition hover:border-subgreen-400 hover:bg-subgreen-50 dark:border-slate-600 dark:bg-white dark:hover:border-subgreen-500"
+                     style="aspect-ratio: 3/1;"
+                     onclick="document.getElementById('signatureInput').click()">
+                    <!-- object-contain + padding so signature is always fully visible & centred -->
+                    <img id="signaturePreview" src="" alt="Signature preview"
+                         class="hidden absolute inset-0 h-full w-full object-contain object-center p-3" />
+                    <div id="signaturePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                        <p class="text-xs font-semibold text-slate-500">Click or drag signature here</p>
+                    </div>
+                    <input type="file" id="signatureInput" name="signature" accept="image/png,image/jpeg,image/webp" class="hidden" />
+                </div>
+
+                <!-- Guidance below frame -->
+                <div class="mt-3 rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-700/60">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-300">JPG · PNG · WEBP &nbsp;·&nbsp; Max 2 MB</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Best: <span class="font-medium text-slate-600 dark:text-slate-300">transparent PNG</span> · landscape</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Recommended: <span class="font-medium text-slate-600 dark:text-slate-300">400×133 px or wider</span></p>
+                </div>
+
+                <div id="signatureActions" class="mt-3 hidden flex items-center justify-between gap-2">
+                    <span id="signatureFileName" class="truncate text-xs text-slate-500 dark:text-slate-400"></span>
+                    <button type="button" id="signatureClear"
+                            class="flex-shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        Remove
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        <!-- END RIGHT COLUMN -->
+
+    </div>
+    <!-- END 2-column layout -->
+
     </form>
 </div>
 
 <script src="~/js/ph-phone.js" asp-append-version="true"></script>
 @section Scripts {
+<script>
+// ── Image upload helpers ──────────────────────────────────────────────────
+(function () {
+    function setupImageUpload(inputId, previewId, placeholderId, actionsId, fileNameId, clearId, dropzoneId) {
+        var input = document.getElementById(inputId);
+        var preview = document.getElementById(previewId);
+        var placeholder = document.getElementById(placeholderId);
+        var actions = document.getElementById(actionsId);
+        var fileName = document.getElementById(fileNameId);
+        var clearBtn = document.getElementById(clearId);
+        var dropzone = document.getElementById(dropzoneId);
+        if (!input) return;
+
+        function showPreview(file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                actions.classList.remove('hidden');
+                fileName.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            input.value = '';
+            preview.src = '';
+            preview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            actions.classList.add('hidden');
+            fileName.textContent = '';
+        }
+
+        input.addEventListener('change', function () {
+            if (this.files && this.files[0]) showPreview(this.files[0]);
+        });
+
+        clearBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearImage();
+        });
+
+        // Drag-and-drop
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('border-subgreen-400', 'bg-subgreen-50', 'dark:border-subgreen-500');
+        });
+        dropzone.addEventListener('dragleave', function () {
+            this.classList.remove('border-subgreen-400', 'bg-subgreen-50', 'dark:border-subgreen-500');
+        });
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('border-subgreen-400', 'bg-subgreen-50', 'dark:border-subgreen-500');
+            var file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                var dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                showPreview(file);
+            }
+        });
+    }
+
+    setupImageUpload('profilePicInput', 'profilePicPreview', 'profilePicPlaceholder', 'profilePicActions', 'profilePicFileName', 'profilePicClear', 'profilePicDropzone');
+    setupImageUpload('signatureInput', 'signaturePreview', 'signaturePlaceholder', 'signatureActions', 'signatureFileName', 'signatureClear', 'signatureDropzone');
+})();
+</script>
 <script>
 (function () {
     var form = document.getElementById('addEmployeeForm');
@@ -233,11 +407,21 @@
     var addContactEmail = document.getElementById('addContactEmail');
     var addLoginEmail = document.getElementById('addLoginEmail');
     var addDefaultPassword = document.getElementById('addDefaultPassword');
+    var addPhone = document.getElementById('addPhone');
     var DEFAULT_PASSWORD = 'TempPass123!';
+    var uniqueCheckUrl = form ? (form.getAttribute('data-unique-url') || '') : '';
+    var uniqueState = {
+        email: { value: '', exists: false, status: 'idle' },
+        phone: { value: '', exists: false, status: 'idle' }
+    };
+    var uniqueControllers = { email: null, phone: null };
+    var uniqueTimers = { email: null, phone: null };
+    var isSubmitting = false;
 
     function showError(fieldId, message) {
         var el = document.querySelector('.field-error[data-for="' + fieldId + '"]');
         if (!el) return;
+        el.removeAttribute('data-unique-error');
         el.textContent = message || '';
         el.classList.toggle('hidden', !message);
         var input = document.getElementById(fieldId);
@@ -247,8 +431,23 @@
         document.querySelectorAll('.field-error').forEach(function (el) {
             el.textContent = '';
             el.classList.add('hidden');
+            el.removeAttribute('data-unique-error');
         });
         document.querySelectorAll('.input-field').forEach(function (el) { el.classList.remove('border-red-500'); });
+    }
+
+    function setUniqueError(fieldId, message) {
+        showError(fieldId, message);
+        var el = document.querySelector('.field-error[data-for="' + fieldId + '"]');
+        if (el) el.setAttribute('data-unique-error', 'true');
+    }
+
+    function clearUniqueError(fieldId) {
+        var el = document.querySelector('.field-error[data-for="' + fieldId + '"]');
+        if (el && el.getAttribute('data-unique-error') === 'true') {
+            el.removeAttribute('data-unique-error');
+            showError(fieldId, '');
+        }
     }
 
     function capitalizeName(str) {
@@ -273,7 +472,13 @@
     });
     addContactEmail.addEventListener('input', function () {
         if (addCreateAccount.checked) addLoginEmail.value = this.value || '';
+        scheduleUniqueValidation('email', this.value);
     });
+    if (addPhone) {
+        addPhone.addEventListener('input', function () {
+            scheduleUniqueValidation('phone', this.value);
+        });
+    }
 
     var addRole = document.getElementById('addRole');
     var addEmpNumber = document.getElementById('addEmpNumber');
@@ -297,70 +502,151 @@
     var addPostalCode = document.getElementById('addPostalCode');
     var addCountry = document.getElementById('addCountry');
     var addressDebounce = null;
+    var addressAbortController = null;
+    var activeSuggestionIndex = -1;
+    var appRoot = document.getElementById('appRoot');
+    var apiBase = appRoot ? (appRoot.getAttribute('data-api-base') || '').trim().replace(/\/$/, '') : '';
+
+    function buildLocationUrl(query) {
+        var path = '/api/location/autocomplete?q=' + encodeURIComponent(query) + '&limit=6';
+        return apiBase ? apiBase + path : path;
+    }
+
+    function setActiveSuggestion(index) {
+        var options = addressSuggestions.querySelectorAll('button');
+        if (!options.length) {
+            activeSuggestionIndex = -1;
+            return;
+        }
+
+        if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+            options[activeSuggestionIndex].classList.remove('bg-slate-100', 'dark:bg-slate-700');
+        }
+
+        activeSuggestionIndex = index;
+        if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+            options[activeSuggestionIndex].classList.add('bg-slate-100', 'dark:bg-slate-700');
+            options[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function clearAddressSuggestions() {
+        if (!addressSuggestions) return;
+        addressSuggestions.classList.add('hidden');
+        addressSuggestions.innerHTML = '';
+        activeSuggestionIndex = -1;
+    }
+
+    function fillAddressFields(item) {
+        addressLine1.value = item.addressLine || item.displayName || '';
+        addCity.value = item.city || '';
+        addStateProvince.value = item.state || '';
+        addPostalCode.value = item.postalCode || '';
+        addCountry.value = item.country || 'Philippines';
+        clearAddressSuggestions();
+    }
 
     addressLine1.addEventListener('input', function () {
         clearTimeout(addressDebounce);
         var q = this.value.trim();
-        addressSuggestions.classList.add('hidden');
-        addressSuggestions.innerHTML = '';
+        clearAddressSuggestions();
+        if (addressAbortController) addressAbortController.abort();
         if (q.length < 3) return;
+
         addressDebounce = setTimeout(function () {
-            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&countrycodes=ph&limit=5', {
-                headers: { 'Accept': 'application/json' }
-            }).then(function (r) { return r.json(); }).then(function (data) {
-                addressSuggestions.innerHTML = '';
-                if (!data || data.length === 0) {
-                    addressSuggestions.classList.add('hidden');
-                    return;
-                }
-                data.forEach(function (item) {
-                    var div = document.createElement('div');
-                    div.className = 'cursor-pointer px-4 py-3 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
-                    div.textContent = item.display_name;
-                    div.addEventListener('click', function () {
-                        addressLine1.value = item.display_name;
-                        var addr = item.address || {};
-                        addCity.value = addr.city || addr.town || addr.village || addr.municipality || '';
-                        addStateProvince.value = addr.state || addr.province || '';
-                        addPostalCode.value = addr.postcode || '';
-                        addCountry.value = addr.country || 'Philippines';
-                        addressSuggestions.classList.add('hidden');
-                        addressSuggestions.innerHTML = '';
+            addressAbortController = new AbortController();
+            fetch(buildLocationUrl(q), { signal: addressAbortController.signal })
+                .then(function (r) { return r.ok ? r.json() : []; })
+                .then(function (data) {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        clearAddressSuggestions();
+                        return;
+                    }
+                    data.forEach(function (item) {
+                        var optionIndex = addressSuggestions.querySelectorAll('button').length;
+                        var div = document.createElement('button');
+                        div.type = 'button';
+                        div.className = 'block w-full cursor-pointer px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
+                        div.textContent = item.displayName || item.addressLine || 'Address';
+                        div.addEventListener('click', function () { fillAddressFields(item); });
+                        div.addEventListener('mouseenter', function () { setActiveSuggestion(optionIndex); });
+                        addressSuggestions.appendChild(div);
                     });
-                    addressSuggestions.appendChild(div);
+                    addressSuggestions.classList.remove('hidden');
+                })
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return;
+                    clearAddressSuggestions();
                 });
-                addressSuggestions.classList.remove('hidden');
-            }).catch(function () { addressSuggestions.classList.add('hidden'); });
-        }, 300);
+        }, 320);
     });
+
     document.addEventListener('click', function (e) {
-        if (!e.target.closest('.address-autocomplete')) addressSuggestions.classList.add('hidden');
+        if (!e.target.closest('.address-autocomplete')) clearAddressSuggestions();
+    });
+
+    addressLine1.addEventListener('keydown', function (e) {
+        if (addressSuggestions.classList.contains('hidden')) return;
+
+        var options = addressSuggestions.querySelectorAll('button');
+        if (!options.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            var next = activeSuggestionIndex < options.length - 1 ? activeSuggestionIndex + 1 : 0;
+            setActiveSuggestion(next);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            var prev = activeSuggestionIndex > 0 ? activeSuggestionIndex - 1 : options.length - 1;
+            setActiveSuggestion(prev);
+        } else if (e.key === 'Enter') {
+            if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+                e.preventDefault();
+                options[activeSuggestionIndex].click();
+            }
+        } else if (e.key === 'Escape') {
+            clearAddressSuggestions();
+        }
     });
 
     form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+        isSubmitting = true;
+        validateAndSubmit().finally(function () { isSubmitting = false; });
+    });
+
+    async function validateAndSubmit() {
         clearAllErrors();
         var valid = true;
+        var firstNameInput = document.getElementById('addFirstName');
+        var lastNameInput = document.getElementById('addLastName');
+        var addressInput = document.getElementById('addAddressLine1');
+        var cityInput = document.getElementById('addCity');
+        var countryInput = document.getElementById('addCountry');
+        var roleInput = document.getElementById('addRole');
+        var employmentInput = document.getElementById('addEmploymentType');
+        var ageInput = document.getElementById('addAge');
 
-        if (!document.getElementById('addFirstName').value.trim()) {
+        if (!firstNameInput.value.trim()) {
             showError('addFirstName', 'First name is required.'); valid = false;
         }
-        if (!document.getElementById('addLastName').value.trim()) {
+        if (!lastNameInput.value.trim()) {
             showError('addLastName', 'Last name is required.'); valid = false;
         }
-        var addAge = document.getElementById('addAge');
-        if (addAge && addAge.value.trim() !== '') {
-            var ageNum = parseInt(addAge.value, 10);
-            if (isNaN(ageNum) || ageNum < 18 || ageNum > 70) {
-                showError('addAge', 'Age must be between 18 and 70.'); valid = false;
+        if (ageInput && ageInput.value.trim() !== '') {
+            var ageNum = parseInt(ageInput.value, 10);
+            if (isNaN(ageNum) || ageNum <= 18 || ageNum > 70) {
+                showError('addAge', 'Age must be between 19 and 70.'); valid = false;
             }
         }
-        if (!document.getElementById('addAddressLine1').value.trim()) {
+        if (!addressInput.value.trim()) {
             showError('addAddressLine1', 'Address line is required.'); valid = false;
         }
-        if (!document.getElementById('addCity').value.trim()) {
+        if (!cityInput.value.trim()) {
             showError('addCity', 'City is required.'); valid = false;
         }
-        if (!document.getElementById('addCountry').value.trim()) {
+        if (!countryInput.value.trim()) {
             showError('addCountry', 'Country is required.'); valid = false;
         }
         var emailVal = addContactEmail.value.trim();
@@ -373,27 +659,46 @@
                 showError('addContactEmail', 'Enter a valid email address.'); valid = false;
             }
         }
-        if (addCreateAccount.checked) {
-            if (!addDefaultPassword.value.trim()) {
-                showError('addDefaultPassword', 'Default password is required when creating account.'); valid = false;
-            }
+        if (addCreateAccount.checked && !addDefaultPassword.value.trim()) {
+            showError('addDefaultPassword', 'Default password is required when creating account.'); valid = false;
         }
-        if (!document.getElementById('addRole').value) {
+        if (!roleInput.value) {
             showError('addRole', 'Role is required.'); valid = false;
         }
-        if (!document.getElementById('addEmploymentType').value) {
+        if (!employmentInput.value) {
             showError('addEmploymentType', 'Employment type is required.'); valid = false;
         }
 
-        if (!valid) {
-            e.preventDefault();
-            var firstError = document.querySelector('.field-error:not(.hidden)');
-            if (firstError) {
-                var forId = firstError.getAttribute('data-for');
-                if (forId) document.getElementById(forId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var asyncChecks = [];
+        if (emailVal) asyncChecks.push(runUniqueValidation('email', emailVal, true));
+        var phoneVal = addPhone ? addPhone.value.trim() : '';
+        if (phoneVal) asyncChecks.push(runUniqueValidation('phone', phoneVal, true));
+        if (asyncChecks.length) await Promise.all(asyncChecks);
+
+        if (emailVal) {
+            if (uniqueState.email.exists) {
+                setUniqueError('addContactEmail', 'Email is already used by another employee.');
+                valid = false;
+            } else if (uniqueState.email.status === 'error') {
+                showError('addContactEmail', 'Unable to validate email right now. Please try again.');
+                valid = false;
             }
+        }
+        if (phoneVal) {
+            if (uniqueState.phone.exists) {
+                setUniqueError('addPhone', 'Contact number is already used by another employee.');
+                valid = false;
+            } else if (uniqueState.phone.status === 'error') {
+                showError('addPhone', 'Unable to validate contact number right now.');
+                valid = false;
+            }
+        }
+
+        if (!valid) {
+            scrollToFirstError();
             return;
         }
+
         var submitBtn = document.getElementById('addEmployeeSubmitBtn');
         var submitText = document.getElementById('addEmployeeSubmitText');
         var submitSpinner = document.getElementById('addEmployeeSubmitSpinner');
@@ -402,7 +707,66 @@
         setTimeout(function () {
             if (submitBtn) submitBtn.disabled = true;
         }, 0);
-    });
+        form.submit();
+    }
+
+    function scrollToFirstError() {
+        var firstError = document.querySelector('.field-error:not(.hidden)');
+        if (firstError) {
+            var forId = firstError.getAttribute('data-for');
+            if (forId) document.getElementById(forId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function scheduleUniqueValidation(field, value) {
+        if (!uniqueCheckUrl) return;
+        clearTimeout(uniqueTimers[field]);
+        uniqueTimers[field] = setTimeout(function () {
+            runUniqueValidation(field, value);
+        }, 350);
+    }
+
+    function runUniqueValidation(field, value, force) {
+        var state = uniqueState[field];
+        var trimmed = (value || '').trim();
+        if (!trimmed) {
+            state.value = '';
+            state.exists = false;
+            state.status = 'success';
+            clearUniqueError(field === 'email' ? 'addContactEmail' : 'addPhone');
+            return Promise.resolve(false);
+        }
+        if (!uniqueCheckUrl) {
+            state.status = 'unavailable';
+            return Promise.resolve(false);
+        }
+        if (!force && state.value === trimmed && state.status === 'success') {
+            return Promise.resolve(state.exists);
+        }
+        if (uniqueControllers[field]) uniqueControllers[field].abort();
+        var controller = new AbortController();
+        uniqueControllers[field] = controller;
+        state.status = 'pending';
+        var url = uniqueCheckUrl + (uniqueCheckUrl.indexOf('?') >= 0 ? '&' : '?') + 'type=' + encodeURIComponent(field) + '&value=' + encodeURIComponent(trimmed);
+        return fetch(url, { signal: controller.signal })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (controller.signal.aborted) return state.exists;
+                var exists = data && data.exists === true;
+                state.value = trimmed;
+                state.exists = exists;
+                state.status = 'success';
+                var fieldId = field === 'email' ? 'addContactEmail' : 'addPhone';
+                if (exists) setUniqueError(fieldId, field === 'email' ? 'Email is already used by another employee.' : 'Contact number is already used by another employee.');
+                else clearUniqueError(fieldId);
+                return exists;
+            })
+            .catch(function (err) {
+                if (err && err.name === 'AbortError') return state.exists;
+                state.status = 'error';
+                return false;
+            });
+    }
 
     var baseSalary = document.getElementById('addBaseSalary');
     if (baseSalary) {

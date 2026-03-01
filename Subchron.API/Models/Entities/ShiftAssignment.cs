@@ -7,7 +7,6 @@ public class ShiftAssignment
     public int ShiftAssignmentID { get; set; }
 
     public int OrgID { get; set; }
-    public Organization Organization { get; set; } = null!;
 
     public int EmpID { get; set; }
     public Employee Employee { get; set; } = null!;

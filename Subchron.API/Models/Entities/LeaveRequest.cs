@@ -7,7 +7,6 @@ public class LeaveRequest
     public int LeaveRequestID { get; set; }
 
     public int OrgID { get; set; }
-    public Organization Organization { get; set; } = null!;
 
     public int EmpID { get; set; }
     public Employee Employee { get; set; } = null!;
@@ -28,7 +27,6 @@ public class LeaveRequest
     public string? Reason { get; set; }
 
     public int? ReviewedByUserID { get; set; }
-    public User? ReviewedByUser { get; set; }
 
     public DateTime? ReviewedAt { get; set; }
 

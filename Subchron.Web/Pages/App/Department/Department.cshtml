@@ -6,32 +6,71 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div id="deptPageHost" class="mx-auto" aria-busy="true">
-    <div id="deptSkeleton" class="space-y-6 animate-pulse">
+<div id="deptPageHost" class="mx-auto">
+    <div id="deptSkeleton" class="hidden space-y-6 animate-pulse">
+        <!-- Header row skeleton -->
         <div class="mb-6 flex items-center justify-between gap-4">
-            <div class="h-8 w-40 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
-            <div class="h-10 w-36 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            <div class="h-8 w-44 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+            <div class="h-10 w-40 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
         </div>
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <div class="p-4"><div class="h-6 w-24 rounded bg-slate-200 dark:bg-slate-700"></div></div>
-            <div class="space-y-3 border-t border-slate-100 p-4 dark:border-slate-800">
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+        <!-- Search/filter bar skeleton -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <div class="h-10 flex-1 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex gap-3">
+                    <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="h-10 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Table skeleton -->
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <!-- Stat row -->
+            <div class="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-700">
+                <div class="h-4 w-10 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-5 w-6 rounded bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            <!-- Table header -->
+            <div class="flex gap-4 border-b border-slate-100 bg-slate-50/50 px-5 py-3 dark:border-slate-700 dark:bg-slate-800/50">
+                <div class="h-3 w-36 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-3 flex-1 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-3 w-16 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-3 w-16 rounded bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            <!-- Table rows -->
+            @for (int i = 0; i < 6; i++)
+            {
+            <div class="flex items-center gap-4 border-b border-slate-100 px-5 py-3.5 last:border-0 dark:border-slate-700">
+                <div class="h-4 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-4 w-10 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-4 flex-1 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-4 w-24 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-5 w-16 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-7 w-14 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            }
+            <!-- Pagination skeleton -->
+            <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 dark:border-slate-700">
+                <div class="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex gap-1">
+                    <div class="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="deptContent" class="hidden">
+    <div id="deptContent">
     <div class="mb-6 flex flex-row items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-400 dark:text-white sm:text-2xl">Departments</h1>
         </div>
 
         <button type="button" onclick="openDeptModal(null)"
-                class="inline-flex items-center justify-center rounded-xl bg-subgreen-600 p-2 sm:px-4 sm:py-2 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all hover:bg-subgreen-500 whitespace-nowrap">
+                class="btn-primary whitespace-nowrap">
 
             <svg class="h-5 w-5 sm:mr-2 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -48,9 +87,37 @@
         </div>
     }
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div class="grid border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
-            <div class="flex items-center justify-between border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800 lg:col-span-4">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <div class="relative w-full lg:flex-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
+                <input type="text" id="deptSearch"
+                       class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm text-slate-800 placeholder-slate-500 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400"
+                       placeholder="Search departments..." />
+            </div>
+            <div class="flex w-full items-center gap-3 lg:w-auto lg:justify-end">
+                <select id="deptFilterStatus"
+                        class="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                    <option value="">All status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+                <button type="button" id="deptResetFilters"
+                        class="h-10 flex-1 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-700 transition-all duration-150 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-900 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center justify-center gap-2">
+                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="grid border-b border-slate-100 lg:grid-cols-4 dark:border-slate-700">
+            <div class="flex items-center justify-between border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-700 lg:col-span-4">
 
                 <!-- Label LEFT -->
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -59,50 +126,9 @@
 
                 <!-- Number RIGHT -->
                 <p class="text-lg font-semibold text-slate-800 dark:text-white" id="deptStatTotal">
-                    @Model.Departments.Count
+                    0
                 </p>
 
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
-
-                <!-- Search -->
-                <div class="relative w-full lg:flex-1">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </span>
-                    <input type="text" id="deptSearch"
-                           class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm text-slate-800 placeholder-slate-500
-                          focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
-                          dark:border-slate-600 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400"
-                           placeholder="Search departments..." />
-                </div>
-
-                <!-- Controls -->
-                <div class="flex w-full items-center gap-3 lg:w-auto lg:justify-end">
-
-                    <select id="deptFilterStatus"
-                            class="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700
-                           dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
-                        <option value="">All status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-
-                    <button type="button" id="deptResetFilters"
-                            class="h-10 flex-1 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-700
-                           hover:bg-slate-50
-                           dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        Reset
-                    </button>
-
-                </div>
             </div>
         </div>
 
@@ -110,7 +136,7 @@
         <div class="overflow-x-auto no-scrollbar">
             <table class="w-full min-w-[900px] text-left">
                 <thead>
-                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
                             Department Name
                         </th>
@@ -127,18 +153,20 @@
                             Status
                         </th>
                         <!-- Optional: sticky actions on horizontal scroll -->
-                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap sticky right-0 bg-slate-50/50 dark:bg-slate-900/50">
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap sticky right-0 bg-slate-50/50 dark:bg-slate-800/50 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.04)]">
                             Actions
                         </th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="deptTableBody">
-                    <!-- Rows injected by JS from handler=Data -->
-                    <tr id="deptEmptyPlaceholder" class="empty-placeholder" aria-live="polite">
-                        <td colspan="6"
-                            class="px-4 sm:px-5 py-10 sm:py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                            No departments yet. Create one to get started.
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-sm" id="deptTableBody">
+                    <tr id="deptEmptyPlaceholder" class="empty-placeholder hidden" aria-live="polite">
+                        <td colspan="6" class="px-5 py-16 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No departments yet</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">Add a department to get started.</p>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -146,7 +174,7 @@
         </div>
 
         <!-- Pagination (Employee-style) -->
-        <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
 
             <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -156,7 +184,7 @@
                 <div class="flex items-center gap-2">
                     <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
 
-                    <select id="deptRowsPerPage" class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-subgreen-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
+                    <select id="deptRowsPerPage" class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-subgreen-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-gray-200 sm:inline-block">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -164,10 +192,10 @@
                     </select>
 
                     <div class="relative inline-block sm:hidden">
-                        <button id="deptRowsPerPageBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white" aria-haspopup="listbox" aria-expanded="false">
+                        <button id="deptRowsPerPageBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white" aria-haspopup="listbox" aria-expanded="false">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
                         </button>
-                        <div id="deptRowsPerPageMenu" class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
+                        <div id="deptRowsPerPageMenu" class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-800 z-50">
                             <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="5">5</button>
                             <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="10">10</button>
                             <button type="button" class="dept-rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="25">25</button>
@@ -179,14 +207,14 @@
 
             <div class="flex items-center justify-center gap-0 sm:justify-end">
                 <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
-                    <button type="button" id="deptPaginationPrev" class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    <button type="button" id="deptPaginationPrev" class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700">
                         <span class="sr-only">Previous</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                     </button>
 
                     <div id="deptPaginationNumbers" class="inline-flex -space-x-px text-sm"></div>
 
-                    <button type="button" id="deptPaginationNext" class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    <button type="button" id="deptPaginationNext" class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700">
                         <span class="sr-only">Next</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                     </button>
@@ -197,13 +225,13 @@
 
     </div>
 
-    <div id="deptModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="deptModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptModal()"></div>
 
             <!-- Make modal fit small screens: w-full + max-w + safe padding already -->
-            <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                <div class="border-b border-slate-100 px-6 sm:px-8 py-5 dark:border-slate-800">
+            <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-slate-100 px-6 sm:px-8 py-5 dark:border-gray-700">
                     <h3 id="deptModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">Add Department</h3>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Department name is required.</p>
                 </div>
@@ -222,22 +250,19 @@
                                    required maxlength="100" placeholder="e.g. Finance, Human Resources"
                                    class="dept-input h-10 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800
                                       focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
-                                      dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400" />
+                                      dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400" />
                             <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptName"></span>
                         </div>
                     </div>
 
                     <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-6 dark:border-slate-800 sm:flex-row-reverse sm:items-center">
                         <button type="submit" id="deptSubmitBtn" name="handler" value="Create"
-                                class="dept-save-btn inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5
-                                       text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500
-                                       disabled:pointer-events-none disabled:opacity-70">
+                                class="btn-primary dept-save-btn w-full sm:w-auto gap-2 disabled:pointer-events-none disabled:opacity-70">
                             Save Department
                         </button>
 
                         <button type="button" onclick="closeDeptModal()"
-                                class="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
-                                       dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                class="btn-secondary w-full sm:w-auto">
                             Cancel
                         </button>
                     </div>
@@ -246,12 +271,12 @@
         </div>
     </div>
 
-    <div id="deptStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div id="deptStatusModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" role="dialog" aria-modal="true">
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptStatusModal()"></div>
 
-            <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                <div class="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+            <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-slate-100 px-6 py-5 dark:border-gray-700">
                     <h3 id="deptStatusModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">
                         Deactivate Department
                     </h3>
@@ -278,7 +303,7 @@
                                   placeholder="e.g. Restructuring; department merged with Operations."
                                   class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-500
                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
-                                     dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"></textarea>
+                                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"></textarea>
 
                         <p class="mt-1 text-xs text-slate-600 dark:text-slate-400" id="deptStatusReasonHint">
                             Stored in description. Max 200 characters.
@@ -288,15 +313,12 @@
 
                     <div class="mt-6 flex flex-col gap-3 sm:flex-row-reverse sm:items-center">
                         <button type="submit" id="deptStatusConfirmBtn"
-                                class="dept-status-confirm-btn inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5
-                                       text-sm font-semibold text-white hover:bg-subgreen-500
-                                       disabled:pointer-events-none disabled:opacity-70">
+                                class="btn-primary dept-status-confirm-btn w-full sm:w-auto gap-2 disabled:pointer-events-none disabled:opacity-70">
                             Confirm
                         </button>
 
                         <button type="button" onclick="closeDeptStatusModal()"
-                                class="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50
-                                       dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                class="btn-secondary w-full sm:w-auto">
                             Cancel
                         </button>
                     </div>
@@ -307,448 +329,460 @@
 </div>
 
 @section Scripts {
-<script>
-(function () {
-    var host = document.getElementById('deptPageHost');
-    var skeleton = document.getElementById('deptSkeleton');
-    var content = document.getElementById('deptContent');
-    var tbody = document.getElementById('deptTableBody');
-    var placeholder = document.getElementById('deptEmptyPlaceholder');
-    if (!host || !skeleton || !content || !tbody) return;
+    <script>
+        (function () {
+            var host = document.getElementById('deptPageHost');
+            var skeleton = document.getElementById('deptSkeleton');
+            var content = document.getElementById('deptContent');
+            var tbody = document.getElementById('deptTableBody');
+            var placeholder = document.getElementById('deptEmptyPlaceholder');
+            if (!host || !skeleton || !content || !tbody) return;
 
-    var shownAt = Date.now();
-    var revealTimer = null;
-    var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+            var shownAt = Date.now();
+            var revealTimer = null;
+            var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
 
-    function showSkeleton() {
-        if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
-        shownAt = Date.now();
-        host.setAttribute('aria-busy', 'true');
-        skeleton.classList.remove('hidden');
-        content.classList.add('hidden');
-    }
-
-    function revealDeptContent() {
-        var elapsed = Date.now() - shownAt;
-        var wait = Math.max(0, minVisibleMs - elapsed);
-        revealTimer = setTimeout(function () {
-            skeleton.classList.add('hidden');
-            content.classList.remove('hidden');
-            host.setAttribute('aria-busy', 'false');
-            revealTimer = null;
-        }, wait);
-    }
-
-    function esc(s) {
-        if (s == null || s === undefined) return '';
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-    function formatDate(d) {
-        if (!d) return '—';
-        var dt = new Date(d);
-        if (isNaN(dt.getTime())) return '—';
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return months[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
-    }
-    function buildDeptRow(d) {
-        var depId = d.depID != null ? d.depID : d.DepID;
-        var name = d.departmentName || d.DepartmentName || '—';
-        var desc = d.description || d.Description || '—';
-        var isActive = (d.isActive != null ? d.isActive : d.IsActive) !== false;
-        var status = isActive ? 'Active' : 'Inactive';
-        var statusClass = isActive ? 'text-subgreen-700 dark:text-subgreen-300 bg-subgreen-50 dark:bg-subgreen-900/30' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400';
-        var createdAt = formatDate(d.createdAt || d.CreatedAt);
-        var empCount = d.employeeCount != null ? d.employeeCount : (d.EmployeeCount != null ? d.EmployeeCount : 0);
-        var nameEsc = name.replace(/'/g, "\\'");
-        var tr = document.createElement('tr');
-        tr.className = 'dept-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10';
-        tr.setAttribute('data-status', status);
-        tr.setAttribute('data-dept-id', depId);
-        tr.setAttribute('data-name', name);
-        tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">' + esc(name) + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + empCount + '</td><td class="max-w-[140px] sm:max-w-[200px] md:max-w-[260px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(desc) + '">' + (desc ? esc(desc) : '—') + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(createdAt) + '</td><td class="px-5 py-3 whitespace-nowrap"><div class="relative inline-block"><button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center rounded-md border-0 px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + status + '</button></div></td><td class="px-5 py-3 text-right sticky right-0 bg-white dark:bg-slate-900"><button type="button" onclick="openDeptEditModal(' + depId + ', \'' + nameEsc + '\')" class="rounded-lg p-2 text-amber-600 transition-all hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20 dark:hover:text-amber-300" title="Edit"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button></td>';
-        return tr;
-    }
-
-    showSkeleton();
-    function onDataReady() {
-        fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                var departments = (data && data.departments) ? data.departments : [];
-                var existingRows = tbody.querySelectorAll('.dept-row');
-                existingRows.forEach(function (r) { r.remove(); });
-                departments.forEach(function (d) {
-                    tbody.insertBefore(buildDeptRow(d), placeholder);
-                });
-                if (placeholder) {
-                    placeholder.classList.toggle('hidden', departments.length > 0);
-                    var td = placeholder.querySelector('td');
-                    if (td) td.textContent = departments.length === 0 ? 'No departments yet. Create one to get started.' : '';
-                }
-                var statTotal = document.getElementById('deptStatTotal');
-                if (statTotal) statTotal.textContent = departments.length;
-                if (typeof render === 'function') render();
-                revealDeptContent();
-            })
-            .catch(function () {
-                if (placeholder) {
-                    placeholder.classList.remove('hidden');
-                    var td = placeholder.querySelector('td');
-                    if (td) td.textContent = 'Unable to load departments. Check that the API is running.';
-                }
-                revealDeptContent();
-            });
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
-    } else {
-        onDataReady();
-    }
-    document.addEventListener('turbo:before-cache', showSkeleton);
-
-    function openDeptModal(editId, editName) {
-        window.openDeptModal = openDeptModal;
-        var modal = document.getElementById('deptModal');
-        var title = document.getElementById('deptModalTitle');
-        var form = document.getElementById('deptForm');
-        var nameInput = document.getElementById('deptName');
-        var idInput = document.getElementById('deptEditId');
-        var submitBtn = document.getElementById('deptSubmitBtn');
-        if (editId != null && editName != null) {
-            title.textContent = 'Edit Department';
-            form.setAttribute('action', '?handler=Update');
-            idInput.value = editId;
-            idInput.removeAttribute('disabled');
-            nameInput.value = editName;
-            submitBtn.name = 'handler';
-            submitBtn.value = 'Update';
-            submitBtn.textContent = 'Update Department';
-        } else {
-            title.textContent = 'Add Department';
-            form.setAttribute('action', '?handler=Create');
-            idInput.value = '';
-            idInput.setAttribute('disabled', 'disabled');
-            nameInput.value = '';
-            submitBtn.name = 'handler';
-            submitBtn.value = 'Create';
-            submitBtn.textContent = 'Save Department';
-        }
-        document.querySelector('.field-error[data-for="deptName"]').classList.add('hidden');
-        nameInput.classList.remove('border-red-500');
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
-    function closeDeptModal() {
-        document.getElementById('deptModal').classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-    window.openDeptModal = openDeptModal;
-    window.closeDeptModal = closeDeptModal;
-
-    function openDeptEditModal(id, name) {
-        openDeptModal(id, name);
-    }
-    window.openDeptEditModal = openDeptEditModal;
-
-    var deptForm = document.getElementById('deptForm');
-    var deptSubmitBtn = document.getElementById('deptSubmitBtn');
-    var deptNameInput = document.getElementById('deptName');
-    var deptNameFieldError = document.querySelector('.field-error[data-for="deptName"]');
-    var savingHtml = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
-    var createBtnText = 'Save Department';
-    var updateBtnText = 'Update Department';
-
-    function setDeptSubmitLoading(loading) {
-        if (!deptSubmitBtn) return;
-        deptSubmitBtn.disabled = loading;
-        deptSubmitBtn.innerHTML = loading ? savingHtml : (deptForm.getAttribute('action') && deptForm.getAttribute('action').indexOf('Update') !== -1 ? updateBtnText : createBtnText);
-    }
-
-    function showDeptModalError(msg) {
-        if (deptNameFieldError) {
-            deptNameFieldError.textContent = msg || '';
-            deptNameFieldError.classList.toggle('hidden', !msg);
-        }
-        if (deptNameInput) deptNameInput.classList.toggle('border-red-500', !!msg);
-    }
-
-    var deptSubmitInProgress = false;
-    deptForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (deptSubmitInProgress) return;
-        var name = deptNameInput.value.trim();
-        showDeptModalError('');
-        if (!name) {
-            showDeptModalError('Department name is required.');
-            return;
-        }
-        deptSubmitInProgress = true;
-        setDeptSubmitLoading(true);
-        var formData = new FormData(deptForm);
-        var url = window.location.pathname + (deptForm.getAttribute('action') || '?handler=Create');
-        if (url.indexOf('?') === -1) url += '?handler=Create';
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            redirect: 'manual'
-        }).then(function (res) {
-            if (res.status === 302) {
-                var loc = res.headers.get('Location');
-                if (loc) window.location.href = loc;
-                else window.location.reload();
-                return;
+            function showSkeleton() {
+                if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+                shownAt = Date.now();
+                host.setAttribute('aria-busy', 'true');
+                skeleton.classList.remove('hidden');
+                content.classList.add('hidden');
             }
-            var ct = (res.headers.get('Content-Type') || '').toLowerCase();
-            var isJson = ct.indexOf('application/json') !== -1;
-            if (res.ok && isJson) {
-                return res.json().then(function (data) {
-                    if (data && data.ok === true) {
+
+            function revealDeptContent() {
+                var elapsed = Date.now() - shownAt;
+                var wait = Math.max(0, minVisibleMs - elapsed);
+                revealTimer = setTimeout(function () {
+                    skeleton.classList.add('hidden');
+                    content.classList.remove('hidden');
+                    host.setAttribute('aria-busy', 'false');
+                    revealTimer = null;
+                }, wait);
+            }
+
+            function esc(s) {
+                if (s == null || s === undefined) return '';
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+            function formatDate(d) {
+                if (!d) return '—';
+                var dt = new Date(d);
+                if (isNaN(dt.getTime())) return '—';
+                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                return months[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
+            }
+            function buildDeptRow(d) {
+                var depId = d.depID != null ? d.depID : d.DepID;
+                var name = d.departmentName || d.DepartmentName || '—';
+                var desc = d.description || d.Description || '—';
+                var isActive = (d.isActive != null ? d.isActive : d.IsActive) !== false;
+                var status = isActive ? 'Active' : 'Inactive';
+                var badgeClass = isActive
+                    ? 'bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[4.75rem] justify-center'
+                    : 'bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 text-rose-800 dark:text-rose-200 text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[4.75rem] justify-center';
+                var createdAt = formatDate(d.createdAt || d.CreatedAt);
+                var empCount = d.employeeCount != null ? d.employeeCount : (d.EmployeeCount != null ? d.EmployeeCount : 0);
+                var nameEsc = name.replace(/'/g, "\\'");
+                var tr = document.createElement('tr');
+                tr.className = 'dept-row bg-white dark:bg-slate-800 hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10';
+                tr.setAttribute('data-status', status);
+                tr.setAttribute('data-dept-id', depId);
+                tr.setAttribute('data-name', name);
+                tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">' + esc(name) + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + empCount + '</td><td class="max-w-[140px] sm:max-w-[200px] md:max-w-[260px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(desc) + '">' + (desc ? esc(desc) : '—') + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(createdAt) + '</td><td class="px-5 py-3 whitespace-nowrap"><div class="relative inline-block"><button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center border ' + badgeClass + '">' + status + '</button></div></td><td class="px-5 py-3 text-right sticky right-0 bg-white dark:bg-slate-800 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.04)]"><button type="button" onclick="openDeptEditModal(' + depId + ', \'' + nameEsc + '\')" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 transition-all hover:bg-amber-200 dark:hover:bg-amber-900/50 border-0" title="Edit"><svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg><span>Edit</span></button></td>';
+                return tr;
+            }
+
+            showSkeleton();
+            function onDataReady() {
+                fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var departments = (data && data.departments) ? data.departments : [];
+                        var existingRows = tbody.querySelectorAll('.dept-row');
+                        existingRows.forEach(function (r) { r.remove(); });
+                        departments.forEach(function (d) {
+                            tbody.insertBefore(buildDeptRow(d), placeholder);
+                        });
+                        if (placeholder) {
+                            placeholder.classList.toggle('hidden', departments.length > 0);
+                            var td = placeholder.querySelector('td');
+                            if (td && departments.length === 0) td.innerHTML = '<div class="flex flex-col items-center gap-3"><svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg><p class="text-sm font-medium text-slate-500 dark:text-slate-400">No departments yet</p><p class="text-xs text-slate-400 dark:text-slate-500">Add a department to get started.</p></div>';
+                        }
+                        var statTotal = document.getElementById('deptStatTotal');
+                        if (statTotal) statTotal.textContent = departments.length;
+                        if (typeof render === 'function') render();
+                        revealDeptContent();
+                    })
+                    .catch(function () {
+                        if (placeholder) {
+                            placeholder.classList.remove('hidden');
+                            var td = placeholder.querySelector('td');
+                            if (td) td.innerHTML = '<div class="flex flex-col items-center gap-3"><svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><p class="text-sm font-medium text-slate-500 dark:text-slate-400">Unable to load departments</p><p class="text-xs text-slate-400 dark:text-slate-500">Check that the API is running.</p></div>';
+                        }
+                        revealDeptContent();
+                    });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
+            } else {
+                onDataReady();
+            }
+            document.addEventListener('turbo:before-cache', showSkeleton);
+
+            function openDeptModal(editId, editName) {
+                window.openDeptModal = openDeptModal;
+                var modal = document.getElementById('deptModal');
+                var title = document.getElementById('deptModalTitle');
+                var form = document.getElementById('deptForm');
+                var nameInput = document.getElementById('deptName');
+                var idInput = document.getElementById('deptEditId');
+                var submitBtn = document.getElementById('deptSubmitBtn');
+                if (editId != null && editName != null) {
+                    title.textContent = 'Edit Department';
+                    form.setAttribute('action', '?handler=Update');
+                    idInput.value = editId;
+                    idInput.removeAttribute('disabled');
+                    nameInput.value = editName;
+                    submitBtn.name = 'handler';
+                    submitBtn.value = 'Update';
+                    submitBtn.textContent = 'Update Department';
+                } else {
+                    title.textContent = 'Add Department';
+                    form.setAttribute('action', '?handler=Create');
+                    idInput.value = '';
+                    idInput.setAttribute('disabled', 'disabled');
+                    nameInput.value = '';
+                    submitBtn.name = 'handler';
+                    submitBtn.value = 'Create';
+                    submitBtn.textContent = 'Save Department';
+                }
+                document.querySelector('.field-error[data-for="deptName"]').classList.add('hidden');
+                nameInput.classList.remove('border-red-500');
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+            function closeDeptModal() {
+                document.getElementById('deptModal').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+            window.openDeptModal = openDeptModal;
+            window.closeDeptModal = closeDeptModal;
+
+            function openDeptEditModal(id, name) {
+                openDeptModal(id, name);
+            }
+            window.openDeptEditModal = openDeptEditModal;
+
+            var deptForm = document.getElementById('deptForm');
+            var deptSubmitBtn = document.getElementById('deptSubmitBtn');
+            var deptNameInput = document.getElementById('deptName');
+            var deptNameFieldError = document.querySelector('.field-error[data-for="deptName"]');
+            var savingHtml = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
+            var createBtnText = 'Save Department';
+            var updateBtnText = 'Update Department';
+
+            function setDeptSubmitLoading(loading) {
+                if (!deptSubmitBtn) return;
+                deptSubmitBtn.disabled = loading;
+                deptSubmitBtn.innerHTML = loading ? savingHtml : (deptForm.getAttribute('action') && deptForm.getAttribute('action').indexOf('Update') !== -1 ? updateBtnText : createBtnText);
+            }
+
+            function showDeptModalError(msg) {
+                if (deptNameFieldError) {
+                    deptNameFieldError.textContent = msg || '';
+                    deptNameFieldError.classList.toggle('hidden', !msg);
+                }
+                if (deptNameInput) deptNameInput.classList.toggle('border-red-500', !!msg);
+            }
+
+            var deptSubmitInProgress = false;
+            deptForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (deptSubmitInProgress) return;
+                var name = deptNameInput.value.trim();
+                showDeptModalError('');
+                if (!name) {
+                    showDeptModalError('Department name is required.');
+                    return;
+                }
+                deptSubmitInProgress = true;
+                setDeptSubmitLoading(true);
+                var formData = new FormData(deptForm);
+                var url = window.location.pathname + (deptForm.getAttribute('action') || '?handler=Create');
+                if (url.indexOf('?') === -1) url += '?handler=Create';
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    redirect: 'manual'
+                }).then(function (res) {
+                    if (res.status === 302) {
+                        var loc = res.headers.get('Location');
+                        if (loc) window.location.href = loc;
+                        else window.location.reload();
+                        return;
+                    }
+                    var ct = (res.headers.get('Content-Type') || '').toLowerCase();
+                    var isJson = ct.indexOf('application/json') !== -1;
+                    if (res.ok && isJson) {
+                        return res.json().then(function (data) {
+                            if (data && data.ok === true) {
+                                window.location.reload();
+                                return;
+                            }
+                            var msg = (data && data.message) ? data.message : 'Request failed. Please try again.';
+                            showDeptModalError(msg);
+                            deptSubmitInProgress = false;
+                            setDeptSubmitLoading(false);
+                        }).catch(function () {
+                            showDeptModalError('Request failed. Please try again.');
+                            deptSubmitInProgress = false;
+                            setDeptSubmitLoading(false);
+                        });
+                    }
+                    if (res.ok) {
                         window.location.reload();
                         return;
                     }
-                    var msg = (data && data.message) ? data.message : 'Request failed. Please try again.';
-                    showDeptModalError(msg);
-                    deptSubmitInProgress = false;
-                    setDeptSubmitLoading(false);
-                }).catch(function () {
+                    if (isJson) {
+                        return res.json().then(function (data) {
+                            var msg = (data && data.message) ? data.message : 'Request failed. Please try again.';
+                            showDeptModalError(msg);
+                            deptSubmitInProgress = false;
+                            setDeptSubmitLoading(false);
+                        });
+                    }
                     showDeptModalError('Request failed. Please try again.');
                     deptSubmitInProgress = false;
                     setDeptSubmitLoading(false);
-                });
-            }
-            if (res.ok) {
-                window.location.reload();
-                return;
-            }
-            if (isJson) {
-                return res.json().then(function (data) {
-                    var msg = (data && data.message) ? data.message : 'Request failed. Please try again.';
-                    showDeptModalError(msg);
+                }).catch(function () {
+                    showDeptModalError('Network error. Please try again.');
                     deptSubmitInProgress = false;
                     setDeptSubmitLoading(false);
                 });
-            }
-            showDeptModalError('Request failed. Please try again.');
-            deptSubmitInProgress = false;
-            setDeptSubmitLoading(false);
-        }).catch(function () {
-            showDeptModalError('Network error. Please try again.');
-            deptSubmitInProgress = false;
-            setDeptSubmitLoading(false);
-        });
-    });
-
-    var statusModal = document.getElementById('deptStatusModal');
-    var statusForm = document.getElementById('deptStatusForm');
-    var statusIdInput = document.getElementById('deptStatusId');
-    var statusIsActiveInput = document.getElementById('deptStatusIsActive');
-    var statusReasonInput = document.getElementById('deptStatusReason');
-    var statusModalTitle = document.getElementById('deptStatusModalTitle');
-    var statusModalSubtitle = document.getElementById('deptStatusModalSubtitle');
-
-    function openDeptStatusModal(depId, isActive) {
-        statusIdInput.value = depId;
-        statusIsActiveInput.value = isActive ? 'true' : 'false';
-        statusReasonInput.value = '';
-        var statusAction = statusForm.getAttribute('data-status-action') || '/App/Department/Department?handler=SetStatus';
-        statusForm.setAttribute('action', statusAction);
-        statusModalTitle.textContent = isActive ? 'Activate Department' : 'Deactivate Department';
-        var reasonLabel = document.getElementById('deptStatusReasonLabel');
-        if (isActive) {
-            statusModalSubtitle.textContent = 'Optionally add a new description or leave blank to clear the current one. Stored in description.';
-            statusReasonInput.removeAttribute('required');
-            statusReasonInput.placeholder = 'e.g. Department reopened; new scope. Leave blank to clear.';
-            var reqSpan = document.getElementById('deptStatusReasonRequired');
-            var hint = document.getElementById('deptStatusReasonHint');
-            if (reqSpan) reqSpan.style.display = 'none';
-            if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-slate-500 text-xs">(optional)</span>';
-            if (hint) hint.textContent = 'Stored in description. Max 200 characters. Leave blank to clear.';
-        } else {
-            statusModalSubtitle.textContent = 'Provide a reason for deactivating (required). This will be stored in the description for audit.';
-            statusReasonInput.setAttribute('required', 'required');
-            statusReasonInput.placeholder = 'e.g. Restructuring; department merged with Operations.';
-            var reqSpan = document.getElementById('deptStatusReasonRequired');
-            var hint = document.getElementById('deptStatusReasonHint');
-            if (reqSpan) reqSpan.style.display = '';
-            if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span>';
-            if (hint) hint.textContent = 'Stored in description for audit. Max 200 characters.';
-        }
-        var err = document.querySelector('.field-error[data-for="deptStatusReason"]');
-        if (err) err.classList.add('hidden');
-        statusReasonInput.classList.remove('border-red-500');
-        statusModal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
-    function closeDeptStatusModal() {
-        statusModal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-    window.openDeptStatusModal = openDeptStatusModal;
-    window.closeDeptStatusModal = closeDeptStatusModal;
-
-    var statusConfirmBtn = document.getElementById('deptStatusConfirmBtn');
-    var confirmingHtml = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Confirming...';
-    statusForm.addEventListener('submit', function (e) {
-        var isActive = statusIsActiveInput.value === 'true';
-        var reason = statusReasonInput.value.trim();
-        var err = document.querySelector('.field-error[data-for="deptStatusReason"]');
-        if (!isActive && !reason) {
-            e.preventDefault();
-            err.textContent = 'Reason is required when deactivating.';
-            err.classList.remove('hidden');
-            statusReasonInput.classList.add('border-red-500');
-            return;
-        }
-        if (reason.length > 200) {
-            e.preventDefault();
-            err.textContent = 'Reason must be 200 characters or less.';
-            err.classList.remove('hidden');
-            statusReasonInput.classList.add('border-red-500');
-            return;
-        }
-        if (err) err.classList.add('hidden');
-        statusReasonInput.classList.remove('border-red-500');
-        if (statusConfirmBtn && !statusConfirmBtn.disabled) {
-            statusConfirmBtn.disabled = true;
-            statusConfirmBtn.innerHTML = confirmingHtml;
-        }
-    });
-
-    function openDeptStatusModalFromBadge(btn) {
-        var row = btn.closest('tr');
-        if (!row) return;
-        var depId = parseInt(row.getAttribute('data-dept-id'), 10);
-        var isActive = row.getAttribute('data-status') === 'Active';
-        openDeptStatusModal(depId, !isActive);
-    }
-    window.openDeptStatusModalFromBadge = openDeptStatusModalFromBadge;
-
-    var rows = document.querySelectorAll('.dept-row');
-    var search = document.getElementById('deptSearch');
-    var filterStatus = document.getElementById('deptFilterStatus');
-    var resetBtn = document.getElementById('deptResetFilters');
-    var statTotal = document.getElementById('deptStatTotal');
-    var rowsPerPageEl = document.getElementById('deptRowsPerPage');
-    var currentPage = 1;
-
-    function getVisible() {
-        var q = (search && search.value || '').toLowerCase();
-        var status = (filterStatus && filterStatus.value || '').toLowerCase();
-        return Array.from(rows).filter(function (tr) {
-            var name = (tr.getAttribute('data-name') || '').toLowerCase();
-            var rowStatus = (tr.getAttribute('data-status') || '').toLowerCase();
-            return (!q || name.indexOf(q) !== -1) && (!status || rowStatus === status);
-        });
-    }
-    function render() {
-        var visible = getVisible();
-        var perPage = parseInt(rowsPerPageEl && rowsPerPageEl.value || '50', 10) || 50;
-        var totalPages = Math.max(1, Math.ceil(visible.length / perPage));
-        currentPage = Math.min(Math.max(1, currentPage), totalPages);
-        var start = (currentPage - 1) * perPage;
-        var pageRows = visible.slice(start, start + perPage);
-        rows.forEach(function (tr) {
-            var inFilter = visible.indexOf(tr) !== -1;
-            var inPage = pageRows.indexOf(tr) !== -1;
-            tr.style.display = inFilter && inPage ? '' : 'none';
-        });
-        var emptyRow = document.getElementById('deptEmptyPlaceholder');
-        if (emptyRow) {
-            var searchVal = (search && search.value || '').trim();
-            var hasFilter = searchVal.length > 0 || (filterStatus && filterStatus.value);
-            if (visible.length === 0) {
-                emptyRow.classList.remove('hidden');
-                emptyRow.querySelector('td').textContent = hasFilter ? 'No results match your filters. Try adjusting search or filters.' : 'No departments yet. Create one to get started.';
-            } else {
-                emptyRow.classList.add('hidden');
-            }
-        }
-        var showingEl = document.getElementById('deptPaginationShowing');
-        var totalEl = document.getElementById('deptPaginationTotal');
-        if (showingEl) showingEl.textContent = visible.length === 0 ? '0' : (start + 1) + '–' + Math.min(start + perPage, visible.length);
-        if (totalEl) totalEl.textContent = visible.length;
-        if (statTotal) statTotal.textContent = visible.length;
-        var prevBtn = document.getElementById('deptPaginationPrev');
-        var nextBtn = document.getElementById('deptPaginationNext');
-        if (prevBtn) prevBtn.disabled = currentPage <= 1;
-        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-        var numbersEl = document.getElementById('deptPaginationNumbers');
-        if (numbersEl) {
-            numbersEl.innerHTML = '';
-            var maxButtons = 5;
-            var half = Math.floor(maxButtons / 2);
-            var startPage = Math.max(1, currentPage - half);
-            var endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
-            for (var p = startPage; p <= endPage; p++) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = p;
-                if (p === currentPage) {
-                    btn.className = 'relative z-10 inline-flex items-center border border-subgreen-600 bg-subgreen-50 px-4 py-2 text-sm font-semibold text-subgreen-600 focus:z-20 dark:bg-subgreen-900/20 dark:text-subgreen-300 dark:border-subgreen-700';
-                } else {
-                    btn.className = 'relative inline-flex items-center border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white';
-                }
-                (function (page) {
-                    btn.addEventListener('click', function () { currentPage = page; render(); });
-                }(p));
-                numbersEl.appendChild(btn);
-            }
-        }
-    }
-    if (search) search.addEventListener('input', function () { currentPage = 1; render(); });
-    if (filterStatus) filterStatus.addEventListener('change', function () { currentPage = 1; render(); });
-    if (resetBtn) resetBtn.addEventListener('click', function () {
-        if (search) search.value = '';
-        if (filterStatus) filterStatus.value = '';
-        currentPage = 1;
-        render();
-    });
-    if (rowsPerPageEl) rowsPerPageEl.addEventListener('change', function () { currentPage = 1; render(); });
-    var prevBtn = document.getElementById('deptPaginationPrev');
-    var nextBtn = document.getElementById('deptPaginationNext');
-    if (prevBtn) prevBtn.addEventListener('click', function () { if (currentPage > 1) { currentPage--; render(); } });
-    if (nextBtn) nextBtn.addEventListener('click', function () { if (currentPage < Math.ceil(getVisible().length / (parseInt(rowsPerPageEl && rowsPerPageEl.value || '50', 10) || 50))) { currentPage++; render(); } });
-
-    // Mobile rows-per-page dropdown
-    var deptRowsBtn = document.getElementById('deptRowsPerPageBtn');
-    var deptRowsMenu = document.getElementById('deptRowsPerPageMenu');
-    if (deptRowsMenu) {
-        deptRowsMenu.querySelectorAll('.dept-rows-option').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                var val = this.getAttribute('data-value');
-                if (rowsPerPageEl) { rowsPerPageEl.value = val; rowsPerPageEl.dispatchEvent(new Event('change')); }
-                deptRowsMenu.classList.add('hidden');
-                if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false');
             });
-        });
-    }
-    if (deptRowsBtn && deptRowsMenu) {
-        deptRowsBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var expanded = deptRowsMenu.classList.toggle('hidden') === false;
-            deptRowsBtn.setAttribute('aria-expanded', String(expanded));
-        });
-        document.addEventListener('click', function () { deptRowsMenu.classList.add('hidden'); if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false'); });
-    }
 
-    render();
+            var statusModal = document.getElementById('deptStatusModal');
+            var statusForm = document.getElementById('deptStatusForm');
+            var statusIdInput = document.getElementById('deptStatusId');
+            var statusIsActiveInput = document.getElementById('deptStatusIsActive');
+            var statusReasonInput = document.getElementById('deptStatusReason');
+            var statusModalTitle = document.getElementById('deptStatusModalTitle');
+            var statusModalSubtitle = document.getElementById('deptStatusModalSubtitle');
 
-    @{
-        var toastMessage = TempData["ToastMessage"] as string;
-        var toastSuccess = TempData["ToastSuccess"] as bool?;
-    }
-    (function () {
-        @if (toastMessage != null)
-        {
-            <text>if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(toastMessage)), @(toastSuccess == true ? "true" : "false"));</text>
-        }
-        @if (!string.IsNullOrEmpty(Model.Error))
-        {
-            <text>if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Error)), false);</text>
-        }
-    })();
-})();
-</script>
+            function openDeptStatusModal(depId, isActive) {
+                statusIdInput.value = depId;
+                statusIsActiveInput.value = isActive ? 'true' : 'false';
+                statusReasonInput.value = '';
+                var statusAction = statusForm.getAttribute('data-status-action') || '/App/Department/Department?handler=SetStatus';
+                statusForm.setAttribute('action', statusAction);
+                statusModalTitle.textContent = isActive ? 'Activate Department' : 'Deactivate Department';
+                var reasonLabel = document.getElementById('deptStatusReasonLabel');
+                if (isActive) {
+                    statusModalSubtitle.textContent = 'Optionally add a new description or leave blank to clear the current one. Stored in description.';
+                    statusReasonInput.removeAttribute('required');
+                    statusReasonInput.placeholder = 'e.g. Department reopened; new scope. Leave blank to clear.';
+                    var reqSpan = document.getElementById('deptStatusReasonRequired');
+                    var hint = document.getElementById('deptStatusReasonHint');
+                    if (reqSpan) reqSpan.style.display = 'none';
+                    if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-slate-500 text-xs">(optional)</span>';
+                    if (hint) hint.textContent = 'Stored in description. Max 200 characters. Leave blank to clear.';
+                } else {
+                    statusModalSubtitle.textContent = 'Provide a reason for deactivating (required). This will be stored in the description for audit.';
+                    statusReasonInput.setAttribute('required', 'required');
+                    statusReasonInput.placeholder = 'e.g. Restructuring; department merged with Operations.';
+                    var reqSpan = document.getElementById('deptStatusReasonRequired');
+                    var hint = document.getElementById('deptStatusReasonHint');
+                    if (reqSpan) reqSpan.style.display = '';
+                    if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span>';
+                    if (hint) hint.textContent = 'Stored in description for audit. Max 200 characters.';
+                }
+                var err = document.querySelector('.field-error[data-for="deptStatusReason"]');
+                if (err) err.classList.add('hidden');
+                statusReasonInput.classList.remove('border-red-500');
+                statusModal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+            function closeDeptStatusModal() {
+                statusModal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+            window.openDeptStatusModal = openDeptStatusModal;
+            window.closeDeptStatusModal = closeDeptStatusModal;
+
+            var statusConfirmBtn = document.getElementById('deptStatusConfirmBtn');
+            var confirmingHtml = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Confirming...';
+            statusForm.addEventListener('submit', function (e) {
+                var isActive = statusIsActiveInput.value === 'true';
+                var reason = statusReasonInput.value.trim();
+                var err = document.querySelector('.field-error[data-for="deptStatusReason"]');
+                if (!isActive && !reason) {
+                    e.preventDefault();
+                    err.textContent = 'Reason is required when deactivating.';
+                    err.classList.remove('hidden');
+                    statusReasonInput.classList.add('border-red-500');
+                    return;
+                }
+                if (reason.length > 200) {
+                    e.preventDefault();
+                    err.textContent = 'Reason must be 200 characters or less.';
+                    err.classList.remove('hidden');
+                    statusReasonInput.classList.add('border-red-500');
+                    return;
+                }
+                if (err) err.classList.add('hidden');
+                statusReasonInput.classList.remove('border-red-500');
+                if (statusConfirmBtn && !statusConfirmBtn.disabled) {
+                    statusConfirmBtn.disabled = true;
+                    statusConfirmBtn.innerHTML = confirmingHtml;
+                }
+            });
+
+            function openDeptStatusModalFromBadge(btn) {
+                var row = btn.closest('tr');
+                if (!row) return;
+                var depId = parseInt(row.getAttribute('data-dept-id'), 10);
+                var isActive = row.getAttribute('data-status') === 'Active';
+                openDeptStatusModal(depId, !isActive);
+            }
+            window.openDeptStatusModalFromBadge = openDeptStatusModalFromBadge;
+
+            var search = document.getElementById('deptSearch');
+            var filterStatus = document.getElementById('deptFilterStatus');
+            var resetBtn = document.getElementById('deptResetFilters');
+            var statTotal = document.getElementById('deptStatTotal');
+            var rowsPerPageEl = document.getElementById('deptRowsPerPage');
+            var currentPage = 1;
+
+            function getVisible() {
+                var tbody = document.getElementById('deptTableBody');
+                var allRows = tbody ? Array.from(tbody.querySelectorAll('.dept-row')) : [];
+                var q = (search && search.value || '').toLowerCase();
+                var status = (filterStatus && filterStatus.value || '').toLowerCase();
+                return allRows.filter(function (tr) {
+                    var name = (tr.getAttribute('data-name') || '').toLowerCase();
+                    var rowStatus = (tr.getAttribute('data-status') || '').toLowerCase();
+                    return (!q || name.indexOf(q) !== -1) && (!status || rowStatus === status);
+                });
+            }
+            function render() {
+                var tbody = document.getElementById('deptTableBody');
+                var rows = tbody ? tbody.querySelectorAll('.dept-row') : [];
+                var visible = getVisible();
+                var perPage = parseInt(rowsPerPageEl && rowsPerPageEl.value || '50', 10) || 50;
+                var totalPages = Math.max(1, Math.ceil(visible.length / perPage));
+                currentPage = Math.min(Math.max(1, currentPage), totalPages);
+                var start = (currentPage - 1) * perPage;
+                var pageRows = visible.slice(start, start + perPage);
+                rows.forEach(function (tr) {
+                    var inFilter = visible.indexOf(tr) !== -1;
+                    var inPage = pageRows.indexOf(tr) !== -1;
+                    tr.style.display = inFilter && inPage ? '' : 'none';
+                });
+                var emptyRow = document.getElementById('deptEmptyPlaceholder');
+                if (emptyRow) {
+                    var searchVal = (search && search.value || '').trim();
+                    var hasFilter = searchVal.length > 0 || (filterStatus && filterStatus.value);
+                    if (visible.length === 0) {
+                        emptyRow.classList.remove('hidden');
+                        var emptyTd = emptyRow.querySelector('td');
+                        if (emptyTd) {
+                            if (hasFilter) {
+                                emptyTd.innerHTML = '<div class="flex flex-col items-center gap-3"><svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" /></svg><p class="text-sm font-medium text-slate-500 dark:text-slate-400">No results match your filters</p><p class="text-xs text-slate-400 dark:text-slate-500">Try adjusting your search or filters.</p></div>';
+                            } else {
+                                emptyTd.innerHTML = '<div class="flex flex-col items-center gap-3"><svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg><p class="text-sm font-medium text-slate-500 dark:text-slate-400">No departments yet</p><p class="text-xs text-slate-400 dark:text-slate-500">Add a department to get started.</p></div>';
+                            }
+                        }
+                    } else {
+                        emptyRow.classList.add('hidden');
+                    }
+                }
+                var showingEl = document.getElementById('deptPaginationShowing');
+                var totalEl = document.getElementById('deptPaginationTotal');
+                if (showingEl) showingEl.textContent = visible.length === 0 ? '0' : (start + 1) + '–' + Math.min(start + perPage, visible.length);
+                if (totalEl) totalEl.textContent = visible.length;
+                if (statTotal) statTotal.textContent = visible.length;
+                var prevBtn = document.getElementById('deptPaginationPrev');
+                var nextBtn = document.getElementById('deptPaginationNext');
+                if (prevBtn) prevBtn.disabled = currentPage <= 1;
+                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+                var numbersEl = document.getElementById('deptPaginationNumbers');
+                if (numbersEl) {
+                    numbersEl.innerHTML = '';
+                    var maxButtons = 5;
+                    var half = Math.floor(maxButtons / 2);
+                    var startPage = Math.max(1, currentPage - half);
+                    var endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                    if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+                    for (var p = startPage; p <= endPage; p++) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = p;
+                        if (p === currentPage) {
+                            btn.className = 'relative z-10 inline-flex items-center border border-subgreen-600 bg-subgreen-50 px-4 py-2 text-sm font-semibold text-subgreen-600 focus:z-20 dark:bg-subgreen-900/20 dark:text-subgreen-300 dark:border-subgreen-700';
+                        } else {
+                            btn.className = 'relative inline-flex items-center border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white';
+                        }
+                        (function (page) {
+                            btn.addEventListener('click', function () { currentPage = page; render(); });
+                        }(p));
+                        numbersEl.appendChild(btn);
+                    }
+                }
+            }
+            if (search) search.addEventListener('input', function () { currentPage = 1; render(); });
+            if (filterStatus) filterStatus.addEventListener('change', function () { currentPage = 1; render(); });
+            if (resetBtn) resetBtn.addEventListener('click', function () {
+                if (search) search.value = '';
+                if (filterStatus) filterStatus.value = '';
+                currentPage = 1;
+                render();
+            });
+            if (rowsPerPageEl) rowsPerPageEl.addEventListener('change', function () { currentPage = 1; render(); });
+            var prevBtn = document.getElementById('deptPaginationPrev');
+            var nextBtn = document.getElementById('deptPaginationNext');
+            if (prevBtn) prevBtn.addEventListener('click', function () { if (currentPage > 1) { currentPage--; render(); } });
+            if (nextBtn) nextBtn.addEventListener('click', function () { if (currentPage < Math.ceil(getVisible().length / (parseInt(rowsPerPageEl && rowsPerPageEl.value || '50', 10) || 50))) { currentPage++; render(); } });
+
+            // Mobile rows-per-page dropdown
+            var deptRowsBtn = document.getElementById('deptRowsPerPageBtn');
+            var deptRowsMenu = document.getElementById('deptRowsPerPageMenu');
+            if (deptRowsMenu) {
+                deptRowsMenu.querySelectorAll('.dept-rows-option').forEach(function (btn) {
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        var val = this.getAttribute('data-value');
+                        if (rowsPerPageEl) { rowsPerPageEl.value = val; rowsPerPageEl.dispatchEvent(new Event('change')); }
+                        deptRowsMenu.classList.add('hidden');
+                        if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+            if (deptRowsBtn && deptRowsMenu) {
+                deptRowsBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var expanded = deptRowsMenu.classList.toggle('hidden') === false;
+                    deptRowsBtn.setAttribute('aria-expanded', String(expanded));
+                });
+                document.addEventListener('click', function () { deptRowsMenu.classList.add('hidden'); if (deptRowsBtn) deptRowsBtn.setAttribute('aria-expanded', 'false'); });
+            }
+
+            render();
+
+            @{
+                    var toastMessage = TempData["ToastMessage"] as string;
+                    var toastSuccess = TempData["ToastSuccess"] as bool?;
+            }
+            (function () {
+                @if (toastMessage != null)
+                {
+                        <text>if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(toastMessage)), @(toastSuccess == true ? "true" : "false"));</text>
+                }
+                @if (!string.IsNullOrEmpty(Model.Error))
+                {
+                        <text>if (window.showToast) window.showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Error)), false);</text>
+                }
+            })();
+        })();
+    </script>
 }

@@ -6,11 +6,10 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Payroll Export</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a pay period, generate a preview from attendance logs and approved OT, resolve exceptions, then export to CSV or Excel.</p>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Payroll Export</h1>
         </div>
     </div>
 
@@ -20,15 +19,25 @@
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div>
                 <label for="periodStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period start</label>
-                <input type="date" id="periodStart" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                <div class="relative mt-1.5">
+                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                    </div>
+                    <input type="date" id="periodStart" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
+                </div>
             </div>
             <div>
                 <label for="periodEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period end</label>
-                <input type="date" id="periodEnd" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                <div class="relative mt-1.5">
+                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                    </div>
+                    <input type="date" id="periodEnd" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
+                </div>
             </div>
         </div>
         <div class="mt-6">
-            <button type="button" id="btnGeneratePreview" class="inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+            <button type="button" id="btnGeneratePreview" class="btn-primary gap-2">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                 Generate preview
             </button>

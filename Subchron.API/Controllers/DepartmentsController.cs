@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Subchron.API.Authorization;
 using Subchron.API.Data;
 using Subchron.API.Models.Entities;
 using Subchron.API.Services;
@@ -13,10 +14,10 @@ namespace Subchron.API.Controllers;
 [Authorize]
 public class DepartmentsController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
     private readonly IAuditService _audit;
 
-    public DepartmentsController(SubchronDbContext db, IAuditService audit)
+    public DepartmentsController(TenantDbContext db, IAuditService audit)
     {
         _db = db;
         _audit = audit;
@@ -134,7 +135,7 @@ public class DepartmentsController : ControllerBase
         _db.Departments.Add(dep);
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "DepartmentCreated", "Department", dep.DepID, dep.DepartmentName);
+        await _audit.LogTenantAsync(orgId!.Value, userId, "DepartmentCreated", "Department", dep.DepID, dep.DepartmentName);
 
         return Ok(new DepartmentDto
         {
@@ -170,7 +171,7 @@ public class DepartmentsController : ControllerBase
         dep.DepartmentName = name;
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "DepartmentUpdated", "Department", dep.DepID, dep.DepartmentName);
+        await _audit.LogTenantAsync(orgId!.Value, userId, "DepartmentUpdated", "Department", dep.DepID, dep.DepartmentName);
 
         return Ok(new DepartmentDto
         {
@@ -208,7 +209,7 @@ public class DepartmentsController : ControllerBase
         await _db.SaveChangesAsync();
 
         var action = dep.IsActive ? "DepartmentActivated" : "DepartmentDeactivated";
-        await _audit.LogAsync(orgId, userId, action, "Department", dep.DepID, reason);
+        await _audit.LogTenantAsync(orgId!.Value, userId, action, "Department", dep.DepID, reason);
 
         return Ok(new DepartmentDto
         {

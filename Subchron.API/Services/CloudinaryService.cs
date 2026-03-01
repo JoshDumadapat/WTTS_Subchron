@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet;
+using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
 using Subchron.API.Models.Settings;
@@ -41,6 +41,32 @@ public class CloudinaryService : ICloudinaryService
             PublicId = publicId,
             Overwrite = true,
             Invalidate = true
+        };
+
+        var result = await _cloudinary.UploadAsync(uploadParams, ct);
+
+        if (result.Error != null)
+            throw new Exception("Cloudinary upload failed: " + result.Error.Message);
+
+        var url = result.SecureUrl?.ToString();
+        if (string.IsNullOrWhiteSpace(url))
+            throw new Exception("Cloudinary upload failed: secure URL missing.");
+
+        return url;
+    }
+
+    public async Task<string> UploadImageAsync(
+        Stream stream,
+        string fileName,
+        string folder,
+        string publicId,
+        CancellationToken ct = default)
+    {
+        var uploadParams = new ImageUploadParams
+        {
+            File = new FileDescription(fileName, stream),
+            Folder = folder,
+            PublicId = publicId
         };
 
         var result = await _cloudinary.UploadAsync(uploadParams, ct);

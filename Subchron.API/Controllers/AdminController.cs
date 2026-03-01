@@ -8,9 +8,9 @@ namespace Subchron.API.Controllers;
 [Route("api/admin")]
 public class AdminController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public AdminController(SubchronDbContext db)
+    public AdminController(TenantDbContext db)
     {
         _db = db;
     }
@@ -87,7 +87,7 @@ public class AdminController : ControllerBase
     {
         var org = GetOrgId(orgId);
         if (org is null) return Forbid();
-        var list = await _db.AuditLogs
+        var list = await _db.TenantAuditLogs
             .AsNoTracking()
             .Where(a => a.OrgID == org)
             .OrderByDescending(a => a.CreatedAt)
@@ -142,7 +142,7 @@ public class AdminController : ControllerBase
             item.EmployeeCount = match?.Count ?? 0;
         }
 
-        var recentActivity = await _db.AuditLogs
+        var recentActivity = await _db.TenantAuditLogs
             .AsNoTracking()
             .Where(a => a.OrgID == org)
             .OrderByDescending(a => a.CreatedAt)

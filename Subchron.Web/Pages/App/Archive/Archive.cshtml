@@ -6,14 +6,13 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<div class="mx-auto">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Archive</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Archived employees. Restore to bring them back to the active directory.</p>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Archive</h1>
         </div>
         <div>
-            <a asp-page="/App/Employee/EmployeeManagement" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+            <a asp-page="/App/Employee/EmployeeManagement" class="btn-secondary">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 Back to Employees
             </a>
@@ -36,21 +35,21 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-4 w-4 text-slate-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-950 dark:text-white" placeholder="Search by name or email..." />
+                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search by name or email..." />
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
+                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All reasons</option>
                         <option value="Resignation">Resignation</option>
                         <option value="End of Contract">End of Contract</option>
                         <option value="Redundancy">Redundancy</option>
                         <option value="Other">Other</option>
                     </select>
-                    <select id="archiveFilterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300">
+                    <select id="archiveFilterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All status</option>
                         <option value="Archived">Archived</option>
                     </select>
-                    <button type="button" id="archiveResetFilters" class="h-10 rounded-xl border border-slate-300 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Reset</button>
+                    <button type="button" id="archiveResetFilters" class="btn-secondary h-10 text-xs font-medium uppercase tracking-wider">Reset</button>
                 </div>
             </div>
         </div>
@@ -70,7 +69,12 @@
                 </thead>
                 <tbody id="archiveTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
                     @{
-                        var initials = (string fn, string ln) => string.Concat((fn?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant(), (ln?.Trim().FirstOrDefault() ?? ' ').ToString().ToUpperInvariant()).Trim();
+                        var initials = (string? fn, string? ln) =>
+                        {
+                            var first = string.IsNullOrWhiteSpace(fn) ? string.Empty : fn.Trim()[0].ToString().ToUpperInvariant();
+                            var last = string.IsNullOrWhiteSpace(ln) ? string.Empty : ln.Trim()[0].ToString().ToUpperInvariant();
+                            return string.Concat(first, last).Trim();
+                        };
                         var fullName = (string fn, string? mn, string ln) => string.Join(" ", new[] { fn, mn, ln }.Where(s => !string.IsNullOrWhiteSpace(s)));
                         var addr = (string? line, string? city, string? country) => string.Join(", ", new[] { line, city, country }.Where(s => !string.IsNullOrWhiteSpace(s)));
                         var ecDisplay = (string? n, string? p, string? r) => string.Join(" · ", new[] { n, p, r }.Where(s => !string.IsNullOrWhiteSpace(s)));
@@ -103,7 +107,7 @@
                             <td class="px-5 py-3 text-right">
                                 <div class="flex justify-end gap-2">
                                     <button type="button" onclick="openArchiveViewModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button>
-                                    <button type="button" onclick="openRestoreModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-subgreen-500"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore</button>
+                                    <button type="button" onclick="openRestoreModal(this)" class="btn-primary px-2 py-1 text-xs gap-1"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore</button>
                                 </div>
                             </td>
                         </tr>
@@ -185,7 +189,7 @@
                     </section>
                 </div>
                 <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-                    <button type="button" onclick="closeArchiveViewModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Close</button>
+                    <button type="button" onclick="closeArchiveViewModal()" class="btn-secondary">Close</button>
                 </div>
             </div>
         </div>
@@ -225,8 +229,8 @@
                     </div>
                     <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
                         <div class="flex gap-3">
-                            <button type="button" onclick="closeRestoreModal()" class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
-                            <button type="submit" id="confirmRestoreBtn" class="flex-1 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-subgreen-500 disabled:opacity-70 disabled:cursor-not-allowed">Confirm restore</button>
+                            <button type="button" onclick="closeRestoreModal()" class="btn-secondary flex-1">Cancel</button>
+                            <button type="submit" id="confirmRestoreBtn" class="btn-primary flex-1">Confirm restore</button>
                         </div>
                     </div>
                 </form>
@@ -240,7 +244,7 @@
         </div>
         <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">No archived employees</h3>
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Archived employees will appear here. Use the status badge on the Employee Management page to archive someone.</p>
-        <a asp-page="/App/Employee/EmployeeManagement" class="mt-4 inline-flex items-center rounded-xl bg-subgreen-600 px-4 py-2 text-sm font-semibold text-white hover:bg-subgreen-500">Go to Employees</a>
+        <a asp-page="/App/Employee/EmployeeManagement" class="btn-primary mt-4">Go to Employees</a>
     </div>
 </div>
 

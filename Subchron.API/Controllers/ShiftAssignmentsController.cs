@@ -13,9 +13,9 @@ namespace Subchron.API.Controllers;
 [Authorize]
 public class ShiftAssignmentsController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public ShiftAssignmentsController(SubchronDbContext db)
+    public ShiftAssignmentsController(TenantDbContext db)
     {
         _db = db;
     }

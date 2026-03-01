@@ -13,9 +13,9 @@ namespace Subchron.API.Controllers;
 [Authorize]
 public class LeaveRequestsController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public LeaveRequestsController(SubchronDbContext db)
+    public LeaveRequestsController(TenantDbContext db)
     {
         _db = db;
     }
@@ -55,7 +55,6 @@ public class LeaveRequestsController : ControllerBase
 
         var query = _db.LeaveRequests.AsNoTracking()
             .Include(lr => lr.Employee)
-            .Include(lr => lr.ReviewedByUser)
             .Where(lr => lr.OrgID == orgId.Value);
 
         if (!string.IsNullOrWhiteSpace(status))
@@ -89,7 +88,7 @@ public class LeaveRequestsController : ControllerBase
                 EndDate = lr.EndDate,
                 Status = lr.Status,
                 Reason = lr.Reason,
-                ReviewedByUserName = lr.ReviewedByUser != null ? lr.ReviewedByUser.Name : null,
+                ReviewedByUserName = null,
                 ReviewedAt = lr.ReviewedAt,
                 ReviewNotes = lr.ReviewNotes,
                 CreatedAt = lr.CreatedAt
@@ -159,7 +158,6 @@ public class LeaveRequestsController : ControllerBase
 
         var lr = await _db.LeaveRequests.AsNoTracking()
             .Include(lr => lr.Employee)
-            .Include(lr => lr.ReviewedByUser)
             .FirstOrDefaultAsync(lr => lr.LeaveRequestID == id && lr.OrgID == orgId.Value);
         if (lr == null)
             return NotFound();
@@ -176,7 +174,7 @@ public class LeaveRequestsController : ControllerBase
             EndDate = lr.EndDate,
             Status = lr.Status,
             Reason = lr.Reason,
-            ReviewedByUserName = lr.ReviewedByUser != null ? lr.ReviewedByUser.Name : null,
+            ReviewedByUserName = null,
             ReviewedAt = lr.ReviewedAt,
             ReviewNotes = lr.ReviewNotes,
             CreatedAt = lr.CreatedAt

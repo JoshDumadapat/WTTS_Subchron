@@ -4,7 +4,6 @@ public class Department
 {
     public int DepID { get; set; }
     public int OrgID { get; set; }
-    public Organization Organization { get; set; } = null!;
 
     public string DepartmentName { get; set; } = null!;
     public string? Description { get; set; }

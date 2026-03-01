@@ -447,4 +447,100 @@
     });
 })();
 </script>
+<script>
+// Address autocomplete for Upgrade Plan billing (LocationIQ) — runs when billing form is in DOM
+(function () {
+    var input = document.getElementById('cardAddressLine1');
+    var list = document.getElementById('settingsBillingAddressSuggestions');
+    if (!input || !list) return;
+
+    var debounceTimer = null;
+    var abortController = null;
+    var activeSuggestionIndex = -1;
+
+    function setActiveSuggestion(index) {
+        var options = list.querySelectorAll('button');
+        if (!options.length) { activeSuggestionIndex = -1; return; }
+        if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) options[activeSuggestionIndex].classList.remove('bg-slate-100', 'dark:bg-slate-700');
+        activeSuggestionIndex = index;
+        if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+            options[activeSuggestionIndex].classList.add('bg-slate-100', 'dark:bg-slate-700');
+            options[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function clearSuggestions() {
+        list.classList.add('hidden');
+        list.innerHTML = '';
+        activeSuggestionIndex = -1;
+    }
+
+    function fillAddress(item) {
+        input.value = item.addressLine || item.displayName || '';
+        var cityEl = document.getElementById('cardBillingCity');
+        var provEl = document.getElementById('cardBillingProvince');
+        var postalEl = document.getElementById('cardBillingPostal');
+        var countryEl = document.getElementById('cardBillingCountry');
+        if (cityEl) cityEl.value = item.city || '';
+        if (provEl) provEl.value = item.state || '';
+        if (postalEl) postalEl.value = item.postalCode || '';
+        if (countryEl) countryEl.value = item.country || 'Philippines';
+        clearSuggestions();
+    }
+
+    function showSuggestions(query) {
+        if (!query || query.length < 3) { clearSuggestions(); return; }
+        if (abortController) abortController.abort();
+        abortController = new AbortController();
+        fetch('/api/location/autocomplete?q=' + encodeURIComponent(query) + '&limit=6', { signal: abortController.signal })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!Array.isArray(data) || data.length === 0) { clearSuggestions(); return; }
+                list.innerHTML = '';
+                data.forEach(function (item, idx) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'block w-full cursor-pointer px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
+                    btn.textContent = item.displayName || item.addressLine || 'Address';
+                    btn.addEventListener('click', function () { fillAddress(item); });
+                    btn.addEventListener('mouseenter', function () { setActiveSuggestion(idx); });
+                    list.appendChild(btn);
+                });
+                list.classList.remove('hidden');
+                activeSuggestionIndex = -1;
+            })
+            .catch(function (err) {
+                if (err && err.name !== 'AbortError') clearSuggestions();
+            });
+    }
+
+    input.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        var q = input.value.trim();
+        clearSuggestions();
+        if (q.length < 3) return;
+        debounceTimer = setTimeout(function () { showSuggestions(q); }, 320);
+    });
+    input.addEventListener('keydown', function (e) {
+        if (list.classList.contains('hidden')) return;
+        var options = list.querySelectorAll('button');
+        if (!options.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSuggestion(activeSuggestionIndex < options.length - 1 ? activeSuggestionIndex + 1 : 0);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSuggestion(activeSuggestionIndex > 0 ? activeSuggestionIndex - 1 : options.length - 1);
+        } else if (e.key === 'Enter' && activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+            e.preventDefault();
+            options[activeSuggestionIndex].click();
+        } else if (e.key === 'Escape') {
+            clearSuggestions();
+        }
+    });
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.address-autocomplete')) clearSuggestions();
+    });
+})();
+</script>
 }

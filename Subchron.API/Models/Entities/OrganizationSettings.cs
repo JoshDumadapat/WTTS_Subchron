@@ -12,9 +12,15 @@ public class OrganizationSettings
     public bool AllowManualEntry { get; set; } = false;
     public bool RequireGeo { get; set; } = false;
     public bool EnforceGeofence { get; set; } = false;
+    public bool RestrictByIp { get; set; } = false;
+    public bool PreventDoubleClockIn { get; set; } = true;
 
     public int DefaultGraceMinutes { get; set; } = 0;
     public string RoundRule { get; set; } = "None";
+
+    public bool AutoClockOutEnabled { get; set; } = false;
+    public decimal? AutoClockOutMaxHours { get; set; }
+    public string? DefaultShiftTemplateCode { get; set; }
 
     public bool OTEnabled { get; set; } = false;
     public decimal OTThresholdHours { get; set; } = 0m;

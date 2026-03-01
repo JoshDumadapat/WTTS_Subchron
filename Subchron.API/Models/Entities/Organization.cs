@@ -9,9 +9,9 @@ public class Organization
     public DateTime CreatedAt { get; set; }
 
     public OrganizationSettings? Settings { get; set; }
+    public OrganizationProfile? Profile { get; set; }
     public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     public ICollection<User> Users { get; set; } = new List<User>();
     public ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
     public ICollection<BillingRecord> BillingRecords { get; set; } = new List<BillingRecord>();
-    public ICollection<Department> Departments { get; set; } = new List<Department>();
 }

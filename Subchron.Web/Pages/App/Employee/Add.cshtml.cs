@@ -51,6 +51,32 @@ public class AddModel : PageModel
         }
     }
 
+    public async Task<IActionResult> OnGetCheckUniqueAsync(string type, string value)
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, exists = false });
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
+            return new JsonResult(new { ok = false, exists = false });
+        var kind = (type ?? string.Empty).Trim();
+        var val = value ?? string.Empty;
+        if (string.IsNullOrEmpty(kind))
+            return new JsonResult(new { ok = false, exists = false });
+        try
+        {
+            var client = _http.CreateClient("Subchron.API");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var url = baseUrl + "/api/employees/check-unique?type=" + Uri.EscapeDataString(kind) + "&value=" + Uri.EscapeDataString(val);
+            var resp = await client.GetFromJsonAsync<UniqueCheckResponse>(url);
+            return new JsonResult(new { ok = resp?.Ok == true, exists = resp?.Exists == true });
+        }
+        catch
+        {
+            return new JsonResult(new { ok = false, exists = false });
+        }
+    }
+
     private async Task LoadDepartmentsAsync()
     {
         var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
@@ -78,7 +104,9 @@ public class AddModel : PageModel
         string city, string? stateProvince, string? postalCode, string country,
         string role, string employmentType,
         string? emergencyContactName, string? emergencyContactPhone, string? emergencyContactRelation,
-        bool createAccount, string? ContactEmail, string? Email, string? DefaultPassword)
+        bool createAccount, string? ContactEmail, string? Email, string? DefaultPassword,
+        string? idPictureUrl, string? signatureUrl,
+        IFormFile? profilePicture, IFormFile? signature)
     {
         await LoadDepartmentsAsync();
 
@@ -102,9 +130,9 @@ public class AddModel : PageModel
             TempData["ToastSuccess"] = false;
             return Page();
         }
-        if (age.HasValue && (age.Value < 18 || age.Value > 70))
+        if (age.HasValue && (age.Value <= 18 || age.Value > 70))
         {
-            TempData["ToastMessage"] = "Age must be between 18 and 70.";
+            TempData["ToastMessage"] = "Age must be between 19 and 70.";
             TempData["ToastSuccess"] = false;
             await LoadDepartmentsAsync();
             return Page();
@@ -123,6 +151,21 @@ public class AddModel : PageModel
                 TempData["ToastSuccess"] = false;
                 return Page();
             }
+        }
+
+        var resolvedIdPictureUrl = idPictureUrl?.Trim();
+        var resolvedSignatureUrl = signatureUrl?.Trim();
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        if (profilePicture != null && profilePicture.Length > 0)
+        {
+            var uploadUrl = await UploadEmployeeImageAsync(client, baseUrl, profilePicture, "photo");
+            if (uploadUrl != null) resolvedIdPictureUrl = uploadUrl;
+        }
+        if (signature != null && signature.Length > 0)
+        {
+            var uploadUrl = await UploadEmployeeImageAsync(client, baseUrl, signature, "signature");
+            if (uploadUrl != null) resolvedSignatureUrl = uploadUrl;
         }
 
         // 1) Create employee first (with or without UserID). This ensures the employee row is always saved.
@@ -149,11 +192,10 @@ public class AddModel : PageModel
             Country = string.IsNullOrWhiteSpace(country) ? "Philippines" : country.Trim(),
             EmergencyContactName = string.IsNullOrWhiteSpace(emergencyContactName) ? null : emergencyContactName.Trim(),
             EmergencyContactPhone = string.IsNullOrWhiteSpace(emergencyContactPhone) ? null : emergencyContactPhone.Trim(),
-            EmergencyContactRelation = string.IsNullOrWhiteSpace(emergencyContactRelation) ? null : emergencyContactRelation.Trim()
+            EmergencyContactRelation = string.IsNullOrWhiteSpace(emergencyContactRelation) ? null : emergencyContactRelation.Trim(),
+            IdPictureUrl = string.IsNullOrWhiteSpace(resolvedIdPictureUrl) ? null : resolvedIdPictureUrl,
+            SignatureUrl = string.IsNullOrWhiteSpace(resolvedSignatureUrl) ? null : resolvedSignatureUrl
         };
-
-        var client = _http.CreateClient("Subchron.API");
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         HttpResponseMessage resp;
         try
@@ -200,7 +242,7 @@ public class AddModel : PageModel
         }
         catch
         {
-            TempData["ToastMessage"] = "Employee was created but could not link account. Check Employee Management.";
+            TempData["ToastMessage"] = "Employee was created but could not read response. Check Employee Management.";
             TempData["ToastSuccess"] = true;
             return RedirectToPage("/App/Employee/EmployeeManagement");
         }
@@ -213,7 +255,13 @@ public class AddModel : PageModel
             HttpResponseMessage userResp;
             try
             {
-                var userPayload = new { Email = loginEmail, Password = password, Name = $"{firstName.Trim()} {lastName.Trim()}".Trim() };
+                var userPayload = new
+                {
+                    Email = loginEmail,
+                    Password = password,
+                    Name = $"{firstName.Trim()} {lastName.Trim()}".Trim(),
+                    AvatarUrl = string.IsNullOrWhiteSpace(resolvedIdPictureUrl) ? null : resolvedIdPictureUrl
+                };
                 userResp = await client.PostAsJsonAsync(baseUrl + "/api/Auth/create-employee-user", userPayload);
             }
             catch (Exception)
@@ -272,12 +320,38 @@ public class AddModel : PageModel
 
         TempData["ToastMessage"] = "Employee created successfully.";
         TempData["ToastSuccess"] = true;
-        return RedirectToPage("/App/Employee/EmployeeManagement");
+        return RedirectToPage("/App/Employee/EmployeeManagement", new { showId = empId });
+    }
+
+    private static async Task<string?> UploadEmployeeImageAsync(HttpClient client, string baseUrl, IFormFile file, string type)
+    {
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            await using var stream = file.OpenReadStream();
+            var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "image/jpeg");
+            content.Add(fileContent, "file", file.FileName ?? "image");
+            var resp = await client.PostAsync(baseUrl + "/api/employees/upload-image?type=" + Uri.EscapeDataString(type), content);
+            if (!resp.IsSuccessStatusCode) return null;
+            var json = await resp.Content.ReadFromJsonAsync<JsonElement>();
+            return json.TryGetProperty("url", out var u) ? u.GetString() : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public class DepartmentItem
     {
         public int DepID { get; set; }
         public string DepartmentName { get; set; } = "";
+    }
+
+    private class UniqueCheckResponse
+    {
+        public bool Ok { get; set; }
+        public bool Exists { get; set; }
     }
 }

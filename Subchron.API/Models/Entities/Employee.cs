@@ -7,10 +7,8 @@ public class Employee
     public int EmpID { get; set; }
 
     public int OrgID { get; set; }
-    public Organization Organization { get; set; } = null!;
 
     public int? UserID { get; set; }
-    public User? User { get; set; }
 
     public int? DepartmentID { get; set; }
 
@@ -94,6 +92,15 @@ public class Employee
     [MaxLength(64)]
     public string? AttendanceQrToken { get; set; }
     public DateTime? AttendanceQrIssuedAt { get; set; }
+
+    [MaxLength(500)]
+    public string? AvatarUrl { get; set; }
+
+    [MaxLength(500)]
+    public string? IdPictureUrl { get; set; }
+
+    [MaxLength(500)]
+    public string? SignatureUrl { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

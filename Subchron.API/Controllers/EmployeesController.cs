@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Subchron.API.Authorization;
 using Subchron.API.Data;
 using Subchron.API.Models.Entities;
 using Subchron.API.Services;
@@ -13,15 +14,19 @@ namespace Subchron.API.Controllers;
 [Authorize]
 public class EmployeesController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
+    private readonly SubchronDbContext _platformDb;
     private readonly IAuditService _audit;
     private readonly IConfiguration _config;
+    private readonly ICloudinaryService _cloudinary;
 
-    public EmployeesController(SubchronDbContext db, IAuditService audit, IConfiguration config)
+    public EmployeesController(TenantDbContext db, SubchronDbContext platformDb, IAuditService audit, IConfiguration config, ICloudinaryService cloudinary)
     {
         _db = db;
+        _platformDb = platformDb;
         _audit = audit;
         _config = config;
+        _cloudinary = cloudinary;
     }
 
     private int? GetUserOrgId()
@@ -92,6 +97,9 @@ public class EmployeesController : ControllerBase
                 AddressLine1 = e.AddressLine1,
                 City = e.City,
                 Country = e.Country,
+                AvatarUrl = e.AvatarUrl,
+                IdPictureUrl = e.IdPictureUrl,
+                SignatureUrl = e.SignatureUrl,
                 EmergencyContactName = e.EmergencyContactName,
                 EmergencyContactPhone = e.EmergencyContactPhone,
                 EmergencyContactRelation = e.EmergencyContactRelation,
@@ -108,7 +116,7 @@ public class EmployeesController : ControllerBase
         var userIds = list.Where(x => x.UserID.HasValue).Select(x => x.UserID!.Value).Distinct().ToList();
         if (userIds.Count > 0)
         {
-            var userEmails = await _db.Users.AsNoTracking()
+            var userEmails = await _platformDb.Users.AsNoTracking()
                 .Where(u => userIds.Contains(u.UserID))
                 .Select(u => new { u.UserID, u.Email })
                 .ToListAsync();
@@ -132,6 +140,40 @@ public class EmployeesController : ControllerBase
         }
 
         return Ok(list);
+    }
+
+    /// <summary>Upload an image (ID picture or signature) for an employee. Returns { url }.</summary>
+    [HttpPost("upload-image")]
+    public async Task<ActionResult<object>> UploadImage([FromForm] IFormFile file, [FromQuery] string type, CancellationToken ct = default)
+    {
+        var orgId = GetUserOrgId();
+        if (!orgId.HasValue && !IsSuperAdmin())
+            return Forbid();
+
+        if (file == null || file.Length == 0)
+            return BadRequest(new { ok = false, message = "No file uploaded." });
+
+        var kind = (type ?? "").Trim().ToLowerInvariant();
+        var folder = kind == "signature" ? "employee/signatures" : "employee/photos";
+        var prefix = kind == "signature" ? "sig" : "photo";
+        var publicId = $"{prefix}_{orgId}_{Guid.NewGuid():N}";
+
+        var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowed.Contains(file.ContentType?.ToLowerInvariant()))
+            return BadRequest(new { ok = false, message = "Only JPEG, PNG, and WebP images are allowed." });
+        if (file.Length > 5 * 1024 * 1024)
+            return BadRequest(new { ok = false, message = "File size must be 5 MB or less." });
+
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            var url = await _cloudinary.UploadImageAsync(stream, file.FileName ?? "image", folder, publicId, ct);
+            return Ok(new { ok = true, url });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { ok = false, message = "Upload failed.", detail = ex.Message });
+        }
     }
 
     // Get next suggested employee number for a role (e.g. EMP-0002).
@@ -166,7 +208,7 @@ public class EmployeesController : ControllerBase
         dto.DepartmentName = depName;
         if (emp.UserID.HasValue)
         {
-            var user = await _db.Users.AsNoTracking().Where(u => u.UserID == emp.UserID.Value).Select(u => u.Email).FirstOrDefaultAsync();
+            var user = await _platformDb.Users.AsNoTracking().Where(u => u.UserID == emp.UserID.Value).Select(u => u.Email).FirstOrDefaultAsync();
             dto.Email = user;
         }
 
@@ -189,8 +231,8 @@ public class EmployeesController : ControllerBase
             return BadRequest(new { ok = false, message = "First name is required." });
         if (string.IsNullOrWhiteSpace(r.LastName))
             return BadRequest(new { ok = false, message = "Last name is required." });
-        if (r.Age.HasValue && (r.Age.Value < 18 || r.Age.Value > 70))
-            return BadRequest(new { ok = false, message = "Age must be between 18 and 70." });
+        if (r.Age.HasValue && (r.Age.Value <= 18 || r.Age.Value > 70))
+            return BadRequest(new { ok = false, message = "Age must be between 19 and 70." });
 
         var role = string.IsNullOrWhiteSpace(r.Role) ? "Employee" : r.Role.Trim();
         var empNumber = string.IsNullOrWhiteSpace(r.EmpNumber) ? null : r.EmpNumber.Trim();
@@ -218,6 +260,10 @@ public class EmployeesController : ControllerBase
         var now = DateTime.UtcNow;
         var qrToken = AttendanceQrHelper.GenerateAttendanceQrToken(32);
 
+        var idPictureUrl = string.IsNullOrWhiteSpace(r.IdPictureUrl) ? null : r.IdPictureUrl.Trim();
+        var signatureUrl = string.IsNullOrWhiteSpace(r.SignatureUrl) ? null : r.SignatureUrl.Trim();
+        var avatarUrl = idPictureUrl; // Use ID picture as profile/avatar
+
         var emp = new Employee
         {
             OrgID = orgId.Value,
@@ -244,6 +290,9 @@ public class EmployeesController : ControllerBase
             EmergencyContactName = string.IsNullOrWhiteSpace(r.EmergencyContactName) ? null : r.EmergencyContactName.Trim(),
             EmergencyContactPhone = string.IsNullOrWhiteSpace(r.EmergencyContactPhone) ? null : r.EmergencyContactPhone.Trim(),
             EmergencyContactRelation = string.IsNullOrWhiteSpace(r.EmergencyContactRelation) ? null : r.EmergencyContactRelation.Trim(),
+            AvatarUrl = avatarUrl,
+            IdPictureUrl = idPictureUrl,
+            SignatureUrl = signatureUrl,
             IsArchived = false,
             AttendanceQrToken = qrToken,
             AttendanceQrIssuedAt = now,
@@ -254,7 +303,7 @@ public class EmployeesController : ControllerBase
         _db.Employees.Add(emp);
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "EmployeeCreated", "Employee", emp.EmpID, $"Added {emp.FirstName} {emp.LastName} ({emp.EmpNumber})");
+        await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeCreated", "Employee", emp.EmpID, $"Added {emp.FirstName} {emp.LastName} ({emp.EmpNumber})");
 
         return Ok(ToDto(emp));
     }
@@ -304,7 +353,7 @@ public class EmployeesController : ControllerBase
         if (req?.UserID.HasValue == true)
         {
             var linkUserId = req.UserID.Value;
-            var userExists = await _db.Users.AnyAsync(u => u.UserID == linkUserId && u.OrgID == orgId.Value);
+            var userExists = await _platformDb.Users.AnyAsync(u => u.UserID == linkUserId && u.OrgID == orgId.Value);
             if (!userExists)
                 return BadRequest(new { ok = false, message = "User not found in this organization." });
             emp.UserID = linkUserId;
@@ -312,7 +361,13 @@ public class EmployeesController : ControllerBase
 
         if (req?.FirstName != null) { var s = req.FirstName.Trim(); if (s.Length > 0) emp.FirstName = s.Length > 80 ? s[..80] : s; }
         if (req?.LastName != null) { var s = req.LastName.Trim(); if (s.Length > 0) emp.LastName = s.Length > 80 ? s[..80] : s; }
-        if (req?.Age != null) emp.Age = req.Age;
+        if (req?.Age != null)
+        {
+            var newAge = req.Age.Value;
+            if (newAge <= 18 || newAge > 70)
+                return BadRequest(new { ok = false, message = "Age must be between 19 and 70." });
+            emp.Age = newAge;
+        }
         if (req?.Gender != null) emp.Gender = string.IsNullOrWhiteSpace(req.Gender) ? null : req.Gender.Trim().Length > 20 ? req.Gender.Trim()[..20] : req.Gender.Trim();
         if (req?.MiddleName != null) emp.MiddleName = string.IsNullOrWhiteSpace(req.MiddleName) ? null : (req.MiddleName.Trim().Length > 80 ? req.MiddleName.Trim()[..80] : req.MiddleName.Trim());
         if (req?.EmpNumber != null) { var s = req.EmpNumber.Trim(); if (s.Length > 0) { var exists = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.EmpNumber == s && e.EmpID != id); if (exists) return BadRequest(new { ok = false, message = "Employee number already in use." }); emp.EmpNumber = s.Length > 40 ? s[..40] : s; } }
@@ -343,12 +398,20 @@ public class EmployeesController : ControllerBase
         if (req?.EmergencyContactName != null) emp.EmergencyContactName = string.IsNullOrWhiteSpace(req.EmergencyContactName) ? null : (req.EmergencyContactName.Trim().Length > 120 ? req.EmergencyContactName.Trim()[..120] : req.EmergencyContactName.Trim());
         if (req?.EmergencyContactPhone != null) emp.EmergencyContactPhone = string.IsNullOrWhiteSpace(req.EmergencyContactPhone) ? null : (req.EmergencyContactPhone.Trim().Length > 30 ? req.EmergencyContactPhone.Trim()[..30] : req.EmergencyContactPhone.Trim());
         if (req?.EmergencyContactRelation != null) emp.EmergencyContactRelation = string.IsNullOrWhiteSpace(req.EmergencyContactRelation) ? null : (req.EmergencyContactRelation.Trim().Length > 60 ? req.EmergencyContactRelation.Trim()[..60] : req.EmergencyContactRelation.Trim());
+        if (req?.IdPictureUrl != null)
+        {
+            var idPic = string.IsNullOrWhiteSpace(req.IdPictureUrl) ? null : req.IdPictureUrl.Trim();
+            emp.IdPictureUrl = idPic?.Length > 500 ? idPic[..500] : idPic;
+            emp.AvatarUrl = emp.IdPictureUrl; // Keep avatar in sync with ID picture
+        }
+        if (req?.SignatureUrl != null) emp.SignatureUrl = string.IsNullOrWhiteSpace(req.SignatureUrl) ? null : (req.SignatureUrl.Trim().Length > 500 ? req.SignatureUrl.Trim()[..500] : req.SignatureUrl.Trim());
+        if (req?.AvatarUrl != null) emp.AvatarUrl = string.IsNullOrWhiteSpace(req.AvatarUrl) ? null : (req.AvatarUrl.Trim().Length > 500 ? req.AvatarUrl.Trim()[..500] : req.AvatarUrl.Trim());
 
         emp.UpdatedAt = DateTime.UtcNow;
         emp.UpdatedByUserId = userId;
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "EmployeeUpdated", "Employee", emp.EmpID, $"{emp.FirstName} {emp.LastName}");
+        await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeUpdated", "Employee", emp.EmpID, $"{emp.FirstName} {emp.LastName}");
 
         return Ok(ToDto(emp));
     }
@@ -384,7 +447,7 @@ public class EmployeesController : ControllerBase
         emp.UpdatedByUserId = userId;
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "EmployeeArchived", "Employee", emp.EmpID, reason);
+        await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeArchived", "Employee", emp.EmpID, reason);
 
         return Ok(ToDto(emp));
     }
@@ -419,9 +482,53 @@ public class EmployeesController : ControllerBase
         emp.UpdatedByUserId = userId;
         await _db.SaveChangesAsync();
 
-        await _audit.LogAsync(orgId, userId, "EmployeeRestored", "Employee", emp.EmpID, reason ?? "Restored");
+        await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeRestored", "Employee", emp.EmpID, reason ?? "Restored");
 
         return Ok(ToDto(emp));
+    }
+
+    [HttpGet("check-unique")]
+    public async Task<IActionResult> CheckUnique([FromQuery] string type, [FromQuery] string value)
+    {
+        var orgId = GetUserOrgId();
+        var isSuperAdmin = IsSuperAdmin();
+        if (!orgId.HasValue && !isSuperAdmin)
+            return Forbid();
+
+        var kind = (type ?? string.Empty).Trim().ToLowerInvariant();
+        var rawValue = (value ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(kind) || string.IsNullOrEmpty(rawValue))
+            return BadRequest(new { ok = false, message = "Type and value are required." });
+
+        bool exists = false;
+        if (kind == "phone")
+        {
+            var normalized = NormalizePhone(rawValue);
+            if (!string.IsNullOrEmpty(normalized))
+            {
+                var query = _db.Employees.AsQueryable();
+                if (orgId.HasValue)
+                    query = query.Where(e => e.OrgID == orgId.Value);
+                exists = await query.AnyAsync(e => e.PhoneNormalized == normalized);
+            }
+        }
+        else if (kind == "email")
+        {
+            var email = rawValue.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(email))
+            {
+                var users = _platformDb.Users.AsQueryable();
+                if (orgId.HasValue)
+                    users = users.Where(u => u.OrgID == orgId.Value);
+                exists = await users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email);
+            }
+        }
+        else
+        {
+            return BadRequest(new { ok = false, message = "Unsupported type." });
+        }
+
+        return Ok(new { ok = true, exists });
     }
 
     private static string? NormalizePhone(string? phone)
@@ -491,6 +598,9 @@ public class EmployeesController : ControllerBase
             EmergencyContactName = e.EmergencyContactName,
             EmergencyContactPhone = e.EmergencyContactPhone,
             EmergencyContactRelation = e.EmergencyContactRelation,
+            AvatarUrl = e.AvatarUrl,
+            IdPictureUrl = e.IdPictureUrl,
+            SignatureUrl = e.SignatureUrl,
             IsArchived = e.IsArchived,
             ArchivedAt = e.ArchivedAt,
             ArchivedReason = e.ArchivedReason,
@@ -529,6 +639,9 @@ public class EmployeeDto
     public string? EmergencyContactName { get; set; }
     public string? EmergencyContactPhone { get; set; }
     public string? EmergencyContactRelation { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? IdPictureUrl { get; set; }
+    public string? SignatureUrl { get; set; }
     public string? Email { get; set; }
     public bool IsArchived { get; set; }
     public DateTime? ArchivedAt { get; set; }
@@ -563,6 +676,8 @@ public class EmployeeCreateRequest
     public string? EmergencyContactName { get; set; }
     public string? EmergencyContactPhone { get; set; }
     public string? EmergencyContactRelation { get; set; }
+    public string? IdPictureUrl { get; set; }
+    public string? SignatureUrl { get; set; }
 }
 
 public class EmployeeUpdateRequest
@@ -589,6 +704,9 @@ public class EmployeeUpdateRequest
     public string? EmergencyContactName { get; set; }
     public string? EmergencyContactPhone { get; set; }
     public string? EmergencyContactRelation { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? IdPictureUrl { get; set; }
+    public string? SignatureUrl { get; set; }
 }
 
 public class EmployeeArchiveRequest

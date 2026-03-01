@@ -48,6 +48,18 @@
     animation: float 6s ease-in-out infinite;
 }
 
+@layer components {
+    /* Primary green button — bg-subgreen-500 in both light and dark */
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-subgreen-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 transition-all duration-200 hover:scale-[1.03] hover:bg-subgreen-600 hover:shadow-subgreen-500/40 focus:outline-none focus:ring-2 focus:ring-subgreen-500/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100;
+    }
+
+    /* Secondary outline button */
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700;
+    }
+}
+
 @layer utilities {
     .reveal-base {
         opacity: 0;
@@ -100,5 +112,14 @@
     .btn-hero-secondary {
         transform-origin: center;
         will-change: transform;
+    }
+
+    /* Hide scrollbar while preserving scroll functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE / Edge */
+        scrollbar-width: none;     /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;             /* Chrome / Safari / Opera */
     }
 }

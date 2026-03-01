@@ -1,199 +1,451 @@
-﻿<div id="tab-pay" class="tab-content hidden h-full flex-col">
+@* Pay Components Engine - Payroll Configuration Tab *@
+<div id="tab-pay" class="tab-content hidden h-full flex-col">
 
     <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Payroll Configuration</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enable and configure specific pay rules for your organization.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define earnings rules and deductions. No hardcoding — build exactly what your organisation needs.</p>
         </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-8">
-        <div class="mx-auto max-w-3xl space-y-6">
+        <div class="space-y-8">
 
-            <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="p-6">
-                    <h3 class="flex items-center text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                        <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.546 1.16 3.74.322 4.298-1.517l.611-2.017c.553-1.822-1.415-3.321-3.114-2.523l-.133.062c-1.699.798-3.667-.701-3.115-2.523l.612-2.017c.566-1.864 2.899-2.614 4.453-1.428l.848.647M12 3v3m0 15v-3" /></svg>
-                        Financial Basis
-                    </h3>
-                    <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">Currency</label>
-                            <select class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                <option>PHP (₱)</option>
-                                <option>USD ($)</option>
+            @* ── Financial Basis ──────────────────────────────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Financial Basis</h3>
+                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Base currency, pay frequency, and daily hours.</p>
+                </div>
+                <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-3">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Currency</label>
+                        <div class="relative">
+                            <select id="pay-currency" class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="PHP">PHP (&#8369;)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="SGD">SGD (S$)</option>
+                                <option value="EUR">EUR (&#8364;)</option>
+                                <option value="GBP">GBP (&#163;)</option>
+                                <option value="MYR">MYR (RM)</option>
+                                <option value="AUD">AUD (A$)</option>
+                                <option value="JPY">JPY (&#165;)</option>
                             </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
                         </div>
-                        <div>
-                            <label class="mb-2 block text-xs font-semibold text-gray-700 dark:text-gray-300">Pay Cycle</label>
-                            <select class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                <option>Semi-Monthly</option>
-                                <option>Monthly</option>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Pay Cycle</label>
+                        <div class="relative">
+                            <select id="pay-cycle" class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="Weekly">Weekly</option>
+                                <option value="BiWeekly">Bi-Weekly</option>
+                                <option value="SemiMonthly" selected>Semi-Monthly</option>
+                                <option value="Monthly">Monthly</option>
                             </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Hours Per Day</label>
+                        <div class="flex items-center gap-2">
+                            <input id="pay-hours-per-day" type="number" min="1" max="24" value="8"
+                                   class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                            <span class="whitespace-nowrap text-xs text-gray-400">hrs / day</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-4">
-                <h3 class="px-2 text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compensation Rules</h3>
-
-                <div id="row-reg-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <label class="relative inline-flex cursor-pointer items-center">
-                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('reg-ot', this.checked)">
-                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
-                            </label>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Regular Overtime</span>
-                                <span class="text-xs text-gray-500">Standard multiplier for hours beyond 8hrs/day</span>
-                            </div>
-                        </div>
-                        <div id="controls-reg-ot" class="flex items-center gap-4">
-                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-                                <button onclick="setRateType('reg-ot', 'percent')" id="reg-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
-                                <button onclick="setRateType('reg-ot', 'fixed')" id="reg-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
-                            </div>
-                            <div class="relative w-28">
-                                <span id="reg-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
-                                <input type="number" value="125" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="reg-ot-input">
-                                <span id="reg-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
-                            </div>
-                        </div>
+            @* ── Earnings Rules (Pay Components Engine) ───────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Earnings Rules</h3>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define how extra pay applies (OT, holiday, rest day). No hardcoding — e.g. OT 1.25x, Night Diff 10%, Holiday 2x, Rest Day 1.3x.</p>
                     </div>
+                    <button type="button" onclick="openEarningRuleModal()" class="btn-primary gap-1.5">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Earning Rule
+                    </button>
                 </div>
-
-                <div id="row-night-diff" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <label class="relative inline-flex cursor-pointer items-center">
-                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('night-diff', this.checked)">
-                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
-                            </label>
-                            <div>
-                                <span class="flex items-center text-sm font-bold text-gray-900 dark:text-white">
-                                    Night Differential
-                                    <span class="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">10PM - 6AM</span>
-                                </span>
-                                <span class="text-xs text-gray-500">Premium for regular hours worked at night</span>
-                            </div>
-                        </div>
-                        <div id="controls-night-diff" class="flex items-center gap-4">
-                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-                                <button onclick="setRateType('night-diff', 'percent')" id="night-diff-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
-                                <button onclick="setRateType('night-diff', 'fixed')" id="night-diff-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
-                            </div>
-                            <div class="relative w-28">
-                                <span id="night-diff-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
-                                <input type="number" value="10" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="night-diff-input">
-                                <span id="night-diff-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/40">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Applies To</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Rate</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Taxable</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Benefit Base</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Approval</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsRulesBody" class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                            <tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
+                                <td colspan="7" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one (e.g. OT 1.25x, Night Diff 10%, Holiday 2x).</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <div id="row-night-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <label class="relative inline-flex cursor-pointer items-center">
-                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('night-ot', this.checked)">
-                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
-                            </label>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Night Overtime</span>
-                                <span class="text-xs text-gray-500">Compounded rate for OT during night window</span>
-                            </div>
-                        </div>
-                        <div id="controls-night-ot" class="flex items-center gap-4">
-                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-                                <button onclick="setRateType('night-ot', 'percent')" id="night-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
-                                <button onclick="setRateType('night-ot', 'fixed')" id="night-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
-                            </div>
-                            <div class="relative w-28">
-                                <span id="night-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
-                                <input type="number" value="137.5" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="night-ot-input">
-                                <span id="night-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="row-rest-ot" class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <label class="relative inline-flex cursor-pointer items-center">
-                                <input type="checkbox" checked class="peer sr-only" onchange="toggleRow('rest-ot', this.checked)">
-                                <div class="peer h-5 w-9 rounded-full bg-gray-200 peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all dark:bg-gray-700 peer-checked:after:translate-x-full"></div>
-                            </label>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">Rest Day Overtime</span>
-                                <span class="text-xs text-gray-500">Rate for working on scheduled off-days</span>
-                            </div>
-                        </div>
-                        <div id="controls-rest-ot" class="flex items-center gap-4">
-                            <div class="flex items-center rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-                                <button onclick="setRateType('rest-ot', 'percent')" id="rest-ot-btn-pct" class="rounded-md bg-white px-2 py-1 font-bold text-[10px] text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400">PCT %</button>
-                                <button onclick="setRateType('rest-ot', 'fixed')" id="rest-ot-btn-fix" class="px-2 py-1 font-bold text-[10px] text-gray-500 dark:text-gray-400">FIXED ₱</button>
-                            </div>
-                            <div class="relative w-28">
-                                <span id="rest-ot-symbol-pre" class="absolute top-1/2 left-3 hidden -translate-y-1/2 text-sm font-bold text-gray-400">₱</span>
-                                <input type="number" value="130" class="block w-full rounded-lg border-0 py-2 pr-8 text-right font-bold text-emerald-600 ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:ring-gray-600" id="rest-ot-input">
-                                <span id="rest-ot-symbol-post" class="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-bold text-gray-400">%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
-            <div class="flex items-center justify-end pt-4">
-                <button class="rounded-lg bg-emerald-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                    Save Payroll Configuration
-                </button>
+            @* ── Deductions (Global, not country-specific) ─────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Deductions</h3>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Tax, SSS, pension, insurance — Fixed, Percentage, or Formula-based. Employer/employee share, auto-compute or manual.</p>
+                    </div>
+                    <button type="button" onclick="openDeductionModal()" class="btn-primary gap-1.5">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Deduction
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/40">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Amount / Formula</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Employer</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Employee</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compute</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deductionsRulesBody" class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                            <tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
+                                <td colspan="7" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one (e.g. Tax, SSS, Pension, Insurance).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
     </div>
 </div>
 
+@* ─── EARNING RULE MODAL ─── *@
+<div id="earningRuleModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <h3 id="earningRuleModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Earning Rule</h3>
+            <button type="button" onclick="closeEarningRuleModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-4">
+            <input type="hidden" id="earningRuleId" value="" />
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
+                <input type="text" id="earningRuleName" placeholder="e.g. OT 1.25x, Night Diff 10%" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
+                <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <option value="Regular">Regular</option>
+                    <option value="OT" selected>OT</option>
+                    <option value="Holiday">Holiday</option>
+                    <option value="RestDay">Rest Day</option>
+                    <option value="NightDiff">Night Diff</option>
+                    <option value="Custom">Custom</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Type</label>
+                    <select id="earningRuleRateType" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Multiplier" selected>Multiplier (e.g. 1.25x)</option>
+                        <option value="Percentage">Percentage (e.g. 10%)</option>
+                        <option value="Fixed">Fixed Amount</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Value</label>
+                    <input type="number" id="earningRuleRateValue" min="0" step="0.01" value="1.25" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="earningRuleTaxable" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Taxable?</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="earningRuleBenefitBase" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Include in benefit base?</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="earningRuleRequiresApproval" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Requires approval?</span>
+                </label>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <button type="button" onclick="closeEarningRuleModal()" class="btn-secondary">Cancel</button>
+            <button type="button" onclick="saveEarningRule()" class="btn-primary gap-1.5">Save Earning Rule</button>
+        </div>
+    </div>
+</div>
+
+@* ─── DEDUCTION MODAL ─── *@
+<div id="deductionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <h3 id="deductionModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Deduction</h3>
+            <button type="button" onclick="closeDeductionModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-4">
+            <input type="hidden" id="deductionRuleId" value="" />
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
+                <input type="text" id="deductionRuleName" placeholder="e.g. Tax, SSS, Pension, Insurance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type</label>
+                <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <option value="Fixed" selected>Fixed</option>
+                    <option value="Percentage">Percentage</option>
+                    <option value="Formula">Formula-based</option>
+                </select>
+            </div>
+            <div id="deductionAmountWrap">
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
+                <input type="number" id="deductionRuleAmount" min="0" step="0.01" placeholder="Fixed amount or %" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+            <div id="deductionFormulaWrap" class="hidden">
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Formula expression</label>
+                <input type="text" id="deductionRuleFormula" placeholder="e.g. progressive_tax(gross)" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="deductionEmployerShare" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Employer share?</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="deductionEmployeeShare" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Employee share?</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="deductionAutoCompute" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Auto-compute?</span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">If Off: manual entry per pay period.</p>
+        </div>
+        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <button type="button" onclick="closeDeductionModal()" class="btn-secondary">Cancel</button>
+            <button type="button" onclick="saveDeductionRule()" class="btn-primary gap-1.5">Save Deduction</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Logic to enable/disable specific rule rows
-    function toggleRow(idPrefix, isEnabled) {
-        const row = document.getElementById(`row-${idPrefix}`);
-        const controls = document.getElementById(`controls-${idPrefix}`);
-
-        if (isEnabled) {
-            row.classList.remove('opacity-40');
-            controls.classList.remove('pointer-events-none');
-        } else {
-            row.classList.add('opacity-40');
-            controls.classList.add('pointer-events-none');
-        }
+(function () {
+    var orgId = window.__orgIdForPay || 0;
+    function getOrgId() {
+        if (orgId) return orgId;
+        var m = document.cookie.match(/orgId=(\d+)/);
+        if (m) return parseInt(m[1], 10);
+        return 0;
     }
 
-    // Logic to switch between % and ₱ rates
-    function setRateType(idPrefix, type) {
-        const pctBtn = document.getElementById(`${idPrefix}-btn-pct`);
-        const fixBtn = document.getElementById(`${idPrefix}-btn-fix`);
-        const input = document.getElementById(`${idPrefix}-input`);
-        const preSymbol = document.getElementById(`${idPrefix}-symbol-pre`);
-        const postSymbol = document.getElementById(`${idPrefix}-symbol-post`);
+    var _earningsList = [];
+    var _deductionsList = [];
 
-        if (type === 'fixed') {
-            fixBtn.className = "rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400";
-            pctBtn.className = "px-2 py-1 text-[10px] font-bold text-gray-500 dark:text-gray-400";
-            preSymbol.classList.remove('hidden');
-            postSymbol.classList.add('hidden');
-            input.classList.add('pl-8');
-            input.classList.remove('pr-8');
+    function openEarningRuleModal(editId) {
+        document.getElementById('earningRuleModalTitle').textContent = editId ? 'Edit Earning Rule' : 'Add Earning Rule';
+        document.getElementById('earningRuleId').value = editId || '';
+        if (editId && _earningsList.length) {
+            var r = _earningsList.find(function (x) { return x.earningRuleID === editId; });
+            if (r) {
+                document.getElementById('earningRuleName').value = r.name || '';
+                document.getElementById('earningRuleAppliesTo').value = r.appliesTo || 'OT';
+                document.getElementById('earningRuleRateType').value = r.rateType || 'Multiplier';
+                document.getElementById('earningRuleRateValue').value = r.rateValue != null ? r.rateValue : '1.25';
+                document.getElementById('earningRuleTaxable').checked = !!r.isTaxable;
+                document.getElementById('earningRuleBenefitBase').checked = !!r.includeInBenefitBase;
+                document.getElementById('earningRuleRequiresApproval').checked = !!r.requiresApproval;
+            }
         } else {
-            pctBtn.className = "rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-600 shadow-sm dark:bg-gray-600 dark:text-emerald-400";
-            fixBtn.className = "px-2 py-1 text-[10px] font-bold text-gray-500 dark:text-gray-400";
-            preSymbol.classList.add('hidden');
-            postSymbol.classList.remove('hidden');
-            input.classList.remove('pl-8');
-            input.classList.add('pr-8');
+            document.getElementById('earningRuleName').value = '';
+            document.getElementById('earningRuleAppliesTo').value = 'OT';
+            document.getElementById('earningRuleRateType').value = 'Multiplier';
+            document.getElementById('earningRuleRateValue').value = '1.25';
+            document.getElementById('earningRuleTaxable').checked = true;
+            document.getElementById('earningRuleBenefitBase').checked = false;
+            document.getElementById('earningRuleRequiresApproval').checked = false;
         }
+        document.getElementById('earningRuleModal').classList.remove('hidden');
+        document.getElementById('earningRuleModal').classList.add('flex');
     }
+    function closeEarningRuleModal() {
+        document.getElementById('earningRuleModal').classList.add('hidden');
+        document.getElementById('earningRuleModal').classList.remove('flex');
+    }
+    window.openEarningRuleModal = openEarningRuleModal;
+    window.closeEarningRuleModal = closeEarningRuleModal;
+
+    function openDeductionModal(editId) {
+        document.getElementById('deductionModalTitle').textContent = editId ? 'Edit Deduction' : 'Add Deduction';
+        document.getElementById('deductionRuleId').value = editId || '';
+        if (editId && _deductionsList.length) {
+            var r = _deductionsList.find(function (x) { return x.deductionRuleID === editId; });
+            if (r) {
+                document.getElementById('deductionRuleName').value = r.name || '';
+                document.getElementById('deductionRuleType').value = r.deductionType || 'Fixed';
+                document.getElementById('deductionRuleAmount').value = r.amount != null ? r.amount : '';
+                document.getElementById('deductionRuleFormula').value = r.formulaExpression || '';
+                document.getElementById('deductionEmployerShare').checked = !!r.hasEmployerShare;
+                document.getElementById('deductionEmployeeShare').checked = !!r.hasEmployeeShare;
+                document.getElementById('deductionAutoCompute').checked = !!r.autoCompute;
+            }
+        } else {
+            document.getElementById('deductionRuleName').value = '';
+            document.getElementById('deductionRuleType').value = 'Fixed';
+            document.getElementById('deductionRuleAmount').value = '';
+            document.getElementById('deductionRuleFormula').value = '';
+            document.getElementById('deductionEmployerShare').checked = false;
+            document.getElementById('deductionEmployeeShare').checked = true;
+            document.getElementById('deductionAutoCompute').checked = true;
+        }
+        toggleDeductionAmountVsFormula();
+        document.getElementById('deductionModal').classList.remove('hidden');
+        document.getElementById('deductionModal').classList.add('flex');
+    }
+    function closeDeductionModal() {
+        document.getElementById('deductionModal').classList.add('hidden');
+        document.getElementById('deductionModal').classList.remove('flex');
+    }
+    window.openDeductionModal = openDeductionModal;
+    window.closeDeductionModal = closeDeductionModal;
+    window.toggleDeductionAmountVsFormula = function () {
+        var t = document.getElementById('deductionRuleType').value;
+        document.getElementById('deductionAmountWrap').classList.toggle('hidden', t === 'Formula');
+        document.getElementById('deductionFormulaWrap').classList.toggle('hidden', t !== 'Formula');
+    };
+
+    function saveEarningRule() {
+        var id = document.getElementById('earningRuleId').value;
+        var name = (document.getElementById('earningRuleName').value || '').trim();
+        if (!name) { document.getElementById('earningRuleName').focus(); return; }
+        var payload = {
+            name: name,
+            appliesTo: document.getElementById('earningRuleAppliesTo').value,
+            rateType: document.getElementById('earningRuleRateType').value,
+            rateValue: parseFloat(document.getElementById('earningRuleRateValue').value) || 1,
+            isTaxable: document.getElementById('earningRuleTaxable').checked,
+            includeInBenefitBase: document.getElementById('earningRuleBenefitBase').checked,
+            requiresApproval: document.getElementById('earningRuleRequiresApproval').checked
+        };
+        var oid = getOrgId();
+        if (!oid) { console.warn('No orgId for pay components'); closeEarningRuleModal(); return; }
+        var url = '/api/organizations/' + oid + '/pay-components/earnings';
+        var method = 'POST';
+        if (id) { url += '/' + id; method = 'PUT'; }
+        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok !== false) { closeEarningRuleModal(); loadEarnings(); }
+            })
+            .catch(function () { });
+    }
+    function saveDeductionRule() {
+        var id = document.getElementById('deductionRuleId').value;
+        var name = (document.getElementById('deductionRuleName').value || '').trim();
+        if (!name) { document.getElementById('deductionRuleName').focus(); return; }
+        var t = document.getElementById('deductionRuleType').value;
+        var payload = {
+            name: name,
+            deductionType: t,
+            amount: t === 'Formula' ? null : (parseFloat(document.getElementById('deductionRuleAmount').value) || null),
+            formulaExpression: t === 'Formula' ? (document.getElementById('deductionRuleFormula').value || '').trim() : null,
+            hasEmployerShare: document.getElementById('deductionEmployerShare').checked,
+            hasEmployeeShare: document.getElementById('deductionEmployeeShare').checked,
+            autoCompute: document.getElementById('deductionAutoCompute').checked
+        };
+        var oid = getOrgId();
+        if (!oid) { console.warn('No orgId'); closeDeductionModal(); return; }
+        var url = '/api/organizations/' + oid + '/pay-components/deductions';
+        var method = 'POST';
+        if (id) { url += '/' + id; method = 'PUT'; }
+        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok !== false) { closeDeductionModal(); loadDeductions(); }
+            })
+            .catch(function () { });
+    }
+    window.saveEarningRule = saveEarningRule;
+    window.saveDeductionRule = saveDeductionRule;
+
+    function loadEarnings() {
+        var oid = getOrgId();
+        if (!oid) return;
+        fetch('/api/organizations/' + oid + '/pay-components/earnings', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                _earningsList = Array.isArray(list) ? list : [];
+                var tbody = document.getElementById('earningsRulesBody');
+                tbody.querySelectorAll('.earnings-row').forEach(function (el) { el.remove(); });
+                var ph = tbody.querySelector('.earnings-placeholder');
+                if (ph) ph.remove();
+                if (!_earningsList.length) {
+                    tbody.innerHTML = '<tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="7" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one.</td></tr>';
+                    return;
+                }
+                _earningsList.forEach(function (r) {
+                    var rateText = r.rateType === 'Multiplier' ? (r.rateValue + 'x') : (r.rateType === 'Percentage' ? (r.rateValue + '%') : r.rateValue);
+                    var tr = document.createElement('tr');
+                    tr.className = 'earnings-row';
+                    tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + (r.name || '') + '</td><td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + (r.appliesTo || '') + '</td><td class="px-5 py-3 text-xs">' + rateText + '</td><td class="px-5 py-3">' + (r.isTaxable ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.includeInBenefitBase ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.requiresApproval ? 'Yes' : 'No') + '</td><td class="px-5 py-3 text-right"><button type="button" onclick="window.editEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button><button type="button" onclick="window.deleteEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button></td>';
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(function () { });
+    }
+    function loadDeductions() {
+        var oid = getOrgId();
+        if (!oid) return;
+        fetch('/api/organizations/' + oid + '/pay-components/deductions', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                _deductionsList = Array.isArray(list) ? list : [];
+                var tbody = document.getElementById('deductionsRulesBody');
+                tbody.querySelectorAll('.deductions-row').forEach(function (el) { el.remove(); });
+                var ph = tbody.querySelector('.deductions-placeholder');
+                if (ph) ph.remove();
+                if (!_deductionsList.length) {
+                    tbody.innerHTML = '<tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="7" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one.</td></tr>';
+                    return;
+                }
+                _deductionsList.forEach(function (r) {
+                    var amountText = r.deductionType === 'Formula' ? (r.formulaExpression || '—') : (r.amount != null ? r.amount : '—');
+                    var tr = document.createElement('tr');
+                    tr.className = 'deductions-row';
+                    tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + (r.name || '') + '</td><td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + (r.deductionType || '') + '</td><td class="px-5 py-3 text-xs">' + amountText + '</td><td class="px-5 py-3">' + (r.hasEmployerShare ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.hasEmployeeShare ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.autoCompute ? 'Auto' : 'Manual') + '</td><td class="px-5 py-3 text-right"><button type="button" onclick="window.editDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button><button type="button" onclick="window.deleteDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button></td>';
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(function () { });
+    }
+    window.editEarningRule = function (id) { openEarningRuleModal(id); };
+    window.editDeductionRule = function (id) { openDeductionModal(id); };
+    window.deleteEarningRule = function (id) { if (confirm('Remove this earning rule?')) { fetch('/api/organizations/' + getOrgId() + '/pay-components/earnings/' + id, { method: 'DELETE' }).then(function () { loadEarnings(); }); } };
+    window.deleteDeductionRule = function (id) { if (confirm('Remove this deduction?')) { fetch('/api/organizations/' + getOrgId() + '/pay-components/deductions/' + id, { method: 'DELETE' }).then(function () { loadDeductions(); }); } };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('tab-pay')) {
+            loadEarnings();
+            loadDeductions();
+        }
+    });
+    document.getElementById('earningRuleModal')?.addEventListener('click', function (e) { if (e.target === this) closeEarningRuleModal(); });
+    document.getElementById('deductionModal')?.addEventListener('click', function (e) { if (e.target === this) closeDeductionModal(); });
+})();
 </script>

@@ -18,13 +18,17 @@ public class BillingController : ControllerBase
     private readonly JwtTokenService _jwt;
     private readonly PayMongoService _payMongo;
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
+    private readonly IAuditService _audit;
     private readonly EmailService _email;
 
-    public BillingController(JwtTokenService jwt, PayMongoService payMongo, SubchronDbContext db, EmailService email)
+    public BillingController(JwtTokenService jwt, PayMongoService payMongo, SubchronDbContext db, TenantDbContext tenantDb, IAuditService audit, EmailService email)
     {
         _jwt = jwt;
         _payMongo = payMongo;
         _db = db;
+        _tenantDb = tenantDb;
+        _audit = audit;
         _email = email;
     }
 
@@ -46,7 +50,7 @@ public class BillingController : ControllerBase
         var plan = subscription?.Plan;
         var planName = plan?.PlanName ?? "—";
         var employeeLimit = plan?.MaxEmployees ?? 0;
-        var employeesUsed = await _db.Employees.CountAsync(e => e.OrgID == orgId);
+        var employeesUsed = await _tenantDb.Employees.CountAsync(e => e.OrgID == orgId);
         var billingCycle = subscription?.BillingCycle ?? "—";
         var nextBillingDate = subscription?.EndDate.HasValue == true ? subscription.EndDate!.Value.ToString("yyyy-MM-dd") : "—";
         var trialEndDate = subscription?.EndDate.HasValue == true ? subscription.EndDate!.Value.ToString("yyyy-MM-ddTHH:mm:ssZ") : (string?)null;
@@ -108,17 +112,7 @@ public class BillingController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        _db.AuditLogs.Add(new AuditLog
-        {
-            OrgID = orgId,
-            UserID = userId,
-            Action = "SubscriptionCancelled",
-            EntityName = "Subscription",
-            EntityID = sub.SubscriptionID,
-            Details = "Subscription cancelled by user from trial-expired modal.",
-            CreatedAt = DateTime.UtcNow
-        });
-        await _db.SaveChangesAsync();
+        await _audit.LogSuperAdminAsync(orgId, userId, "SubscriptionCancelled", "Subscription", sub.SubscriptionID, "Subscription cancelled by user from trial-expired modal.");
 
         return Ok(new { ok = true, status = "Cancelled" });
     }

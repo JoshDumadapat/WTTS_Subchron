@@ -1,7 +1,9 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Subchron.Web.Pages.Auth;
+using Subchron.Web.Services;
 
 namespace Subchron.Web.Pages.App.Employee;
 
@@ -21,14 +23,27 @@ public class EmployeeManagementModel : PageModel
     public List<DepartmentItem> Departments { get; set; } = new();
     public string? Error { get; set; }
     public string ApiBaseUrl { get; set; } = "";
+    public string OrgName { get; set; } = "Your Company";
+    public string? OrgLogoUrl { get; set; }
 
-    public Task OnGetAsync()
+    public async Task OnGetAsync()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
         Error = null;
         Employees = new List<EmployeeItem>();
         Departments = new List<DepartmentItem>();
-        return Task.CompletedTask;
+
+        var claimOrgName = User.FindFirst(CompleteLoginModel.OrgNameClaimType)?.Value;
+        if (!string.IsNullOrWhiteSpace(claimOrgName))
+            OrgName = claimOrgName.Trim();
+
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (!string.IsNullOrEmpty(token))
+        {
+            var branding = await GetOrgBrandingAsync(token);
+            OrgName = branding.OrgName;
+            OrgLogoUrl = branding.OrgLogoUrl;
+        }
     }
 
     public async Task<IActionResult> OnGetDataAsync()
@@ -104,6 +119,56 @@ public class EmployeeManagementModel : PageModel
         }
     }
 
+    private async Task<(string OrgName, string? OrgLogoUrl)> GetOrgBrandingAsync(string token)
+    {
+        var orgName = User.FindFirst(CompleteLoginModel.OrgNameClaimType)?.Value?.Trim();
+        if (string.IsNullOrWhiteSpace(orgName))
+            orgName = "Your Company";
+        string? orgLogo = null;
+
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
+            return (orgName, orgLogo);
+
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            var profile = await client.GetFromJsonAsync<OrgProfileDto>(baseUrl + "/api/org-profile/current");
+            if (profile != null)
+            {
+                if (!string.IsNullOrWhiteSpace(profile.OrgName))
+                    orgName = profile.OrgName.Trim();
+                if (!string.IsNullOrWhiteSpace(profile.LogoUrl))
+                    orgLogo = profile.LogoUrl;
+            }
+        }
+        catch { }
+
+        return (orgName, orgLogo);
+    }
+
+    private async Task<byte[]?> DownloadImageAsync(HttpClient client, string? url, string baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        var target = url.Trim();
+        if (!target.StartsWith("http", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(baseUrl))
+            target = baseUrl.TrimEnd('/') + (target.StartsWith("/") ? string.Empty : "/") + target;
+
+        try
+        {
+            var resp = await client.GetAsync(target);
+            if (!resp.IsSuccessStatusCode)
+                return null;
+            return await resp.Content.ReadAsByteArrayAsync();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     // Proxies API GET /api/employees/{id}/attendance-qr and returns PNG for the Generate QR modal.
     public async Task<IActionResult> OnGetAttendanceQrAsync(int id)
     {
@@ -149,6 +214,167 @@ public class EmployeeManagementModel : PageModel
         {
             return new JsonResult(new { });
         }
+    }
+
+    /// <summary>
+    /// Generates and returns employee ID card as PDF (front + back) using QuestPDF. Triggered by Print / PDF button.
+    /// </summary>
+    public async Task<IActionResult> OnGetDownloadIdPdfAsync(int id)
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrEmpty(token))
+            return NotFound();
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
+            return NotFound();
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            var empResp = await client.GetFromJsonAsync<EmployeeItem>(baseUrl + "/api/employees/" + id);
+            if (empResp is null)
+                return NotFound();
+
+            var branding = await GetOrgBrandingAsync(token);
+
+            byte[]? qrBytes = null;
+            var qrResp = await client.GetAsync(baseUrl + $"/api/employees/{id}/attendance-qr");
+            if (qrResp.IsSuccessStatusCode)
+                qrBytes = await qrResp.Content.ReadAsByteArrayAsync();
+            var photoBytes = await DownloadImageAsync(client, empResp.IdPictureUrl ?? empResp.AvatarUrl, baseUrl);
+            var signatureBytes = await DownloadImageAsync(client, empResp.SignatureUrl, baseUrl);
+            byte[]? orgLogoBytes = null;
+            if (!string.IsNullOrWhiteSpace(branding.OrgLogoUrl))
+                orgLogoBytes = await DownloadImageAsync(client, branding.OrgLogoUrl, baseUrl);
+
+            var fullName = string.Join(" ", new[] { empResp.FirstName, empResp.LastName }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
+            if (string.IsNullOrWhiteSpace(fullName))
+                fullName = "—";
+
+            var phoneFormatted = "—";
+            if (!string.IsNullOrWhiteSpace(empResp.Phone))
+            {
+                var p = empResp.Phone.Trim();
+                phoneFormatted = p.StartsWith("+") ? p : "+63 " + p;
+            }
+
+            var address = string.Join(", ", new[] { empResp.AddressLine1, empResp.City, empResp.Country }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
+            if (string.IsNullOrWhiteSpace(address))
+                address = "—";
+
+            var data = new EmployeeIdCardPdf.EmployeeIdCardData
+            {
+                OrgName = branding.OrgName,
+                OrgLogoBytes = orgLogoBytes,
+                FullName = fullName,
+                EmpNumber = empResp.EmpNumber ?? "—",
+                Role = empResp.Role ?? "—",
+                Email = string.IsNullOrWhiteSpace(empResp.Email) ? "—" : empResp.Email,
+                PhoneFormatted = phoneFormatted,
+                EmergencyContactName = string.IsNullOrWhiteSpace(empResp.EmergencyContactName) ? "—" : empResp.EmergencyContactName,
+                EmergencyContactPhone = string.IsNullOrWhiteSpace(empResp.EmergencyContactPhone) ? "—" : empResp.EmergencyContactPhone,
+                EmergencyContactRelation = string.IsNullOrWhiteSpace(empResp.EmergencyContactRelation) ? "—" : empResp.EmergencyContactRelation,
+                Address = address,
+                PhotoBytes = photoBytes,
+                QrBytes = qrBytes,
+                SignatureBytes = signatureBytes
+            };
+
+            var pdfBytes = EmployeeIdCardPdf.Generate(data);
+            var fileName = "employee-id-" + (empResp.EmpNumber ?? id.ToString()) + ".pdf";
+            Response.Headers.Append("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch
+        {
+            return NotFound();
+        }
+    }
+
+    /// <summary>
+    /// Generates PDF from front/back card images captured via html2canvas so the PDF matches the modal exactly.
+    /// </summary>
+    public async Task<IActionResult> OnPostDownloadIdPdfFromImagesAsync(int id, string? frontImageBase64, string? backImageBase64)
+    {
+        if (string.IsNullOrWhiteSpace(frontImageBase64) || string.IsNullOrWhiteSpace(backImageBase64))
+            return BadRequest("Missing front or back image.");
+
+        byte[] frontBytes = DecodeBase64Image(frontImageBase64);
+        byte[] backBytes = DecodeBase64Image(backImageBase64);
+        if (frontBytes == null || frontBytes.Length == 0 || backBytes == null || backBytes.Length == 0)
+            return BadRequest("Invalid image data.");
+
+        try
+        {
+            var pdfBytes = EmployeeIdCardPdf.GenerateFromImages(frontBytes, backBytes);
+            var fileName = "employee-id-" + id + ".pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch
+        {
+            return StatusCode(500);
+        }
+    }
+
+    public IActionResult OnPostDownloadBatchIdsFromImages(string? cardsJson)
+    {
+        if (string.IsNullOrWhiteSpace(cardsJson))
+            return BadRequest("Missing cards payload.");
+
+        List<BatchIdCardImageDto>? payload;
+        try
+        {
+            payload = JsonSerializer.Deserialize<List<BatchIdCardImageDto>>(cardsJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch
+        {
+            return BadRequest("Invalid cards payload.");
+        }
+
+        if (payload == null || payload.Count == 0)
+            return BadRequest("No cards provided.");
+
+        var cardImages = new List<EmployeeIdCardPdf.CardImagePair>();
+        foreach (var card in payload)
+        {
+            var front = DecodeBase64Image(card.FrontImageBase64 ?? string.Empty);
+            var back = DecodeBase64Image(card.BackImageBase64 ?? string.Empty);
+            if (front is { Length: > 0 } && back is { Length: > 0 })
+                cardImages.Add(new EmployeeIdCardPdf.CardImagePair(front, back));
+        }
+
+        if (cardImages.Count == 0)
+            return BadRequest("No valid cards to render.");
+
+        try
+        {
+            var pdfBytes = EmployeeIdCardPdf.GenerateBatchFromImages(cardImages);
+            var fileName = "employee-ids-batch-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch
+        {
+            return StatusCode(500);
+        }
+    }
+
+    private static byte[]? DecodeBase64Image(string data)
+    {
+        if (string.IsNullOrWhiteSpace(data)) return null;
+        var s = data.Trim();
+        var idx = s.IndexOf(',');
+        if (idx >= 0) s = s.Substring(idx + 1);
+        try { return Convert.FromBase64String(s); }
+        catch { return null; }
+    }
+
+    private sealed class BatchIdCardImageDto
+    {
+        public int Id { get; set; }
+        public string? FrontImageBase64 { get; set; }
+        public string? BackImageBase64 { get; set; }
     }
 
     public async Task<IActionResult> OnPostUpdateEmployeeAsync(
@@ -334,6 +560,13 @@ public class EmployeeManagementModel : PageModel
         public string? AddressLine1 { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }
+        public string? EmergencyContactName { get; set; }
+        public string? EmergencyContactPhone { get; set; }
+        public string? EmergencyContactRelation { get; set; }
+        public string? AvatarUrl { get; set; }
+        public string? IdPictureUrl { get; set; }
+        public string? SignatureUrl { get; set; }
+        public string? Email { get; set; }
         public bool IsArchived { get; set; }
     }
 
@@ -341,5 +574,11 @@ public class EmployeeManagementModel : PageModel
     {
         public int DepID { get; set; }
         public string DepartmentName { get; set; } = "";
+    }
+
+    private class OrgProfileDto
+    {
+        public string? OrgName { get; set; }
+        public string? LogoUrl { get; set; }
     }
 }

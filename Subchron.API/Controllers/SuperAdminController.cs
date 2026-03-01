@@ -9,10 +9,12 @@ namespace Subchron.API.Controllers;
 public class SuperAdminController : ControllerBase
 {
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
 
-    public SuperAdminController(SubchronDbContext db)
+    public SuperAdminController(SubchronDbContext db, TenantDbContext tenantDb)
     {
         _db = db;
+        _tenantDb = tenantDb;
     }
 
     [HttpGet("dashboard/counts/organizations")]
@@ -25,7 +27,7 @@ public class SuperAdminController : ControllerBase
     [HttpGet("dashboard/counts/employees")]
     public async Task<IActionResult> GetTotalEmployees(CancellationToken ct = default)
     {
-        var count = await _db.Employees.AsNoTracking().CountAsync(e => !e.IsArchived, ct);
+        var count = await _tenantDb.Employees.AsNoTracking().CountAsync(e => !e.IsArchived, ct);
         return Ok(new { totalEmployees = count });
     }
 
@@ -39,7 +41,7 @@ public class SuperAdminController : ControllerBase
     [HttpGet("dashboard/counts/departments")]
     public async Task<IActionResult> GetTotalDepartments(CancellationToken ct = default)
     {
-        var count = await _db.Departments.AsNoTracking().CountAsync(ct);
+        var count = await _tenantDb.Departments.AsNoTracking().CountAsync(ct);
         return Ok(new { totalDepartments = count });
     }
 
@@ -70,7 +72,7 @@ public class SuperAdminController : ControllerBase
     [HttpGet("dashboard/counts/leave-requests")]
     public async Task<IActionResult> GetLeaveRequestsCount([FromQuery] string? status = null, CancellationToken ct = default)
     {
-        var query = _db.LeaveRequests.AsNoTracking();
+        var query = _tenantDb.LeaveRequests.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(lr => lr.Status == status.Trim());
         var count = await query.CountAsync(ct);
@@ -120,7 +122,7 @@ public class SuperAdminController : ControllerBase
     [HttpGet("dashboard/recent-activity")]
     public async Task<IActionResult> GetRecentActivity([FromQuery] int limit = 20, CancellationToken ct = default)
     {
-        var list = await _db.AuditLogs
+        var list = await _db.SuperAdminAuditLogs
             .AsNoTracking()
             .OrderByDescending(a => a.CreatedAt)
             .Take(limit)
@@ -131,7 +133,7 @@ public class SuperAdminController : ControllerBase
                 Details = a.Details,
                 CreatedAt = a.CreatedAt,
                 OrgId = a.OrgID,
-                OrgName = a.Organization != null ? a.Organization.OrgName : null
+                OrgName = null
             })
             .ToListAsync(ct);
         return Ok(list);
@@ -185,7 +187,7 @@ public class SuperAdminController : ControllerBase
         var activeOrgs = await _db.Organizations.AsNoTracking().CountAsync(o => o.Status == "Active", ct);
         var suspendedOrgs = await _db.Organizations.AsNoTracking().CountAsync(o => o.Status == "Suspended", ct);
         var newOrgsThisMonth = await _db.Organizations.AsNoTracking().CountAsync(o => o.CreatedAt >= startOfMonth, ct);
-        var totalEmployees = await _db.Employees.AsNoTracking().CountAsync(e => !e.IsArchived, ct);
+        var totalEmployees = await _tenantDb.Employees.AsNoTracking().CountAsync(e => !e.IsArchived, ct);
         var totalUsers = await _db.Users.AsNoTracking().CountAsync(u => u.IsActive, ct);
         var totalRevenue = await _db.PaymentTransactions.AsNoTracking()
             .Where(t => t.Status == "paid")
@@ -206,7 +208,7 @@ public class SuperAdminController : ControllerBase
             })
             .ToListAsync(ct);
 
-        var recentActivity = await _db.AuditLogs
+        var recentActivity = await _db.SuperAdminAuditLogs
             .AsNoTracking()
             .OrderByDescending(a => a.CreatedAt)
             .Take(recentActivityLimit)
@@ -217,7 +219,7 @@ public class SuperAdminController : ControllerBase
                 Details = a.Details,
                 CreatedAt = a.CreatedAt,
                 OrgId = a.OrgID,
-                OrgName = a.Organization != null ? a.Organization.OrgName : null
+                OrgName = null
             })
             .ToListAsync(ct);
 

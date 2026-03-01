@@ -1,9 +1,11 @@
 @using System.Security.Claims
 @using Subchron.Web.Rbac
 @using Subchron.Web.Pages.Auth
+@using Subchron.Web.Services
 @inject IConfiguration Config
+@inject LayoutBrandingService LayoutBrandingService
 
-@{
+@{ 
     // Basic claim values
     var displayName = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name ?? "User";
     var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("role")?.Value ?? "";
@@ -11,10 +13,32 @@
         ? ""
         : System.Text.RegularExpressions.Regex.Replace(roleClaim, "([a-z])([A-Z])", "$1 $2").Trim();
 
-    // Defer profile/avatar to client so initial HTML is not blocked by API
     var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
     // Hide full-page overlay on Turbo in-app nav so only the module skeleton shows; show it only on full load (login/signup/reload).
     var isTurboVisit = Context.Request.Headers.ContainsKey("Turbo-Request-Id") || Context.Request.Headers.ContainsKey("X-Turbo-Request-Id");
+
+    var branding = await LayoutBrandingService.GetAsync(User);
+    if (!string.IsNullOrWhiteSpace(branding.ProfileName))
+        displayName = branding.ProfileName!.Trim();
+
+    var orgSidebarName = !string.IsNullOrWhiteSpace(branding.OrgName) ? branding.OrgName! : "Organization";
+    var orgSidebarInitial = !string.IsNullOrWhiteSpace(orgSidebarName)
+        ? char.ToUpperInvariant(orgSidebarName.Trim()[0]).ToString()
+        : "O";
+    var orgLogoUrl = string.IsNullOrWhiteSpace(branding.OrgLogoUrl)
+        ? null
+        : branding.OrgLogoUrl!.Trim();
+    var orgLogoSrc = string.IsNullOrWhiteSpace(orgLogoUrl)
+        ? null
+        : orgLogoUrl + (orgLogoUrl.Contains("?") ? "&" : "?") + "v=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    var orgLogoHasImage = !string.IsNullOrWhiteSpace(orgLogoSrc);
+
+    var profileAvatarSrc = branding.ProfileAvatarUrl;
+    if (string.IsNullOrWhiteSpace(profileAvatarSrc))
+    {
+        var encoded = Uri.EscapeDataString(displayName);
+        profileAvatarSrc = $"https://ui-avatars.com/api/?name={encoded}&background=16a34a&color=fff&bold=true";
+    }
 }
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth" id="htmlRoot">
@@ -271,10 +295,82 @@
                 height: 0;
                 display: none;
             }
+
+        /* Hide scrollbar on the main content area globally */
+        main {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        main::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ===== GLOBAL BUTTON STYLES ===== */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            background-color: #28a84d;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            transition: background-color 150ms, transform 150ms;
+            outline: none;
+        }
+        .btn-primary:hover {
+            background-color: #209030;
+            transform: scale(1.03);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-primary:focus {
+            outline: 2px solid #28a84d;
+            outline-offset: 2px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            transition: background-color 150ms, transform 150ms;
+            outline: none;
+        }
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+            transform: scale(1.03);
+        }
+        .btn-secondary:active {
+            transform: scale(0.97);
+        }
+        .btn-secondary:focus {
+            outline: 2px solid #94a3b8;
+            outline-offset: 2px;
+        }
+        .dark .btn-secondary {
+            border-color: #475569;
+            background-color: #1e293b;
+            color: #cbd5e1;
+        }
+        .dark .btn-secondary:hover {
+            background-color: #334155;
+        }
     </style>
 </head>
 
-<body id="appRoot" class="min-h-screen bg-slate-200 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
+<body id="appRoot" class="min-h-screen bg-slate-100 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
     <!-- Toast: defined first so showToast exists when page scripts run after redirect -->
     <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
     <script>
@@ -322,34 +418,6 @@
             window.showToast = showToast;
         })();
     </script>
-    <script>
-        (function () {
-            var appRoot = document.getElementById("appRoot");
-            if (!appRoot) return;
-            var apiBase = (appRoot.getAttribute("data-api-base") || "").trim().replace(/\/$/, "");
-            var token = appRoot.getAttribute("data-access-token") || "";
-            if (!apiBase || !token) return;
-            fetch(apiBase + "/api/auth/profile", { headers: { "Authorization": "Bearer " + token } })
-                .then(function (r) { return r.ok ? r.json() : null; })
-                .then(function (data) {
-                    if (!data) return;
-                    var nameEl = document.getElementById("layoutProfileName");
-                    if (nameEl && data.name) nameEl.textContent = data.name;
-                    var avatarEl = document.getElementById("layoutProfileAvatar");
-                    if (avatarEl && data.avatarUrl) {
-                        var v = new Date().getTime();
-                        avatarEl.src = data.avatarUrl + (data.avatarUrl.indexOf("?") !== -1 ? "&" : "?") + "v=" + v;
-                    }
-                    // Also set data attributes so client code on profile page can update them
-                    try {
-                        if (nameEl && data.name) nameEl.setAttribute('data-initial-value', data.name);
-                        if (avatarEl && data.avatarUrl) avatarEl.setAttribute('data-initial-src', data.avatarUrl);
-                    } catch (e) {}
-                })
-                .catch(function () {});
-        })();
-    </script>
-
     <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <div class="absolute -top-[10%] -left-[15%] h-[50%] w-[50%] rounded-full bg-emerald-100/20 blur-[180px] dark:bg-emerald-900/20"></div>
         <div class="absolute top-[15%] -right-[15%] h-[45%] w-[45%] rounded-full bg-sky-100/20 blur-[180px] dark:bg-sky-900/18"></div>
@@ -374,39 +442,33 @@
             <div class="flex h-[100px] items-center px-6">
                 <div class="profile-header">
                     <div class="logo-box" aria-hidden="true">
+                        <img id="orgSidebarLogo" src="@orgLogoSrc" data-initial-src="@orgLogoSrc" data-logo-base="@orgLogoUrl" alt="@orgSidebarName Logo" class="@(orgLogoHasImage ? string.Empty : "hidden ")h-full w-full object-cover" />
+                        <div id="orgSidebarLogoFallback" class="@(orgLogoHasImage ? "hidden" : "")">
+                            <svg viewBox="0 0 52 52"
+                                 width="52"
+                                 height="52"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 role="img"
+                                 aria-label="@orgSidebarName Logo">
 
-                        @{
-                            var orgName = (await Component.InvokeAsync("OrgDisplayName"))?.ToString() ?? "Organization";
-                            var firstLetter = !string.IsNullOrWhiteSpace(orgName)
-                            ? char.ToUpperInvariant(orgName.Trim()[0]).ToString()
-                            : "O";
-                        }
+                                <rect width="52" height="52" fill="#16a34a"></rect>
 
-                        <svg viewBox="0 0 52 52"
-                             width="52"
-                             height="52"
-                             xmlns="http://www.w3.org/2000/svg"
-                             role="img"
-                             aria-label="@orgName Logo">
-
-                            <rect width="52" height="52" fill="#16a34a"></rect>
-
-                            <text x="50%"
-                                  y="54%"
-                                  text-anchor="middle"
-                                  dominant-baseline="middle"
-                                  font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-                                  font-size="24"
-                                  font-weight="700"
-                                  fill="#ffffff">
-                                @firstLetter
-                            </text>
-                        </svg>
-
+                                <text x="50%"
+                                      y="54%"
+                                      text-anchor="middle"
+                                      dominant-baseline="middle"
+                                      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+                                      font-size="24"
+                                      font-weight="700"
+                                      fill="#ffffff">
+                                    @orgSidebarInitial
+                                </text>
+                            </svg>
+                        </div>
                     </div>
 
-                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">
-                        @await Component.InvokeAsync("OrgDisplayName")
+                    <span id="orgSidebarCompanyName" class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">
+                        @orgSidebarName
                     </span>
                 </div>
             </div>
@@ -438,7 +500,7 @@
 
                 @if (RoleModuleAccess.CanAccessModule(User, AppModule.EmployeeManagement))
                 {
-                <a href="/App/Employee/EmployeeManagement" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                <a href="/App/Employee/EmployeeManagement" data-turbo="false" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -607,7 +669,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
+        <main class="flex-1 overflow-auto bg-[#F2F2F2] dark:bg-slate-900">
             <header class="layout-header bg-white shadow-lg dark:bg-slate-800"
                     style="margin:20px; border-radius:18px; padding:16px 24px;">
                 <div class="flex items-center justify-between">
@@ -624,9 +686,240 @@
                             </svg>
                         </button>
 
-                        <div id="layoutPageTitle" class="text-sm font-normal text-slate-500 dark:text-slate-400">
-                            @(ViewData["PageTitle"] ?? "Admin")
-                        </div>
+                        <!-- Dynamic Breadcrumb -->
+                        <nav id="layoutBreadcrumb" aria-label="Breadcrumb">
+                            <ol id="breadcrumbList" class="inline-flex items-center flex-wrap gap-y-1">
+                                <!-- Built by JS based on current URL path -->
+                            </ol>
+                        </nav>
+                        <script>
+                        (function () {
+                            // ─── Route map ────────────────────────────────────────────────────────────────
+                            // Keyed by lowercase URL path segment.
+                            // Folder-level segments that are pure routing noise go in SKIP.
+                            // ──────────────────────────────────────────────────────────────────────────────
+                            var ROUTE_MAP = {
+                                'dashboard':            { label: 'Dashboard',             href: '/App/Dashboard' },
+                                // Employee
+                                'employeemanagement':   { label: 'Employee Management',   href: '/App/Employee/EmployeeManagement' },
+                                'add':                  { label: 'Add Employee',           href: null },
+                                'edit':                 { label: 'Edit Employee',          href: null },
+                                // Department
+                                'department':           { label: 'Departments',            href: '/App/Department/Department' },
+                                // Operations
+                                'operations':           { label: 'Operations',             href: null },
+                                'scanstation':          { label: 'Scan Station',           href: '/App/Operations/ScanStation' },
+                                'attendancelogs':       { label: 'Attendance Logs',        href: '/App/Operations/AttendanceLogs' },
+                                'overtimerequests':     { label: 'Overtime Requests',      href: '/App/Operations/OvertimeRequests' },
+                                'create':               { label: 'New Scan Station',       href: null },
+                                'details':              { label: 'Details',                href: null },
+                                'kiosk':                { label: 'Kiosk Mode',             href: null },
+                                // Payroll & Reports (folder is skipped; leaf pages shown)
+                                'payrollandreports':    { label: 'Payroll & Reports',      href: null },
+                                'payroll':              { label: 'Payroll Export',         href: '/App/PayrollAndReports/Payroll' },
+                                'reports':              { label: 'Reports',                href: '/App/PayrollAndReports/Reports' },
+                                // Leave & Shift
+                                'leaveandshift':        { label: 'Shift & Leave',          href: null },
+                                'leavemanagement':      { label: 'Leave Management',       href: '/App/LeaveAndShift/LeaveManagement' },
+                                'shiftschedule':        { label: 'Shift Schedule',         href: '/App/LeaveAndShift/ShiftSchedule' },
+                                // Audit Log
+                                'auditlog':             { label: 'Audit Log',              href: '/App/AuditLog' },
+                                // Archive
+                                'archive':              { label: 'Archive',                href: '/App/Archive/Archive' },
+                                // Org Config  — folder skipped; OrganizationSettings is the real page
+                                'organizationsettings': { label: 'Organization Settings',  href: '/App/OrgConfig/OrganizationSettings' },
+                                // Settings / Resources
+                                'settings':             { label: 'Settings',               href: '/App/Settings' },
+                                'resources':            { label: 'Resources',              href: '/App/Resources' },
+                            };
+
+                            // Tab-id → human label for the OrgSettings page
+                            var ORG_TAB_LABELS = {
+                                'tab-profile':     'Profile & Branding',
+                                'tab-attendance':  'Attendance Rules',
+                                'tab-locations':   'Locations & Map',
+                                'tab-shifts':      'Shift Rules',
+                                'tab-leave':       'Leave Rules',
+                                'tab-pay':         'Pay Rules',
+                            };
+
+                            // Segments that are pure routing folders — never shown in the breadcrumb
+                            var SKIP = {
+                                'app': true,
+                                'employee': true,      // folder, not the Employee Management page
+                                'orgconfig': true,     // folder
+                                'payrollandreports': true, // folder (leaf pages have their own labels)
+                                'leaveandshift': true, // folder
+                            };
+
+                            // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+                            function chevron() {
+                                var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                svg.setAttribute('class', 'mx-1.5 h-3.5 w-3.5 flex-shrink-0 text-slate-400 dark:text-slate-500');
+                                svg.setAttribute('fill', 'none');
+                                svg.setAttribute('viewBox', '0 0 24 24');
+                                svg.setAttribute('stroke', 'currentColor');
+                                svg.setAttribute('aria-hidden', 'true');
+                                var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                p.setAttribute('stroke-linecap', 'round');
+                                p.setAttribute('stroke-linejoin', 'round');
+                                p.setAttribute('stroke-width', '2');
+                                p.setAttribute('d', 'm9 5 7 7-7 7');
+                                svg.appendChild(p);
+                                return svg;
+                            }
+
+                            function makeLink(label, href) {
+                                var a = document.createElement('a');
+                                a.href = href;
+                                a.className = 'text-sm font-medium text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors';
+                                a.textContent = label;
+                                return a;
+                            }
+
+                            function makeText(label, isCurrent) {
+                                var span = document.createElement('span');
+                                span.className = isCurrent
+                                    ? 'text-sm font-semibold text-slate-800 dark:text-slate-100'
+                                    : 'text-sm font-medium text-slate-500 dark:text-slate-400';
+                                span.textContent = label;
+                                return span;
+                            }
+
+                            function renderSegments(segments) {
+                                var ol = document.getElementById('breadcrumbList');
+                                if (!ol) return;
+                                ol.innerHTML = '';
+
+                                for (var k = 0; k < segments.length; k++) {
+                                    var seg = segments[k];
+                                    var isLast = (k === segments.length - 1);
+                                    var li = document.createElement('li');
+                                    li.className = 'inline-flex items-center';
+
+                                    if (k > 0) li.appendChild(chevron());
+
+                                    if (!isLast && seg.href) {
+                                        li.appendChild(makeLink(seg.label, seg.href));
+                                    } else {
+                                        li.appendChild(makeText(seg.label, isLast));
+                                    }
+
+                                    ol.appendChild(li);
+                                }
+                            }
+
+                            // ─── Resolve current active OrgSettings tab ───────────────────────────────────
+                            function activeOrgTab() {
+                                // 1. URL hash (set by switchTab)
+                                var hash = (window.location.hash || '').replace('#', '');
+                                if (hash && ORG_TAB_LABELS[hash]) return ORG_TAB_LABELS[hash];
+                                // 2. Check which tab-content is visible
+                                for (var id in ORG_TAB_LABELS) {
+                                    var el = document.getElementById(id);
+                                    if (el && !el.classList.contains('hidden')) return ORG_TAB_LABELS[id];
+                                }
+                                return 'Profile & Branding'; // default
+                            }
+
+                            // ─── Main breadcrumb builder ──────────────────────────────────────────────────
+                            function buildBreadcrumb() {
+                                var path = window.location.pathname;
+                                var rawSegs = path.split('/').filter(function (s) { return s.length > 0; });
+                                var segments = [];
+
+                                for (var i = 0; i < rawSegs.length; i++) {
+                                    var raw = rawSegs[i];
+                                    var key = raw.toLowerCase();
+
+                                    // Drop noise folders
+                                    if (SKIP[key]) continue;
+
+                                    // Drop numeric segments (e.g. /Edit/42 — the id)
+                                    if (/^\d+$/.test(raw)) continue;
+
+                                    var mapped = ROUTE_MAP[key];
+                                    if (mapped) {
+                                        segments.push({ label: mapped.label, href: mapped.href });
+                                    } else {
+                                        // Fallback: split CamelCase / kebab
+                                        var human = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]/g, ' ');
+                                        segments.push({ label: human, href: null });
+                                    }
+                                }
+
+                                // ── Special case: Organization Settings  ──────────────────────────────
+                                // URL: /App/OrgConfig/OrganizationSettings
+                                // → show "Organization Settings > <Active Tab>"
+                                var isOrgSettings = rawSegs.some(function(s){ return s.toLowerCase() === 'organizationsettings'; });
+                                if (isOrgSettings) {
+                                    var tabLabel = activeOrgTab();
+                                    // Replace the last segment (organizationsettings) with parent + tab child
+                                    // Find the org settings segment and make it a link, add tab as current
+                                    segments = [
+                                        { label: 'Organization Settings', href: '/App/OrgConfig/OrganizationSettings' },
+                                        { label: tabLabel, href: null }
+                                    ];
+                                    renderSegments(segments);
+                                    return;
+                                }
+
+                                // ── Special case: Employee Add ────────────────────────────────────────
+                                // URL: /App/Employee/Add
+                                var isEmployeeAdd = rawSegs.some(function(s){ return s.toLowerCase() === 'add'; })
+                                                 && rawSegs.some(function(s){ return s.toLowerCase() === 'employee'; });
+                                if (isEmployeeAdd) {
+                                    segments = [
+                                        { label: 'Employee Management', href: '/App/Employee/EmployeeManagement' },
+                                        { label: 'Add Employee', href: null }
+                                    ];
+                                    renderSegments(segments);
+                                    return;
+                                }
+
+                                // ── Special case: Employee Edit ───────────────────────────────────────
+                                // URL: /App/Employee/Edit/42
+                                var isEmployeeEdit = rawSegs.some(function(s){ return s.toLowerCase() === 'edit'; })
+                                                  && rawSegs.some(function(s){ return s.toLowerCase() === 'employee'; });
+                                if (isEmployeeEdit) {
+                                    segments = [
+                                        { label: 'Employee Management', href: '/App/Employee/EmployeeManagement' },
+                                        { label: 'Edit Employee', href: null }
+                                    ];
+                                    renderSegments(segments);
+                                    return;
+                                }
+
+                                // ── Fallback: dedupe consecutive identical labels ──────────────────────
+                                var deduped = [];
+                                for (var j = 0; j < segments.length; j++) {
+                                    if (!deduped.length || deduped[deduped.length - 1].label !== segments[j].label) {
+                                        deduped.push(segments[j]);
+                                    }
+                                }
+
+                                if (!deduped.length) {
+                                    deduped = [{ label: 'Dashboard', href: '/App/Dashboard' }];
+                                }
+
+                                renderSegments(deduped);
+                            }
+
+                            // ─── Init & events ────────────────────────────────────────────────────────────
+                            buildBreadcrumb();
+                            document.addEventListener('turbo:render', buildBreadcrumb);
+                            document.addEventListener('turbo:load', buildBreadcrumb);
+
+                            // Re-render when the OrgSettings tab switches (hash changes)
+                            window.addEventListener('hashchange', function () {
+                                buildBreadcrumb();
+                            });
+
+                            // Expose so switchTab() on the OrgSettings page can call it directly
+                            window.__rebuildBreadcrumb = buildBreadcrumb;
+                        })();
+                        </script>
                     </div>
 
                     <!-- RIGHT: Notification dropdown + Theme + Profile (name hidden on phone) -->
@@ -711,11 +1004,12 @@
                                     aria-haspopup="menu"
                                     aria-expanded="false">
                                 <div class="text-right hidden sm:block">
-                                    <div id="layoutProfileName" class="text-sm font-semibold text-slate-900 dark:text-white">@displayName</div>
+                                    <div id="layoutProfileName" data-initial-value="@displayName" class="text-sm font-semibold text-slate-900 dark:text-white">@displayName</div>
                                     <div class="text-xs text-slate-500 dark:text-slate-400">@(string.IsNullOrEmpty(roleDisplay) ? roleClaim : roleDisplay)</div>
                                 </div>
                                 <img id="layoutProfileAvatar"
-                                     src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=16a34a&color=fff&bold=true"
+                                     src="@profileAvatarSrc"
+                                     data-initial-src="@profileAvatarSrc"
                                      alt="Profile"
                                      class="h-9 w-9 flex-shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700" />
                             </button>
@@ -873,6 +1167,60 @@
           // Close on ESC
           document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") closeMenu();
+          });
+        })();
+
+        (function () {
+          var nameEl = document.getElementById("orgSidebarCompanyName");
+          var logoImg = document.getElementById("orgSidebarLogo");
+          var fallback = document.getElementById("orgSidebarLogoFallback");
+          var appRoot = document.getElementById("appRoot");
+          var initialLogoBase = logoImg ? (logoImg.getAttribute("data-logo-base") || "").trim() : "";
+          var state = {
+            orgName: nameEl ? (nameEl.textContent || "").trim() : "Organization",
+            logoUrl: initialLogoBase || null
+          };
+          window.__orgBranding = state;
+
+          function updateLogo() {
+            if (!logoImg || !fallback) return;
+            if (state.logoUrl) {
+              var bust = state.logoUrl + (state.logoUrl.indexOf("?") === -1 ? "?v=" : "&v=") + Date.now();
+              logoImg.src = bust;
+              logoImg.alt = (state.orgName || "Organization") + " logo";
+              logoImg.classList.remove("hidden");
+              fallback.classList.add("hidden");
+            } else {
+              logoImg.classList.add("hidden");
+              fallback.classList.remove("hidden");
+            }
+          }
+
+          function render() {
+            if (nameEl && state.orgName) nameEl.textContent = state.orgName;
+            updateLogo();
+          }
+
+          function applyBranding(partial) {
+            if (!partial) return;
+            if (typeof partial.orgName === "string" && partial.orgName.trim()) state.orgName = partial.orgName.trim();
+            if (partial.logoUrl !== undefined) state.logoUrl = partial.logoUrl || null;
+            render();
+          }
+
+          var apiBase = appRoot ? (appRoot.getAttribute("data-api-base") || "").trim().replace(/\/$/, "") : "";
+          var token = appRoot ? (appRoot.getAttribute("data-access-token") || "") : "";
+          if (apiBase && token) {
+            fetch(apiBase + "/api/org-profile/current", { headers: { "Authorization": "Bearer " + token } })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (data) {
+                if (data) applyBranding({ orgName: data.orgName, logoUrl: data.logoUrl });
+              })
+              .catch(function () { });
+          }
+
+          window.addEventListener("org-branding-updated", function (e) {
+            applyBranding(e.detail || {});
           });
         })();
 

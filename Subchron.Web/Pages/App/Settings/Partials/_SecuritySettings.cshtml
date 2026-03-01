@@ -14,7 +14,7 @@
         <!-- Step 1: Start -->
         <div id="changePwdStep1" class="mt-6">
             <button type="button" id="btnStartChangePwd"
-                    class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                    class="btn-primary">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                 Change password
             </button>
@@ -32,11 +32,11 @@
                 <span class="text-slate-400 dark:text-slate-500"> — Request a reset link to your email</span>
             </p>
             <div class="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" id="btnContinueToNewPwd" class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <button type="button" id="btnContinueToNewPwd" class="btn-primary">
                     Continue
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
-                <button type="button" id="btnCancelChangePwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                <button type="button" id="btnCancelChangePwd" class="btn-secondary">
                     Cancel
                 </button>
             </div>
@@ -61,10 +61,10 @@
             <div id="changePwdError" class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"></div>
             <div id="changePwdSuccess" class="hidden rounded-lg border border-subgreen-200 bg-subgreen-50 px-3 py-2 text-sm text-subgreen-800 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300">Password updated successfully.</div>
             <div class="flex flex-wrap items-center gap-3 pt-1">
-                <button type="submit" id="btnSubmitChangePwd" class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700 focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                <button type="submit" id="btnSubmitChangePwd" class="btn-primary">
                     Update password
                 </button>
-                <button type="button" id="btnCancelNewPwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                <button type="button" id="btnCancelNewPwd" class="btn-secondary">
                     Cancel
                 </button>
             </div>
@@ -129,8 +129,7 @@
     <div id="totpDisabledState" class="mt-5">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">2FA is currently disabled.</p>
         <button type="button" id="btnEnableTotp"
-                class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
-                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70">
+                class="btn-primary gap-2 disabled:opacity-70">
             <svg id="btnEnableTotpSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             <svg id="btnEnableTotpIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             <span id="btnEnableTotpText">Enable 2FA</span>
@@ -227,8 +226,7 @@
                             Cancel
                         </button>
                         <button type="button" id="btnGoTotpStep2"
-                                class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
-                                       focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+                                class="btn-primary gap-2">
                             Continue
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -264,8 +262,7 @@
                     Back
                 </button>
                 <button type="button" id="btnVerifyTotp"
-                        class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
-                               focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70">
+                        class="btn-primary gap-2 disabled:opacity-70">
                     <svg id="btnVerifyTotpSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     <span id="btnVerifyTotpText">Verify & enable</span>
                 </button>
@@ -328,8 +325,7 @@
 
             <div class="mt-5 flex justify-end gap-3">
                 <button type="button" id="btnFinishTotp"
-                        class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-700
-                               focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+                        class="btn-primary gap-2"
                         disabled>
                     Finish
                 </button>

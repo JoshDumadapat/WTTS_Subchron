@@ -35,22 +35,80 @@
     };
 }
 
-<div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
-    <div class="flex flex-wrap gap-3">
-        <a href="#" class="flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-indigo-700">
-            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-            Scan Station
-        </a>
-        <a href="#" class="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+<div class="mx-auto">
+<!-- Header row: title left | Scan Station (primary) + Reports (secondary) right -->
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+        <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Dashboard</h1>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="#" class="btn-secondary">
             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             Reports
         </a>
+        <a href="#" class="btn-primary">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            Scan Station
+        </a>
+    </div>
+</div>
+
+<!-- Filter card: single row — From → to → To → Dept → shortcuts → Reset → Apply -->
+<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex flex-wrap items-end gap-3">
+        <!-- From date -->
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">From</label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                    <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                </div>
+                <input type="date" id="dashFromDate" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+            </div>
+        </div>
+        <span class="mb-2 text-sm text-slate-400 dark:text-slate-500">to</span>
+        <!-- To date -->
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">To</label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                    <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                </div>
+                <input type="date" id="dashToDate" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+            </div>
+        </div>
+        <!-- Department -->
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Department</label>
+            <select id="dashDeptFilter" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white min-w-[160px]">
+                <option value="">All departments</option>
+            </select>
+        </div>
+        <!-- Shortcut filters -->
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Quick filters</label>
+            <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" id="dashShortcutToday" onclick="dashSetShortcut('today')" class="dash-shortcut h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition-all hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">Today</button>
+                <button type="button" id="dashShortcutYesterday" onclick="dashSetShortcut('yesterday')" class="dash-shortcut h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition-all hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">Yesterday</button>
+                <button type="button" id="dashShortcutWeek" onclick="dashSetShortcut('week')" class="dash-shortcut h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition-all hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">This Week</button>
+                <button type="button" id="dashShortcutMonth" onclick="dashSetShortcut('month')" class="dash-shortcut h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition-all hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">This Month</button>
+                <button type="button" id="dashShortcutYear" onclick="dashSetShortcut('year')" class="dash-shortcut h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition-all hover:border-subgreen-400 hover:bg-subgreen-50 hover:text-subgreen-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-subgreen-500 dark:hover:bg-subgreen-900/20 dark:hover:text-subgreen-400">This Year</button>
+            </div>
+        </div>
+        <!-- Reset (secondary) then Apply (primary) -->
+        <div class="flex flex-col gap-1">
+            <label class="invisible text-xs font-medium">Actions</label>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="dashReset()" class="btn-secondary h-10">Reset</button>
+                <button type="button" class="btn-primary h-10">Apply</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="mb-8 grid grid-cols-2 gap-6 lg:grid-cols-3">
 
-    <div class="group relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="group relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="relative z-10 flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Workforce</p>
@@ -66,7 +124,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Present Today</p>
@@ -82,7 +140,7 @@
         <p class="mt-2 text-right text-xs text-gray-400">@Math.Round((double)presentToday / totalEmployees * 100)% Rate</p>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Late Arrivals</p>
@@ -97,7 +155,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">On Leave / Absent</p>
@@ -110,7 +168,7 @@
         <p class="mt-4 text-xs text-gray-500">Includes Sick & Vacation</p>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Pending OT</p>
@@ -125,7 +183,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Missing Out</p>
@@ -142,7 +200,7 @@
 
 <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-700 dark:bg-slate-800">
         <div class="mb-6 flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">Attendance Trends</h3>
@@ -154,7 +212,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="mb-6">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Department Active</h3>
             <p class="text-xs text-gray-500">Distribution of present staff</p>
@@ -173,8 +231,8 @@
     </div>
 </div>
 
-<div class="rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <div class="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-700">
+<div class="rounded-xl border border-gray-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex items-center justify-between border-b border-gray-100 p-6 dark:border-slate-700">
         <div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Live Activity Feed</h3>
         </div>
@@ -183,7 +241,7 @@
 
     <div class="overflow-x-auto">
         <table class="w-full text-left">
-            <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <thead class="bg-gray-50 dark:bg-slate-700/50">
                 <tr>
                     <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Employee</th>
                     <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Department</th>
@@ -191,10 +249,10 @@
                     <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Time</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                 @foreach (var log in recentLogs)
                 {
-                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-9 w-9 @log.Color items-center justify-center rounded-full text-xs font-bold shadow-sm ring-2 ring-white dark:ring-gray-800">
@@ -237,24 +295,84 @@
         </table>
     </div>
 </div>
+</div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // --- Dashboard date shortcut helpers ---
+        function dashFmt(d) {
+            var y = d.getFullYear();
+            var m = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + day;
+        }
+        function dashSetShortcut(type) {
+            var today = new Date();
+            var from, to;
+            if (type === 'today') {
+                from = to = new Date(today);
+            } else if (type === 'yesterday') {
+                from = to = new Date(today);
+                from.setDate(today.getDate() - 1);
+                to = new Date(from);
+            } else if (type === 'week') {
+                var day = today.getDay();
+                var diff = today.getDate() - day + (day === 0 ? -6 : 1);
+                from = new Date(today); from.setDate(diff);
+                to = new Date(today);
+            } else if (type === 'month') {
+                from = new Date(today.getFullYear(), today.getMonth(), 1);
+                to = new Date(today);
+            } else if (type === 'year') {
+                from = new Date(today.getFullYear(), 0, 1);
+                to = new Date(today);
+            }
+            var fromEl = document.getElementById('dashFromDate');
+            var toEl = document.getElementById('dashToDate');
+            if (fromEl) fromEl.value = dashFmt(from);
+            if (toEl) toEl.value = dashFmt(to);
+            // Highlight active shortcut
+            document.querySelectorAll('.dash-shortcut').forEach(function (btn) {
+                btn.classList.remove('border-subgreen-500', 'bg-subgreen-50', 'text-subgreen-700', 'dark:border-subgreen-500', 'dark:bg-subgreen-900/20', 'dark:text-subgreen-400');
+            });
+            var active = document.getElementById('dashShortcut' + type.charAt(0).toUpperCase() + type.slice(1));
+            if (active) active.classList.add('border-subgreen-500', 'bg-subgreen-50', 'text-subgreen-700', 'dark:border-subgreen-500', 'dark:bg-subgreen-900/20', 'dark:text-subgreen-400');
+        }
+        function dashReset() {
+            var fromEl = document.getElementById('dashFromDate');
+            var toEl = document.getElementById('dashToDate');
+            var deptEl = document.getElementById('dashDeptFilter');
+            if (fromEl) fromEl.value = '';
+            if (toEl) toEl.value = '';
+            if (deptEl) deptEl.value = '';
+            document.querySelectorAll('.dash-shortcut').forEach(function (btn) {
+                btn.classList.remove('border-subgreen-500', 'bg-subgreen-50', 'text-subgreen-700', 'dark:border-subgreen-500', 'dark:bg-subgreen-900/20', 'dark:text-subgreen-400');
+            });
+        }
+        function initDashboardCharts() {
+            var attendanceCanvas = document.getElementById('attendanceChart');
+            var deptCanvas = document.getElementById('deptChart');
+            if (!attendanceCanvas || !deptCanvas) return;
+            if (typeof Chart === 'undefined') {
+                setTimeout(initDashboardCharts, 120);
+                return;
+            }
 
-            // --- Shared Config ---
-            const isDark = document.documentElement.classList.contains('dark');
-            const gridColor = isDark ? '#374151' : '#f3f4f6';
-            const textColor = isDark ? '#9ca3af' : '#6b7280';
+            dashSetShortcut('month');
 
-            // --- 1. Line Chart (Trends) ---
-            const ctx1 = document.getElementById('attendanceChart').getContext('2d');
-            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 300);
-            gradient1.addColorStop(0, 'rgba(16, 185, 129, 0.2)'); // Emerald
+            destroyDashboardCharts();
+
+            var isDark = document.documentElement.classList.contains('dark');
+            var gridColor = isDark ? '#374151' : '#f3f4f6';
+            var textColor = isDark ? '#9ca3af' : '#6b7280';
+
+            var ctx1 = attendanceCanvas.getContext('2d');
+            var gradient1 = ctx1.createLinearGradient(0, 0, 0, 300);
+            gradient1.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
             gradient1.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-            new Chart(ctx1, {
+            window.__dashAttendanceChart = new Chart(ctx1, {
                 type: 'line',
                 data: {
                     labels: @Html.Raw(Json.Serialize(days)),
@@ -262,7 +380,7 @@
                         {
                             label: 'On Time',
                             data: @Html.Raw(Json.Serialize(onTimeData)),
-                            borderColor: '#10b981', // Emerald 500
+                            borderColor: '#10b981',
                             backgroundColor: gradient1,
                             borderWidth: 2,
                             fill: true,
@@ -272,7 +390,7 @@
                         {
                             label: 'Late',
                             data: @Html.Raw(Json.Serialize(lateData)),
-                            borderColor: '#f59e0b', // Amber 500
+                            borderColor: '#f59e0b',
                             borderWidth: 2,
                             borderDash: [5, 5],
                             fill: false,
@@ -301,21 +419,14 @@
                 }
             });
 
-            // --- 2. Doughnut Chart (Departments) ---
-            const ctx2 = document.getElementById('deptChart').getContext('2d');
-            new Chart(ctx2, {
+            var ctx2 = deptCanvas.getContext('2d');
+            window.__dashDeptChart = new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
                     labels: @Html.Raw(Json.Serialize(deptLabels)),
                     datasets: [{
                         data: @Html.Raw(Json.Serialize(deptData)),
-                        backgroundColor: [
-                            '#4f46e5', // Indigo
-                            '#10b981', // Emerald
-                            '#f59e0b', // Amber
-                            '#ec4899', // Pink
-                            '#6366f1'  // Violet
-                        ],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#6366f1'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
@@ -324,11 +435,35 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }, // Custom legend used in HTML
+                        legend: { display: false }
                     },
                     cutout: '70%'
                 }
             });
-        });
+        }
+
+        function destroyDashboardCharts() {
+            if (window.__dashAttendanceChart) {
+                window.__dashAttendanceChart.destroy();
+                window.__dashAttendanceChart = null;
+            }
+            if (window.__dashDeptChart) {
+                window.__dashDeptChart.destroy();
+                window.__dashDeptChart = null;
+            }
+        }
+
+        function bindDashboardInitEvents() {
+            if (window.__dashInitEventsBound) return;
+            window.__dashInitEventsBound = true;
+
+            document.addEventListener('DOMContentLoaded', initDashboardCharts);
+            document.addEventListener('turbo:load', initDashboardCharts);
+            document.addEventListener('turbo:before-cache', destroyDashboardCharts);
+            window.addEventListener('pageshow', initDashboardCharts);
+        }
+
+        bindDashboardInitEvents();
+        initDashboardCharts();
     </script>
 }

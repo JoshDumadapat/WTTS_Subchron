@@ -1,0 +1,342 @@
+@{
+    var orgName = (ViewData["OrgName"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(orgName))
+    {
+        orgName = "Your Company";
+    }
+    var orgLogoUrl = ViewData["OrgLogoUrl"] as string;
+}
+
+<style id="idCardModalStyles">
+    .id-card-modal-title {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .id-card-stage {
+        width: 320px;
+        height: 500px;
+        position: relative;
+        perspective: 1400px;
+    }
+
+    .id-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        cursor: pointer;
+    }
+
+    .id-card-face {
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        overflow: hidden;
+        backface-visibility: hidden;
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        background: #ffffff;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .id-card-back {
+        transform: rotateY(180deg);
+        background: #f8fafc;
+    }
+
+    /* Separate capture containers: same layout as card, no flip, used only for html2canvas so front/back are not mirrored */
+    .id-card-capture-zone {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 320px;
+        min-height: 1000px;
+        pointer-events: none;
+        opacity: 0;
+        z-index: -1;
+    }
+    .id-card-capture-stage {
+        width: 320px;
+        height: 500px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+
+    /* Front Header Styles */
+    .card-header-geo {
+        height: 180px;
+        background: #002d5b;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .geo-overlay-1 {
+        position: absolute;
+        bottom: -40px;
+        left: -20%;
+        width: 140%;
+        height: 100px;
+        background: #005ba3;
+        transform: rotate(-10deg);
+    }
+
+    .geo-overlay-2 {
+        position: absolute;
+        bottom: -20px;
+        left: -20%;
+        width: 140%;
+        height: 80px;
+        background: #00a9e0;
+        transform: rotate(10deg);
+    }
+
+    .geo-overlay-white {
+        position: absolute;
+        bottom: -50px;
+        left: -10%;
+        width: 120%;
+        height: 80px;
+        background: white;
+        transform: rotate(-5deg);
+    }
+
+    .id-card-photo-wrapper {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+
+    .id-card-photo-ring {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .id-card-field-label {
+        font-size: 9px;
+        font-weight: 800;
+        color: #64748b;
+        letter-spacing: 0.05em;
+    }
+
+    .id-card-field-value {
+        font-size: 10px;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    /* New Back Design Elements */
+    .emergency-info-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 0 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .signature-line {
+        border-bottom: 1.5px solid #002d5b;
+        width: 180px;
+        margin: 0 auto;
+        position: relative;
+        height: 40px;
+    }
+
+    .signature-text {
+        font-size: 8px;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #94a3b8;
+        margin-top: 6px;
+        letter-spacing: 0.1em;
+    }
+
+    .simple-footer-navy {
+        background: #002d5b;
+        height: 70px;
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    @@media print {
+        #idCardModal .fixed {
+            position: static;
+        }
+
+        #idCardModal .modal-backdrop {
+            display: none;
+        }
+    }
+</style>
+
+<div id="idCardModal" class="fixed inset-0 z-[200] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm modal-backdrop" onclick="closeIdModal()"></div>
+
+        <div class="relative z-10 w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl transition-colors">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 id="idCardModalTitle" class="text-lg font-bold id-card-modal-title dark:text-white">Print Preview</h3>
+                <button type="button" onclick="closeIdModal()" class="text-xs uppercase tracking-widest text-slate-500 hover:text-red-500">Dismiss</button>
+            </div>
+
+            <div id="idCardNoIdMessage" class="mb-4 hidden rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                This team member does not have an ID photo yet. Upload an ID image to generate their ID card.
+            </div>
+
+            <div id="idCardFlipContainer" class="mx-auto id-card-stage">
+                <div id="idCardInner" class="id-card-inner" onclick="flipCard()">
+
+                    <div id="idCardFront" class="id-card-face flex flex-col">
+                        <div class="card-header-geo flex flex-col items-center pt-6 text-white">
+                            <div class="geo-overlay-1"></div>
+                            <div class="geo-overlay-2"></div>
+                            <div class="geo-overlay-white"></div>
+                            <div class="relative z-20 flex flex-col items-center gap-1 text-center">
+                                @if (!string.IsNullOrWhiteSpace(orgLogoUrl))
+                                {
+                                    <img src="@orgLogoUrl" alt="@orgName logo" class="h-12 w-auto object-contain drop-shadow" />
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 64 32" class="h-12 w-auto text-white/90" role="img" aria-label="@orgName logo placeholder">
+                                        <rect x="2" y="6" width="60" height="20" rx="6" fill="rgba(255,255,255,0.25)" />
+                                        <circle cx="16" cy="16" r="8" fill="rgba(255,255,255,0.9)" />
+                                        <rect x="28" y="10" width="24" height="12" rx="3" fill="rgba(255,255,255,0.55)" />
+                                    </svg>
+                                }
+                                <span class="text-[8px] font-semibold tracking-widest opacity-80 uppercase">@orgName</span>
+                            </div>
+                        </div>
+
+                        <div class="id-card-photo-wrapper">
+                            <div class="id-card-photo-ring">
+                                <img id="idCardPhoto" src="/images/default-avatar.png" alt="Employee" class="h-full w-full object-cover" />
+                            </div>
+                        </div>
+
+                        <div class="mt-20 px-8 text-center">
+                            <h2 id="idCardName" class="text-2xl font-black uppercase tracking-tight text-[#002d5b] leading-none">—</h2>
+                            <p id="idCardRole" class="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-[#00a9e0]">—</p>
+
+                            <div class="mt-8 space-y-3">
+                                <div class="flex flex-col items-start border-l-2 border-[#00a9e0] pl-3">
+                                    <span class="id-card-field-label uppercase">Email Address</span>
+                                    <span id="idCardEmail" class="id-card-field-value">—</span>
+                                </div>
+                                <div class="flex flex-col items-start border-l-2 border-slate-200 pl-3">
+                                    <span class="id-card-field-label uppercase">Contact No.</span>
+                                    <span id="idCardPhone" class="id-card-field-value">—</span>
+                                </div>
+                                <div class="flex flex-col items-start border-l-2 border-slate-200 pl-3">
+                                    <span class="id-card-field-label uppercase">Address</span>
+                                    <span id="idCardAddress" class="id-card-field-value leading-snug">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto h-4 bg-[#002d5b] w-full"></div>
+                    </div>
+
+                    <div id="idCardBack" class="id-card-face id-card-back flex flex-col text-slate-800">
+                        <div class="h-2 bg-[#00a9e0] w-full"></div>
+
+                        <div class="py-6 flex flex-col flex-1 gap-6">
+                            <div class="emergency-info-card">
+                                <h4 class="text-[10px] font-black text-[#002d5b] uppercase tracking-widest mb-3 border-b border-slate-100 pb-1">Emergency Contact</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="id-card-field-label">NAME</span>
+                                        <span id="idCardEcName" class="id-card-field-value">—</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="id-card-field-label">PHONE</span>
+                                        <span id="idCardEcPhone" class="id-card-field-value">—</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="id-card-field-label">RELATION</span>
+                                        <span id="idCardEcRelation" class="id-card-field-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="bg-white p-1.5 border border-slate-100 rounded-lg shadow-sm">
+                                    <img id="idCardQr" src="" alt="QR" class="h-32 w-32" />
+                                </div>
+                                <p id="idCardEmpNumber" class="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#002d5b] whitespace-nowrap">Employee No: —</p>
+                            </div>
+
+                            <div class="flex flex-col items-center mt-auto mb-8">
+                                <div class="signature-line">
+                                    <img id="idCardSignature" src="" alt="" class="max-h-12 max-w-full object-contain mx-auto absolute bottom-1 inset-x-0" />
+                                </div>
+                                <span class="signature-text">Employee Signature</span>
+                            </div>
+                        </div>
+
+                        <div class="simple-footer-navy">
+                            <span class="text-[10px] font-bold tracking-[0.2em] uppercase">@orgName</span>
+                            <span class="text-[7px] tracking-widest opacity-60 uppercase mt-1">Property of @orgName - If found, please return.</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Separate front/back nodes for PDF capture only (no flip transform), so images are not mirrored -->
+            <div id="idCardCaptureZone" class="id-card-capture-zone" aria-hidden="true">
+                <div id="idCardFrontCapture" class="id-card-capture-stage"></div>
+                <div id="idCardBackCapture" class="id-card-capture-stage"></div>
+            </div>
+
+            <div class="mt-8 flex items-center justify-between">
+                <p class="text-[10px] text-slate-400 italic">Click card to flip preview</p>
+                <div class="flex gap-2">
+                    <button type="button" id="idCardPrintBtn" class="rounded-xl bg-blue-600 px-6 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-blue-700 transition-all">Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeIdModal() {
+        document.getElementById('idCardModal').classList.add('hidden');
+        // Reset flip on close
+        document.getElementById('idCardInner').style.transform = 'rotateY(0deg)';
+    }
+
+    function flipCard() {
+        const inner = document.getElementById('idCardInner');
+        inner.style.transform = inner.style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';
+    }
+
+    // Function to be called from your main page to open the modal
+    function openEmployeeIdCard(data) {
+        document.getElementById('idCardName').innerText = data.name || "—";
+        document.getElementById('idCardRole').innerText = data.role || "—";
+        document.getElementById('idCardEmpNumber').innerText = data.empNo || "—";
+        document.getElementById('idCardEmail').innerText = data.email || "—";
+        document.getElementById('idCardEcName').innerText = data.ecName || "—";
+        document.getElementById('idCardEcPhone').innerText = data.ecPhone || "—";
+        document.getElementById('idCardEcRelation').innerText = data.ecRelation || "—";
+        document.getElementById('idCardAddress').innerText = data.address || "—";
+        document.getElementById('idCardPhoto').src = data.photoUrl || "/images/default-avatar.png";
+        document.getElementById('idCardQr').src = data.qrUrl || "";
+        document.getElementById('idCardSignature').src = data.signatureUrl || "";
+a lot 
+        document.getElementById('idCardModal').classList.remove('hidden');
+    }
+</script>

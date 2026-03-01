@@ -6,6 +6,8 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
     var e = Model.Employee;
     var dateHired = e?.DateHired?.ToString("yyyy-MM-dd") ?? "";
+    var hasLoginAccount = e?.UserID.HasValue == true;
+    var loginEmail = e?.Email ?? string.Empty;
     string Option(string value, string text, string? current)
     {
         if (string.IsNullOrEmpty(value))
@@ -23,11 +25,6 @@
 <div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <a href="/App/Employee/EmployeeManagement" class="hover:text-subgreen-600 dark:hover:text-subgreen-400">Employee Directory</a>
-                <span>/</span>
-                <span class="text-slate-700 dark:text-slate-200">Edit Employee</span>
-            </nav>
             <h1 class="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Edit Employee</h1>
             <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Update employee details. Changes are saved when you click Update Employee.</p>
         </div>
@@ -81,9 +78,11 @@
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Address</h2>
             <div class="space-y-4">
-                <div>
+                <div class="address-autocomplete relative">
                     <label for="editAddressLine1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line <span class="text-red-500">*</span></label>
-                    <input type="text" name="addressLine1" id="editAddressLine1" value="@e.AddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Address line 1" required />
+                    <input type="text" name="addressLine1" id="editAddressLine1" value="@e.AddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Start typing address — suggestions from LocationIQ" autocomplete="off" required />
+                    <div id="editAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Select an address to auto-fill city, state/province, postal code, and country.</p>
                 </div>
                 <div>
                     <label for="editAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
@@ -122,9 +121,24 @@
                     </div>
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email (login account)</label>
-                    <input type="text" value="@e.Email" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" readonly placeholder="No login account" />
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Shown when employee has a linked login account. Password is never displayed.</p>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Login email</label>
+                    <div class="space-y-2 rounded-2xl border border-slate-100 p-4 dark:border-slate-700/70">
+                        <input type="email" value="@loginEmail" class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-900 placeholder-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-white" readonly placeholder="No login account linked" />
+                        <div class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" id="editHasAccount" class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" @(hasLoginAccount ? "checked" : string.Empty) disabled />
+                            <label for="editHasAccount" class="text-sm font-medium text-slate-700 dark:text-slate-300">Has login account</label>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            @if (hasLoginAccount)
+                            {
+                                <text>Employee can sign in with this email. Update passwords in Security settings.</text>
+                            }
+                            else
+                            {
+                                <text>No login account linked yet. Use Employee Management → Create Account to provision one.</text>
+                            }
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -207,11 +221,126 @@
         </section>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <a href="/App/Employee/EmployeeManagement" class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Cancel</a>
-            <button type="submit" class="inline-flex h-12 items-center justify-center rounded-xl bg-subgreen-600 px-6 text-sm font-semibold text-white shadow-lg shadow-subgreen-500/20 hover:bg-subgreen-500">Update Employee</button>
+            <a href="/App/Employee/EmployeeManagement" class="btn-secondary h-12 px-6">Cancel</a>
+            <button type="submit" class="btn-primary h-12 px-6 disabled:opacity-70">Update Employee</button>
         </div>
     </form>
     }
 </div>
 
 <script src="~/js/ph-phone.js" asp-append-version="true"></script>
+<script>
+    (function () {
+        var input = document.getElementById('editAddressLine1');
+        var list = document.getElementById('editAddressSuggestions');
+        if (!input || !list) return;
+
+        var debounceTimer = null;
+        var abortController = null;
+        var activeSuggestionIndex = -1;
+
+        function setActiveSuggestion(index) {
+            var options = list.querySelectorAll('button');
+            if (!options.length) {
+                activeSuggestionIndex = -1;
+                return;
+            }
+
+            if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+                options[activeSuggestionIndex].classList.remove('bg-slate-100', 'dark:bg-slate-700');
+            }
+
+            activeSuggestionIndex = index;
+            if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+                options[activeSuggestionIndex].classList.add('bg-slate-100', 'dark:bg-slate-700');
+                options[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function clearSuggestions() {
+            list.classList.add('hidden');
+            list.innerHTML = '';
+            activeSuggestionIndex = -1;
+        }
+
+        function fillAddress(item) {
+            var cityEl = document.getElementById('editCity');
+            var provEl = document.getElementById('editStateProvince');
+            var postalEl = document.getElementById('editPostalCode');
+            var countryEl = document.getElementById('editCountry');
+            input.value = item.addressLine || item.displayName || '';
+            if (cityEl) cityEl.value = item.city || '';
+            if (provEl) provEl.value = item.state || '';
+            if (postalEl) postalEl.value = item.postalCode || '';
+            if (countryEl) countryEl.value = item.country || 'Philippines';
+            clearSuggestions();
+        }
+
+        function showSuggestions(query) {
+            if (!query || query.length < 3) {
+                clearSuggestions();
+                return;
+            }
+
+            if (abortController) abortController.abort();
+            abortController = new AbortController();
+
+            fetch('/api/location/autocomplete?q=' + encodeURIComponent(query) + '&limit=6', { signal: abortController.signal })
+                .then(function (r) { return r.ok ? r.json() : []; })
+                .then(function (data) {
+                    clearSuggestions();
+                    if (!Array.isArray(data) || data.length === 0) return;
+
+                    data.forEach(function (item) {
+                        var optionIndex = list.querySelectorAll('button').length;
+                        var div = document.createElement('button');
+                        div.type = 'button';
+                        div.className = 'block w-full cursor-pointer px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
+                        div.textContent = item.displayName || item.addressLine || 'Address';
+                        div.addEventListener('click', function () { fillAddress(item); });
+                        div.addEventListener('mouseenter', function () { setActiveSuggestion(optionIndex); });
+                        list.appendChild(div);
+                    });
+
+                    list.classList.remove('hidden');
+                })
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return;
+                    clearSuggestions();
+                });
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () { showSuggestions(input.value.trim()); }, 320);
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (list.classList.contains('hidden')) return;
+
+            var options = list.querySelectorAll('button');
+            if (!options.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var next = activeSuggestionIndex < options.length - 1 ? activeSuggestionIndex + 1 : 0;
+                setActiveSuggestion(next);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var prev = activeSuggestionIndex > 0 ? activeSuggestionIndex - 1 : options.length - 1;
+                setActiveSuggestion(prev);
+            } else if (e.key === 'Enter') {
+                if (activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+                    e.preventDefault();
+                    options[activeSuggestionIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                clearSuggestions();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.address-autocomplete')) clearSuggestions();
+        });
+    })();
+</script>

@@ -1,0 +1,29 @@
+@{
+    var modals = new (string Id, string Title, string Message)[]
+    {
+        ("manualEntryInstructionModal", "Manual Entry Enabled", "Admins and supervisors can file time entries without scans. Remind approvers to validate evidence before approving."),
+        ("geofenceInstructionModal", "Geofence Required", "Employees must stay inside an approved location radius to clock in or out. Add locations under the Locations tab first."),
+        ("ipRestrictionInstructionModal", "IP Restriction Active", "Clock-ins only work from allow-listed office networks. Update your IP list under Locations > Networks."),
+        ("doubleClockInstructionModal", "Double Clock-in Prevention", "System blocks second clock-ins until a clock-out occurs. This keeps duplicate logs from messy shifts."),
+        ("autoClockInstructionModal", "Auto Clock-out Enabled", "Subchron will auto clock-out workers after the max hours you set. Use this for kiosk scenarios where people forget to clock out."),
+    };
+}
+
+@foreach (var modal in modals)
+{
+    <div id="@modal.Id" class="instruction-modal fixed inset-0 z-[160] hidden" role="dialog" aria-modal="true" aria-labelledby="@modal.Id-title">
+        <div class="flex min-h-screen items-center justify-center px-4">
+            <div class="absolute inset-0 bg-slate-900/60" onclick="closeInstructionModal('@modal.Id')"></div>
+            <div class="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 id="@modal.Id-title" class="text-lg font-semibold text-slate-900 dark:text-white">@modal.Title</h3>
+                    <button type="button" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400" onclick="closeInstructionModal('@modal.Id')">Close</button>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300">@modal.Message</p>
+                <div class="mt-6 flex justify-end">
+                    <button type="button" class="btn-primary" onclick="closeInstructionModal('@modal.Id')">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

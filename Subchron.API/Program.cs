@@ -36,13 +36,25 @@ if (jwt != null && !string.IsNullOrEmpty(jwt.Secret))
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// EF Core configuration (with retry handling for hosting environments)
-var connectionString =
+// EF Core: Platform DB (DefaultConnection) and Tenant DB (TenantConnection) — two physical databases
+var defaultConnection =
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var tenantConnection =
+    builder.Configuration.GetConnectionString("TenantConnection")
+    ?? throw new InvalidOperationException("Connection string 'TenantConnection' not found.");
 
 builder.Services.AddDbContext<SubchronDbContext>(options =>
-    options.UseSqlServer(connectionString, sql =>
+    options.UseSqlServer(defaultConnection, sql =>
+    {
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null);
+    }));
+
+builder.Services.AddDbContext<TenantDbContext>(options =>
+    options.UseSqlServer(tenantConnection, sql =>
     {
         sql.EnableRetryOnFailure(
             maxRetryCount: 5,
@@ -56,10 +68,12 @@ builder.Services.Configure<RecaptchaSettings>(builder.Configuration.GetSection("
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<PayMongoSettings>(builder.Configuration.GetSection("PayMongo"));
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.Configure<LocationIqSettings>(builder.Configuration.GetSection("LocationIq"));
 
 // Services
 builder.Services.AddHttpClient<RecaptchaService>();
 builder.Services.AddHttpClient<PayMongoService>();
+builder.Services.AddHttpClient<ILocationIqService, LocationIqService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
@@ -111,9 +125,9 @@ using (var scope = app.Services.CreateScope())
                 {
                     try
                     {
-                        logger.LogInformation("Applying EF migrations... attempt {Attempt}/{Max}", attempt, maxAttempts);
+                        logger.LogInformation("Applying Platform (SubchronDbContext) migrations... attempt {Attempt}/{Max}", attempt, maxAttempts);
                         await db.Database.MigrateAsync(cts.Token);
-                        logger.LogInformation("EF migrations applied successfully.");
+                        logger.LogInformation("Platform migrations applied successfully.");
                         break;
                     }
                     catch (Exception ex) when (attempt < maxAttempts)
@@ -122,6 +136,23 @@ using (var scope = app.Services.CreateScope())
                         await Task.Delay(TimeSpan.FromSeconds(2), cts.Token);
                     }
                 }
+            }
+
+            // Tenant DB migrations (separate database)
+            try
+            {
+                var tenantDb = services.GetRequiredService<TenantDbContext>();
+                if (await tenantDb.Database.CanConnectAsync(cts.Token))
+                {
+                    await tenantDb.Database.MigrateAsync(cts.Token);
+                    logger.LogInformation("Tenant DB migrations applied successfully.");
+                }
+                else
+                    logger.LogWarning("Tenant DB not reachable. Skipping tenant migrations.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Tenant DB migration failed during startup.");
             }
         }
         catch (Exception ex)

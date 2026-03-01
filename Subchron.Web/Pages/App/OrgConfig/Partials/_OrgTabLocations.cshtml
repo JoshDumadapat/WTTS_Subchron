@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     /* Utility to hide scrollbar while keeping scroll functionality */
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
@@ -8,90 +8,194 @@
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none; /* Firefox */
     }
+
+    #orgLocationsMap {
+        z-index: 1;
+    }
+
+    /* Neutral background: light and dark (Google Maps–style) */
+    .leaflet-container {
+        height: 100%;
+        width: 100%;
+        background: #e8eaed;
+    }
+    .dark .leaflet-container {
+        background: #2d3748;
+    }
+
+    /* Dark mode tile brightness — lifts the map out of pitch-black */
+    .dark .leaflet-tile-pane {
+        filter: brightness(0.85) contrast(1.1) saturate(1.15);
+    }
+
+    /* Loading overlay: light and dark mode */
+    #orgLocationsMapLoader {
+        position: absolute;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8eaed;
+        transition: opacity 0.25s ease;
+    }
+    .dark #orgLocationsMapLoader {
+        background: #111827;
+    }
+    #orgLocationsMapLoader.hidden {
+        pointer-events: none;
+        opacity: 0;
+    }
+    .map-loader-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #d1d5db;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: map-spin 0.8s linear infinite;
+    }
+    .dark .map-loader-spinner {
+        border-color: #374151;
+        border-top-color: #34d399;
+    }
+    @@keyframes map-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .location-outline {
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        border-radius: 0;
+    }
+    .dark .location-outline {
+        border-color: rgba(71, 85, 105, 0.75);
+    }
+
+    #tab-locations .leaflet-control-attribution {
+        display: none !important;
+    }
+
+    .org-radius-ring {
+        stroke: #10b981;
+        stroke-width: 2px;
+        stroke-opacity: 0.8;
+        fill: rgba(16, 185, 129, 0.12);
+        transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    .pin-color-option {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+    }
+
+    .pin-color-option.active {
+        transform: translateY(-2px) scale(1.05);
+        border-color: rgba(255,255,255,0.9);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 10px 15px -8px rgba(15,23,42,0.45);
+    }
+
+    .dark .pin-color-option.active {
+        border-color: rgba(15,23,42,0.9);
+        box-shadow: 0 0 0 3px rgba(15,23,42,0.9), 0 10px 15px -8px rgba(0,0,0,0.6);
+    }
+
+    .map-pin-wrap {
+        width: 34px;
+        height: 34px;
+    }
+
+    .map-pin {
+        width: 24px;
+        height: 26px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        position: relative;
+        display: block;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+        background: #10b981;
+    }
+
+    .map-pin::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .map-pin-inactive {
+        background: #94a3b8;
+        border-color: #cbd5f5;
+        box-shadow: 0 1px 6px rgba(15, 23, 42, 0.2);
+    }
+
+    .site-card-accent {
+        border-left: 4px solid transparent;
+    }
+
+    /* Pin color option classes */
+    .pin-color-blue {
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    }
+
+    .pin-color-purple {
+        background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    }
+
+    .pin-color-pink {
+        background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+    }
+
+    .pin-color-cyan {
+        background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+    }
+
+    .pin-color-emerald {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    }
 </style>
 
 <div id="tab-locations" class="tab-content hidden h-full flex-col">
 
-    <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <div class="flex flex-col gap-3 border-b border-gray-200 px-0 py-4 dark:border-gray-700 lg:flex-row lg:items-center lg:justify-between">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Locations Management</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage geofenced sites and office coordinates.</p>
         </div>
-        <span class="hidden text-xs font-medium text-gray-400 sm:block">Click map to set coordinates</span>
+        <div class="w-full max-w-sm lg:text-right lg:ml-auto">
+            <label class="sr-only" for="orgLocationSearch">Search location</label>
+            <div class="relative inline-block w-full lg:w-auto lg:min-w-[360px]">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" /></svg>
+                </div>
+                <input id="orgLocationSearch" type="search" placeholder="Search address or landmark"
+                       class="block w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                       autocomplete="off">
+                <div id="orgLocationSearchSuggestions" class="absolute left-0 right-0 top-full z-10 mt-1 hidden overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"></div>
+            </div>
+        </div>
     </div>
 
     <div class="flex h-[600px] flex-1 flex-col lg:flex-row">
 
-        <div class="flex w-full flex-col border-b border-gray-200 bg-white lg:w-[400px] lg:border-r lg:border-b-0 dark:border-gray-700 dark:bg-gray-900">
+        <div class="flex w-full h-full flex-col border-b border-gray-200 bg-white lg:w-[400px] lg:border-r lg:border-b-0 dark:border-gray-700 dark:bg-gray-900 location-outline">
 
-            <div class="scrollbar-hide h-[260px] shrink-0 overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900/50">
+            <div class="scrollbar-hide h-[220px] shrink-0 overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900/50">
                 <div class="mb-3 flex items-center justify-between">
                     <span class="text-xs font-bold tracking-wider text-gray-500 uppercase">Active Sites</span>
-                    <span class="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] text-gray-600 dark:bg-gray-700 dark:text-gray-300">3</span>
+                    <span id="orgLocationsCount" class="inline-flex cursor-pointer select-none items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-800 ring-1 ring-emerald-600/30 transition hover:-translate-y-0.5 hover:shadow-sm dark:bg-emerald-900/40 dark:text-emerald-200" title="Showing active sites">0</span>
                 </div>
 
-                <div class="space-y-3">
-
-                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
-                        <div class="mb-3 flex items-start justify-between">
-                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Main HQ</h3>
-                            <span onclick="openModal('status', 'Main HQ')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                Active
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="font-mono text-xs text-gray-500">14.5995, 120.9842</div>
-                            <div class="relative">
-                                <button onclick="toggleMenu('menu-1')" class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
-                                </button>
-                                <div id="menu-1" class="ring-opacity-5 absolute top-full right-0 z-50 mt-1 hidden w-32 rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-700">
-                                    <a href="#" onclick="editSite('Main HQ', '14.5995', '120.9842', '50')" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-600">Edit</a>
-                                    <a href="#" onclick="openModal('remove', 'Main HQ')" class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">Remove</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
-                        <div class="mb-3 flex items-start justify-between">
-                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Warehouse A</h3>
-                            <span onclick="openModal('status', 'Warehouse A')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                Active
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="font-mono text-xs text-gray-500">14.6000, 121.0000</div>
-                            <div class="relative">
-                                <button onclick="toggleMenu('menu-2')" class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
-                                </button>
-                                <div id="menu-2" class="ring-opacity-5 absolute top-full right-0 z-50 mt-1 hidden w-32 rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none dark:bg-gray-700">
-                                    <a href="#" onclick="editSite('Warehouse A', '14.6000', '121.0000', '100')" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-600">Edit</a>
-                                    <a href="#" onclick="openModal('remove', 'Warehouse A')" class="block px-4 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">Remove</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-400 dark:border-gray-700 dark:bg-gray-800">
-                        <div class="mb-3 flex items-start justify-between">
-                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Davao Hub</h3>
-                            <span onclick="openModal('status', 'Davao Hub')" class="shrink-0 cursor-pointer rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-[10px] text-emerald-700 ring-1 ring-emerald-600/20 transition-colors ring-inset hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                Active
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="font-mono text-xs text-gray-500">7.1907, 125.4553</div>
-                            <div class="relative">
-                                <button class="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
+                <div id="orgLocationsListLoading" class="text-sm text-gray-500 dark:text-gray-400">Loading locations…</div>
+                <div id="orgLocationsEmpty" class="hidden rounded-lg border border-dashed border-gray-300 bg-white/70 px-4 py-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-slate-800/60 dark:text-gray-300">
+                    No active sites yet. Add your first location to start enforcing map restrictions.
                 </div>
+                <div id="orgLocationsList" class="space-y-3"></div>
             </div>
 
             <div class="flex-1 border-t border-gray-200 bg-white p-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:border-gray-700 dark:bg-gray-800">
@@ -99,6 +203,7 @@
                     <h3 id="form-title" class="text-base font-bold text-gray-900 dark:text-white">Add New Site</h3>
                     <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">Cancel Edit</button>
                 </div>
+                <div id="orgLocationsFormError" class="mb-4 hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/50 dark:bg-red-900/20 dark:text-red-200"></div>
                 <div class="space-y-4">
                     <div>
                         <label for="site_name" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Location Name</label>
@@ -118,71 +223,69 @@
                         <label for="site_radius" class="block text-xs leading-6 font-medium text-gray-900 dark:text-gray-300">Radius (Meters)</label>
                         <div class="mt-1"><input type="number" id="site_radius" value="50" class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:ring-emerald-500"></div>
                     </div>
-                    <button id="form-submit-btn" class="w-full rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">Add Site</button>
+                    <button id="form-submit-btn" type="button" class="btn-primary w-full">Add Site</button>
                 </div>
             </div>
         </div>
 
-        <div class="group relative flex-1 bg-gray-100 dark:bg-gray-900">
-            <div class="absolute inset-0 flex items-center justify-center overflow-hidden bg-slate-200 dark:bg-slate-800">
-                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px;"></div>
-                <div class="pointer-events-none z-10 text-center">
-                    <svg class="mx-auto mb-2 h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7m0 0L9 17"></path></svg>
-                    <span class="block text-base font-medium text-gray-500">Interactive Map Component</span>
+        <div class="group relative flex-1 bg-gray-100 dark:bg-gray-900 location-outline">
+            <div class="absolute inset-0">
+                <div id="orgLocationsMap" class="absolute inset-0"></div>
+                <div id="orgLocationsMapLoader" aria-hidden="true">
+                    <div class="map-loader-spinner" role="presentation"></div>
                 </div>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-                    <div class="h-5 w-5 animate-bounce rounded-full border-2 border-white bg-emerald-500 shadow-lg"></div>
-                </div>
-                <button onclick="simulateMapClick()" class="absolute right-4 bottom-4 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200">
-                    <span class="flex items-center">
-                        <svg class="mr-2 h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Set Current Pin
-                    </span>
-                </button>
             </div>
+            <button id="locateMyPositionBtn" type="button" class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-md transition duration-150 hover:border-emerald-400 hover:bg-white/95 hover:text-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-300">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a6 6 0 100-12 6 6 0 000 12z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m10 8h-2M12 20v2M4 12H2m15.364-5.364l-1.414 1.414M17.95 17.95l-1.414-1.414M7.05 17.95l1.414-1.414M7.05 6.05l1.414 1.414" /></svg>
+                <span class="locate-label">Use My Location</span>
+            </button>
+            <button id="setCurrentPinBtn" type="button" class="absolute right-4 bottom-4 z-10 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-md transition duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:border-emerald-400 hover:text-emerald-600 hover:bg-white/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:border-emerald-500 dark:hover:text-emerald-300 dark:hover:bg-gray-900/90">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Set Current Pin
+            </button>
         </div>
     </div>
 </div>
 
 <div id="action-modal" class="relative z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"></div>
+    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
 
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto" style="-ms-overflow-style:none;scrollbar-width:none;">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
 
-            <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+            <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all dark:bg-slate-900 sm:my-8 sm:w-full sm:max-w-md">
 
-                <div class="bg-white px-6 pt-6 pb-6">
+                <div class="bg-white px-6 pt-6 pb-6 dark:bg-slate-900">
                     <div class="sm:flex sm:items-start">
 
-                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <div id="modal-icon-wrap" class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg id="modal-icon" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
                         </div>
 
                         <div class="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 id="modal-title" class="text-lg leading-6 font-bold text-gray-900">Remove Site</h3>
+                            <h3 id="modal-title" class="text-lg leading-6 font-bold text-gray-900 dark:text-white">Remove Site</h3>
                             <div class="mt-2">
-                                <p id="modal-desc" class="text-sm text-gray-500">Are you sure you want to remove this location? This action cannot be undone.</p>
+                                <p id="modal-desc" class="text-sm text-gray-500 dark:text-gray-300">Are you sure you want to remove this location? This action cannot be undone.</p>
 
-                                <div class="mt-4">
-                                    <label for="action-reason" class="block text-sm font-semibold text-gray-700">Reason / Remarks</label>
+                                <div id="action-reason-wrapper" class="mt-4">
+                                    <label for="action-reason" class="block text-sm font-semibold text-gray-700 dark:text-gray-200">Reason / Remarks</label>
                                     <textarea id="action-reason"
-                                              rows="3"
-                                              class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none sm:text-sm"
-                                              placeholder="e.g. Site renovation, relocation..."></textarea>
+                                               rows="3"
+                                               class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                                               placeholder="e.g. Site renovation, relocation..."></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse">
-                    <button id="modal-confirm-btn" type="button" onclick="closeModal()" class="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-500 sm:ml-3 sm:w-auto">
+                <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse dark:bg-slate-900/70">
+                    <button id="modal-confirm-btn" type="button" class="inline-flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-500 sm:ml-3 sm:w-auto">
                         Confirm Removal
                     </button>
-                    <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 transition-colors ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                    <button id="modal-cancel-btn" type="button" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 transition-colors ring-inset hover:bg-gray-50 dark:bg-slate-900 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-slate-800 sm:mt-0 sm:w-auto">
                         Cancel
                     </button>
                 </div>
@@ -192,6 +295,7 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     // Logic (same as previous)
     function toggleMenu(menuId) {
@@ -207,6 +311,16 @@
     });
 
     function editSite(name, lat, lng, rad) {
+        if (window.orgLocationsFormApi?.enterEditFromLegacy) {
+            window.orgLocationsFormApi.enterEditFromLegacy({
+                locationName: name,
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng),
+                radiusMeters: parseInt(rad, 10) || 50
+            });
+            document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
+            return;
+        }
         document.getElementById('site_name').value = name;
         document.getElementById('site_lat').value = lat;
         document.getElementById('site_lng').value = lng;
@@ -217,6 +331,10 @@
         document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
     }
     function resetForm() {
+        if (window.orgLocationsFormApi?.reset) {
+            window.orgLocationsFormApi.reset();
+            return;
+        }
         document.getElementById('site_name').value = '';
         document.getElementById('site_lat').value = '';
         document.getElementById('site_lng').value = '';
@@ -227,36 +345,1137 @@
     }
 
     function openModal(type, siteName) {
-        const modal = document.getElementById('action-modal');
-        const title = document.getElementById('modal-title');
-        const desc = document.getElementById('modal-desc');
-        const btn = document.getElementById('modal-confirm-btn');
-        const reasonInput = document.getElementById('action-reason');
-
-        if (type === 'remove') {
-            title.innerText = "Remove Site";
-            desc.innerText = `Are you sure you want to remove ${siteName}? This action cannot be undone.`;
-            btn.innerText = "Confirm Removal";
-            btn.className = "inline-flex w-full justify-center items-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 transition-colors sm:ml-3 sm:w-auto";
-            // Red Theme Focus
-            reasonInput.className = "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 sm:text-sm";
-
-        } else if (type === 'status') {
-            title.innerText = "Deactivate Site";
-            desc.innerText = `You are about to deactivate ${siteName}. Users will no longer be able to clock in here.`;
-            btn.innerText = "Confirm Deactivation";
-            btn.className = "inline-flex w-full justify-center items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors sm:ml-3 sm:w-auto";
-            // Emerald Theme Focus for Deactivation
-            reasonInput.className = "mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:text-sm";
+        if (type === 'status' && window.orgLocationsStatusApi?.openByName) {
+            window.orgLocationsStatusApi.openByName(siteName);
+            return;
         }
-        document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
-        modal.classList.remove('hidden');
+        if (type === 'remove') {
+            document.getElementById('action-modal').classList.remove('hidden');
+        }
     }
     function closeModal() {
-        document.getElementById('action-modal').classList.add('hidden');
+        if (window.orgLocationsStatusApi?.close) {
+            window.orgLocationsStatusApi.close();
+        } else {
+            document.getElementById('action-modal').classList.add('hidden');
+        }
     }
     function simulateMapClick() {
         document.getElementById('site_lat').value = '14.5547';
         document.getElementById('site_lng').value = '121.0244';
     }
+
+    // Leaflet map setup — optimized for slow connections (fewer blanks, spinner, no 429 bursts).
+    // Tiles are cached by the browser (by URL). For server-side/CDN: put a cache (e.g. nginx, Cloudflare)
+    // in front of the tile origin to reduce latency and avoid 429s.
+    (function () {
+        var mapEl = document.getElementById('orgLocationsMap');
+        var loaderEl = document.getElementById('orgLocationsMapLoader');
+        if (!mapEl) return;
+
+        var map = null;
+        var marker = null;
+        var markerCoords = null;
+        var pendingMarkerCoords = null;
+        var geofenceCircle = null;
+        var pendingCircleData = null;
+        var siteMarkerLayer = null;
+        var siteCircleLayer = null;
+        var latestSiteData = [];
+        const mapPinColorHex = {
+            emerald: '#10b981',
+            blue: '#3b82f6',
+            purple: '#8b5cf6',
+            pink: '#ec4899',
+            cyan: '#06b6d4'
+        };
+        var autoReloadTimer = null;
+        var sizeFixTimer = null;
+        var autoReloadTriggered = false;
+        var tabEl = document.getElementById('tab-locations');
+        var latInput = document.getElementById('site_lat');
+        var lngInput = document.getElementById('site_lng');
+        var radiusInput = document.getElementById('site_radius');
+
+        function getStartLatLng() {
+            var lat = parseFloat(latInput && latInput.value ? latInput.value : '14.5995');
+            var lng = parseFloat(lngInput && lngInput.value ? lngInput.value : '120.9842');
+            return { lat: isNaN(lat) ? 14.5995 : lat, lng: isNaN(lng) ? 120.9842 : lng };
+        }
+
+        function syncInputs(latlng) {
+            if (latInput) latInput.value = latlng.lat.toFixed(6);
+            if (lngInput) lngInput.value = latlng.lng.toFixed(6);
+        }
+
+        function updateMarkerCoords(latlng) {
+            markerCoords = { lat: latlng.lat, lng: latlng.lng };
+        }
+
+        function getRadiusMeters() {
+            if (!radiusInput) return 50;
+            var r = parseFloat(radiusInput.value || '50');
+            if (isNaN(r) || r <= 0) r = 50;
+            return r;
+        }
+
+        function moveMarker(latlng, opts) {
+            if (!latlng) return;
+            updateMarkerCoords(latlng);
+            if (marker) {
+                marker.setLatLng(latlng);
+            } else {
+                pendingMarkerCoords = latlng;
+            }
+            if (map && opts?.pan !== false) {
+                map.setView(latlng, opts?.zoom || Math.max(map.getZoom(), 14));
+            }
+            updateGeofenceCircle(latlng, opts?.pulse);
+        }
+
+        function updateGeofenceCircle(latlng, pulse) {
+            var radius = getRadiusMeters();
+            if (!map) {
+                pendingCircleData = { latlng, pulse };
+                return;
+            }
+            if (!geofenceCircle) {
+                geofenceCircle = L.circle(latlng, {
+                    radius: radius,
+                    color: '#10b981',
+                    weight: 2,
+                    fillColor: '#10b981',
+                    fillOpacity: 0.18,
+                    className: 'org-radius-ring'
+                }).addTo(map);
+            } else {
+                geofenceCircle.setLatLng(latlng);
+                geofenceCircle.setRadius(radius);
+            }
+            if (pulse) {
+                requestAnimationFrame(triggerRadiusPulse);
+            }
+        }
+
+        function triggerRadiusPulse() {
+            if (!geofenceCircle) return;
+            var el = geofenceCircle.getElement();
+            if (!el) return;
+            el.classList.remove('org-radius-ring-pulse');
+            void el.offsetWidth;
+            el.classList.add('org-radius-ring-pulse');
+        }
+
+        function getMapPinHex(color) {
+            return mapPinColorHex[color] || mapPinColorHex.emerald;
+        }
+
+        function createSiteIcon(color, isActive) {
+            var hex = isActive ? getMapPinHex(color) : '#ef4444';
+            var fade = isActive ? '' : ' opacity-60';
+            var html = `
+            <span class="relative inline-flex h-10 w-10 items-center justify-center -translate-y-1${fade}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
+                <svg class="w-8 h-10 animate-bounce" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z" fill="${hex}" stroke="white" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="4" fill="white" fill-opacity="0.9"/>
+                </svg>
+            </span>`;
+            return L.divIcon({
+                className: 'map-pin-wrap',
+                html,
+                iconSize: [32, 40],
+                iconAnchor: [16, 36],
+                popupAnchor: [0, -36]
+            });
+        }
+
+        function renderSitesLayer(sites) {
+            latestSiteData = Array.isArray(sites) ? sites : [];
+            if (!map || !siteMarkerLayer || !siteCircleLayer) return;
+            siteMarkerLayer.clearLayers();
+            siteCircleLayer.clearLayers();
+            latestSiteData.forEach(site => {
+                if (!site || !Number.isFinite(site.latitude) || !Number.isFinite(site.longitude)) return;
+                var latlng = [site.latitude, site.longitude];
+                var circleColor = site.isActive ? (getMapPinHex(site.pinColor)) : '#ef4444';
+                L.circle(latlng, {
+                    radius: site.radiusMeters || 50,
+                    color: circleColor,
+                    weight: 2,
+                    fillColor: circleColor,
+                    fillOpacity: 0.08,
+                    className: 'animate-pulse'
+                }).addTo(siteCircleLayer);
+                var markerIcon = createSiteIcon(site.pinColor, site.isActive);
+                var markerInstance = L.marker(latlng, { icon: markerIcon }).addTo(siteMarkerLayer);
+                markerInstance.bindTooltip(site.locationName || 'Site', { direction: 'top', offset: [0, -12] });
+            });
+        }
+
+        function clearMapTimers() {
+            if (autoReloadTimer) {
+                clearTimeout(autoReloadTimer);
+                autoReloadTimer = null;
+            }
+            if (sizeFixTimer) {
+                clearTimeout(sizeFixTimer);
+                sizeFixTimer = null;
+            }
+        }
+
+        function showLoader() {
+            if (!loaderEl) return;
+            loaderEl.classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            if (!loaderEl) return;
+            loaderEl.classList.add('hidden');
+        }
+
+        function initMap(forceRecreate) {
+            if (typeof L === 'undefined') return false;
+
+            if (forceRecreate && map) {
+                map.remove();
+                map = null;
+                marker = null;
+                geofenceCircle = null;
+                siteMarkerLayer = null;
+                siteCircleLayer = null;
+            }
+
+            if (map) {
+                map.invalidateSize();
+                return true;
+            }
+
+            var start = getStartLatLng();
+            markerCoords = { lat: start.lat, lng: start.lng };
+            map = L.map(mapEl, {
+            preferCanvas: true,
+            zoomSnap: 0.5,
+            zoomDelta: 0.5
+        }).setView([start.lat, start.lng], 12);
+
+        // Philippines-focused bounds — limits tile requests to region
+        var phBounds = L.latLngBounds([3.8, 114.0], [21.3, 127.0]);
+        map.setMaxBounds(phBounds.pad(0.15));
+        map.setMinZoom(5);
+
+        // ——— Tile layer: light (Voyager) and dark (Stadia Alidade Smooth Dark) ———
+        // Detect current dark mode from the <html> element class
+        var TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        // Stadia "alidade_smooth_dark" — slate/navy tones, much easier to read than pitch-black dark_all
+        var TILE_DARK  = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
+        var TILE_OPTS_LIGHT = {
+            maxZoom: 19,
+            minZoom: 5,
+            subdomains: 'abcd',
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            keepBuffer: 4,
+            updateWhenIdle: true,
+            updateWhenZooming: false,
+            maxNativeZoom: 19
+        };
+        var TILE_OPTS_DARK = {
+            maxZoom: 20,
+            minZoom: 5,
+            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; OpenStreetMap contributors',
+            keepBuffer: 4,
+            updateWhenIdle: true,
+            updateWhenZooming: false,
+            maxNativeZoom: 20
+        };
+        // Unified opts helper — picks the right opts per tile style
+        function getTileOpts(url) {
+            return url === TILE_DARK ? TILE_OPTS_DARK : TILE_OPTS_LIGHT;
+        }
+
+        function isDarkMode() {
+            return document.documentElement.classList.contains('dark');
+        }
+
+        var tileLayer = L.tileLayer(isDarkMode() ? TILE_DARK : TILE_LIGHT, getTileOpts(isDarkMode() ? TILE_DARK : TILE_LIGHT));
+
+        // Hide loading overlay after first successful tile load (progressive feel)
+        tileLayer.on('load', hideLoader);
+        // Fallback: hide after a short delay if no event fires (e.g. cached)
+        setTimeout(hideLoader, 800);
+
+        tileLayer.addTo(map);
+
+        // ——— Watch for dark/light mode toggle and swap tiles live ———
+        var _mapThemeObserver = new MutationObserver(function () {
+            if (!map) return;
+            var newUrl = isDarkMode() ? TILE_DARK : TILE_LIGHT;
+            if (tileLayer && tileLayer._url === newUrl) return; // already correct
+            map.removeLayer(tileLayer);
+            tileLayer = L.tileLayer(newUrl, getTileOpts(newUrl));
+            tileLayer.addTo(map);
+            // bring marker back on top
+            if (marker) { marker.remove(); marker.addTo(map); }
+        });
+        _mapThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+            siteCircleLayer = L.layerGroup().addTo(map);
+            siteMarkerLayer = L.layerGroup().addTo(map);
+            geofenceCircle = L.circle([start.lat, start.lng], {
+                radius: getRadiusMeters(),
+                color: '#10b981',
+                weight: 2,
+                fillColor: '#10b981',
+                fillOpacity: 0.18,
+                className: 'org-radius-ring'
+            }).addTo(map);
+            marker = L.marker([start.lat, start.lng], { draggable: true }).addTo(map);
+
+            if (pendingMarkerCoords) {
+                marker.setLatLng(pendingMarkerCoords);
+                updateMarkerCoords(pendingMarkerCoords);
+                pendingMarkerCoords = null;
+            }
+
+            updateGeofenceCircle(marker.getLatLng());
+            if (pendingCircleData) {
+                updateGeofenceCircle(pendingCircleData.latlng, pendingCircleData.pulse);
+                pendingCircleData = null;
+            }
+
+            if (latestSiteData.length) {
+                renderSitesLayer(latestSiteData);
+            }
+
+            marker.on('dragend', function (e) {
+                updateMarkerCoords(e.target.getLatLng());
+                updateGeofenceCircle(e.target.getLatLng());
+            });
+
+            map.on('click', function (e) {
+                moveMarker(e.latlng, { zoom: map.getZoom() });
+            });
+
+            var setPinBtn = document.getElementById('setCurrentPinBtn');
+            if (setPinBtn) {
+                setPinBtn.addEventListener('click', function () {
+                    var lat = parseFloat(latInput && latInput.value ? latInput.value : '');
+                    var lng = parseFloat(lngInput && lngInput.value ? lngInput.value : '');
+                    var formHasCoords = !isNaN(lat) && !isNaN(lng);
+                    if (formHasCoords) {
+                        var latlng = { lat: lat, lng: lng };
+                        moveMarker(latlng, { zoom: Math.max(map.getZoom(), 14) });
+                        syncInputs(latlng);
+                        if (marker) marker.addTo(map);
+                    } else if (marker) {
+                        var latlng = marker.getLatLng();
+                        syncInputs(latlng);
+                    }
+                    setPinBtn.classList.add('ring-emerald-300');
+                    setTimeout(function () {
+                        setPinBtn.classList.remove('ring-emerald-300');
+                    }, 400);
+                });
+            }
+
+            var locateBtn = document.getElementById('locateMyPositionBtn');
+            if (locateBtn) {
+                var locateLabel = locateBtn.querySelector('.locate-label');
+                var locateDefaultText = locateLabel ? locateLabel.textContent.trim() : 'Use My Location';
+                if (!navigator.geolocation) {
+                    locateBtn.classList.add('hidden');
+                } else {
+                    locateBtn.addEventListener('click', function () {
+                        locateBtn.disabled = true;
+                        if (locateLabel) locateLabel.textContent = 'Locating…';
+                        navigator.geolocation.getCurrentPosition(function (pos) {
+                            locateBtn.disabled = false;
+                            if (locateLabel) locateLabel.textContent = locateDefaultText;
+                            moveMarker({ lat: pos.coords.latitude, lng: pos.coords.longitude }, { zoom: 17 });
+                        }, function () {
+                            locateBtn.disabled = false;
+                            if (locateLabel) locateLabel.textContent = locateDefaultText;
+                            window.showToast?.('Unable to get current location. Please allow location access.', false);
+                        });
+                    });
+                }
+            }
+
+            return true;
+        }
+
+        function scheduleMapAutoReload() {
+            clearMapTimers();
+            sizeFixTimer = setTimeout(function () {
+                if (map) map.invalidateSize();
+            }, 120);
+
+            autoReloadTimer = setTimeout(function () {
+                if (!loaderEl || loaderEl.classList.contains('hidden') || autoReloadTriggered) return;
+                autoReloadTriggered = true;
+                initMap(true);
+                setTimeout(function () {
+                    if (map) map.invalidateSize();
+                }, 120);
+            }, 2000);
+        }
+
+        function onLocationsTabShown() {
+            autoReloadTriggered = false;
+
+            if (map) {
+                hideLoader();
+                map.invalidateSize();
+                setTimeout(function () {
+                    if (map) map.invalidateSize();
+                }, 120);
+                return;
+            }
+
+            showLoader();
+
+            if (!initMap()) {
+                return;
+            }
+
+            scheduleMapAutoReload();
+        }
+
+        if (tabEl) {
+            tabEl.addEventListener('org-locations-tab-shown', onLocationsTabShown);
+        }
+
+        window.__orgLocationsMapAPI = {
+            setLatLng(latlng, zoom) {
+                moveMarker(latlng, { zoom });
+            },
+            renderSites(sites) {
+                renderSitesLayer(sites);
+            },
+            flyToLocation(latlng, zoom) {
+                if (!map || !latlng) return;
+                var z = zoom || 16;
+                map.flyTo([latlng.lat ?? latlng[0], latlng.lng ?? latlng[1]], z, { duration: 0.4 });
+            }
+        };
+
+        if (radiusInput) {
+            radiusInput.addEventListener('input', function () {
+                if (!markerCoords) return;
+                updateGeofenceCircle(markerCoords, true);
+            });
+        }
+    })();
+
+    (function initLocationSearch() {
+        const input = document.getElementById('orgLocationSearch');
+        const suggestionsBox = document.getElementById('orgLocationSearchSuggestions');
+        if (!input || !suggestionsBox) return;
+
+        const appRoot = document.getElementById('appRoot');
+        const apiBase = (appRoot?.getAttribute('data-api-base') || '').trim().replace(/\/$/, '');
+        const token = appRoot?.getAttribute('data-access-token') || '';
+        const endpoint = `${apiBase}/api/location/autocomplete`;
+
+        let debounceTimer = null;
+        let abortController = null;
+        let activeIndex = -1;
+        let currentItems = [];
+
+        function clearSuggestions() {
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('hidden');
+            activeIndex = -1;
+            currentItems = [];
+        }
+
+        function applyLocation(item) {
+            if (!item) return;
+            input.value = item.displayName || item.addressLine || '';
+            clearSuggestions();
+            const lat = parseFloat(item.lat || item.latitude);
+            const lng = parseFloat(item.lon || item.lng || item.longitude);
+            if (!isNaN(lat) && !isNaN(lng) && window.__orgLocationsMapAPI) {
+                window.__orgLocationsMapAPI.setLatLng({ lat, lng }, 16);
+            }
+        }
+
+        function renderSuggestions(list) {
+            if (!list.length) {
+                clearSuggestions();
+                return;
+            }
+            suggestionsBox.innerHTML = '';
+            list.forEach((item, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-emerald-50 dark:text-gray-200 dark:hover:bg-gray-800';
+                btn.textContent = item.displayName || item.addressLine || 'Unknown location';
+                btn.addEventListener('click', () => applyLocation(item));
+                btn.addEventListener('mouseenter', () => setActive(idx));
+                suggestionsBox.appendChild(btn);
+            });
+            suggestionsBox.classList.remove('hidden');
+            currentItems = list;
+            activeIndex = -1;
+        }
+
+        function setActive(index) {
+            const buttons = suggestionsBox.querySelectorAll('button');
+            buttons.forEach(btn => btn.classList.remove('bg-emerald-50', 'dark:bg-gray-800'));
+            if (index >= 0 && buttons[index]) {
+                buttons[index].classList.add('bg-emerald-50', 'dark:bg-gray-800');
+                activeIndex = index;
+            }
+        }
+
+        function fetchSuggestions(query) {
+            if (!query || query.length < 3) {
+                clearSuggestions();
+                return;
+            }
+            if (abortController) abortController.abort();
+            abortController = new AbortController();
+            fetch(`${endpoint}?q=${encodeURIComponent(query)}&limit=6`, {
+                signal: abortController.signal,
+                headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
+            })
+                .then(resp => resp.ok ? resp.json() : [])
+                .then(data => Array.isArray(data) ? renderSuggestions(data) : clearSuggestions())
+                .catch(err => {
+                    if (err?.name === 'AbortError') return;
+                    clearSuggestions();
+                });
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const value = this.value.trim();
+            debounceTimer = setTimeout(() => fetchSuggestions(value), 300);
+        });
+
+        input.addEventListener('keydown', function (evt) {
+            if (suggestionsBox.classList.contains('hidden')) {
+                if (evt.key === 'Enter') {
+                    evt.preventDefault();
+                    fetchSuggestions(this.value.trim());
+                }
+                return;
+            }
+            const max = currentItems.length;
+            if (!max) return;
+            if (evt.key === 'ArrowDown') {
+                evt.preventDefault();
+                const next = (activeIndex + 1) % max;
+                setActive(next);
+            } else if (evt.key === 'ArrowUp') {
+                evt.preventDefault();
+                const prev = activeIndex <= 0 ? max - 1 : activeIndex - 1;
+                setActive(prev);
+            } else if (evt.key === 'Enter') {
+                evt.preventDefault();
+                if (activeIndex >= 0) applyLocation(currentItems[activeIndex]);
+                else if (currentItems[0]) applyLocation(currentItems[0]);
+            } else if (evt.key === 'Escape') {
+                clearSuggestions();
+            }
+        });
+
+        document.addEventListener('click', function (evt) {
+            if (!evt.target.closest('#orgLocationSearchSuggestions') && evt.target !== input) {
+                clearSuggestions();
+            }
+        });
+    })();
+
+    (function initOrgLocationsCrud() {
+        const appRoot = document.getElementById('appRoot');
+        const apiBase = (appRoot?.getAttribute('data-api-base') || '').trim().replace(/\/$/, '');
+        const token = appRoot?.getAttribute('data-access-token') || '';
+        if (!apiBase || !token) return;
+
+        const listEl = document.getElementById('orgLocationsList');
+        const loadingEl = document.getElementById('orgLocationsListLoading');
+        const emptyEl = document.getElementById('orgLocationsEmpty');
+        const countEl = document.getElementById('orgLocationsCount');
+        const formErrorEl = document.getElementById('orgLocationsFormError');
+        const addBtn = document.getElementById('form-submit-btn');
+        const nameInput = document.getElementById('site_name');
+        const latInput = document.getElementById('site_lat');
+        const lngInput = document.getElementById('site_lng');
+        const radiusInput = document.getElementById('site_radius');
+        const colorContainer = document.getElementById('site_pin_color');
+        const statusModal = document.getElementById('action-modal');
+        const modalTitleEl = document.getElementById('modal-title');
+        const modalDescEl = document.getElementById('modal-desc');
+        const modalIconWrap = document.getElementById('modal-icon-wrap');
+        const modalIcon = document.getElementById('modal-icon');
+        const reasonWrapper = document.getElementById('action-reason-wrapper');
+        const reasonInput = document.getElementById('action-reason');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        if (!listEl || !addBtn) return;
+
+        const emptyAllMessage = 'No locations yet. Add your first site above.';
+        const emptyActiveMessage = 'No active sites yet. Add your first location to start enforcing map restrictions.';
+        const emptyInactiveMessage = 'No inactive sites yet. Deactivate a site to see it here.';
+        const activeBadgeClasses = ['bg-emerald-100', 'text-emerald-800', 'ring-emerald-600/30', 'dark:bg-emerald-900/40', 'dark:text-emerald-200'];
+        const inactiveBadgeClasses = ['bg-red-100', 'text-red-700', 'ring-red-500/30', 'dark:bg-red-900/30', 'dark:text-red-200'];
+        const pinColorOptions = ['blue', 'purple', 'pink', 'cyan'];
+        const pinColorHex = {
+            blue: '#3b82f6',
+            purple: '#8b5cf6',
+            pink: '#ec4899',
+            cyan: '#06b6d4',
+            emerald: '#10b981'
+        };
+        let showInactive = false;
+        const formTitleEl = document.getElementById('form-title');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+
+        let items = [];
+        let isLoading = false;
+        let isSaving = false;
+        let editingId = null;
+        let pendingStatusSite = null;
+        let pendingStatusActive = true;
+        let statusSubmitting = false;
+        let selectedColor = 'blue';
+
+        function setSelectedColor(color) {
+            selectedColor = pinColorOptions.includes((color || '').toLowerCase()) ? (color || '').toLowerCase() : 'blue';
+        }
+
+        if (countEl) {
+            countEl.setAttribute('role', 'button');
+            countEl.setAttribute('tabindex', '0');
+            const toggleFilter = (evt) => {
+                if (evt) evt.preventDefault();
+                showInactive = !showInactive;
+                renderList();
+            };
+            countEl.addEventListener('click', toggleFilter);
+            countEl.addEventListener('keydown', (evt) => {
+                if (evt.key === 'Enter' || evt.key === ' ') {
+                    evt.preventDefault();
+                    toggleFilter();
+                }
+            });
+        }
+
+        function showFormError(message) {
+            if (!formErrorEl) return;
+            if (message) {
+                formErrorEl.textContent = message;
+                formErrorEl.classList.remove('hidden');
+            } else {
+                formErrorEl.textContent = '';
+                formErrorEl.classList.add('hidden');
+            }
+        }
+
+        function setLoading(state) {
+            isLoading = state;
+            if (loadingEl) loadingEl.classList.toggle('hidden', !state);
+        }
+
+        function getIdleSubmitLabel() {
+            return editingId ? 'Update Site' : 'Add Site';
+        }
+
+        function getSavingSubmitLabel() {
+            return editingId ? 'Updating…' : 'Saving…';
+        }
+
+        function setSaving(state) {
+            isSaving = state;
+            addBtn.disabled = state;
+            addBtn.textContent = state ? getSavingSubmitLabel() : getIdleSubmitLabel();
+        }
+
+        function toggleReasonVisibility(show) {
+            reasonWrapper?.classList.toggle('hidden', !show);
+        }
+
+        function applyModalTheme(isDeactivate) {
+            if (!modalIconWrap || !modalIcon || !modalConfirmBtn) return;
+            const dangerIconClasses = ['bg-red-100', 'dark:bg-red-900/30'];
+            const successIconClasses = ['bg-emerald-100', 'dark:bg-emerald-900/30'];
+            modalIconWrap.classList.remove(...dangerIconClasses, ...successIconClasses);
+            modalIcon.classList.remove('text-red-600', 'text-emerald-600');
+            modalConfirmBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'bg-emerald-600', 'hover:bg-emerald-500');
+            if (isDeactivate) {
+                modalIconWrap.classList.add(...dangerIconClasses);
+                modalIcon.classList.add('text-red-600');
+                modalConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-500');
+            } else {
+                modalIconWrap.classList.add(...successIconClasses);
+                modalIcon.classList.add('text-emerald-600');
+                modalConfirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+            }
+        }
+
+        function setStatusModalVisible(show) {
+            if (!statusModal) return;
+            statusModal.classList.toggle('hidden', !show);
+            if (!show) {
+                pendingStatusSite = null;
+                reasonInput?.classList.remove('border-red-500');
+                reasonInput?.blur();
+            }
+        }
+
+        function promptStatusToggle(site) {
+            if (!statusModal || !modalTitleEl || !modalDescEl || !modalConfirmBtn) return;
+            pendingStatusSite = site;
+            pendingStatusActive = !site.isActive;
+            const isDeactivate = !pendingStatusActive;
+            toggleReasonVisibility(isDeactivate);
+            if (reasonInput) {
+                reasonInput.value = isDeactivate ? '' : (site.deactivationReason || '');
+                reasonInput.classList.remove('border-red-500');
+            }
+            modalTitleEl.textContent = pendingStatusActive ? 'Reactivate Site' : `Deactivate ${site.locationName}`;
+            modalDescEl.textContent = pendingStatusActive
+                ? `Bring ${site.locationName} back online so employees can clock in there.`
+                : `Provide a short reason for pausing ${site.locationName}.`;
+            modalConfirmBtn.textContent = pendingStatusActive ? 'Reactivate' : 'Deactivate';
+            applyModalTheme(isDeactivate);
+            setStatusModalVisible(true);
+        }
+
+        function hideStatusModal() {
+            if (statusSubmitting) return;
+            setStatusModalVisible(false);
+        }
+
+        modalCancelBtn?.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            hideStatusModal();
+        });
+
+        function formatCoord(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '—';
+            return num.toFixed(4);
+        }
+
+        function normalizeSite(site) {
+            if (!site) return null;
+            return {
+                locationId: site.locationId,
+                locationName: (site.locationName || 'Unnamed Site').trim(),
+                latitude: Number(site.latitude),
+                longitude: Number(site.longitude),
+                radiusMeters: site.radiusMeters ?? 0,
+                isActive: site.isActive !== false,
+                deactivationReason: site.deactivationReason || '',
+                pinColor: (site.pinColor || 'emerald').toLowerCase()
+            };
+        }
+
+        const pinColorBusy = new Set();
+
+        async function updateSitePinColor(site, color, buttonEl) {
+            const newColor = (color || '').toLowerCase();
+            if (!site || site.pinColor === newColor || !pinColorOptions.includes(newColor)) return;
+            const siteId = site.locationId;
+            if (!siteId || pinColorBusy.has(siteId)) return;
+
+            const previousColor = site.pinColor;
+            const idx = items.findIndex(s => s.locationId === siteId);
+            if (idx < 0) return;
+
+            pinColorBusy.add(siteId);
+            buttonEl?.classList.add('opacity-60');
+
+            items[idx] = { ...site, pinColor: newColor };
+            renderList();
+
+            try {
+                const resp = await fetch(`${apiBase}/api/org-locations/current/${siteId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        locationName: site.locationName,
+                        latitude: site.latitude,
+                        longitude: site.longitude,
+                        radiusMeters: site.radiusMeters,
+                        pinColor: newColor
+                    })
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok)
+                    throw new Error(data?.message || 'Unable to update pin color.');
+                const updated = normalizeSite(data);
+                if (updated) {
+                    items[idx] = updated;
+                    renderList();
+                }
+                window.showToast?.('Pin color updated.', true);
+            }
+            catch (err) {
+                items[idx] = { ...site, pinColor: previousColor };
+                renderList();
+                window.showToast?.(err.message || 'Unable to update pin color.', false);
+            }
+            finally {
+                pinColorBusy.delete(siteId);
+                buttonEl?.classList.remove('opacity-60');
+            }
+        }
+
+        function renderList() {
+            if (!items.length) {
+                listEl.innerHTML = '';
+                emptyEl?.classList.remove('hidden');
+                if (emptyEl) emptyEl.textContent = emptyAllMessage;
+                if (countEl) {
+                    countEl.textContent = '0';
+                    countEl.classList.remove(...inactiveBadgeClasses);
+                    countEl.classList.add(...activeBadgeClasses);
+                    countEl.setAttribute('title', 'No sites yet');
+                }
+                window.__orgLocationsMapAPI?.renderSites?.([]);
+                return;
+            }
+
+            const ordered = [...items].sort((a, b) => {
+                if (a?.isActive === b?.isActive) return (a?.locationName || '').localeCompare(b?.locationName || '');
+                return (b?.isActive ? 1 : 0) - (a?.isActive ? 1 : 0);
+            });
+
+            const activeSites = ordered.filter(site => site?.isActive);
+            const inactiveSites = ordered.filter(site => !site?.isActive);
+            const prioritized = showInactive ? [...inactiveSites, ...activeSites] : [...activeSites, ...inactiveSites];
+
+            const activeCount = activeSites.length;
+            const inactiveCount = inactiveSites.length;
+            if (countEl) {
+                countEl.textContent = (showInactive ? inactiveCount : activeCount).toString();
+                countEl.setAttribute('title', showInactive ? 'Inactive sites highlighted first' : 'Active sites highlighted first');
+                countEl.classList.remove(...inactiveBadgeClasses, ...activeBadgeClasses);
+                countEl.classList.add(...(showInactive ? inactiveBadgeClasses : activeBadgeClasses));
+            }
+
+            listEl.innerHTML = '';
+            emptyEl?.classList.add('hidden');
+
+            prioritized.forEach(site => {
+                const card = document.createElement('div');
+                card.className = 'site-card-accent flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800 cursor-pointer hover:ring-2 hover:ring-emerald-500/30';
+                const accentHex = site.isActive ? (pinColorHex[site.pinColor] || '#3b82f6') : '#ef4444';
+                card.style.borderLeftColor = accentHex;
+                if (!site.isActive) {
+                    card.classList.add('border-gray-200/80', 'bg-gray-50', 'opacity-95', 'dark:border-gray-700/60', 'dark:bg-slate-900/40');
+                }
+
+                const badgeClasses = site.isActive
+                    ? 'rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-600/10 dark:bg-emerald-900/40 dark:text-emerald-300'
+                    : 'rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-600 ring-1 ring-red-500/20 dark:bg-red-900/30 dark:text-red-200';
+
+                card.innerHTML = `
+                    <div class="mb-3 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">${site.locationName}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${site.radiusMeters} meters radius</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" data-action="toggle-status" class="${badgeClasses} hover:scale-[1.03] transition" title="${site.isActive ? 'Deactivate site' : 'Reactivate site'}">
+                                ${site.isActive ? 'Active' : 'Inactive'}
+                            </button>
+                            <button type="button" data-action="edit-location" class="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-emerald-600 dark:hover:bg-gray-700">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.688-1.688a1.875 1.875 0 1 1 2.652 2.652L10.6 16.053a4.5 4.5 0 0 1-1.938 1.127L6 18l.82-2.66a4.5 4.5 0 0 1 1.127-1.938ZM18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div class="font-mono">${formatCoord(site.latitude)}, ${formatCoord(site.longitude)}</div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-1" data-role="pin-color-palette"></div>
+                            <span class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">${site.locationId ? `Site #${site.locationId}` : ''}</span>
+                        </div>
+                    </div>
+                `;
+
+                const editBtn = card.querySelector('[data-action="edit-location"]');
+                if (editBtn) {
+                    if (!site.isActive) {
+                        editBtn.setAttribute('disabled', 'true');
+                        editBtn.classList.add('cursor-not-allowed', 'opacity-40');
+                    } else {
+                        editBtn.removeAttribute('disabled');
+                        editBtn.classList.remove('cursor-not-allowed', 'opacity-40');
+                        editBtn.addEventListener('click', (e) => { e.stopPropagation(); enterEdit(site); });
+                    }
+                }
+
+                const statusBtn = card.querySelector('[data-action="toggle-status"]');
+                if (statusBtn) statusBtn.addEventListener('click', (e) => { e.stopPropagation(); promptStatusToggle(site); });
+
+                card.addEventListener('click', function (e) {
+                    if (e.target.closest('button') || e.target.closest('[data-role="pin-color-palette"]')) return;
+                    window.__orgLocationsMapAPI?.flyToLocation?.({ lat: site.latitude, lng: site.longitude }, 16);
+                });
+
+                const palette = card.querySelector('[data-role="pin-color-palette"]');
+                if (palette) {
+                    if (!site.isActive) {
+                        palette.remove();
+                    } else {
+                        palette.classList.add('items-center');
+                        pinColorOptions.forEach(color => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = `pin-color-option pin-color-${color} h-4 w-4 rounded-full border-2 border-transparent shadow-sm`;
+                            btn.setAttribute('aria-label', `Set ${color} pin`);
+                            if (color === site.pinColor) btn.classList.add('active');
+                            btn.addEventListener('click', (evt) => {
+                                evt.stopPropagation();
+                                updateSitePinColor(site, color, btn);
+                            });
+                            palette.appendChild(btn);
+                        });
+                    }
+                }
+
+                if (!site.isActive && site.deactivationReason) {
+                    const reasonBlock = document.createElement('div');
+                    reasonBlock.className = 'mt-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/30 dark:bg-red-900/20 dark:text-red-200';
+                    reasonBlock.textContent = `Reason: ${site.deactivationReason}`;
+                    card.appendChild(reasonBlock);
+                }
+
+                listEl.appendChild(card);
+            });
+
+            window.__orgLocationsMapAPI?.renderSites?.(items);
+        }
+
+        async function loadSites() {
+            setLoading(true);
+            showFormError('');
+            try {
+                const resp = await fetch(`${apiBase}/api/org-locations/current`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = resp.ok ? await resp.json() : null;
+                if (!resp.ok) {
+                    throw new Error(data?.message || 'Unable to load locations.');
+                }
+                items = Array.isArray(data) ? data.map(normalizeSite).filter(Boolean) : [];
+                renderList();
+            }
+            catch (err) {
+                window.showToast?.(err.message || 'Unable to load locations.', false);
+                items = [];
+                renderList();
+            }
+            finally {
+                setLoading(false);
+            }
+        }
+
+        function parseDecimal(value) {
+            const parsed = parseFloat(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function updateSubmitLabel() {
+            if (isSaving) return;
+            addBtn.textContent = getIdleSubmitLabel();
+        }
+
+        function setFormMode(isEdit) {
+            if (formTitleEl) formTitleEl.textContent = isEdit ? 'Edit Site' : 'Add New Site';
+            cancelBtn?.classList.toggle('hidden', !isEdit);
+            updateSubmitLabel();
+        }
+
+        function enterEdit(site) {
+            editingId = site.locationId;
+            setFormMode(true);
+            showFormError('');
+            if (nameInput) nameInput.value = site.locationName || '';
+            if (latInput) latInput.value = Number.isFinite(site.latitude) ? site.latitude.toFixed(6) : '';
+            if (lngInput) lngInput.value = Number.isFinite(site.longitude) ? site.longitude.toFixed(6) : '';
+            if (radiusInput) radiusInput.value = site.radiusMeters ?? 50;
+            setSelectedColor(site.pinColor || 'blue');
+            window.__orgLocationsMapAPI?.setLatLng({ lat: site.latitude, lng: site.longitude }, 16);
+        }
+
+        function resetFormState() {
+            editingId = null;
+            showFormError('');
+            setSaving(false);
+            setFormMode(false);
+            if (nameInput) nameInput.value = '';
+            if (latInput) latInput.value = '';
+            if (lngInput) lngInput.value = '';
+            if (radiusInput) radiusInput.value = 50;
+            setSelectedColor('blue');
+        }
+
+        async function submitStatusChange() {
+            if (!pendingStatusSite || statusSubmitting) return;
+            const siteId = pendingStatusSite.locationId;
+            if (!siteId) return;
+
+            const isDeactivate = !pendingStatusActive;
+            let reasonValue = reasonInput?.value?.trim() || '';
+            if (isDeactivate && !reasonValue) {
+                reasonInput?.classList.add('border-red-500');
+                reasonInput?.focus();
+                return;
+            }
+            reasonInput?.classList.remove('border-red-500');
+            if (!isDeactivate) reasonValue = '';
+
+            statusSubmitting = true;
+            const prevLabel = modalConfirmBtn?.textContent;
+            if (modalConfirmBtn) {
+                modalConfirmBtn.disabled = true;
+                modalConfirmBtn.textContent = isDeactivate ? 'Deactivating…' : 'Reactivating…';
+            }
+            const siteName = pendingStatusSite.locationName || 'Site';
+            const successVerb = pendingStatusActive ? 'reactivated' : 'deactivated';
+
+            try {
+                const resp = await fetch(`${apiBase}/api/org-locations/current/${siteId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        isActive: pendingStatusActive,
+                        reason: reasonValue || null
+                    })
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(data?.message || 'Unable to update status.');
+                const normalized = normalizeSite(data);
+                if (normalized) {
+                    const idx = items.findIndex(s => s.locationId === siteId);
+                    if (idx >= 0) {
+                        items[idx] = normalized;
+                        renderList();
+                    }
+                }
+                window.showToast?.(`${siteName} was ${successVerb}.`, true);
+            }
+            catch (err) {
+                const errMsg = err?.message || 'Network error.';
+                window.showToast?.(`${siteName} update failed: ${errMsg}`, false);
+            }
+            finally {
+                statusSubmitting = false;
+                if (modalConfirmBtn) {
+                    modalConfirmBtn.disabled = false;
+                    modalConfirmBtn.textContent = prevLabel || (pendingStatusActive ? 'Reactivate' : 'Deactivate');
+                }
+                hideStatusModal();
+            }
+        }
+
+        async function handleSubmit() {
+            if (isSaving) return;
+            const name = nameInput?.value?.trim() || '';
+            const lat = parseDecimal(latInput?.value ?? '');
+            const lng = parseDecimal(lngInput?.value ?? '');
+            const radius = parseInt(radiusInput?.value ?? '0', 10);
+
+            if (!name) {
+                showFormError('Enter a site name.');
+                nameInput?.focus();
+                return;
+            }
+            if (lat === null || lng === null) {
+                showFormError('Set the pin on the map and click "Set Current Pin" before saving.');
+                return;
+            }
+            if (!Number.isFinite(radius) || radius < 10) {
+                showFormError('Radius must be at least 10 meters.');
+                radiusInput?.focus();
+                return;
+            }
+
+            showFormError('');
+            setSaving(true);
+            try {
+                const isEdit = !!editingId;
+                const url = isEdit ? `${apiBase}/api/org-locations/current/${editingId}` : `${apiBase}/api/org-locations/current`;
+                const method = isEdit ? 'PUT' : 'POST';
+                const resp = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        locationName: name,
+                        latitude: lat,
+                        longitude: lng,
+                        radiusMeters: radius,
+                        pinColor: selectedColor
+                    })
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) {
+                    throw new Error(data?.message || (isEdit ? 'Unable to update location.' : 'Unable to add location.'));
+                }
+                const normalized = normalizeSite(data);
+                if (normalized) {
+                    if (isEdit) {
+                        const idx = items.findIndex(s => s.locationId === editingId);
+                        if (idx >= 0) {
+                            items[idx] = normalized;
+                        }
+                    } else {
+                        items.unshift(normalized);
+                    }
+                    renderList();
+                }
+                window.showToast?.(isEdit ? 'Location updated.' : 'Location added.', true);
+                resetFormState();
+            }
+            catch (err) {
+                showFormError(err.message || (editingId ? 'Unable to update location.' : 'Unable to add location.'));
+                window.showToast?.('Unable to save location.', false);
+            }
+            finally {
+                setSaving(false);
+            }
+        }
+        updateSubmitLabel();
+        modalConfirmBtn?.addEventListener('click', submitStatusChange);
+        addBtn.addEventListener('click', handleSubmit);
+        cancelBtn?.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            resetFormState();
+        });
+        loadSites();
+
+        window.orgLocationsFormApi = {
+            reset: resetFormState,
+            enterEditById(id) {
+                const site = items.find(s => s.locationId === id);
+                if (site) enterEdit(site);
+            },
+            enterEditFromLegacy(payload) {
+                const site = normalizeSite(payload);
+                if (site) enterEdit(site);
+            }
+        };
+
+        window.orgLocationsStatusApi = {
+            openByName(name) {
+                const site = items.find(s => s.locationName === name);
+                if (site) promptStatusToggle(site);
+            },
+            close: hideStatusModal
+        };
+    })();
 </script>

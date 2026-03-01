@@ -935,20 +935,28 @@ color: #94a3b8 !important;
      if (firstPreset) firstPreset.classList.add('filter-preset-active');
         }
 
-      document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('growthChart').getContext('2d');
+        function initSuperAdminDashboardChart() {
+            var chartCanvas = document.getElementById('growthChart');
+            if (!chartCanvas) return;
+            if (typeof Chart === 'undefined') {
+                setTimeout(initSuperAdminDashboardChart, 120);
+                return;
+            }
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            destroySuperAdminDashboardChart();
+
+            var ctx = chartCanvas.getContext('2d');
+            var gradient = ctx.createLinearGradient(0, 0, 0, 300);
             gradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
             gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-            new Chart(ctx, {
+            window.__superGrowthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
                     datasets: [{
                         label: 'New Organizations',
-                        data: [15, 28, 22, 35, 30, 42], // demo data
+                        data: [15, 28, 22, 35, 30, 42],
                         borderColor: '#10b981',
                         borderWidth: 3,
                         pointBackgroundColor: '#10b981',
@@ -981,6 +989,26 @@ color: #94a3b8 !important;
                     interaction: { intersect: false, mode: 'index' }
                 }
             });
-        });
+        }
+
+        function destroySuperAdminDashboardChart() {
+            if (window.__superGrowthChart) {
+                window.__superGrowthChart.destroy();
+                window.__superGrowthChart = null;
+            }
+        }
+
+        function bindSuperAdminDashboardEvents() {
+            if (window.__superDashEventsBound) return;
+            window.__superDashEventsBound = true;
+
+            document.addEventListener('DOMContentLoaded', initSuperAdminDashboardChart);
+            document.addEventListener('turbo:load', initSuperAdminDashboardChart);
+            document.addEventListener('turbo:before-cache', destroySuperAdminDashboardChart);
+            window.addEventListener('pageshow', initSuperAdminDashboardChart);
+        }
+
+        bindSuperAdminDashboardEvents();
+        initSuperAdminDashboardChart();
     </script>
 }

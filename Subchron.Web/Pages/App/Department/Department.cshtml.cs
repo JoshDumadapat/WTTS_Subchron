@@ -21,12 +21,9 @@ public class DepartmentModel : PageModel
     public string? Error { get; set; }
     public string ApiBaseUrl { get; set; } = "";
 
-    public Task OnGetAsync()
+    public void OnGet()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
-        Error = null;
-        Departments = new List<DepartmentItem>();
-        return Task.CompletedTask;
     }
 
     public async Task<IActionResult> OnGetDataAsync()

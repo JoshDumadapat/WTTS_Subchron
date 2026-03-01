@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Subchron.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,8 @@ builder.Services.AddHttpClient("Subchron.API", client =>
     if (!string.IsNullOrWhiteSpace(api))
         client.BaseAddress = new Uri(api + "/");
 });
+
+builder.Services.AddScoped<LayoutBrandingService>();
 
 var app = builder.Build();
 

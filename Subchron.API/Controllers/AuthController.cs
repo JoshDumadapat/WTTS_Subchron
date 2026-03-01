@@ -23,6 +23,7 @@ namespace Subchron.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
     private readonly RecaptchaService _recaptcha;
     private readonly EmailService _email;
     private readonly JwtTokenService _jwt;
@@ -45,6 +46,7 @@ public class AuthController : ControllerBase
 
     public AuthController(
         SubchronDbContext db,
+        TenantDbContext tenantDb,
         RecaptchaService recaptcha,
         EmailService email,
         JwtTokenService jwt,
@@ -56,6 +58,7 @@ public class AuthController : ControllerBase
         PayMongoService? payMongo = null)
     {
         _db = db;
+        _tenantDb = tenantDb;
         _recaptcha = recaptcha;
         _email = email;
         _jwt = jwt;
@@ -160,7 +163,7 @@ public class AuthController : ControllerBase
         if (user is null || !user.IsActive)
         {
             RecordLoginAttempt(ip);
-            await _audit.LogAsync(null, null, "LoginFailed", "User", null, "Invalid email or inactive: " + (email.Length > 80 ? email[..80] : email));
+            await _audit.LogSuperAdminAsync(null, null, "LoginFailed", "User", null, "Invalid email or inactive: " + (email.Length > 80 ? email[..80] : email));
             var nowRequiresCaptcha = IsLoginCaptchaRequired(ip);
 
             return Unauthorized(new LoginResponse
@@ -174,7 +177,7 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(user.Password))
         {
             RecordLoginAttempt(ip);
-            await _audit.LogAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "No password (external account)");
+            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "No password (external account)");
             return Unauthorized(new LoginResponse
             {
                 Ok = false,
@@ -187,7 +190,7 @@ public class AuthController : ControllerBase
         if (!BCrypt.Net.BCrypt.Verify(req.Password ?? "", user.Password))
         {
             RecordLoginAttempt(ip);
-            await _audit.LogAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "Invalid password");
+            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "Invalid password");
             var nowRequiresCaptcha = IsLoginCaptchaRequired(ip);
 
             return Unauthorized(new LoginResponse
@@ -204,7 +207,7 @@ public class AuthController : ControllerBase
         // TOTP required?
         if (user.TotpEnabled)
         {
-            await _audit.LogAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "TOTP required");
+            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "TOTP required");
             return Ok(new LoginResponse
             {
                 Ok = true,
@@ -215,7 +218,7 @@ public class AuthController : ControllerBase
 
         // Update last login and audit
         _ = UpdateLastLoginAsync(user.UserID);
-        await _audit.LogAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "Success");
+        await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "Success");
 
         // Use linked Employee's Role for token/redirect
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
@@ -264,7 +267,7 @@ public class AuthController : ControllerBase
             userId = uid;
         if (!string.IsNullOrEmpty(orgIdClaim) && int.TryParse(orgIdClaim, out var oid))
             orgId = oid;
-        await _audit.LogAsync(orgId, userId, "Logout", "User", userId, "Success");
+        await _audit.LogSuperAdminAsync(orgId, userId, "Logout", "User", userId, "Success");
         return Ok(new { ok = true });
     }
 
@@ -290,6 +293,14 @@ public class AuthController : ControllerBase
         var name = string.IsNullOrWhiteSpace(req.Name) ? email : req.Name.Trim();
         if (name.Length > 255) name = name[..255];
 
+        string? avatarUrl = null;
+        if (!string.IsNullOrWhiteSpace(req.AvatarUrl))
+        {
+            avatarUrl = req.AvatarUrl.Trim();
+            if (avatarUrl.Length > 500)
+                avatarUrl = avatarUrl[..500];
+        }
+
         var user = new User
         {
             OrgID = orgId,
@@ -298,7 +309,8 @@ public class AuthController : ControllerBase
             Password = BCrypt.Net.BCrypt.HashPassword(req.Password.Trim()),
             IsActive = true,
             Role = UserRoleType.Employee,
-            EmailVerified = false
+            EmailVerified = false,
+            AvatarUrl = avatarUrl
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -571,7 +583,7 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             return Unauthorized(new { ok = false, message = "Not authenticated." });
 
-        var emp = await _db.Employees.AsNoTracking()
+        var emp = await _tenantDb.Employees.AsNoTracking()
             .Where(e => e.UserID == userId)
             .Select(e => new
             {
@@ -594,11 +606,22 @@ public class AuthController : ControllerBase
                 e.EmergencyContactName,
                 e.EmergencyContactPhone,
                 e.EmergencyContactRelation,
-                Role = e.User != null ? e.User.Role : (UserRoleType?)null
+                e.UserID
             })
             .FirstOrDefaultAsync();
         if (emp is null)
             return Ok(new { hasEmployee = false });
+
+        UserRoleType? role = null;
+        if (emp.UserID.HasValue)
+        {
+            var u = await _db.Users.AsNoTracking()
+                .Where(x => x.UserID == emp.UserID.Value)
+                .Select(x => new { x.Role })
+                .FirstOrDefaultAsync();
+            if (u != null)
+                role = u.Role;
+        }
 
         return Ok(new
         {
@@ -622,7 +645,7 @@ public class AuthController : ControllerBase
             emergencyContactName = emp.EmergencyContactName ?? "",
             emergencyContactPhone = emp.EmergencyContactPhone ?? "",
             emergencyContactRelation = emp.EmergencyContactRelation ?? "",
-            role = emp.Role?.ToString() ?? ""
+            role = role?.ToString() ?? ""
         });
     }
 
@@ -634,7 +657,7 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             return Unauthorized(new { ok = false, message = "Not authenticated." });
 
-        var emp = await _db.Employees.FirstOrDefaultAsync(e => e.UserID == userId);
+        var emp = await _tenantDb.Employees.FirstOrDefaultAsync(e => e.UserID == userId);
         if (emp is null)
             return NotFound(new { ok = false, message = "No employee record linked to your account." });
 
@@ -843,7 +866,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        await _audit.LogAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, provider);
+        await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, provider);
 
         // If 2FA is enabled, require TOTP before issuing session token
         if (user.TotpEnabled)
@@ -1323,6 +1346,16 @@ public class AuthController : ControllerBase
                     AttendanceMode = mode,
                     RoundRule = "None"
                 });
+                _db.OrganizationProfiles.Add(new OrganizationProfile
+                {
+                    OrgID = org.OrgID,
+                    Country = "Philippines"
+                });
+                _db.OrganizationProfiles.Add(new OrganizationProfile
+                {
+                    OrgID = org.OrgID,
+                    Country = "Philippines"
+                });
 
                 var startDate = DateTime.UtcNow.Date;
                 var isTrialPlan = (plan.PlanName ?? "").Equals("Standard", StringComparison.OrdinalIgnoreCase);
@@ -1380,7 +1413,7 @@ public class AuthController : ControllerBase
                     }
                 }
 
-                _db.Employees.Add(new Employee
+                _tenantDb.Employees.Add(new Employee
                 {
                     OrgID = org.OrgID,
                     UserID = user.UserID,
@@ -1397,6 +1430,7 @@ public class AuthController : ControllerBase
                 });
 
                 await _db.SaveChangesAsync();
+                await _tenantDb.SaveChangesAsync();
 
                 await tx.CommitAsync();
 
@@ -1528,7 +1562,7 @@ public class AuthController : ControllerBase
                     if (parts.Length == 1) { safeFirstName = parts[0]; safeLastName = parts[0]; }
                     else { safeFirstName = parts[0]; safeLastName = parts[^1]; }
                 }
-                _db.Employees.Add(new Employee
+                _tenantDb.Employees.Add(new Employee
                 {
                     OrgID = org.OrgID,
                     UserID = user.UserID,
@@ -1544,6 +1578,7 @@ public class AuthController : ControllerBase
                     CreatedByUserId = user.UserID
                 });
                 await _db.SaveChangesAsync();
+                await _tenantDb.SaveChangesAsync();
 
                 int? trialTxnId = null;
                 if (isFreeTrial)
@@ -1683,6 +1718,7 @@ public class AuthController : ControllerBase
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? Name { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 
     public class CompleteSignupWithBillingRequest
@@ -1814,7 +1850,7 @@ public class AuthController : ControllerBase
     // When the user has a linked Employee, returns that Employee's role so login redirect and RBAC use backoffice and portal correctly.
     private async Task<string?> GetEffectiveRoleForUserAsync(int userId)
     {
-        var emp = await _db.Employees.AsNoTracking()
+        var emp = await _tenantDb.Employees.AsNoTracking()
             .Where(e => e.UserID == userId)
             .Select(e => e.Role)
             .FirstOrDefaultAsync();

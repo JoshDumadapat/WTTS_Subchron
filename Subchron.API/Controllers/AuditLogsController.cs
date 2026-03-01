@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Subchron.API.Authorization;
 using Subchron.API.Data;
 
 namespace Subchron.API.Controllers;
@@ -11,26 +11,14 @@ namespace Subchron.API.Controllers;
 [Authorize]
 public class AuditLogsController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public AuditLogsController(SubchronDbContext db)
+    public AuditLogsController(TenantDbContext db)
     {
         _db = db;
     }
 
-    private int? GetUserOrgId()
-    {
-        var claim = User.FindFirstValue("orgId");
-        return !string.IsNullOrEmpty(claim) && int.TryParse(claim, out var id) ? id : null;
-    }
-
-    private bool IsSuperAdmin()
-    {
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue("role");
-        return string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
-    }
-
-    // List audit logs. SuperAdmin sees all; org users see only their org.
+    /// <summary>List tenant audit logs. Tenants see only their OrgID. SuperAdmin is explicitly forbidden from reading TenantAuditLogs.</summary>
     [HttpGet]
     public async Task<ActionResult<List<AuditLogDto>>> List(
         [FromQuery] DateTime? from,
@@ -42,20 +30,21 @@ public class AuditLogsController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50)
     {
-        var orgId = GetUserOrgId();
-        if (!orgId.HasValue && !IsSuperAdmin())
+        if (User.IsSuperAdmin())
+            return Forbid();
+
+        var orgId = User.GetOrgID();
+        if (!orgId.HasValue)
             return Forbid();
 
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var query = _db.AuditLogs
+        var query = _db.TenantAuditLogs
             .AsNoTracking()
-            .Include(a => a.User)
+            .Where(a => a.OrgID == orgId.Value)
             .AsQueryable();
 
-        if (orgId.HasValue)
-            query = query.Where(a => a.OrgID == orgId.Value);
         if (from.HasValue)
             query = query.Where(a => a.CreatedAt >= from.Value);
         if (to.HasValue)
@@ -73,7 +62,7 @@ public class AuditLogsController : ControllerBase
                 (a.Details != null && a.Details.ToLower().Contains(term)) ||
                 (a.EntityName != null && a.EntityName.ToLower().Contains(term)) ||
                 (a.Action != null && a.Action.ToLower().Contains(term)) ||
-                (a.User != null && a.User.Name != null && a.User.Name.ToLower().Contains(term)));
+                (a.Meta != null && a.Meta.ToLower().Contains(term)));
         }
 
         var total = await query.CountAsync();
@@ -83,10 +72,10 @@ public class AuditLogsController : ControllerBase
             .Take(pageSize)
             .Select(a => new AuditLogDto
             {
-                AuditID = a.AuditID,
+                AuditID = a.TenantAuditLogID,
                 OrgID = a.OrgID,
                 UserID = a.UserID,
-                UserName = a.User != null ? a.User.Name : null,
+                UserName = null,
                 Action = a.Action,
                 EntityName = a.EntityName,
                 EntityID = a.EntityID,

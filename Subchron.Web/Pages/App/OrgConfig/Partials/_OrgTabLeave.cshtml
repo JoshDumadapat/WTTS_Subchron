@@ -3,157 +3,490 @@
     <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Leave Policies</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage time-off types, allowances, and accrual rules.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage time-off types, allowances, accrual rules, and global leave settings.</p>
         </div>
-        <button class="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900">
-            <svg class="mr-2 -ml-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-            Add New Policy
+        <button onclick="openLeaveModal()" class="btn-primary gap-1.5">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add Leave Type
         </button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-8">
         <div class="flex flex-col gap-8">
 
+            @* ─── ACTIVE LEAVE POLICIES TABLE ─── *@
             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
-                    <h3 class="text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Active Policies</h3>
+                <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Active Leave Types</h3>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/40">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Leave Type</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowance</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Carry Over</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Leave Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowance</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Accrual</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Carry Over</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Flags</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody id="leavePoliciesBody" class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
 
-                            <tr class="group transition-colors hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
+                            @* Sample: Sick Leave *@
+                            <tr class="leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10">
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
-                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">Sick Leave</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Emergency & Health</div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">Sick Leave</div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500">All Employees</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                        15 Days / Year
-                                    </span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">15 days / yr</span>
                                 </td>
-                                <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                    <span class="flex items-center text-gray-400 dark:text-gray-500">
-                                        <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">Lump Sum</td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
                                         None
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <button class="rounded-full p-2 text-gray-400 hover:bg-emerald-100 hover:text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:hover:bg-gray-700 dark:hover:text-emerald-400">
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex gap-1.5">
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-400">Approval</span>
+                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-500/20 dark:bg-blue-900/20 dark:text-blue-400">Doc</span>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                                         </button>
-                                        <button class="rounded-full p-2 text-gray-400 hover:bg-red-100 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                                        <button onclick="this.closest('.leave-row').remove()" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
 
-                            <tr class="group transition-colors hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
+                            @* Sample: Vacation Leave *@
+                            <tr class="leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10">
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">Vacation Leave</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">Standard PTO</div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">Vacation Leave</div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500">All Employees</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                        12 Days / Year
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">12 days / yr</span>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">Monthly</td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Max 5 days
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                    <span class="flex items-center text-emerald-600 dark:text-emerald-400">
-                                        <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        Max 5 Days
-                                    </span>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex gap-1.5">
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-400">Approval</span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <button class="rounded-full p-2 text-gray-400 hover:bg-emerald-100 hover:text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:hover:bg-gray-700 dark:hover:text-emerald-400">
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                                         </button>
-                                        <button class="rounded-full p-2 text-gray-400 hover:bg-red-100 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                                        <button onclick="this.closest('.leave-row').remove()" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
+
+                            @* Sample: Emergency Leave *@
+                            <tr class="leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10">
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">Emergency Leave</div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500">All Employees</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">3 days / yr</span>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">Lump Sum</td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <span class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                        None
+                                    </span>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap">
+                                    <div class="flex gap-1.5">
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-400">Approval</span>
+                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-500/20 dark:bg-blue-900/20 dark:text-blue-400">Doc</span>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                                        </button>
+                                        <button onclick="this.closest('.leave-row').remove()" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-700">
-                    <h3 class="text-base font-bold text-gray-900 dark:text-white">General Settings</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Configure global accrual and fiscal year rules.</p>
+            @* ─── GENERAL LEAVE SETTINGS ─── *@
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">General Leave Settings</h3>
+                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Global rules that apply across all leave types.</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-0 divide-y divide-gray-100 dark:divide-gray-700 md:grid-cols-2 md:divide-x md:divide-y-0">
 
-                    <div>
-                        <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Accrual Frequency</label>
-                        <div class="relative">
-                            <select class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:bg-gray-800">
-                                <option>Annual (Lump Sum)</option>
-                                <option>Monthly (Pro-rated)</option>
-                                <option>Bi-Weekly</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                    @* Left column *@
+                    <div class="space-y-5 p-6">
+
+                        @* Fiscal Year Start *@
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Fiscal Year Start</label>
+                            <div class="relative">
+                                <select class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                    <option>January 1</option>
+                                    <option>April 1</option>
+                                    <option>July 1</option>
+                                    <option>Employee Hire Date</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                </div>
                             </div>
                         </div>
+
+                        @* Leave Balance Reset *@
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Balance Reset Rule</label>
+                            <div class="relative">
+                                <select class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                    <option>Reset on Fiscal Year Start</option>
+                                    <option>Reset on Employee Anniversary</option>
+                                    <option>No Reset (Cumulative)</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div>
-                        <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Fiscal Year Start</label>
-                        <div class="relative">
-                            <select class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-gray-900 ring-1 ring-gray-300 ring-inset focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:focus:bg-gray-800">
-                                <option>January 1st</option>
-                                <option>Employee Hire Date</option>
-                                <option>April 1st</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                    @* Right column *@
+                    <div class="space-y-0 divide-y divide-gray-100 dark:divide-gray-700">
+
+                        @* Prorated leave *@
+                        <div class="flex items-center justify-between px-6 py-4">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-800 dark:text-white">Prorated Leave for New Hires</span>
+                                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Calculate leave based on months worked in first year.</p>
                             </div>
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" checked class="peer sr-only">
+                                <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                            peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                            dark:bg-gray-600"></div>
+                            </label>
                         </div>
+
                     </div>
 
                 </div>
-            </div>
 
-            <div class="flex items-center justify-end">
-                <button class="inline-flex justify-center rounded-lg bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900">
-                    Save Changes
-                </button>
+                <div class="flex items-center justify-end border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+                    <button class="btn-primary gap-1.5">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        Save General Settings
+                    </button>
+                </div>
             </div>
 
         </div>
     </div>
+
 </div>
+
+@* ─── ADD LEAVE TYPE MODAL ─── *@
+<div id="leaveModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <h3 class="text-base font-bold text-gray-900 dark:text-white">New Leave Type</h3>
+            <button onclick="closeLeaveModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+
+        <div class="max-h-[72vh] overflow-y-auto px-6 py-5 space-y-5">
+
+            @* Leave Type *@
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Type</label>
+                <div class="relative">
+                    <select id="leaveTypeSelect" onchange="onLeaveTypeChange(this)" class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="sick">Sick Leave</option>
+                        <option value="vacation">Vacation Leave</option>
+                        <option value="emergency">Emergency Leave</option>
+                        <option value="unpaid">Unpaid Leave</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            @* Custom name (shown only when Custom is selected) *@
+            <div id="customNameField" class="hidden">
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Leave Name</label>
+                <input type="text" id="customLeaveName" placeholder="e.g. Bereavement Leave, Paternity Leave..." maxlength="60"
+                       class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+            </div>
+
+            @* Allowance *@
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance (Days / Year)</label>
+                    <input type="number" id="leaveAllowance" min="1" max="365" value="15"
+                           class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Accrual Type</label>
+                    <div class="relative">
+                        <select id="leaveAccrual" class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2 pr-10 pl-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="lump">Lump Sum</option>
+                            <option value="monthly">Monthly Accrual</option>
+                            <option value="perperiod">Per Pay Period</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Carry Over Rule *@
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Carry Over Rule</label>
+                <div class="flex gap-3">
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="radio" name="carry_over" value="none" checked class="h-4 w-4 accent-emerald-500" onchange="toggleCarryOverInput(false)">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">None</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="radio" name="carry_over" value="max" class="h-4 w-4 accent-emerald-500" onchange="toggleCarryOverInput(true)">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Max days</span>
+                    </label>
+                </div>
+                <div id="carryOverInput" class="mt-2 hidden flex items-center gap-2">
+                    <input type="number" min="1" max="365" value="5" placeholder="e.g. 5"
+                           class="w-24 rounded-lg border-0 py-1.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <span class="text-xs text-gray-400">days max carry over</span>
+                </div>
+            </div>
+
+            @* Applies To *@
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
+                <div class="relative">
+                    <select class="block w-full appearance-none rounded-lg border-0 bg-gray-50 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option>All Employees</option>
+                        <option>Full-Time Only</option>
+                        <option>Part-Time Only</option>
+                        <option>Probationary Only</option>
+                        <option>Regular Only</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            @* Toggle flags *@
+            <div class="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700">
+
+                <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                    <div>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Approval</span>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Manager must approve before leave is confirmed.</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" id="flagApproval" checked class="peer sr-only">
+                        <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                    peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                    peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                    <div>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Document</span>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Employee must upload supporting document (e.g. medical cert).</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" id="flagDoc" class="peer sr-only">
+                        <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                    peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                    peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between px-4 py-3">
+                    <div>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Negative Balance</span>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Allow employee to go below zero leave credits.</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" id="flagNegative" class="peer sr-only">
+                        <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                    peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                    peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                    </label>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <button onclick="closeLeaveModal()" class="btn-secondary">Cancel</button>
+            <button onclick="saveLeavePolicy()" class="btn-primary gap-1.5">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                Save Leave Type
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function openLeaveModal() {
+        const m = document.getElementById('leaveModal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+    function closeLeaveModal() {
+        const m = document.getElementById('leaveModal');
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+    function onLeaveTypeChange(sel) {
+        document.getElementById('customNameField').classList.toggle('hidden', sel.value !== 'custom');
+    }
+    function toggleCarryOverInput(show) {
+        document.getElementById('carryOverInput').classList.toggle('hidden', !show);
+    }
+
+    const leaveTypeLabels = { sick: 'Sick Leave', vacation: 'Vacation Leave', emergency: 'Emergency Leave', unpaid: 'Unpaid Leave', custom: '' };
+    const leaveTypeColors = {
+        sick:      'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
+        vacation:  'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+        emergency: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
+        unpaid:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+        custom:    'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
+    };
+
+    const accrualLabels = { lump: 'Lump Sum', monthly: 'Monthly', perperiod: 'Per Period' };
+
+    function saveLeavePolicy() {
+        const typeVal   = document.getElementById('leaveTypeSelect').value;
+        const typeName  = typeVal === 'custom'
+            ? (document.getElementById('customLeaveName').value.trim() || 'Custom Leave')
+            : leaveTypeLabels[typeVal];
+        const allowance = document.getElementById('leaveAllowance').value;
+        const accrual   = accrualLabels[document.getElementById('leaveAccrual').value];
+        const carryNone = document.querySelector('input[name="carry_over"]:checked').value === 'none';
+        const carryMax  = carryNone ? null : document.querySelector('#carryOverInput input').value;
+        const needApproval = document.getElementById('flagApproval').checked;
+        const needDoc      = document.getElementById('flagDoc').checked;
+
+        const carryHtml = carryNone
+            ? `<span class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>None</span>`
+            : `<span class="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Max ${carryMax} days</span>`;
+
+        const flags = [
+            needApproval ? `<span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-400">Approval</span>` : '',
+            needDoc      ? `<span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-500/20 dark:bg-blue-900/20 dark:text-blue-400">Doc</span>` : ''
+        ].filter(Boolean).join('') || '<span class="text-xs text-gray-400">-</span>';
+
+        const trashSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />';
+        const editSvg  = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />';
+
+        const row = document.createElement('tr');
+        row.className = 'leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10';
+        row.innerHTML = `
+            <td class="px-5 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg ${leaveTypeColors[typeVal]}">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white">${typeName}</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500">All Employees</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-5 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">${allowance} days / yr</span>
+            </td>
+            <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">${accrual}</td>
+            <td class="px-5 py-4 whitespace-nowrap">${carryHtml}</td>
+            <td class="px-5 py-4 whitespace-nowrap"><div class="flex gap-1.5 flex-wrap">${flags}</div></td>
+            <td class="px-5 py-4 whitespace-nowrap text-right">
+                <div class="flex items-center justify-end gap-1">
+                    <button class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${editSvg}</svg>
+                    </button>
+                    <button onclick="this.closest('.leave-row').remove()" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${trashSvg}</svg>
+                    </button>
+                </div>
+            </td>`;
+
+        document.getElementById('leavePoliciesBody').appendChild(row);
+        closeLeaveModal();
+    }
+
+    document.getElementById('leaveModal').addEventListener('click', function(e) {
+        if (e.target === this) closeLeaveModal();
+    });
+</script>
