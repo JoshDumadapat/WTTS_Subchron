@@ -156,6 +156,10 @@
     .pin-color-emerald {
         background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
     }
+
+    .site-card-accent[style*="--accent"]:hover {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
 </style>
 
 <div id="tab-locations" class="tab-content hidden h-full flex-col">
@@ -471,8 +475,8 @@
         }
 
         function createSiteIcon(color, isActive) {
-            var hex = isActive ? getMapPinHex(color) : '#ef4444';
-            var fade = isActive ? '' : ' opacity-60';
+            var hex = isActive ? getMapPinHex(color) : '#6b7280';
+            var fade = isActive ? '' : ' opacity-70';
             var html = `
             <span class="relative inline-flex h-10 w-10 items-center justify-center -translate-y-1${fade}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
                 <svg class="w-8 h-10 animate-bounce" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1165,8 +1169,9 @@
 
             prioritized.forEach(site => {
                 const card = document.createElement('div');
-                card.className = 'site-card-accent flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800 cursor-pointer hover:ring-2 hover:ring-emerald-500/30';
-                const accentHex = site.isActive ? (pinColorHex[site.pinColor] || '#3b82f6') : '#ef4444';
+                const accentHex = site.isActive ? (pinColorHex[site.pinColor] || '#3b82f6') : '#6b7280';
+                card.className = 'site-card-accent flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800 cursor-pointer';
+                card.style.setProperty('--accent', accentHex);
                 card.style.borderLeftColor = accentHex;
                 if (!site.isActive) {
                     card.classList.add('border-gray-200/80', 'bg-gray-50', 'opacity-95', 'dark:border-gray-700/60', 'dark:bg-slate-900/40');
