@@ -1,6 +1,6 @@
 ﻿<div id="tab-profile" class="tab-content mx-auto w-full max-w-6xl px-4 py-6">
 
-    <div class="mb-6 border-b border-gray-200 pb-4 dark:border-gray-700">
+    <div class="mb-6 border-b border-slate-200 pb-4 dark:border-gray-700">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Organization Profile</h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your organization's details and branding.</p>
     </div>
@@ -9,13 +9,13 @@
 
         <div id="orgProfileError" class="mb-4 hidden rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
 
-        <div class="relative mb-8 overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-emerald-50/50 to-white p-6 shadow-sm dark:border-gray-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+        <div class="relative mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-emerald-50/50 to-white p-6 shadow-lg dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
             <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-60">
                 <div class="h-full bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_60%)]"></div>
             </div>
             <div class="relative z-10 flex flex-col gap-8 md:flex-row md:items-center">
                 <div class="relative h-32 w-32 flex-shrink-0 drop-shadow-sm">
-                    <div class="group flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-dashed border-emerald-200 bg-white/80 transition-colors hover:border-emerald-400 dark:border-emerald-500/40 dark:bg-slate-800">
+                    <div class="group flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-dashed border-emerald-200 bg-slate-100/80 transition-colors hover:border-emerald-400 dark:border-emerald-500/40 dark:bg-slate-800">
                         <svg id="profile-placeholder" class="h-12 w-12 text-emerald-400/70 dark:text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -55,11 +55,11 @@
                     </div>
 
                     <div class="flex flex-wrap gap-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                        <span class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/70 px-3 py-1 text-emerald-600 dark:border-emerald-500/30 dark:bg-slate-800/70">
+                        <span class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/70 px-3 py-1 text-emerald-600 dark:border-emerald-500/30 dark:bg-slate-800/70">
                             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                             Brand-ready assets
                         </span>
-                        <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/60 px-3 py-1 dark:border-gray-700 dark:bg-slate-800/70">
+                        <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-slate-100/60 px-3 py-1 dark:border-gray-700 dark:bg-slate-800/70">
                             <svg class="h-3.5 w-3.5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             Ensure timezone, currency & HQ info stay fresh
                         </span>
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <hr class="mb-8 border-gray-200 dark:border-gray-700" />
+        <hr class="mb-8 border-slate-300 dark:border-gray-700" />
 
         <div class="space-y-6">
 
@@ -76,7 +76,7 @@
                 <label class="mb-2 block text-sm font-semibold text-gray-800 dark:text-white">Headquarters Address</label>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
                     <div class="md:col-span-12 address-autocomplete">
-                        <label for="orgAddressLine1" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Street Address</label>
+                        <label for="orgAddressLine1" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Street Address</label>
                         <div class="relative">
                             <div class="form-input-icon">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -85,27 +85,27 @@
                                 </svg>
                             </div>
                             <input type="text" id="orgAddressLine1" disabled placeholder="Street Address" class="form-input-custom has-icon" value="">
-                            <div id="orgAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                            <div id="orgAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-lg border border-slate-200 bg-slate-50 shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
                         </div>
                     </div>
 
                     <div class="md:col-span-3">
-                        <label for="orgCity" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">City</label>
+                        <label for="orgCity" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">City</label>
                         <input type="text" id="orgCity" disabled placeholder="City" class="form-input-custom" value="">
                     </div>
 
                     <div class="md:col-span-3">
-                        <label for="orgState" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">State / Province</label>
+                        <label for="orgState" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">State / Province</label>
                         <input type="text" id="orgState" disabled placeholder="State/Province" class="form-input-custom" value="">
                     </div>
 
                     <div class="md:col-span-3">
-                        <label for="orgPostal" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Postal Code</label>
+                        <label for="orgPostal" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Postal Code</label>
                         <input type="text" id="orgPostal" disabled placeholder="Postal Code" class="form-input-custom" value="">
                     </div>
 
                     <div class="md:col-span-3">
-                        <label for="orgCountry" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Country</label>
+                        <label for="orgCountry" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Country</label>
                         <select id="orgCountry" disabled class="form-input-custom">
                             <option selected>Philippines</option>
                             <option>United States</option>
@@ -120,7 +120,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
                     <div>
-                        <label for="orgContactEmail" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contact Email</label>
+                        <label for="orgContactEmail" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Contact Email</label>
                         <div class="relative">
                             <div class="form-input-icon">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -132,7 +132,7 @@
                     </div>
 
                     <div>
-                        <label for="orgContactPhone" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contact Phone</label>
+                        <label for="orgContactPhone" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Contact Phone</label>
                         <div class="relative">
                             <div class="form-input-icon">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -151,7 +151,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Timezone</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Timezone</label>
                         <div class="relative">
                             <div class="form-input-icon">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -167,7 +167,7 @@
                     </div>
 
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Currency</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Currency</label>
                         <div class="relative">
                             <div class="form-input-icon">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -186,7 +186,7 @@
             </div>
 
             <div id="action-buttons" class="animate-fade-in hidden">
-                <hr class="mt-8 mb-4 border-gray-200 dark:border-gray-700" />
+                <hr class="mt-8 mb-4 border-slate-300 dark:border-gray-700" />
 
                 <div class="flex items-center justify-end gap-x-4">
                     <button type="button" onclick="cancelEditMode()" class="text-sm leading-6 font-semibold text-gray-800 transition-colors hover:text-gray-700 dark:text-gray-300 dark:hover:text-white">
@@ -215,7 +215,7 @@
         font-size: 0.875rem;
         line-height: 1.25rem;
         color: #111827;
-        border: 1px solid #d1d5db;
+        border: 1px solid #94a3b8;
         background-color: #ffffff;
         transition: all 0.2s;
     }
@@ -253,7 +253,7 @@
 
         .form-input-custom:disabled {
             background-color: #f9fafb;
-            border-color: #e5e7eb;
+            border-color: #cbd5e1;
             color: #4b5563;
             cursor: not-allowed;
         }

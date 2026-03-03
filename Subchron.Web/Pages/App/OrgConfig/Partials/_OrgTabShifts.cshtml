@@ -20,7 +20,7 @@
             <div id="shiftsList" class="space-y-4">
 
                 @* Sample: Regular Day Shift (Fixed) *@
-                <div class="shift-card overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-800/60 dark:bg-gray-800">
+                <div class="shift-card overflow-hidden rounded-2xl border border-emerald-200 bg-slate-50 shadow-sm dark:border-emerald-800/60 dark:bg-gray-800">
                     <div class="h-1.5 w-full bg-emerald-500"></div>
                     <div class="px-5 pt-4 pb-4">
                         <div class="flex items-start justify-between gap-4">
@@ -64,7 +64,7 @@
                 </div>
 
                 @* Sample: Flex Worker (Flexible) *@
-                <div class="shift-card overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm dark:border-blue-800/60 dark:bg-gray-800">
+                <div class="shift-card overflow-hidden rounded-2xl border border-blue-200 bg-slate-50 shadow-sm dark:border-blue-800/60 dark:bg-gray-800">
                     <div class="h-1.5 w-full bg-blue-500"></div>
                     <div class="px-5 pt-4 pb-4">
                         <div class="flex items-start justify-between gap-4">
@@ -108,7 +108,7 @@
                 </div>
 
                 @* Sample: Project Based (Open) *@
-                <div class="shift-card overflow-hidden rounded-2xl border border-violet-200 bg-white shadow-sm dark:border-violet-800/60 dark:bg-gray-800">
+                <div class="shift-card overflow-hidden rounded-2xl border border-violet-200 bg-slate-50 shadow-sm dark:border-violet-800/60 dark:bg-gray-800">
                     <div class="h-1.5 w-full bg-violet-500"></div>
                     <div class="px-5 pt-4 pb-4">
                         <div class="flex items-start justify-between gap-4">
@@ -154,8 +154,8 @@
             </div>
 
             @* ── OVERTIME RULES ───────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center gap-3 border-b border-gray-100 bg-gray-50/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/30">
+            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center gap-3 border-b border-gray-100 bg-slate-100/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/30">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -180,7 +180,7 @@
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">OT Enabled</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Allow overtime tracking</p>
                                 </div>
-                                <select id="ot-enabled" class="rounded-lg border-0 bg-white py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
+                                <select id="ot-enabled" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
                                     <option value="on">On</option>
                                     <option value="off">Off</option>
                                 </select>
@@ -194,7 +194,7 @@
                             </div>
                             <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">OT Basis</p>
-                                <select id="ot-basis" class="block w-full rounded-lg border-0 bg-white py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <select id="ot-basis" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="after_shift_end">After scheduled shift end</option>
                                     <option value="after_x_hours_day">After X total hours / day</option>
                                     <option value="after_x_hours_week">After X total hours / week</option>
@@ -215,7 +215,7 @@
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Pre-Approval</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Required before OT</p>
                                 </div>
-                                <select id="ot-preapproval" class="rounded-lg border-0 bg-white py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
+                                <select id="ot-preapproval" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
                                     <option value="on">On</option>
                                     <option value="off" selected>Off</option>
                                 </select>
@@ -229,7 +229,7 @@
                             </div>
                             <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Approver Role</p>
-                                <select id="ot-approver-role" class="block w-full rounded-lg border-0 bg-white py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <select id="ot-approver-role" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="Supervisor">Supervisor</option>
                                     <option value="Manager">Manager</option>
                                     <option value="HR">HR</option>
@@ -240,7 +240,7 @@
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Auto-Approve</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Skip workflow (small orgs)</p>
                                 </div>
-                                <select id="ot-auto-approve" class="rounded-lg border-0 bg-white py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
+                                <select id="ot-auto-approve" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
                                     <option value="on">On</option>
                                     <option value="off" selected>Off</option>
                                 </select>
@@ -258,7 +258,7 @@
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Round OT Minutes To</p>
-                                <select id="ot-round-to" class="block w-full rounded-lg border-0 bg-white py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <select id="ot-round-to" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="none">None</option>
                                     <option value="5">5 mins</option>
                                     <option value="15" selected>15 mins</option>
@@ -301,7 +301,7 @@
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Hard Stop</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Block clock-in beyond max shift</p>
                                 </div>
-                                <select id="ot-hard-stop" class="rounded-lg border-0 bg-white py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
+                                <select id="ot-hard-stop" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
                                     <option value="on">On</option>
                                     <option value="off">Off</option>
                                 </select>
@@ -352,52 +352,9 @@
 
 @* ─── DELETE SHIFT CONFIRMATION MODAL ─── *@
 <div id="deleteShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
-        <div class="h-1.5 w-full bg-red-500"></div>
-        <div class="px-6 pt-6 pb-5">
-            <div class="flex items-start gap-4">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
-                    <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-base font-bold text-gray-900 dark:text-white">Remove Shift Template?</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Why do you want to remove <span id="deleteShiftName" class="font-semibold text-gray-700 dark:text-gray-300"></span>?</p>
-                </div>
-            </div>
-            <div class="mt-5 space-y-2">
-                <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:border-red-300 hover:bg-red-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-red-600 dark:hover:bg-red-900/10 transition-all has-[:checked]:border-red-400 has-[:checked]:bg-red-50 dark:has-[:checked]:border-red-500 dark:has-[:checked]:bg-red-900/20">
-                    <input type="radio" name="deleteReason" value="no_longer_needed" class="accent-red-500" checked>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">No longer needed</span>
-                </label>
-                <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:border-red-300 hover:bg-red-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-red-600 dark:hover:bg-red-900/10 transition-all has-[:checked]:border-red-400 has-[:checked]:bg-red-50 dark:has-[:checked]:border-red-500 dark:has-[:checked]:bg-red-900/20">
-                    <input type="radio" name="deleteReason" value="replacing_with_new" class="accent-red-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Replacing with a new template</span>
-                </label>
-                <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:border-red-300 hover:bg-red-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-red-600 dark:hover:bg-red-900/10 transition-all has-[:checked]:border-red-400 has-[:checked]:bg-red-50 dark:has-[:checked]:border-red-500 dark:has-[:checked]:bg-red-900/20">
-                    <input type="radio" name="deleteReason" value="was_a_mistake" class="accent-red-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Added by mistake</span>
-                </label>
-                <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 hover:border-red-300 hover:bg-red-50 dark:border-gray-600 dark:bg-gray-700/40 dark:hover:border-red-600 dark:hover:bg-red-900/10 transition-all has-[:checked]:border-red-400 has-[:checked]:bg-red-50 dark:has-[:checked]:border-red-500 dark:has-[:checked]:bg-red-900/20">
-                    <input type="radio" name="deleteReason" value="other" class="accent-red-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Other reason</span>
-                </label>
-            </div>
-        </div>
-        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
-            <button onclick="closeDeleteShiftModal()" class="btn-secondary">Cancel</button>
-            <button onclick="confirmDeleteShift()" class="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-1 transition-colors">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                Yes, Remove
-            </button>
-        </div>
+    <div class="w-full max-w-sm overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
     </div>
-</div>
-
-@* ─── EDIT SHIFT MODAL ─── *@
-<div id="editShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
 
         <div class="h-1.5 w-full bg-amber-400"></div>
         <div class="flex items-center justify-between border-b border-amber-100 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
@@ -723,7 +680,7 @@
 
         </div>
 
-        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button onclick="closeAddShiftModal()" class="btn-secondary">Cancel</button>
             <button onclick="saveShiftTemplate()" class="btn-primary gap-1.5">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -851,7 +808,7 @@
         const editSvg  = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />';
 
         const card = document.createElement('div');
-        card.className = `shift-card overflow-hidden rounded-2xl border ${borderColor} bg-white shadow-sm dark:bg-gray-800`;
+        card.className = `shift-card overflow-hidden rounded-2xl border ${borderColor} bg-slate-50 shadow-sm dark:bg-gray-800`;
         card.innerHTML = `
             <div class="h-1.5 w-full ${accentBar}"></div>
             <div class="px-5 pt-4 pb-4">

@@ -35,10 +35,10 @@
     </div>
 
     <!-- Card container: LEFT tabs + RIGHT content -->
-    <div class="flex min-h-[600px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:flex-row dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex min-h-[600px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-lg sm:flex-row dark:border-slate-700 dark:bg-slate-800">
 
         <!-- LEFT: NAV (tabs) -->
-        <aside class="order-1 hidden flex-shrink-0 border-b border-slate-200 bg-slate-50/50 sm:block sm:w-52 sm:border-r sm:border-b-0 dark:border-slate-700 dark:bg-slate-900/40">
+        <aside class="order-1 hidden flex-shrink-0 border-b border-slate-200 bg-slate-100 sm:block sm:w-52 sm:border-r sm:border-b-0 dark:border-slate-700 dark:bg-slate-900/40">
             <nav class="space-y-1 p-4">
 
                 <button onclick="switchTab('tab-profile')" id="nav-profile"
@@ -50,7 +50,7 @@
                 </button>
 
                 <button onclick="switchTab('tab-attendance')" id="nav-attendance"
-                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-slate-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
                     <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -58,7 +58,7 @@
                 </button>
 
                 <button onclick="switchTab('tab-locations')" id="nav-locations"
-                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-slate-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
                     <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -67,7 +67,7 @@
                 </button>
 
                 <button onclick="switchTab('tab-shifts')" id="nav-shifts"
-                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-slate-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
                     <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -75,7 +75,7 @@
                 </button>
 
                 <button onclick="switchTab('tab-leave')" id="nav-leave"
-                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-slate-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
                     <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -83,7 +83,7 @@
                 </button>
 
                 <button onclick="switchTab('tab-pay')" id="nav-pay"
-                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
+                        class="nav-item flex w-full items-center rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-slate-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-white">
                     <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -94,7 +94,7 @@
         </aside>
 
         <!-- RIGHT: CONTENT -->
-        <main class="order-2 flex-1 overflow-y-auto bg-white p-6 dark:bg-slate-800">
+        <main class="order-2 flex-1 overflow-y-auto bg-slate-50 p-6 dark:bg-slate-800">
 
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabProfile.cshtml" />
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabAttendance.cshtml" />
@@ -133,14 +133,14 @@
             // --- Update Desktop Sidebar (local page nav) ---
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400', 'active');
-                btn.classList.add('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+                btn.classList.add('text-gray-600', 'hover:bg-slate-200', 'dark:text-gray-400');
             });
 
             const navId = 'nav-' + tabId.replace('tab-', '');
             const activeBtn = document.getElementById(navId);
             if (activeBtn) {
                 activeBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400', 'active');
-                activeBtn.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-slate-200', 'dark:text-gray-400');
             }
 
             // --- Update Mobile Dropdown ---
@@ -159,7 +159,7 @@
                     const mainLink = sidebarNav.querySelector(`a.nav-item[href="${orgHref}"]`) || sidebarNav.querySelector(`a.nav-item[href^="${orgHref}"]`);
                     if (mainLink) {
                         mainLink.classList.add('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
-                        mainLink.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+                        mainLink.classList.remove('text-gray-600', 'hover:bg-slate-200', 'dark:text-gray-400');
                         try { mainLink.focus({preventScroll: true}); } catch (e) { /* no-op */ }
                         try { localStorage.setItem('subchron-active-href', orgHref); } catch (e) { /* no-op */ }
                     }
@@ -199,7 +199,7 @@
                     // Clear any active states and set the Organization Settings anchor active.
                     sidebarNav.querySelectorAll('a.nav-item').forEach(a => a.classList.remove('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400'));
                     mainLink.classList.add('active', 'bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-900/20', 'dark:text-emerald-400');
-                    mainLink.classList.remove('text-gray-600', 'hover:bg-white', 'dark:text-gray-400');
+                    mainLink.classList.remove('text-gray-600', 'hover:bg-slate-200', 'dark:text-gray-400');
 
                     // Persist so the layout's restore logic keeps it after reloads
                     try { localStorage.setItem('subchron-active-href', orgHref); } catch (e) { /* no-op */ }

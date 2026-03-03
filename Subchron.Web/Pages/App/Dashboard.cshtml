@@ -54,7 +54,7 @@
 </div>
 
 <!-- Filter card: single row — From → to → To → Dept → shortcuts → Reset → Apply -->
-<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
     <div class="flex flex-wrap items-end gap-3">
         <!-- From date -->
         <div class="flex flex-col gap-1">
@@ -108,7 +108,7 @@
 
 <div class="mb-8 grid grid-cols-2 gap-6 lg:grid-cols-3">
 
-    <div class="group relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="relative z-10 flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Workforce</p>
@@ -124,7 +124,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Present Today</p>
@@ -140,7 +140,7 @@
         <p class="mt-2 text-right text-xs text-gray-400">@Math.Round((double)presentToday / totalEmployees * 100)% Rate</p>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Late Arrivals</p>
@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">On Leave / Absent</p>
@@ -168,7 +168,7 @@
         <p class="mt-4 text-xs text-gray-500">Includes Sick & Vacation</p>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Pending OT</p>
@@ -183,7 +183,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Missing Out</p>
@@ -200,7 +200,7 @@
 
 <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-lg lg:col-span-2 dark:border-slate-700 dark:bg-slate-800">
         <div class="mb-6 flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">Attendance Trends</h3>
@@ -212,7 +212,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="mb-6">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Department Active</h3>
             <p class="text-xs text-gray-500">Distribution of present staff</p>
@@ -231,7 +231,7 @@
     </div>
 </div>
 
-<div class="rounded-xl border border-gray-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+<div class="rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
     <div class="flex items-center justify-between border-b border-gray-100 p-6 dark:border-slate-700">
         <div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Live Activity Feed</h3>
@@ -255,7 +255,7 @@
                     <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-9 w-9 @log.Color items-center justify-center rounded-full text-xs font-bold shadow-sm ring-2 ring-white dark:ring-gray-800">
+                                <div class="flex h-9 w-9 @log.Color items-center justify-center rounded-full text-xs font-bold shadow-lg ring-2 ring-white dark:ring-gray-800">
                                     @log.Initials
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">@log.Name</span>
