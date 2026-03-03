@@ -546,17 +546,35 @@
 
     var addRole = document.getElementById('addRole');
     var addEmpNumber = document.getElementById('addEmpNumber');
+    var nextEmpNumberAbortController = null;
+    var empNumberCache = Object.create(null);
     if (addRole && addEmpNumber) {
         addRole.addEventListener('change', function () {
             var role = this.value;
             if (!role) { addEmpNumber.value = ''; return; }
-            fetch('/App/Employee/Add?handler=NextEmpNumber&role=' + encodeURIComponent(role), { headers: { 'Accept': 'application/json' } })
+            if (empNumberCache[role]) {
+                addEmpNumber.value = empNumberCache[role];
+                clearFieldError('addEmpNumber');
+                return;
+            }
+            if (nextEmpNumberAbortController) nextEmpNumberAbortController.abort();
+            nextEmpNumberAbortController = new AbortController();
+            fetch('/App/Employee/Add?handler=NextEmpNumber&role=' + encodeURIComponent(role), {
+                headers: { 'Accept': 'application/json' },
+                signal: nextEmpNumberAbortController.signal
+            })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     addEmpNumber.value = (data && data.empNumber) ? data.empNumber : '';
-                    if (addEmpNumber.value.trim()) clearFieldError('addEmpNumber');
+                    if (addEmpNumber.value.trim()) {
+                        empNumberCache[role] = addEmpNumber.value;
+                        clearFieldError('addEmpNumber');
+                    }
                 })
-                .catch(function () { addEmpNumber.value = ''; });
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return;
+                    addEmpNumber.value = '';
+                });
         });
     }
 

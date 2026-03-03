@@ -17,20 +17,42 @@ public class LocationIqService : ILocationIqService
         _settings = opts.Value;
     }
 
+    // LocationIQ - address autocomplete query.
     public async Task<IReadOnlyList<LocationAutocompleteResult>> AutocompleteAsync(string query, int limit = 5, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query)) return Array.Empty<LocationAutocompleteResult>();
 
+        if (string.IsNullOrWhiteSpace(_settings.ApiKey))
+            return Array.Empty<LocationAutocompleteResult>();
+
         var url = $"{_settings.BaseUrl}autocomplete?key={_settings.ApiKey}&q={Uri.EscapeDataString(query)}&limit={limit}&dedupe=1&format=json";
-        var data = await _http.GetFromJsonAsync<List<LocationIqPlaceDto>>(url, ct) ?? new List<LocationIqPlaceDto>();
-        return data.Select(Map).ToList();
+        try
+        {
+            var data = await _http.GetFromJsonAsync<List<LocationIqPlaceDto>>(url, ct) ?? new List<LocationIqPlaceDto>();
+            return data.Select(Map).ToList();
+        }
+        catch
+        {
+            return Array.Empty<LocationAutocompleteResult>();
+        }
     }
 
+    // LocationIQ - reverse geocode query.
     public async Task<LocationAutocompleteResult?> ReverseAsync(decimal lat, decimal lon, CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(_settings.ApiKey))
+            return null;
+
         var url = $"{_settings.BaseUrl}reverse?key={_settings.ApiKey}&lat={lat.ToString(CultureInfo.InvariantCulture)}&lon={lon.ToString(CultureInfo.InvariantCulture)}&format=json";
-        var data = await _http.GetFromJsonAsync<LocationIqPlaceDto>(url, ct);
-        return data == null ? null : Map(data);
+        try
+        {
+            var data = await _http.GetFromJsonAsync<LocationIqPlaceDto>(url, ct);
+            return data == null ? null : Map(data);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static LocationAutocompleteResult Map(LocationIqPlaceDto dto)

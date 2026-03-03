@@ -15,6 +15,7 @@ public class LocationController : ControllerBase
         _location = location;
     }
 
+    // Location lookup - LocationIQ autocomplete proxy.
     [AllowAnonymous]
     [HttpGet("autocomplete")]
     public async Task<IActionResult> Autocomplete([FromQuery] string q, [FromQuery] int limit = 5, CancellationToken ct = default)
@@ -22,9 +23,12 @@ public class LocationController : ControllerBase
         if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 3)
             return Ok(Array.Empty<object>());
         var results = await _location.AutocompleteAsync(q.Trim(), Math.Clamp(limit, 3, 10), ct);
+        if (Response.Headers.ContainsKey("Cache-Control")) Response.Headers.Remove("Cache-Control");
+        Response.Headers.Append("Cache-Control", "public, max-age=300");
         return Ok(results);
     }
 
+    // Location lookup - LocationIQ reverse geocode proxy.
     [AllowAnonymous]
     [HttpGet("reverse")]
     public async Task<IActionResult> Reverse([FromQuery] decimal lat, [FromQuery] decimal lon, CancellationToken ct = default)

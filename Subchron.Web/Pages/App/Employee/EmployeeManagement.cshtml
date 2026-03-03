@@ -656,7 +656,8 @@
 
         var shownAt = Date.now();
         var revealTimer = null;
-        var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+        var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 80;
+        var employeeRowsCache = Array.prototype.slice.call(tbody.querySelectorAll('.employee-row'));
 
         function showSkeleton() {
             if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
@@ -670,10 +671,12 @@
             var elapsed = Date.now() - shownAt;
             var wait = Math.max(0, minVisibleMs - elapsed);
             revealTimer = setTimeout(function () {
-                skeleton.classList.add('hidden');
-                content.classList.remove('hidden');
-                host.setAttribute('aria-busy', 'false');
-                revealTimer = null;
+                requestAnimationFrame(function () {
+                    skeleton.classList.add('hidden');
+                    content.classList.remove('hidden');
+                    host.setAttribute('aria-busy', 'false');
+                    revealTimer = null;
+                });
             }, wait);
         }
 
@@ -806,9 +809,9 @@
                     if (emptyTd) emptyTd.innerHTML = '<p class="text-sm text-slate-600 dark:text-slate-400">Loading timed out. Please refresh the page.</p>';
                     placeholder.classList.remove('hidden');
                 }
-            }, 6000);
+            }, 4000);
 
-            fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin', cache: 'no-store' })
                 .then(function (r) { if (!r.ok) throw new Error('Request failed: ' + r.status); return r.json(); })
                 .then(function (data) {
                     clearTimeout(fallbackTimer);
@@ -837,10 +840,13 @@
                     }
 
                     tbody.querySelectorAll('.employee-row').forEach(function (r) { r.remove(); });
-
+                    var rowsFragment = document.createDocumentFragment();
                     employees.forEach(function (e) {
-                        try { tbody.insertBefore(buildRow(e), placeholder); } catch (err) { }
+                        try { rowsFragment.appendChild(buildRow(e)); } catch (err) { }
                     });
+                    if (placeholder) tbody.insertBefore(rowsFragment, placeholder);
+                    else tbody.appendChild(rowsFragment);
+                    employeeRowsCache = Array.prototype.slice.call(tbody.querySelectorAll('.employee-row'));
 
                     if (placeholder) placeholder.classList.toggle('hidden', employees.length > 0);
 
@@ -873,10 +879,9 @@
                 });
         }
 
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onDataReady, { once: true });
-        else onDataReady();
+        onDataReady();
 
-        function getRows() { return document.querySelectorAll('.employee-row'); }
+        function getRows() { return employeeRowsCache; }
         function getSelectedEmpIds() {
             var checkboxes = document.querySelectorAll('.employee-checkbox:checked');
             return Array.from(checkboxes).map(function (cb) { return parseInt(cb.getAttribute('data-emp-id'), 10); }).filter(Boolean);
@@ -1166,7 +1171,7 @@
         setIdText('idCardEcRelation', data.ecRelation || '—');
 
         var qrEl = getIdEl('idCardQr');
-        if (qrEl && data.empId) qrEl.src = window.location.pathname + '?handler=AttendanceQr&id=' + encodeURIComponent(data.empId);
+        if (qrEl && data.empId) qrEl.src = window.location.pathname + '?handler=AttendanceQr&id=' + encodeURIComponent(data.empId) + '&t=' + Date.now();
 
         var sigEl = getIdEl('idCardSignature');
         if (sigEl) {

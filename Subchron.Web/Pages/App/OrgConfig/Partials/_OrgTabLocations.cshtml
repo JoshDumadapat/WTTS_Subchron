@@ -659,6 +659,7 @@
             loaderEl.classList.add('hidden');
         }
 
+        // Locations map - init Leaflet map safely across browsers.
         function initMap(forceRecreate) {
             if (typeof L === 'undefined') return false;
 
@@ -692,8 +693,8 @@
         // ——— Tile layer: light (Voyager) and dark (Stadia Alidade Smooth Dark) ———
         // Detect current dark mode from the <html> element class
         var TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-        // Stadia "alidade_smooth_dark" — slate/navy tones, much easier to read than pitch-black dark_all
-        var TILE_DARK  = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
+        // Edge blocks or 404s some third-party tiles; use Carto dark tiles for cross-browser stability.
+        var TILE_DARK  = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
         var TILE_OPTS_LIGHT = {
             maxZoom: 19,
             minZoom: 5,
@@ -723,6 +724,16 @@
         }
 
         var tileLayer = L.tileLayer(isDarkMode() ? TILE_DARK : TILE_LIGHT, getTileOpts(isDarkMode() ? TILE_DARK : TILE_LIGHT));
+
+        // If a tile source fails in a browser, fall back to light tiles to avoid a blank map.
+        tileLayer.on('tileerror', function () {
+            if (!map) return;
+            var fallbackUrl = TILE_LIGHT;
+            if (tileLayer && tileLayer._url === fallbackUrl) return;
+            try { map.removeLayer(tileLayer); } catch (e) { }
+            tileLayer = L.tileLayer(fallbackUrl, getTileOpts(fallbackUrl));
+            tileLayer.addTo(map);
+        });
 
         // Hide loading overlay after first successful tile load (progressive feel)
         tileLayer.on('load', hideLoader);
@@ -850,6 +861,7 @@
             }, 2000);
         }
 
+        // Locations map - refresh when the tab becomes visible.
         function onLocationsTabShown() {
             autoReloadTriggered = false;
 
@@ -909,6 +921,7 @@
         }
     })();
 
+    // Locations search - LocationIQ autocomplete.
     (function initLocationSearch() {
         const input = document.getElementById('orgLocationSearch');
         const suggestionsBox = document.getElementById('orgLocationSearchSuggestions');
@@ -971,6 +984,7 @@
             }
         }
 
+        // Locations search - debounce + cancel requests to avoid 429s and stale results.
         function fetchSuggestions(query) {
             if (!query || query.length < 3) {
                 clearSuggestions();
@@ -1030,6 +1044,7 @@
         });
     })();
 
+    // Locations CRUD - list, create, update, and status changes.
     (function initOrgLocationsCrud() {
         const appRoot = document.getElementById('appRoot');
         const apiBase = (appRoot?.getAttribute('data-api-base') || '').trim().replace(/\/$/, '');

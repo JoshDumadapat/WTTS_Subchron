@@ -37,26 +37,48 @@ public class EmployeeManagementModel : PageModel
         if (!string.IsNullOrWhiteSpace(claimOrgName))
             OrgName = claimOrgName.Trim();
 
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
-        if (!string.IsNullOrEmpty(token))
-        {
-            var branding = await GetOrgBrandingAsync(token);
-            OrgName = branding.OrgName;
-            OrgLogoUrl = branding.OrgLogoUrl;
-        }
+        await Task.CompletedTask;
     }
 
     public async Task<IActionResult> OnGetDataAsync()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
-        await Task.WhenAll(
-            LoadDepartmentsAsync(),
-            LoadEmployeesAsync(archivedOnly: false)
-        );
+        var token = GetAccessToken();
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
+            return new JsonResult(new { employees = Array.Empty<EmployeeItem>(), departments = Array.Empty<DepartmentItem>() });
+
+        try
+        {
+            var data = await FetchEmployeeManagementDataAsync(token, baseUrl);
+            Departments = data.departments;
+            Employees = data.employees;
+            Error = null;
+        }
+        catch
+        {
+            Departments = new List<DepartmentItem>();
+            Employees = new List<EmployeeItem>();
+            Error = "Unable to load employees right now.";
+        }
+
         return new JsonResult(new { employees = Employees, departments = Departments });
     }
 
+    // Employee Management - fetching data API functions
+    private async Task<(List<EmployeeItem> employees, List<DepartmentItem> departments)> FetchEmployeeManagementDataAsync(string token, string baseUrl)
+    {
+        var client = CreateAuthorizedApiClient(token);
+        var departmentsTask = FetchDepartmentsAsync(client, baseUrl);
+        var employeesTask = FetchEmployeesAsync(client, baseUrl, archivedOnly: false);
+        await Task.WhenAll(departmentsTask, employeesTask);
+        return (await employeesTask, await departmentsTask);
+    }
+
     private string GetApiBaseUrl() => (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
+
+    // Employee Management - auth and API client helpers
+    private string? GetAccessToken() => User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
 
     private HttpClient CreateAuthorizedApiClient(string token)
     {
@@ -80,17 +102,17 @@ public class EmployeeManagementModel : PageModel
         return null;
     }
 
+    // Employee Management - fetching data API functions
     private async Task LoadDepartmentsAsync()
     {
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token)) return;
         var baseUrl = GetApiBaseUrl();
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
             var client = CreateAuthorizedApiClient(token);
-            var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
-            Departments = list ?? new List<DepartmentItem>();
+            Departments = await FetchDepartmentsAsync(client, baseUrl);
         }
         catch
         {
@@ -99,24 +121,38 @@ public class EmployeeManagementModel : PageModel
         }
     }
 
+    // Employee Management - fetching data API functions
     private async Task LoadEmployeesAsync(bool archivedOnly)
     {
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token)) return;
         var baseUrl = GetApiBaseUrl();
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
             var client = CreateAuthorizedApiClient(token);
-            var url = baseUrl + "/api/employees" + (archivedOnly ? "?archivedOnly=true" : "");
-            var list = await client.GetFromJsonAsync<List<EmployeeItem>>(url);
-            Employees = list ?? new List<EmployeeItem>();
+            Employees = await FetchEmployeesAsync(client, baseUrl, archivedOnly);
         }
         catch
         {
             Employees = new List<EmployeeItem>();
             Error ??= "Unable to load employees right now.";
         }
+    }
+
+    // Employee Management - fetching data API functions
+    private static async Task<List<DepartmentItem>> FetchDepartmentsAsync(HttpClient client, string baseUrl)
+    {
+        var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
+        return list ?? new List<DepartmentItem>();
+    }
+
+    // Employee Management - fetching data API functions
+    private static async Task<List<EmployeeItem>> FetchEmployeesAsync(HttpClient client, string baseUrl, bool archivedOnly)
+    {
+        var url = baseUrl + "/api/employees" + (archivedOnly ? "?archivedOnly=true" : "");
+        var list = await client.GetFromJsonAsync<List<EmployeeItem>>(url);
+        return list ?? new List<EmployeeItem>();
     }
 
     private async Task<(string OrgName, string? OrgLogoUrl)> GetOrgBrandingAsync(string token)
@@ -181,6 +217,8 @@ public class EmployeeManagementModel : PageModel
         try
         {
             var client = CreateAuthorizedApiClient(token);
+            client.DefaultRequestHeaders.Remove("X-Web-Base");
+            client.DefaultRequestHeaders.Add("X-Web-Base", Request.Scheme + "://" + Request.Host);
             var resp = await client.GetAsync(baseUrl + $"/api/employees/{id}/attendance-qr");
             if (!resp.IsSuccessStatusCode)
                 return NotFound();
@@ -216,9 +254,7 @@ public class EmployeeManagementModel : PageModel
         }
     }
 
-    /// <summary>
-    /// Generates and returns employee ID card as PDF (front + back) using QuestPDF. Triggered by Print / PDF button.
-    /// </summary>
+    // Builds and returns the employee ID card PDF (front and back) for the Print/PDF action.
     public async Task<IActionResult> OnGetDownloadIdPdfAsync(int id)
     {
         var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
@@ -290,9 +326,7 @@ public class EmployeeManagementModel : PageModel
         }
     }
 
-    /// <summary>
-    /// Generates PDF from front/back card images captured via html2canvas so the PDF matches the modal exactly.
-    /// </summary>
+    // Creates a PDF from front/back card images captured in the browser so it matches the modal layout.
     public async Task<IActionResult> OnPostDownloadIdPdfFromImagesAsync(int id, string? frontImageBase64, string? backImageBase64)
     {
         if (string.IsNullOrWhiteSpace(frontImageBase64) || string.IsNullOrWhiteSpace(backImageBase64))

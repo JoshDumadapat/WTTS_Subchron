@@ -16,6 +16,8 @@
     var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
     // Hide full-page overlay on Turbo in-app nav so only the module skeleton shows; show it only on full load (login/signup/reload).
     var isTurboVisit = Context.Request.Headers.ContainsKey("Turbo-Request-Id") || Context.Request.Headers.ContainsKey("X-Turbo-Request-Id");
+    var isEmployeeManagementPage = Context.Request.Path.StartsWithSegments("/App/Employee/EmployeeManagement", StringComparison.OrdinalIgnoreCase);
+    var hideGlobalLoadingOverlay = isTurboVisit || isEmployeeManagementPage;
 
     var branding = await LayoutBrandingService.GetAsync(User);
     if (!string.IsNullOrWhiteSpace(branding.ProfileName))
@@ -514,7 +516,7 @@
 
                 @if (RoleModuleAccess.CanAccessModule(User, AppModule.EmployeeManagement))
                 {
-                <a href="/App/Employee/EmployeeManagement" data-turbo="false" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
+                <a href="/App/Employee/EmployeeManagement" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -1091,7 +1093,7 @@
             </header>
 
             <!-- Full-page logo overlay: only on full load (login/signup/reload). Hidden for Turbo in-app nav so only module skeleton shows. -->
-            <div id="turbo-loading-overlay" data-turbo-permanent class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-100 dark:bg-slate-900 @(isTurboVisit ? "hidden" : "")" style="@(isTurboVisit ? "display:none" : "")" aria-live="polite" aria-busy="true">
+            <div id="turbo-loading-overlay" data-turbo-permanent class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-100 dark:bg-slate-900 @(hideGlobalLoadingOverlay ? "hidden" : "")" style="@(hideGlobalLoadingOverlay ? "display:none" : "")" aria-live="polite" aria-busy="true">
                 <img src="~/images/logo/logo.png" alt="Subchron" class="h-40 w-40 sm:h-48 sm:w-48 object-contain animate-pulse" />
             </div>
 

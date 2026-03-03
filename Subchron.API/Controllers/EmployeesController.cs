@@ -47,6 +47,7 @@ public class EmployeesController : ControllerBase
         return string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Employee management - list employees with optional filters.
     [HttpGet]
     public async Task<ActionResult<List<EmployeeDto>>> List(
         [FromQuery] bool? archivedOnly,
@@ -114,35 +115,28 @@ public class EmployeesController : ControllerBase
             .ToListAsync();
 
         var userIds = list.Where(x => x.UserID.HasValue).Select(x => x.UserID!.Value).Distinct().ToList();
-        if (userIds.Count > 0)
-        {
-            var userEmails = await _platformDb.Users.AsNoTracking()
-                .Where(u => userIds.Contains(u.UserID))
-                .Select(u => new { u.UserID, u.Email })
-                .ToListAsync();
-            var emailLookup = userEmails.ToDictionary(u => u.UserID, u => u.Email ?? "");
-            foreach (var dto in list)
-                if (dto.UserID.HasValue && emailLookup.TryGetValue(dto.UserID.Value, out var email))
-                    dto.Email = email;
-        }
-
         var depIds = list.Where(x => x.DepartmentID.HasValue).Select(x => x.DepartmentID!.Value).Distinct().ToList();
-        if (depIds.Count > 0)
+
+        var emailLookupTask = BuildUserEmailLookupAsync(userIds);
+        var depLookupTask = BuildDepartmentLookupAsync(depIds);
+        await Task.WhenAll(emailLookupTask, depLookupTask);
+
+        var emailLookup = await emailLookupTask;
+        var depLookup = await depLookupTask;
+
+        foreach (var dto in list)
         {
-            var depNames = await _db.Departments.AsNoTracking()
-                .Where(d => depIds.Contains(d.DepID))
-                .Select(d => new { d.DepID, d.DepartmentName })
-                .ToListAsync();
-            var lookup = depNames.ToDictionary(d => d.DepID, d => d.DepartmentName);
-            foreach (var dto in list)
-                if (dto.DepartmentID.HasValue && lookup.TryGetValue(dto.DepartmentID.Value, out var name))
-                    dto.DepartmentName = name;
+            if (dto.UserID.HasValue && emailLookup.TryGetValue(dto.UserID.Value, out var email))
+                dto.Email = email;
+            if (dto.DepartmentID.HasValue && depLookup.TryGetValue(dto.DepartmentID.Value, out var depName))
+                dto.DepartmentName = depName;
         }
 
         return Ok(list);
     }
 
-    /// <summary>Upload an image (ID picture or signature) for an employee. Returns { url }.</summary>
+    // Employee management - upload employee ID/signature image.
+    // Uploads an employee image file (ID picture or signature) and returns its URL.
     [HttpPost("upload-image")]
     public async Task<ActionResult<object>> UploadImage([FromForm] IFormFile file, [FromQuery] string type, CancellationToken ct = default)
     {
@@ -176,7 +170,7 @@ public class EmployeesController : ControllerBase
         }
     }
 
-    // Get next suggested employee number for a role (e.g. EMP-0002).
+    // Employee management - get next generated employee number for a role.
     [HttpGet("next-number")]
     public async Task<ActionResult<object>> GetNextEmpNumber([FromQuery] string? role)
     {
@@ -188,6 +182,7 @@ public class EmployeesController : ControllerBase
         return Ok(new { empNumber = next });
     }
 
+    // Employee management - get one employee profile by id.
     [HttpGet("{id:int}")]
     public async Task<ActionResult<EmployeeDto>> Get(int id)
     {
@@ -201,20 +196,22 @@ public class EmployeesController : ControllerBase
         if (emp is null)
             return NotFound(new { ok = false, message = "Employee not found." });
 
-        var depName = emp.DepartmentID.HasValue
-            ? await _db.Departments.AsNoTracking().Where(d => d.DepID == emp.DepartmentID).Select(d => d.DepartmentName).FirstOrDefaultAsync()
-            : null;
+        var depNameTask = emp.DepartmentID.HasValue
+            ? _db.Departments.AsNoTracking().Where(d => d.DepID == emp.DepartmentID).Select(d => d.DepartmentName).FirstOrDefaultAsync()
+            : Task.FromResult<string?>(null);
         var dto = ToDto(emp);
-        dto.DepartmentName = depName;
-        if (emp.UserID.HasValue)
-        {
-            var user = await _platformDb.Users.AsNoTracking().Where(u => u.UserID == emp.UserID.Value).Select(u => u.Email).FirstOrDefaultAsync();
-            dto.Email = user;
-        }
+        var emailTask = emp.UserID.HasValue
+            ? _platformDb.Users.AsNoTracking().Where(u => u.UserID == emp.UserID.Value).Select(u => u.Email).FirstOrDefaultAsync()
+            : Task.FromResult<string?>(null);
+
+        await Task.WhenAll(depNameTask, emailTask);
+        dto.DepartmentName = await depNameTask;
+        dto.Email = await emailTask;
 
         return Ok(dto);
     }
 
+    // Employee management - create employee record.
     [HttpPost]
     public async Task<ActionResult<EmployeeDto>> Create([FromBody] EmployeeCreateRequest req)
     {
@@ -308,6 +305,7 @@ public class EmployeesController : ControllerBase
         return Ok(ToDto(emp));
     }
 
+    // Employee management - generate or return attendance QR image.
     // Get attendance QR PNG for an employee. Token is generated and saved if missing (legacy).
     [HttpGet("{employeeId:int}/attendance-qr")]
     public async Task<IActionResult> GetAttendanceQr(int employeeId)
@@ -329,12 +327,27 @@ public class EmployeesController : ControllerBase
 
         var webBase = (_config["WebBaseUrl"] ?? "").TrimEnd('/');
         if (string.IsNullOrEmpty(webBase))
+        {
+            var headerBase = (Request.Headers["X-Web-Base"].ToString() ?? "").Trim();
+            if (!string.IsNullOrEmpty(headerBase))
+                webBase = headerBase.TrimEnd('/');
+        }
+        if (string.IsNullOrEmpty(webBase))
+        {
+            var origin = (Request.Headers["Origin"].ToString() ?? "").Trim();
+            if (!string.IsNullOrEmpty(origin))
+                webBase = origin.TrimEnd('/');
+        }
+        if (string.IsNullOrEmpty(webBase))
+            webBase = (Request.Scheme + "://" + Request.Host).TrimEnd('/');
+        if (string.IsNullOrEmpty(webBase))
             return StatusCode(500, new { ok = false, message = "WebBaseUrl is not configured." });
         var scanUrl = $"{webBase}/attendance/scan/{emp.AttendanceQrToken}";
         var pngBytes = AttendanceQrHelper.GenerateQrPng(scanUrl);
         return File(pngBytes, "image/png");
     }
 
+    // Employee management - update existing employee.
     [HttpPut("{id:int}")]
     public async Task<ActionResult<EmployeeDto>> Update(int id, [FromBody] EmployeeUpdateRequest req)
     {
@@ -370,7 +383,20 @@ public class EmployeesController : ControllerBase
         }
         if (req?.Gender != null) emp.Gender = string.IsNullOrWhiteSpace(req.Gender) ? null : req.Gender.Trim().Length > 20 ? req.Gender.Trim()[..20] : req.Gender.Trim();
         if (req?.MiddleName != null) emp.MiddleName = string.IsNullOrWhiteSpace(req.MiddleName) ? null : (req.MiddleName.Trim().Length > 80 ? req.MiddleName.Trim()[..80] : req.MiddleName.Trim());
-        if (req?.EmpNumber != null) { var s = req.EmpNumber.Trim(); if (s.Length > 0) { var exists = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.EmpNumber == s && e.EmpID != id); if (exists) return BadRequest(new { ok = false, message = "Employee number already in use." }); emp.EmpNumber = s.Length > 40 ? s[..40] : s; } }
+        if (req?.EmpNumber != null)
+        {
+            var s = req.EmpNumber.Trim();
+            if (s.Length > 0)
+            {
+                var newEmpNumber = s.Length > 40 ? s[..40] : s;
+                if (!string.Equals(emp.EmpNumber, newEmpNumber, StringComparison.Ordinal))
+                {
+                    var exists = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.EmpNumber == newEmpNumber && e.EmpID != id);
+                    if (exists) return BadRequest(new { ok = false, message = "Employee number already in use." });
+                    emp.EmpNumber = newEmpNumber;
+                }
+            }
+        }
         if (req?.Role != null) { var s = req.Role.Trim(); if (s.Length > 0) emp.Role = s.Length > 40 ? s[..40] : s; }
         if (req?.WorkState != null) { var s = req.WorkState.Trim(); if (s.Length > 0) emp.WorkState = s.Length > 40 ? s[..40] : s; }
         if (req?.EmploymentType != null) { var s = req.EmploymentType.Trim(); if (s.Length > 0) emp.EmploymentType = s.Length > 40 ? s[..40] : s; }
@@ -380,7 +406,7 @@ public class EmployeesController : ControllerBase
         {
             var phoneTrimmed = string.IsNullOrWhiteSpace(req.Phone) ? null : req.Phone.Trim();
             var newPhoneNorm = NormalizePhone(phoneTrimmed);
-            if (!string.IsNullOrEmpty(newPhoneNorm))
+            if (!string.Equals(emp.PhoneNormalized, newPhoneNorm, StringComparison.Ordinal) && !string.IsNullOrEmpty(newPhoneNorm))
             {
                 var phoneTaken = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.PhoneNormalized == newPhoneNorm && e.EmpID != id);
                 if (phoneTaken)
@@ -452,6 +478,7 @@ public class EmployeesController : ControllerBase
         return Ok(ToDto(emp));
     }
 
+    // Employee management - restore archived employee.
     [HttpPatch("{id:int}/restore")]
     public async Task<ActionResult<EmployeeDto>> Restore(int id, [FromBody] EmployeeRestoreRequest req)
     {
@@ -487,6 +514,7 @@ public class EmployeesController : ControllerBase
         return Ok(ToDto(emp));
     }
 
+    // Employee management - check uniqueness for phone/email.
     [HttpGet("check-unique")]
     public async Task<IActionResult> CheckUnique([FromQuery] string type, [FromQuery] string value)
     {
@@ -514,13 +542,13 @@ public class EmployeesController : ControllerBase
         }
         else if (kind == "email")
         {
-            var email = rawValue.ToLowerInvariant();
+            var email = rawValue;
             if (!string.IsNullOrEmpty(email))
             {
                 var users = _platformDb.Users.AsQueryable();
                 if (orgId.HasValue)
                     users = users.Where(u => u.OrgID == orgId.Value);
-                exists = await users.AnyAsync(u => u.Email != null && u.Email.ToLower() == email);
+                exists = await users.AnyAsync(u => u.Email != null && u.Email == email);
             }
         }
         else
@@ -531,6 +559,7 @@ public class EmployeesController : ControllerBase
         return Ok(new { ok = true, exists });
     }
 
+    // Employee management - normalize phone for uniqueness checks.
     private static string? NormalizePhone(string? phone)
     {
         if (string.IsNullOrWhiteSpace(phone)) return null;
@@ -541,6 +570,7 @@ public class EmployeesController : ControllerBase
         return digits.Length > 11 ? digits.Substring(digits.Length - 11, 11) : (digits.Length >= 10 ? digits : null);
     }
 
+    // Employee management - map role names to employee-number prefixes.
     private static string GetRolePrefix(string role)
     {
         if (string.IsNullOrWhiteSpace(role)) return "EMP";
@@ -552,24 +582,62 @@ public class EmployeesController : ControllerBase
         return "EMP";
     }
 
+    // Employee management - generate the next employee number with minimal DB reads.
     private async Task<string> GetNextEmpNumberAsync(int orgId, string role)
     {
         var prefix = GetRolePrefix(role);
-        var pattern = prefix + "-%";
-        var existing = await _db.Employees
-            .Where(e => e.OrgID == orgId && EF.Functions.Like(e.EmpNumber, pattern))
-            .Select(e => e.EmpNumber)
+        var numberPrefix = prefix + "-";
+        var existing = await _db.Employees.AsNoTracking()
+            .Where(e => e.OrgID == orgId && e.EmpNumber != null && e.EmpNumber.StartsWith(numberPrefix))
+            .Select(e => e.EmpNumber!)
+            .OrderByDescending(s => s.Length)
+            .ThenByDescending(s => s)
+            .Take(300)
             .ToListAsync();
+
         var maxNum = 0;
         foreach (var s in existing)
         {
-            var parts = s.Split('-');
-            if (parts.Length >= 2 && int.TryParse(parts[^1], out var n) && n > maxNum)
+            if (TryExtractEmpNumberSuffix(s, prefix, out var n) && n > maxNum)
                 maxNum = n;
         }
         return prefix + "-" + (maxNum + 1).ToString("D4");
     }
 
+    // Employee management - read the numeric suffix from a formatted employee number.
+    private static bool TryExtractEmpNumberSuffix(string value, string prefix, out int number)
+    {
+        number = 0;
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        var expectedStart = prefix + "-";
+        if (!value.StartsWith(expectedStart, StringComparison.OrdinalIgnoreCase)) return false;
+        var suffix = value[expectedStart.Length..];
+        return int.TryParse(suffix, out number);
+    }
+
+    // Employee management - build email lookup table for linked user accounts.
+    private async Task<Dictionary<int, string>> BuildUserEmailLookupAsync(List<int> userIds)
+    {
+        if (userIds.Count == 0) return new Dictionary<int, string>();
+        var userEmails = await _platformDb.Users.AsNoTracking()
+            .Where(u => userIds.Contains(u.UserID))
+            .Select(u => new { u.UserID, u.Email })
+            .ToListAsync();
+        return userEmails.ToDictionary(u => u.UserID, u => u.Email ?? "");
+    }
+
+    // Employee management - build department lookup table for display names.
+    private async Task<Dictionary<int, string>> BuildDepartmentLookupAsync(List<int> depIds)
+    {
+        if (depIds.Count == 0) return new Dictionary<int, string>();
+        var depNames = await _db.Departments.AsNoTracking()
+            .Where(d => depIds.Contains(d.DepID))
+            .Select(d => new { d.DepID, d.DepartmentName })
+            .ToListAsync();
+        return depNames.ToDictionary(d => d.DepID, d => d.DepartmentName);
+    }
+
+    // Employee management - map entity model to API response shape.
     private static EmployeeDto ToDto(Employee e)
     {
         return new EmployeeDto

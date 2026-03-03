@@ -18,8 +18,8 @@
     </h1>
 
     <!-- Signup card -->
-    <div class="mt-8 rounded-xl border border-slate-200 bg-white p-8 shadow-lg ring-1 ring-slate-200
-                dark:border-slate-700 dark:bg-slate-800 dark:ring-slate-700">
+    <div class="mt-8 rounded-xl border-2 border-slate-300 bg-white p-8 shadow-xl ring-1 ring-slate-900/5
+                dark:border-slate-700 dark:bg-slate-800 dark:ring-slate-500/20">
 
         <form class="space-y-5" id="signupForm" onsubmit="return goEmailSignup(event)">
             <!-- Email -->
@@ -29,11 +29,11 @@
                 </label>
                 <input id="email" name="email" type="email" autocomplete="email" required
                        placeholder="you@company.com"
-                       class="placeholder-slate-400 mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm
-                              text-slate-900 transition-colors outline-none
-                              focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
-                              dark:placeholder-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
-                              dark:focus:border-subgreen-400 dark:focus:ring-subgreen-400" />
+                       class="placeholder-slate-400 mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm
+                               text-slate-900 transition-colors outline-none
+                               focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500
+                               dark:placeholder-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
+                               dark:focus:border-subgreen-400 dark:focus:ring-subgreen-400" />
                 <p id="emailError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
             </div>
 
@@ -62,8 +62,8 @@
             <div class="mt-6">
                 <!-- Google signup simulation -->
                 <a href="/Auth/ExternalLogin?provider=Google&flow=signup"
-                   class="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3
-                          text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50
+                   class="flex w-full items-center justify-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3
+                          text-sm font-medium text-slate-700 shadow-md transition hover:bg-slate-50 hover:border-slate-400
                           focus:ring-2 focus:ring-slate-200 focus:outline-none
                           dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
                           dark:focus:ring-slate-700">

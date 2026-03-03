@@ -23,6 +23,17 @@ public class AddModel : PageModel
     public bool? ToastSuccess { get; set; }
     private string GetApiBaseUrl() => (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
 
+    // Employee Management - API client helpers
+    private string? GetAccessToken() => User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+
+    // Employee Management - API client helpers
+    private HttpClient CreateAuthorizedApiClient(string token)
+    {
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        return client;
+    }
+
     public async Task OnGetAsync()
     {
         await LoadDepartmentsAsync();
@@ -30,7 +41,7 @@ public class AddModel : PageModel
 
     public async Task<IActionResult> OnGetNextEmpNumberAsync(string? role)
     {
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token))
             return new JsonResult(new { empNumber = "" });
         var baseUrl = GetApiBaseUrl();
@@ -38,12 +49,8 @@ public class AddModel : PageModel
             return new JsonResult(new { empNumber = "" });
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var url = baseUrl + "/api/employees/next-number" + (string.IsNullOrEmpty(role) ? "" : "?role=" + Uri.EscapeDataString(role));
-            var resp = await client.GetFromJsonAsync<JsonElement>(url);
-            var empNumber = resp.TryGetProperty("empNumber", out var p) ? p.GetString() ?? "" : "";
-            return new JsonResult(new { empNumber });
+            var client = CreateAuthorizedApiClient(token);
+            return new JsonResult(new { empNumber = await FetchNextEmpNumberAsync(client, baseUrl, role) });
         }
         catch
         {
@@ -53,7 +60,7 @@ public class AddModel : PageModel
 
     public async Task<IActionResult> OnGetCheckUniqueAsync(string type, string value)
     {
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token))
             return new JsonResult(new { ok = false, exists = false });
         var baseUrl = GetApiBaseUrl();
@@ -65,11 +72,9 @@ public class AddModel : PageModel
             return new JsonResult(new { ok = false, exists = false });
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var url = baseUrl + "/api/employees/check-unique?type=" + Uri.EscapeDataString(kind) + "&value=" + Uri.EscapeDataString(val);
-            var resp = await client.GetFromJsonAsync<UniqueCheckResponse>(url);
-            return new JsonResult(new { ok = resp?.Ok == true, exists = resp?.Exists == true });
+            var client = CreateAuthorizedApiClient(token);
+            var result = await CheckUniqueAsync(client, baseUrl, kind, val);
+            return new JsonResult(new { ok = result.ok, exists = result.exists });
         }
         catch
         {
@@ -79,16 +84,14 @@ public class AddModel : PageModel
 
     private async Task LoadDepartmentsAsync()
     {
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token)) return;
         var baseUrl = GetApiBaseUrl();
         if (string.IsNullOrEmpty(baseUrl)) return;
         try
         {
-            var client = _http.CreateClient("Subchron.API");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
-            Departments = list ?? new List<DepartmentItem>();
+            var client = CreateAuthorizedApiClient(token);
+            Departments = await FetchDepartmentsAsync(client, baseUrl);
         }
         catch
         {
@@ -110,7 +113,7 @@ public class AddModel : PageModel
     {
         await LoadDepartmentsAsync();
 
-        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        var token = GetAccessToken();
         if (string.IsNullOrEmpty(token))
         {
             TempData["ToastMessage"] = "Not authenticated.";
@@ -161,18 +164,10 @@ public class AddModel : PageModel
 
         var resolvedIdPictureUrl = idPictureUrl?.Trim();
         var resolvedSignatureUrl = signatureUrl?.Trim();
-        var client = _http.CreateClient("Subchron.API");
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        if (profilePicture != null && profilePicture.Length > 0)
-        {
-            var uploadUrl = await UploadEmployeeImageAsync(client, baseUrl, profilePicture, "photo");
-            if (uploadUrl != null) resolvedIdPictureUrl = uploadUrl;
-        }
-        if (signature != null && signature.Length > 0)
-        {
-            var uploadUrl = await UploadEmployeeImageAsync(client, baseUrl, signature, "signature");
-            if (uploadUrl != null) resolvedSignatureUrl = uploadUrl;
-        }
+        var client = CreateAuthorizedApiClient(token);
+        var uploadedImages = await UploadEmployeeImagesAsync(client, baseUrl, profilePicture, signature);
+        if (!string.IsNullOrWhiteSpace(uploadedImages.idPictureUrl)) resolvedIdPictureUrl = uploadedImages.idPictureUrl;
+        if (!string.IsNullOrWhiteSpace(uploadedImages.signatureUrl)) resolvedSignatureUrl = uploadedImages.signatureUrl;
         if (string.IsNullOrWhiteSpace(resolvedSignatureUrl))
         {
             TempData["ToastMessage"] = "Signature is required.";
@@ -339,6 +334,43 @@ public class AddModel : PageModel
         TempData["ToastMessage"] = "Employee created successfully.";
         TempData["ToastSuccess"] = true;
         return RedirectToPage("/App/Employee/EmployeeManagement", new { showId = empId });
+    }
+
+    // Employee Management - fetching data API functions
+    private static async Task<List<DepartmentItem>> FetchDepartmentsAsync(HttpClient client, string baseUrl)
+    {
+        var list = await client.GetFromJsonAsync<List<DepartmentItem>>(baseUrl + "/api/departments");
+        return list ?? new List<DepartmentItem>();
+    }
+
+    // Employee Management - fetching data API functions
+    private static async Task<string> FetchNextEmpNumberAsync(HttpClient client, string baseUrl, string? role)
+    {
+        var url = baseUrl + "/api/employees/next-number" + (string.IsNullOrEmpty(role) ? "" : "?role=" + Uri.EscapeDataString(role));
+        var resp = await client.GetFromJsonAsync<JsonElement>(url);
+        return resp.TryGetProperty("empNumber", out var p) ? p.GetString() ?? "" : "";
+    }
+
+    // Employee Management - fetching data API functions
+    private static async Task<(bool ok, bool exists)> CheckUniqueAsync(HttpClient client, string baseUrl, string type, string value)
+    {
+        var url = baseUrl + "/api/employees/check-unique?type=" + Uri.EscapeDataString(type) + "&value=" + Uri.EscapeDataString(value);
+        var resp = await client.GetFromJsonAsync<UniqueCheckResponse>(url);
+        return (resp?.Ok == true, resp?.Exists == true);
+    }
+
+    // Employee Management - upload API functions
+    private static async Task<(string? idPictureUrl, string? signatureUrl)> UploadEmployeeImagesAsync(HttpClient client, string baseUrl, IFormFile? profilePicture, IFormFile? signature)
+    {
+        var profileTask = profilePicture != null && profilePicture.Length > 0
+            ? UploadEmployeeImageAsync(client, baseUrl, profilePicture, "photo")
+            : Task.FromResult<string?>(null);
+        var signatureTask = signature != null && signature.Length > 0
+            ? UploadEmployeeImageAsync(client, baseUrl, signature, "signature")
+            : Task.FromResult<string?>(null);
+
+        await Task.WhenAll(profileTask, signatureTask);
+        return (await profileTask, await signatureTask);
     }
 
     private static async Task<string?> UploadEmployeeImageAsync(HttpClient client, string baseUrl, IFormFile file, string type)
