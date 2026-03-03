@@ -82,6 +82,11 @@
         transition: transform 0.35s ease, opacity 0.35s ease;
     }
 
+    .org-radius-ring--editing {
+        stroke: #facc15;
+        fill: rgba(250, 204, 21, 0.24);
+    }
+
     .pin-color-option {
         transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
     }
@@ -378,6 +383,10 @@
         var siteMarkerLayer = null;
         var siteCircleLayer = null;
         var latestSiteData = [];
+        var editingSiteId = null;
+        var editingSiteCircle = null;
+        var editingSiteMarker = null;
+        var pendingEditingLatLng = null;
         const mapPinColorHex = {
             emerald: '#10b981',
             blue: '#3b82f6',
@@ -385,6 +394,8 @@
             pink: '#ec4899',
             cyan: '#06b6d4'
         };
+        const editingPinHex = '#facc15';
+        const editingFillHex = 'rgba(250, 204, 21, 0.18)';
         var autoReloadTimer = null;
         var sizeFixTimer = null;
         var autoReloadTriggered = false;
@@ -418,15 +429,75 @@
         function moveMarker(latlng, opts) {
             if (!latlng) return;
             updateMarkerCoords(latlng);
-            if (marker) {
-                marker.setLatLng(latlng);
+
+            if (editingSiteId) {
+                if (editingSiteMarker) {
+                    editingSiteMarker.setLatLng(latlng);
+                } else {
+                    pendingEditingLatLng = latlng;
+                }
+                if (editingSiteCircle) {
+                    editingSiteCircle.setLatLng(latlng);
+                    editingSiteCircle.setRadius(getRadiusMeters());
+                }
+                syncInputs(latlng);
             } else {
-                pendingMarkerCoords = latlng;
+                if (marker) {
+                    marker.setLatLng(latlng);
+                } else {
+                    pendingMarkerCoords = latlng;
+                }
+                updateGeofenceCircle(latlng, opts?.pulse);
             }
+
             if (map && opts?.pan !== false) {
                 map.setView(latlng, opts?.zoom || Math.max(map.getZoom(), 14));
             }
-            updateGeofenceCircle(latlng, opts?.pulse);
+        }
+
+        function hidePrimaryMarker() {
+            if (marker) {
+                marker.setOpacity(0);
+                if (marker.dragging && typeof marker.dragging.disable === 'function') {
+                    try { marker.dragging.disable(); } catch (err) { }
+                }
+            }
+            if (geofenceCircle) {
+                geofenceCircle.setStyle({ opacity: 0, fillOpacity: 0 });
+            }
+        }
+
+        function showPrimaryMarker() {
+            if (marker) {
+                marker.setOpacity(1);
+                if (marker.dragging && typeof marker.dragging.enable === 'function') {
+                    try { marker.dragging.enable(); } catch (err) { }
+                }
+            }
+            if (geofenceCircle) {
+                geofenceCircle.setStyle({ opacity: 1, fillOpacity: 0.18 });
+                if (markerCoords) {
+                    geofenceCircle.setLatLng(markerCoords);
+                    geofenceCircle.setRadius(getRadiusMeters());
+                }
+            }
+        }
+
+        function beginEditingSite(site) {
+            if (!site || site.locationId === undefined || site.locationId === null) return;
+            editingSiteId = site.locationId;
+            hidePrimaryMarker();
+            renderSitesLayer(latestSiteData);
+            if (Number.isFinite(site.latitude) && Number.isFinite(site.longitude)) {
+                moveMarker({ lat: site.latitude, lng: site.longitude }, { zoom: Math.max(map ? map.getZoom() : 14, 14) });
+            }
+        }
+
+        function endEditingSite() {
+            editingSiteId = null;
+            pendingEditingLatLng = null;
+            showPrimaryMarker();
+            renderSitesLayer(latestSiteData);
         }
 
         function updateGeofenceCircle(latlng, pulse) {
@@ -466,12 +537,15 @@
             return mapPinColorHex[color] || mapPinColorHex.emerald;
         }
 
-        function createSiteIcon(color, isActive) {
-            var hex = isActive ? getMapPinHex(color) : '#6b7280';
-            var fade = isActive ? '' : ' opacity-70';
+        function createSiteIcon(color, isActive, options) {
+            var opts = options || {};
+            var hex = opts.customHex || (isActive ? getMapPinHex(color) : '#6b7280');
+            var fade = opts.noFade ? '' : (isActive ? '' : ' opacity-70');
+            var bounceClass = opts.bounce === false ? '' : ' animate-bounce';
+            var extraWrapperClass = opts.wrapperClass ? ` ${opts.wrapperClass}` : '';
             var html = `
-            <span class="relative inline-flex h-10 w-10 items-center justify-center -translate-y-1${fade}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
-                <svg class="w-8 h-10 animate-bounce" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <span class="relative inline-flex h-10 w-10 items-center justify-center -translate-y-1${fade}${extraWrapperClass}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
+                <svg class="w-8 h-10${bounceClass}" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z" fill="${hex}" stroke="white" stroke-width="2"/>
                     <circle cx="12" cy="12" r="4" fill="white" fill-opacity="0.9"/>
                 </svg>
@@ -490,22 +564,78 @@
             if (!map || !siteMarkerLayer || !siteCircleLayer) return;
             siteMarkerLayer.clearLayers();
             siteCircleLayer.clearLayers();
+
+            if (editingSiteCircle) {
+                editingSiteCircle.remove();
+                editingSiteCircle = null;
+            }
+            if (editingSiteMarker) {
+                editingSiteMarker.remove();
+                editingSiteMarker = null;
+            }
+
             latestSiteData.forEach(site => {
                 if (!site || !Number.isFinite(site.latitude) || !Number.isFinite(site.longitude)) return;
                 var latlng = [site.latitude, site.longitude];
                 var circleColor = site.isActive ? (getMapPinHex(site.pinColor)) : '#ef4444';
-                L.circle(latlng, {
-                    radius: site.radiusMeters || 50,
-                    color: circleColor,
-                    weight: 2,
-                    fillColor: circleColor,
-                    fillOpacity: 0.08,
-                    className: 'animate-pulse'
-                }).addTo(siteCircleLayer);
-                var markerIcon = createSiteIcon(site.pinColor, site.isActive);
-                var markerInstance = L.marker(latlng, { icon: markerIcon }).addTo(siteMarkerLayer);
-                markerInstance.bindTooltip(site.locationName || 'Site', { direction: 'top', offset: [0, -12] });
+
+                if (site.locationId === editingSiteId) {
+                    var activeRadius = getRadiusMeters();
+                    editingSiteCircle = L.circle(latlng, {
+                        radius: activeRadius,
+                        color: editingPinHex,
+                        weight: 2,
+                        fillColor: editingFillHex,
+                        fillOpacity: 0.35,
+                        className: 'org-radius-ring org-radius-ring--editing'
+                    }).addTo(siteCircleLayer);
+
+                    var markerIcon = createSiteIcon(site.pinColor, true, {
+                        customHex: editingPinHex,
+                        noFade: true,
+                        bounce: false
+                    });
+
+                    editingSiteMarker = L.marker(latlng, {
+                        icon: markerIcon,
+                        draggable: true,
+                        autoPan: true,
+                        zIndexOffset: 1500
+                    }).addTo(siteMarkerLayer);
+
+                    editingSiteMarker.bindTooltip(site.locationName || 'Site', { direction: 'top', offset: [0, -12] });
+
+                    editingSiteMarker.on('drag', function (e) {
+                        var newLatLng = e.target.getLatLng();
+                        if (editingSiteCircle) editingSiteCircle.setLatLng(newLatLng);
+                        if (latInput) latInput.value = newLatLng.lat.toFixed(6);
+                        if (lngInput) lngInput.value = newLatLng.lng.toFixed(6);
+                        markerCoords = { lat: newLatLng.lat, lng: newLatLng.lng };
+                    });
+                } else {
+                    L.circle(latlng, {
+                        radius: site.radiusMeters || 50,
+                        color: circleColor,
+                        weight: 2,
+                        fillColor: circleColor,
+                        fillOpacity: 0.08,
+                        className: 'animate-pulse'
+                    }).addTo(siteCircleLayer);
+                    var markerIcon = createSiteIcon(site.pinColor, site.isActive);
+                    var markerInstance = L.marker(latlng, { icon: markerIcon }).addTo(siteMarkerLayer);
+                    markerInstance.bindTooltip(site.locationName || 'Site', { direction: 'top', offset: [0, -12] });
+                }
             });
+
+            if (pendingEditingLatLng && editingSiteMarker) {
+                editingSiteMarker.setLatLng(pendingEditingLatLng);
+                if (editingSiteCircle) editingSiteCircle.setLatLng(pendingEditingLatLng);
+                pendingEditingLatLng = null;
+            }
+
+            if (editingSiteCircle) {
+                editingSiteCircle.setRadius(getRadiusMeters());
+            }
         }
 
         function clearMapTimers() {
@@ -637,6 +767,10 @@
                 pendingCircleData = null;
             }
 
+            if (editingSiteId) {
+                hidePrimaryMarker();
+            }
+
             if (latestSiteData.length) {
                 renderSitesLayer(latestSiteData);
             }
@@ -659,11 +793,13 @@
                     if (formHasCoords) {
                         var latlng = { lat: lat, lng: lng };
                         moveMarker(latlng, { zoom: Math.max(map.getZoom(), 14) });
+                        if (!editingSiteId && marker) marker.addTo(map);
+                    } else if (editingSiteMarker) {
+                        var latlng = editingSiteMarker.getLatLng();
                         syncInputs(latlng);
-                        if (marker) marker.addTo(map);
                     } else if (marker) {
-                        var latlng = marker.getLatLng();
-                        syncInputs(latlng);
+                        var fallback = marker.getLatLng();
+                        syncInputs(fallback);
                     }
                     setPinBtn.classList.add('ring-emerald-300');
                     setTimeout(function () {
@@ -750,13 +886,25 @@
                 if (!map || !latlng) return;
                 var z = zoom || 16;
                 map.flyTo([latlng.lat ?? latlng[0], latlng.lng ?? latlng[1]], z, { duration: 0.4 });
+            },
+            startEditingSite(site) {
+                beginEditingSite(site);
+            },
+            stopEditingSite() {
+                endEditingSite();
             }
         };
 
         if (radiusInput) {
             radiusInput.addEventListener('input', function () {
-                if (!markerCoords) return;
-                updateGeofenceCircle(markerCoords, true);
+                if (editingSiteId && editingSiteCircle) {
+                    var r = parseFloat(radiusInput.value || '50');
+                    if (!isNaN(r) && r > 0) {
+                        editingSiteCircle.setRadius(r);
+                    }
+                } else if (markerCoords) {
+                    updateGeofenceCircle(markerCoords, true);
+                }
             });
         }
     })();
@@ -1300,7 +1448,7 @@
             if (lngInput) lngInput.value = Number.isFinite(site.longitude) ? site.longitude.toFixed(6) : '';
             if (radiusInput) radiusInput.value = site.radiusMeters ?? 50;
             setSelectedColor(site.pinColor || 'blue');
-            window.__orgLocationsMapAPI?.setLatLng({ lat: site.latitude, lng: site.longitude }, 16);
+            window.__orgLocationsMapAPI?.startEditingSite?.(site);
         }
 
         function resetFormState() {
@@ -1313,6 +1461,7 @@
             if (lngInput) lngInput.value = '';
             if (radiusInput) radiusInput.value = 50;
             setSelectedColor('blue');
+            window.__orgLocationsMapAPI?.stopEditingSite?.();
         }
 
         async function submitStatusChange() {

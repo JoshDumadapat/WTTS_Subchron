@@ -1,7 +1,7 @@
 @* Pay Components Engine - Payroll Configuration Tab *@
 <div id="tab-pay" class="tab-content hidden h-full flex-col">
 
-    <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
+    <div class="flex items-center justify-between border-b border-slate-300 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Payroll Configuration</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define earnings rules and deductions. No hardcoding — build exactly what your organisation needs.</p>
@@ -12,8 +12,8 @@
         <div class="space-y-8">
 
             @* ── Financial Basis ──────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Financial Basis</h3>
                     <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Base currency, pay frequency, and daily hours.</p>
                 </div>
@@ -62,8 +62,8 @@
             </div>
 
             @* ── Earnings Rules (Pay Components Engine) ───────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div>
                         <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Earnings Rules</h3>
                         <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define how extra pay applies (OT, holiday, rest day). No hardcoding — e.g. OT 1.25x, Night Diff 10%, Holiday 2x, Rest Day 1.3x.</p>
@@ -74,7 +74,7 @@
                     </button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
                         <thead class="bg-slate-100 dark:bg-gray-700/40">
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
@@ -86,7 +86,7 @@
                                 <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="earningsRulesBody" class="divide-y divide-gray-100 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody id="earningsRulesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
                             <tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
                                 <td colspan="7" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one (e.g. OT 1.25x, Night Diff 10%, Holiday 2x).</td>
                             </tr>
@@ -96,8 +96,8 @@
             </div>
 
             @* ── Deductions (Global, not country-specific) ─────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div>
                         <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Deductions</h3>
                         <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Tax, SSS, pension, insurance — Fixed, Percentage, or Formula-based. Employer/employee share, auto-compute or manual.</p>
@@ -108,7 +108,7 @@
                     </button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
                         <thead class="bg-slate-100 dark:bg-gray-700/40">
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
@@ -120,7 +120,7 @@
                                 <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="deductionsRulesBody" class="divide-y divide-gray-100 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody id="deductionsRulesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
                             <tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
                                 <td colspan="7" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one (e.g. Tax, SSS, Pension, Insurance).</td>
                             </tr>
@@ -135,8 +135,8 @@
 
 @* ─── EARNING RULE MODAL ─── *@
 <div id="earningRuleModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
             <h3 id="earningRuleModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Earning Rule</h3>
             <button type="button" onclick="closeEarningRuleModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
@@ -148,7 +148,7 @@
             </div>
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
-                <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                     <option value="Regular">Regular</option>
                     <option value="OT" selected>OT</option>
                     <option value="Holiday">Holiday</option>
@@ -160,7 +160,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Type</label>
-                    <select id="earningRuleRateType" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <select id="earningRuleRateType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="Multiplier" selected>Multiplier (e.g. 1.25x)</option>
                         <option value="Percentage">Percentage (e.g. 10%)</option>
                         <option value="Fixed">Fixed Amount</option>
@@ -186,7 +186,7 @@
                 </label>
             </div>
         </div>
-        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+        <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeEarningRuleModal()" class="btn-secondary">Cancel</button>
             <button type="button" onclick="saveEarningRule()" class="btn-primary gap-1.5">Save Earning Rule</button>
         </div>
@@ -195,8 +195,8 @@
 
 @* ─── DEDUCTION MODAL ─── *@
 <div id="deductionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
             <h3 id="deductionModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Deduction</h3>
             <button type="button" onclick="closeDeductionModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
@@ -208,7 +208,7 @@
             </div>
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type</label>
-                <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-gray-50 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                     <option value="Fixed" selected>Fixed</option>
                     <option value="Percentage">Percentage</option>
                     <option value="Formula">Formula-based</option>
@@ -238,7 +238,7 @@
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">If Off: manual entry per pay period.</p>
         </div>
-        <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+        <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeDeductionModal()" class="btn-secondary">Cancel</button>
             <button type="button" onclick="saveDeductionRule()" class="btn-primary gap-1.5">Save Deduction</button>
         </div>

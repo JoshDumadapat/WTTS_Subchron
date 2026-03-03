@@ -18,8 +18,8 @@
                 <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
             </div>
         </div>
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
+        <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
+            <div class="grid grid-cols-2 border-b border-slate-300 lg:grid-cols-4 dark:border-slate-800">
                 <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
                 <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
                 <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
@@ -67,7 +67,7 @@
             </div>
         }
 
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-6 rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
             <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -76,13 +76,13 @@
                         </svg>
                     </span>
                     <input type="text" id="searchInput"
-                           class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                           class="h-10 w-full rounded-xl border border-slate-300 bg-white pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                            placeholder="Search employees...">
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <select id="filterStatus"
-                            class="hidden sm:inline-block h-10 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All work state</option>
                         <option value="Active">Active</option>
                         <option value="On Leave">On Leave</option>
@@ -92,12 +92,12 @@
                     </select>
 
                     <select id="filterDepartment"
-                            class="hidden sm:inline-block h-10 rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All Departments</option>
                     </select>
 
                     <button type="button" id="resetFilters" aria-label="Reset filters"
-                            class="h-10 rounded-xl border border-gray-300 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
+                            class="h-10 rounded-xl border border-slate-300 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
                         <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -126,23 +126,23 @@
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 divide-y divide-slate-100 border-b border-slate-100 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700 dark:border-slate-700">
-                <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+            <div class="grid grid-cols-2 divide-y divide-slate-300 border-b border-slate-300 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-900 dark:text-white" id="statTotal">@Model.Employees.Count</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Active (WorkState)</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-subgreen-600 dark:text-subgreen-400" id="statActive">@Model.Employees.Count(e => e.WorkState == "Active")</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Other (On Leave, etc.)</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-amber-600 dark:text-amber-400" id="statInactive">@Model.Employees.Count(e => e.WorkState != "Active")</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-100 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Archived</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-600 dark:text-slate-400" id="statArchived">—</p>
                 </div>
@@ -151,7 +151,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                        <tr class="border-y border-slate-300 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
                             <th class="w-10 px-2 py-3 text-center">
                                 <input type="checkbox" id="selectAllEmployees" aria-label="Select all"
                                        class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
@@ -166,7 +166,7 @@
                         </tr>
                     </thead>
 
-                    <tbody id="employeeTableBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
+                    <tbody id="employeeTableBody" class="divide-y divide-slate-300 dark:divide-slate-700 text-sm">
                         @{
                             string Initials(string? fn, string? ln)
                             {
@@ -307,7 +307,7 @@
             </div>
 
             <!-- Pagination footer -->
-            <div class="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-4 border-t border-slate-300 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
 
                 <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -318,7 +318,7 @@
                         <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
 
                         <select id="rowsPerPage"
-                                class="hidden h-9 rounded-lg border border-gray-200 bg-white px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
+                                class="hidden h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
                             <option value="5">5</option>
                             <option value="10" selected>10</option>
                             <option value="20">20</option>
@@ -327,7 +327,7 @@
 
                         <div class="relative inline-block sm:hidden">
                             <button id="rowsPerPageBtn" type="button"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                     aria-haspopup="listbox" aria-expanded="false">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 6h18M3 12h18M3 18h18" />
@@ -335,7 +335,7 @@
                             </button>
 
                             <div id="rowsPerPageMenu"
-                                 class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
+                                 class="absolute bottom-full left-0 mb-1 hidden min-w-[80px] rounded-xl border border-slate-300 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50">
                                 <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="5">5</button>
                                 <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="10">10</button>
                                 <button type="button" class="rows-option w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700" data-value="20">20</button>
@@ -346,9 +346,9 @@
                 </div>
 
                 <div class="flex items-center justify-center gap-0 sm:justify-end">
-                    <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
+                    <nav class="isolate inline-flex -space-x-px rounded-lg shadow-md" aria-label="Pagination">
                         <button type="button" id="paginationPrev"
-                                class="inline-flex items-center rounded-l-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                                class="inline-flex items-center rounded-l-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                             <span class="sr-only">Previous</span>
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -358,7 +358,7 @@
                         <div id="paginationNumbers" class="inline-flex -space-x-px text-sm"></div>
 
                         <button type="button" id="paginationNext"
-                                class="inline-flex items-center rounded-r-lg border border-gray-200 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                                class="inline-flex items-center rounded-r-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                             <span class="sr-only">Next</span>
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -372,7 +372,7 @@
     </div> <!-- end employeeContent -->
 </div> <!-- end employeePageHost -->
 <!-- Status dropdown portal -->
-<div id="statusDropdownPortal" class="fixed z-[350] hidden min-w-[160px] rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+<div id="statusDropdownPortal" class="fixed z-[350] hidden min-w-[160px] rounded-xl border border-slate-300 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
     <button type="button" class="status-portal-action w-full px-4 py-2.5 text-left text-sm font-medium text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-900/20" data-action="workstate">Work state</button>
     <button type="button" class="status-portal-action w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" data-action="archive">Archive</button>
 </div>
@@ -382,7 +382,7 @@
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStatusActionModal()"></div>
 
-        <div id="statusModalPanel" class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+        <div id="statusModalPanel" class="relative w-full max-w-md rounded-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
 
             <div id="statusModalWorkState" class="hidden">
                 <div class="border-b border-amber-200 bg-amber-50/80 px-6 py-5 dark:border-amber-900/40 dark:bg-amber-900/20">
@@ -395,7 +395,7 @@
                     <input type="hidden" name="id" id="workStateEmpId" value="" />
 
                     <label for="workStateSelect" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Reason <span class="text-red-500">*</span></label>
-                    <select name="workState" id="workStateSelect" required class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+                    <select name="workState" id="workStateSelect" required class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
                         <option value="Active">Active</option>
                         <option value="On Leave">On Leave</option>
                         <option value="Suspended">Suspended</option>
@@ -422,7 +422,7 @@
 
                     <label for="archiveReasonInput" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Archive reason <span class="text-red-500">*</span></label>
                     <textarea name="reason" id="archiveReasonInput" required maxlength="200" rows="3"
-                              class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                              class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                               placeholder="e.g. Resigned, Terminated, End of contract"></textarea>
 
                     <div class="mt-6 flex flex-row-reverse gap-3">
@@ -451,8 +451,8 @@
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
 
-        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 px-8 py-6 dark:border-gray-800">
+        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl transition-all dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-slate-300 px-8 py-6 dark:border-gray-800">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit Employee</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Update employee details.</p>
             </div>
@@ -465,32 +465,32 @@
                     <div class="md:col-span-2">
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name</label>
                         <div class="grid grid-cols-3 gap-3">
-                            <div><input type="text" name="FirstName" id="editFirstName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="First name" required /></div>
-                            <div><input type="text" name="MiddleName" id="editMiddleName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Middle (optional)" /></div>
-                            <div><input type="text" name="LastName" id="editLastName" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Last name" required /></div>
+                            <div><input type="text" name="FirstName" id="editFirstName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="First name" required /></div>
+                            <div><input type="text" name="MiddleName" id="editMiddleName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Middle (optional)" /></div>
+                            <div><input type="text" name="LastName" id="editLastName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Last name" required /></div>
                         </div>
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label>
-                        <input type="text" name="EmpNumber" id="editEmpNumber" class="h-11 w-full rounded-xl border border-gray-200 bg-slate-50 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400" readonly />
+                        <input type="text" name="EmpNumber" id="editEmpNumber" class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400" readonly />
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
-                        <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="">— Select —</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
-                        <input type="number" name="age" id="editAge" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" min="1" max="120" />
+                        <input type="number" name="age" id="editAge" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" min="1" max="120" />
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
-                        <select name="gender" id="editGender" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        <select name="gender" id="editGender" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="">— Select —</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -501,7 +501,7 @@
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role</label>
-                        <select name="role" id="editRole" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        <select name="role" id="editRole" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="Employee">Employee</option>
                             <option value="HR">HR</option>
                             <option value="Manager">Manager</option>
@@ -511,7 +511,7 @@
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type</label>
-                        <select name="EmploymentType" id="editEmploymentType" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        <select name="EmploymentType" id="editEmploymentType" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="Regular">Regular</option>
                             <option value="Contractual">Contractual</option>
                             <option value="Part-Time">Part-Time</option>
@@ -520,7 +520,7 @@
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Work state</label>
-                        <select name="workState" id="editWorkState" class="h-11 w-full rounded-xl border border-gray-200 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        <select name="workState" id="editWorkState" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="Active">Active</option>
                             <option value="On Leave">On Leave</option>
                             <option value="Suspended">Suspended</option>
@@ -531,7 +531,7 @@
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label>
-                        <input type="date" name="dateHired" id="editDateHired" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                        <input type="date" name="dateHired" id="editDateHired" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                     </div>
 
                     <!-- Address + contact sections unchanged (kept as-is) -->
@@ -539,14 +539,14 @@
                         <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div class="address-autocomplete relative sm:col-span-2">
-                                <input type="text" name="AddressLine1" id="editAddressLine1" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Start typing address..." autocomplete="off" />
-                                <div id="editAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                                <input type="text" name="AddressLine1" id="editAddressLine1" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Start typing address..." autocomplete="off" />
+                                <div id="editAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-300 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
                             </div>
-                            <div class="sm:col-span-2"><input type="text" name="AddressLine2" id="editAddressLine2" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Address line 2 (optional)" /></div>
-                            <div><input type="text" name="City" id="editCity" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="City" /></div>
-                            <div><input type="text" name="StateProvince" id="editStateProvince" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="State / Province" /></div>
-                            <div><input type="text" name="PostalCode" id="editPostalCode" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Postal code" /></div>
-                            <div><input type="text" name="Country" id="editCountry" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Country" /></div>
+                            <div class="sm:col-span-2"><input type="text" name="AddressLine2" id="editAddressLine2" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Address line 2 (optional)" /></div>
+                            <div><input type="text" name="City" id="editCity" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="City" /></div>
+                            <div><input type="text" name="StateProvince" id="editStateProvince" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="State / Province" /></div>
+                            <div><input type="text" name="PostalCode" id="editPostalCode" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Postal code" /></div>
+                            <div><input type="text" name="Country" id="editCountry" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Country" /></div>
                         </div>
                     </div>
 
@@ -555,8 +555,8 @@
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div>
                                 <label class="mb-1 block text-xs text-slate-500">Phone</label>
-                                <div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-800">
-                                    <span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span>
+                                <div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800">
+                                    <span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span>
                                     <input type="tel" name="Phone" id="editPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" />
                                 </div>
                             </div>
@@ -566,9 +566,9 @@
                     <div class="md:col-span-2">
                         <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div><label class="mb-1 block text-xs text-slate-500">Name</label><input type="text" name="EmergencyContactName" id="editEmergencyContactName" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Full name" /></div>
-                            <div><label class="mb-1 block text-xs text-slate-500">Phone</label><div class="flex rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-800"><span class="inline-flex items-center rounded-l-xl border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span><input type="tel" name="EmergencyContactPhone" id="editEmergencyContactPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" /></div></div>
-                            <div><label class="mb-1 block text-xs text-slate-500">Relation</label><input type="text" name="EmergencyContactRelation" id="editEmergencyContactRelation" class="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Spouse, Parent" /></div>
+                            <div><label class="mb-1 block text-xs text-slate-500">Name</label><input type="text" name="EmergencyContactName" id="editEmergencyContactName" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Full name" /></div>
+                            <div><label class="mb-1 block text-xs text-slate-500">Phone</label><div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800"><span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span><input type="tel" name="EmergencyContactPhone" id="editEmergencyContactPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" /></div></div>
+                            <div><label class="mb-1 block text-xs text-slate-500">Relation</label><input type="text" name="EmergencyContactRelation" id="editEmergencyContactRelation" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Spouse, Parent" /></div>
                         </div>
                     </div>
                 </div>
@@ -586,8 +586,8 @@
 <div id="viewModal" class="fixed inset-0 z-[200] hidden overflow-y-auto">
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeViewModal()"></div>
-        <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-            <div class="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
+        <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div class="sticky top-0 z-10 border-b border-slate-300 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Employee information</h3>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View only. Use Edit to change details.</p>
             </div>
@@ -638,7 +638,7 @@
                 </section>
             </div>
 
-            <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
+            <div class="border-t border-slate-300 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <button type="button" onclick="closeViewModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Close</button>
             </div>
         </div>
@@ -960,7 +960,7 @@
                     btn.type = 'button';
                     btn.className = (i === currentPage)
                         ? 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-900/40 dark:bg-subgreen-900/20 dark:text-subgreen-300'
-                        : 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800';
+                        : 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-slate-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800';
                     btn.textContent = i;
                     (function (p) { btn.addEventListener('click', function () { currentPage = p; filterRows(); }); })(i);
                     container.appendChild(btn);

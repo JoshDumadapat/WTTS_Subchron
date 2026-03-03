@@ -5,7 +5,7 @@
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure how employees clock in and out across your organization.</p>
     </div>
 
-    <hr class="mb-8 border-slate-200 dark:border-gray-700" />
+    <hr class="mb-8 border-slate-300 dark:border-gray-700" />
 
     <form id="org-attendance-settings-form">
 
@@ -21,9 +21,9 @@
                 @* QR / Kiosk *@
                 <label class="group relative cursor-pointer">
                     <input type="radio" name="primaryMode" class="peer sr-only" value="QR" checked>
-                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm transition-all
+                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-300 bg-slate-50 p-4 shadow-md transition-all
                                 peer-checked:border-emerald-400 peer-checked:bg-gradient-to-br peer-checked:from-emerald-50 peer-checked:to-emerald-100/50 peer-checked:ring-1 peer-checked:ring-emerald-300
-                                hover:border-emerald-300 hover:shadow-md
+                                hover:border-emerald-300 hover:shadow-lg
                                 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-emerald-500 dark:peer-checked:from-emerald-900/30 dark:peer-checked:to-emerald-900/10">
                         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 text-gray-500 transition-colors peer-checked:bg-emerald-100 peer-checked:text-emerald-600 dark:bg-gray-700 dark:peer-checked:bg-emerald-900/40 dark:peer-checked:text-emerald-400 group-has-[input:checked]:bg-emerald-100 group-has-[input:checked]:text-emerald-600 dark:group-has-[input:checked]:bg-emerald-900/40 dark:group-has-[input:checked]:text-emerald-400">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -41,9 +41,9 @@
                 @* Biometric + Geo *@
                 <label class="group relative cursor-pointer">
                     <input type="radio" name="primaryMode" class="peer sr-only" value="Biometric">
-                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm transition-all
+                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-300 bg-slate-50 p-4 shadow-md transition-all
                                 peer-checked:border-emerald-400 peer-checked:bg-gradient-to-br peer-checked:from-emerald-50 peer-checked:to-emerald-100/50 peer-checked:ring-1 peer-checked:ring-emerald-300
-                                hover:border-emerald-300 hover:shadow-md
+                                hover:border-emerald-300 hover:shadow-lg
                                 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-emerald-500 dark:peer-checked:from-emerald-900/30 dark:peer-checked:to-emerald-900/10">
                         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 text-gray-500 transition-colors peer-checked:bg-emerald-100 peer-checked:text-emerald-600 dark:bg-gray-700 dark:peer-checked:bg-emerald-900/40 dark:peer-checked:text-emerald-400 group-has-[input:checked]:bg-emerald-100 group-has-[input:checked]:text-emerald-600 dark:group-has-[input:checked]:bg-emerald-900/40 dark:group-has-[input:checked]:text-emerald-400">
                             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -60,9 +60,9 @@
                 @* Hybrid *@
                 <label class="group relative cursor-pointer">
                     <input type="radio" name="primaryMode" class="peer sr-only" value="Hybrid">
-                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm transition-all
+                    <div class="flex flex-col items-start gap-2 rounded-xl border border-slate-300 bg-slate-50 p-4 shadow-md transition-all
                                 peer-checked:border-emerald-400 peer-checked:bg-gradient-to-br peer-checked:from-emerald-50 peer-checked:to-emerald-100/50 peer-checked:ring-1 peer-checked:ring-emerald-300
-                                hover:border-emerald-300 hover:shadow-md
+                                hover:border-emerald-300 hover:shadow-lg
                                 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-emerald-500 dark:peer-checked:from-emerald-900/30 dark:peer-checked:to-emerald-900/10">
                         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 text-gray-500 transition-colors peer-checked:bg-emerald-100 peer-checked:text-emerald-600 dark:bg-gray-700 dark:peer-checked:bg-emerald-900/40 dark:peer-checked:text-emerald-400 group-has-[input:checked]:bg-emerald-100 group-has-[input:checked]:text-emerald-600 dark:group-has-[input:checked]:bg-emerald-900/40 dark:group-has-[input:checked]:text-emerald-400">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -83,9 +83,9 @@
         </div>
 
         @* --- SECTION 2: MANUAL ENTRY ------------------------------ *@
-        <div class="mb-8 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mb-8 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
 
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+            <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
                 <div>
                     <span class="block text-sm font-semibold text-gray-800 dark:text-white">Manual Entry</span>
                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Allow time logs to be submitted without a QR scan or biometric capture.</p>
@@ -100,7 +100,7 @@
             </div>
 
             @* Manual Entry Sub-options (shown when enabled) *@
-            <div id="manualEntryOptions" class="hidden px-5 py-4 bg-gray-50 dark:bg-gray-700/30">
+            <div id="manualEntryOptions" class="hidden px-5 py-4 bg-slate-100 dark:bg-gray-700/30">
                 <p class="mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-gray-400">Who can submit manual entries?</p>
                 <div class="flex flex-col gap-2 sm:flex-row sm:gap-4">
 
@@ -125,10 +125,10 @@
             <p class="mb-4 text-xs text-gray-400 dark:text-gray-500">Fine-tune guard rails for attendance logging.</p>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
 
             @* Require Geofence *@
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+            <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
                 <div>
                     <span class="block text-sm font-semibold text-gray-800 dark:text-white">Require Geofence</span>
                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Employee must be within the designated location radius to clock in.</p>
@@ -143,7 +143,7 @@
             </div>
 
             @* Restrict by IP *@
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+            <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
                 <div>
                     <span class="block text-sm font-semibold text-gray-800 dark:text-white">Restrict by IP</span>
                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Only allow clock-ins from approved IP addresses (e.g. office Wi-Fi).</p>
@@ -158,7 +158,7 @@
             </div>
 
             @* Prevent Double Clock-in *@
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+            <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
                 <div>
                     <span class="block text-sm font-semibold text-gray-800 dark:text-white">Prevent Double Clock-in</span>
                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Block employees from clocking in again while already clocked in.</p>
@@ -200,13 +200,13 @@
         </div>
 
         @* --- DEFAULT SHIFT TEMPLATE -------------------------------- *@
-        <div class="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mt-8 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
             <div class="px-5 py-4">
                 <span class="block text-sm font-semibold text-gray-800 dark:text-white">Default Shift Template</span>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Pick the fallback shift template for employees without explicit schedules.</p>
 
                 <div class="mt-4 grid gap-3 sm:grid-cols-[minmax(0,320px)_1fr]">
-                    <input type="text" id="defaultShiftTemplateCode" list="defaultShiftTemplateOptions" class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    <input type="text" id="defaultShiftTemplateCode" list="defaultShiftTemplateOptions" class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                            placeholder="e.g. DAYSHIFT_9_6">
                     <p class="text-xs text-gray-500 dark:text-gray-400">Leave blank to respect each employee's current assignment.</p>
                 </div>
@@ -220,7 +220,7 @@
         </datalist>
 
         @* --- SAVE BUTTON -------------------------------------------- *@
-        <hr class="mt-8 mb-6 border-slate-200 dark:border-gray-700" />
+        <hr class="mt-8 mb-6 border-slate-300 dark:border-gray-700" />
 
         <div class="flex justify-end">
             <button type="submit" id="attendanceSettingsSaveBtn" class="btn-primary">

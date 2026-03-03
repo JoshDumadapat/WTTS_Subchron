@@ -130,6 +130,12 @@ public class AddModel : PageModel
             TempData["ToastSuccess"] = false;
             return Page();
         }
+        if (string.IsNullOrWhiteSpace(empNumber))
+        {
+            TempData["ToastMessage"] = "Employee ID is required.";
+            TempData["ToastSuccess"] = false;
+            return Page();
+        }
         if (age.HasValue && (age.Value <= 18 || age.Value > 70))
         {
             TempData["ToastMessage"] = "Age must be between 19 and 70.";
@@ -166,6 +172,18 @@ public class AddModel : PageModel
         {
             var uploadUrl = await UploadEmployeeImageAsync(client, baseUrl, signature, "signature");
             if (uploadUrl != null) resolvedSignatureUrl = uploadUrl;
+        }
+        if (string.IsNullOrWhiteSpace(resolvedSignatureUrl))
+        {
+            TempData["ToastMessage"] = "Signature is required.";
+            TempData["ToastSuccess"] = false;
+            return Page();
+        }
+        if (string.IsNullOrWhiteSpace(resolvedIdPictureUrl))
+        {
+            TempData["ToastMessage"] = "Profile / ID picture is required.";
+            TempData["ToastSuccess"] = false;
+            return Page();
         }
 
         // 1) Create employee first (with or without UserID). This ensures the employee row is always saved.

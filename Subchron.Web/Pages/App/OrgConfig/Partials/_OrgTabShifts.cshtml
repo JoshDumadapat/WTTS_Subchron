@@ -1,6 +1,6 @@
 <div id="tab-shifts" class="tab-content hidden h-full flex-col">
 
-    <div class="flex items-center justify-between border-b border-gray-200 px-8 py-5 dark:border-gray-700">
+    <div class="flex items-center justify-between border-b border-slate-200 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Shift Configuration</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define shift templates for your organization. Assign them to employees later.</p>
@@ -154,8 +154,8 @@
             </div>
 
             @* ── OVERTIME RULES ───────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center gap-3 border-b border-gray-100 bg-slate-100/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/30">
+            <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center gap-3 border-b border-slate-300 bg-slate-100/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/30">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -166,7 +166,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Configure when OT counts, how it's approved, rounded, and limited across day types.</p>
                     </div>
                 </div>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                <div class="divide-y divide-slate-200 dark:divide-gray-700">
 
                     @* 1) OT Eligibility *@
                     <div class="px-6 py-5">
@@ -175,7 +175,7 @@
                             <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">OT Eligibility</h4>
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div>
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">OT Enabled</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Allow overtime tracking</p>
@@ -185,14 +185,14 @@
                                     <option value="off">Off</option>
                                 </select>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Min Hours Before OT</p>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="ot-min-hours" min="0" max="24" step="0.5" value="8" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     <span class="text-xs text-gray-400">hrs / day</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">OT Basis</p>
                                 <select id="ot-basis" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="after_shift_end">After scheduled shift end</option>
@@ -210,7 +210,7 @@
                             <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Approval Rules</h4>
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div>
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Pre-Approval</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Required before OT</p>
@@ -220,14 +220,14 @@
                                     <option value="off" selected>Off</option>
                                 </select>
                             </div>
-                            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div>
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Post-Approval</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">File OT after the fact</p>
                                 </div>
                                 <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">Auto when Off</span>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Approver Role</p>
                                 <select id="ot-approver-role" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="Supervisor">Supervisor</option>
@@ -235,7 +235,7 @@
                                     <option value="HR">HR</option>
                                 </select>
                             </div>
-                            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div>
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Auto-Approve</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Skip workflow (small orgs)</p>
@@ -256,7 +256,7 @@
                             <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Rounding Rules</h4>
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Round OT Minutes To</p>
                                 <select id="ot-round-to" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option value="none">None</option>
@@ -265,7 +265,7 @@
                                     <option value="30">30 mins</option>
                                 </select>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Minimum OT Block</p>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="ot-min-block" min="0" max="120" value="30" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
@@ -282,21 +282,21 @@
                             <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Limits &amp; Controls</h4>
                         </div>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Max OT Per Day</p>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="ot-max-per-day" min="0" max="24" step="0.5" value="4" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     <span class="text-xs text-gray-400">hrs</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Max OT Per Week</p>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="ot-max-per-week" min="0" max="168" value="20" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     <span class="text-xs text-gray-400">hrs</span>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div>
                                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Hard Stop</p>
                                     <p class="text-[10px] text-gray-400 dark:text-gray-500">Block clock-in beyond max shift</p>
@@ -318,21 +318,21 @@
                         </div>
                         <p class="mb-3 text-[10px] text-gray-400 dark:text-gray-500">OT hours are tracked per day type. Pay rates are configured separately in Pay Configuration.</p>
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div class="mb-1 flex items-center gap-1.5">
                                     <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
                                     <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Regular Day</span>
                                 </div>
                                 <p class="text-[10px] text-gray-400 dark:text-gray-500">OT after scheduled end or threshold</p>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div class="mb-1 flex items-center gap-1.5">
                                     <span class="h-2 w-2 rounded-full bg-blue-400"></span>
                                     <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Rest Day</span>
                                 </div>
                                 <p class="text-[10px] text-gray-400 dark:text-gray-500">Tracked in a separate OT bucket</p>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
+                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
                                 <div class="mb-1 flex items-center gap-1.5">
                                     <span class="h-2 w-2 rounded-full bg-amber-400"></span>
                                     <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Holiday</span>
@@ -352,12 +352,10 @@
 
 @* ─── DELETE SHIFT CONFIRMATION MODAL ─── *@
 <div id="deleteShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-sm overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
-    </div>
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-slate-50 shadow-2xl dark:bg-gray-800">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
 
         <div class="h-1.5 w-full bg-amber-400"></div>
-        <div class="flex items-center justify-between border-b border-amber-100 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
+        <div class="flex items-center justify-between border-b border-amber-200 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
             <div class="flex items-center gap-2.5">
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
@@ -384,9 +382,9 @@
                 <div class="grid grid-cols-3 gap-2">
                     <label class="group cursor-pointer">
                         <input type="radio" name="edit_shift_type" value="fixed" class="peer sr-only" onchange="onEditShiftTypeChange('fixed')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:ring-1 peer-checked:ring-amber-300
-                                    hover:border-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
+                                    hover:border-amber-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-amber-600 dark:group-has-[input:checked]:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -396,9 +394,9 @@
                     </label>
                     <label class="group cursor-pointer">
                         <input type="radio" name="edit_shift_type" value="flexible" class="peer sr-only" onchange="onEditShiftTypeChange('flexible')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:ring-1 peer-checked:ring-amber-300
-                                    hover:border-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
+                                    hover:border-amber-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-amber-600 dark:group-has-[input:checked]:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                             </svg>
@@ -408,9 +406,9 @@
                     </label>
                     <label class="group cursor-pointer">
                         <input type="radio" name="edit_shift_type" value="open" class="peer sr-only" onchange="onEditShiftTypeChange('open')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-amber-400 peer-checked:bg-amber-50 peer-checked:ring-1 peer-checked:ring-amber-300
-                                    hover:border-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
+                                    hover:border-amber-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-amber-500 dark:peer-checked:bg-amber-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-amber-600 dark:group-has-[input:checked]:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                             </svg>
@@ -431,8 +429,8 @@
                     <button type="button" onclick="toggleEditDay(this)" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">W</button>
                     <button type="button" onclick="toggleEditDay(this)" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">T</button>
                     <button type="button" onclick="toggleEditDay(this)" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">F</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                 </div>
             </div>
 
@@ -512,7 +510,7 @@
 
         </div>
 
-        <div class="flex items-center justify-end gap-3 border-t border-amber-100 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
+        <div class="flex items-center justify-end gap-3 border-t border-amber-200 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
             <button onclick="closeEditShiftModal()" class="btn-secondary">Cancel</button>
             <button onclick="saveEditShiftTemplate()" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 transition-colors dark:bg-amber-500 dark:hover:bg-amber-400">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -526,7 +524,7 @@
 <div id="addShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
     <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
 
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-700">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-gray-700">
             <h3 class="text-base font-bold text-gray-900 dark:text-white">New Shift Template</h3>
             <button onclick="closeAddShiftModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -549,9 +547,9 @@
 
                     <label class="group cursor-pointer">
                         <input type="radio" name="shift_type" value="fixed" class="peer sr-only" checked onchange="onShiftTypeChange('fixed')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-emerald-400 peer-checked:bg-emerald-50 peer-checked:ring-1 peer-checked:ring-emerald-300
-                                    hover:border-emerald-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-emerald-500 dark:peer-checked:bg-emerald-900/20">
+                                    hover:border-emerald-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-emerald-500 dark:peer-checked:bg-emerald-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-emerald-600 dark:group-has-[input:checked]:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -562,9 +560,9 @@
 
                     <label class="group cursor-pointer">
                         <input type="radio" name="shift_type" value="flexible" class="peer sr-only" onchange="onShiftTypeChange('flexible')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-blue-400 peer-checked:bg-blue-50 peer-checked:ring-1 peer-checked:ring-blue-300
-                                    hover:border-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-blue-500 dark:peer-checked:bg-blue-900/20">
+                                    hover:border-blue-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-blue-500 dark:peer-checked:bg-blue-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-blue-600 dark:group-has-[input:checked]:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                             </svg>
@@ -575,9 +573,9 @@
 
                     <label class="group cursor-pointer">
                         <input type="radio" name="shift_type" value="open" class="peer sr-only" onchange="onShiftTypeChange('open')">
-                        <div class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition-all
+                        <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
                                     peer-checked:border-violet-400 peer-checked:bg-violet-50 peer-checked:ring-1 peer-checked:ring-violet-300
-                                    hover:border-violet-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-violet-500 dark:peer-checked:bg-violet-900/20">
+                                    hover:border-violet-300 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-violet-500 dark:peer-checked:bg-violet-900/20">
                             <svg class="h-5 w-5 text-gray-400 group-has-[input:checked]:text-violet-600 dark:group-has-[input:checked]:text-violet-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                             </svg>
@@ -599,8 +597,8 @@
                     <button type="button" onclick="toggleModalDay(this)" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">W</button>
                     <button type="button" onclick="toggleModalDay(this)" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">T</button>
                     <button type="button" onclick="toggleModalDay(this)" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">F</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                 </div>
             </div>
 
@@ -734,7 +732,7 @@
         const isActive = btn.getAttribute('data-active') === 'true';
         if (isActive) {
             btn.setAttribute('data-active', 'false');
-            btn.className = 'modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
+            btn.className = 'modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
         } else {
             btn.setAttribute('data-active', 'true');
             btn.className = 'modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all';
@@ -906,7 +904,7 @@
             if (active) {
                 btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all';
             } else {
-                btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
+                btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
             }
         });
 
@@ -936,7 +934,7 @@
         if (!active) {
             btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all';
         } else {
-            btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
+            btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
         }
     }
 
