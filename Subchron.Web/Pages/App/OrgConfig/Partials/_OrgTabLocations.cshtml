@@ -97,6 +97,16 @@
         box-shadow: 0 0 0 3px rgba(15,23,42,0.9), 0 10px 15px -8px rgba(0,0,0,0.6);
     }
 
+    .pin-color-blue { background: #3b82f6; }
+    .pin-color-purple { background: #8b5cf6; }
+    .pin-color-pink { background: #ec4899; }
+    .pin-color-cyan { background: #06b6d4; }
+
+    [data-role="pin-color-palette"] {
+        display: flex;
+        gap: 4px;
+    }
+
     .map-pin-wrap {
         width: 34px;
         height: 34px;
@@ -136,30 +146,12 @@
         border-left: 4px solid transparent;
     }
 
-    /* Pin color option classes */
-    .pin-color-blue {
-        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    }
-
-    .pin-color-purple {
-        background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-    }
-
-    .pin-color-pink {
-        background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
-    }
-
-    .pin-color-cyan {
-        background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
-    }
-
-    .pin-color-emerald {
-        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-    }
-
+    /* Hover effect: scale up, border glow + card glow */
     .site-card-accent[style*="--accent"]:hover {
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+        transform: scale(1.02);
+        box-shadow: 0 0 0 1px var(--accent), 0 8px 25px -5px color-mix(in srgb, var(--accent) 40%, transparent);
     }
+
 </style>
 
 <div id="tab-locations" class="tab-content hidden h-full flex-col">
@@ -1170,7 +1162,7 @@
             prioritized.forEach(site => {
                 const card = document.createElement('div');
                 const accentHex = site.isActive ? (pinColorHex[site.pinColor] || '#3b82f6') : '#6b7280';
-                card.className = 'site-card-accent flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-slate-50 p-5 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800 cursor-pointer';
+                card.className = 'site-card-accent flex min-h-[110px] flex-col justify-center rounded-lg border border-gray-200 bg-slate-50 p-5 shadow-sm transition-all duration-200 hover:scale-[1.02] dark:border-gray-700 dark:bg-gray-800 cursor-pointer';
                 card.style.setProperty('--accent', accentHex);
                 card.style.borderLeftColor = accentHex;
                 if (!site.isActive) {

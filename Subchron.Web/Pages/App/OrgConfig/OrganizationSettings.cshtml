@@ -168,8 +168,8 @@
                 // no-op
             }
 
-            // Reflect tab in URL hash so breadcrumb can read it on load/refresh
-            window.location.hash = tabId;
+            // Reflect tab in URL hash so breadcrumb can read it on load/refresh (without triggering scroll)
+            history.replaceState(null, '', '#' + tabId);
 
             // Tell the layout breadcrumb to re-render with the new active tab
             if (typeof window.__rebuildBreadcrumb === 'function') {
