@@ -37,7 +37,14 @@ public class EmployeeManagementModel : PageModel
         if (!string.IsNullOrWhiteSpace(claimOrgName))
             OrgName = claimOrgName.Trim();
 
-        await Task.CompletedTask;
+        var token = GetAccessToken();
+        if (!string.IsNullOrEmpty(token))
+        {
+            var branding = await GetOrgBrandingAsync(token);
+            if (!string.IsNullOrWhiteSpace(branding.OrgName))
+                OrgName = branding.OrgName.Trim();
+            OrgLogoUrl = branding.OrgLogoUrl;
+        }
     }
 
     public async Task<IActionResult> OnGetDataAsync()

@@ -222,7 +222,7 @@
 
                         <div class="id-card-photo-wrapper">
                             <div class="id-card-photo-ring">
-                                <img id="idCardPhoto" src="/images/default-avatar.png" alt="Employee" class="h-full w-full object-cover" />
+                                <img id="idCardPhoto" src="" alt="Employee" class="h-full w-full object-cover" />
                             </div>
                         </div>
 
@@ -336,7 +336,6 @@
         document.getElementById('idCardPhoto').src = data.photoUrl || "/images/default-avatar.png";
         document.getElementById('idCardQr').src = data.qrUrl || "";
         document.getElementById('idCardSignature').src = data.signatureUrl || "";
-a lot 
         document.getElementById('idCardModal').classList.remove('hidden');
     }
 </script>

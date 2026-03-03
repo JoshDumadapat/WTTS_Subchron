@@ -1132,6 +1132,100 @@
         if (el) el.textContent = text;
     }
 
+    var employeePagePath = '@(Url.Page("/App/Employee/EmployeeManagement") ?? "")';
+
+    function getOrigin() {
+        if (window.location.origin) return window.location.origin;
+        var protocol = window.location.protocol || 'https:';
+        var host = window.location.host || '';
+        return protocol.replace(/:$/, '') + '//' + host;
+    }
+
+    function buildAttendanceQrUrl(empId) {
+        if (!empId) return '';
+        try {
+            var url = new URL(employeePagePath || window.location.pathname || '', getOrigin());
+            url.searchParams.set('handler', 'AttendanceQr');
+            url.searchParams.set('id', empId);
+            url.searchParams.set('t', Date.now().toString());
+            return url.toString();
+        }
+        catch (err) {
+            return '';
+        }
+    }
+
+    function getApiContext() {
+        var root = document.getElementById('appRoot');
+        if (!root || !root.dataset) return { apiBase: '', token: '' };
+        return {
+            apiBase: (root.dataset.apiBase || '').trim(),
+            token: (root.dataset.accessToken || '').trim()
+        };
+    }
+
+    function loadQrViaApi(empId) {
+        var ctx = getApiContext();
+        if (!ctx.apiBase || !ctx.token || !empId) return Promise.reject(new Error('Missing API context'));
+        var base = ctx.apiBase.replace(/\/+$/, '');
+        var url = base + '/api/employees/' + encodeURIComponent(empId) + '/attendance-qr';
+        return fetch(url, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + ctx.token,
+                'X-Web-Base': getOrigin()
+            }
+        }).then(function (resp) {
+            if (!resp.ok) throw new Error('Status ' + resp.status);
+            return resp.blob();
+        }).then(function (blob) {
+            return URL.createObjectURL(blob);
+        });
+    }
+
+    function setQrImage(empId) {
+        var qrEl = getIdEl('idCardQr');
+        if (!qrEl) return;
+        if (qrEl.dataset.qrObjectUrl) {
+            URL.revokeObjectURL(qrEl.dataset.qrObjectUrl);
+            delete qrEl.dataset.qrObjectUrl;
+        }
+        if (!empId) {
+            qrEl.src = '';
+            qrEl.alt = 'QR unavailable';
+            qrEl.onerror = null;
+            return;
+        }
+
+        var handlerUrl = buildAttendanceQrUrl(empId);
+        if (!handlerUrl) {
+            qrEl.src = '';
+            qrEl.alt = 'QR unavailable';
+            qrEl.onerror = null;
+            return;
+        }
+
+        var fallbackUsed = false;
+        qrEl.onerror = function () {
+            if (fallbackUsed) return;
+            fallbackUsed = true;
+            loadQrViaApi(empId)
+                .then(function (objectUrl) {
+                    qrEl.onerror = null;
+                    qrEl.dataset.qrObjectUrl = objectUrl;
+                    qrEl.src = objectUrl;
+                    qrEl.alt = 'Employee QR code';
+                })
+                .catch(function () {
+                    qrEl.alt = 'QR unavailable';
+                });
+        };
+
+        qrEl.src = handlerUrl;
+        qrEl.alt = 'Employee QR code';
+    }
+
     function formatPhoneForId(phone) {
         if (!phone || phone === '—') return '—';
         return phone.indexOf('+') === 0 ? phone : '+63 ' + phone;
@@ -1170,8 +1264,7 @@
         setIdText('idCardEcPhone', data.ecPhone || '—');
         setIdText('idCardEcRelation', data.ecRelation || '—');
 
-        var qrEl = getIdEl('idCardQr');
-        if (qrEl && data.empId) qrEl.src = window.location.pathname + '?handler=AttendanceQr&id=' + encodeURIComponent(data.empId) + '&t=' + Date.now();
+        setQrImage(data.empId);
 
         var sigEl = getIdEl('idCardSignature');
         if (sigEl) {
@@ -1195,6 +1288,7 @@
             } else {
                 photoEl.src = '';
                 photoEl.style.display = 'none';
+                photoEl.onerror = null;
             }
         }
 
