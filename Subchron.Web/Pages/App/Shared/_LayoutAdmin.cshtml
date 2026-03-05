@@ -47,7 +47,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="turbo-cache-control" content="no-preview" />
     <title>@ViewData["Title"] - Admin - Subchron</title>
 
     <!-- Suppress "cdn.tailwindcss.com should not be used in production" (use Tailwind CLI/PostCSS in production) -->
@@ -386,7 +385,7 @@
     </style>
 </head>
 
-<body id="appRoot" class="min-h-screen bg-slate-100 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
+<body id="appRoot" class="overflow-hidden min-h-screen bg-slate-100 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")">
     <!-- Toast: defined first so showToast exists when page scripts run after redirect -->
     <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
     <script>
@@ -443,7 +442,7 @@
          class="backdrop-blur-[1px] fixed inset-0 z-10 hidden bg-slate-900/40 md:hidden"
          aria-hidden="true"></div>
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden" id="layoutShell">
         <aside id="sidebar"
                class="relative z-20 flex flex-col border-r border-slate-200 bg-white text-slate-600 shadow-xl dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                style="width: 260px;">
@@ -685,7 +684,7 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-auto bg-[#f2f2f2] dark:bg-slate-900">
+        <main class="relative flex-1 overflow-auto bg-[#f2f2f2] dark:bg-slate-900" id="layout-main">
             <header class="layout-header bg-white shadow-lg dark:bg-slate-800"
                     style="margin:20px; border-radius:18px; padding:16px 24px;">
                 <div class="flex items-center justify-between">

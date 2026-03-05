@@ -1,0 +1,29 @@
+@{
+    var skeletonId = ViewData["SkeletonId"] as string;
+    var extraClasses = ViewData["SkeletonExtraClasses"] as string ?? string.Empty;
+    var idAttr = string.IsNullOrWhiteSpace(skeletonId) ? string.Empty : $"id=\"{skeletonId}\"";
+}
+
+<div @idAttr class="space-y-6 animate-pulse @extraClasses">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="h-8 w-56 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-28 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+        </div>
+    </div>
+    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
+        <div class="grid grid-cols-2 border-b border-slate-300 lg:grid-cols-4 dark:border-slate-800">
+            <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+            <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+            <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+            <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+        </div>
+        <div class="space-y-3 p-4">
+            @for (int i = 0; i < 5; i++)
+            {
+                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+            }
+        </div>
+    </div>
+</div>

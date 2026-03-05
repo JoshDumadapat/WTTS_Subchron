@@ -18,6 +18,4 @@ public class OrganizationSettingsUpdateRequest
     public bool OTApprovalRequired { get; set; }
     public decimal? OTMaxHoursPerDay { get; set; }
 
-    public bool LeaveEnabled { get; set; }
-    public bool LeaveApprovalRequired { get; set; }
 }

@@ -38,12 +38,26 @@ public class EmployeeManagementModel : PageModel
             OrgName = claimOrgName.Trim();
 
         var token = GetAccessToken();
-        if (!string.IsNullOrEmpty(token))
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
+            return;
+
+        var branding = await GetOrgBrandingAsync(token);
+        if (!string.IsNullOrWhiteSpace(branding.OrgName))
+            OrgName = branding.OrgName.Trim();
+        OrgLogoUrl = branding.OrgLogoUrl;
+
+        try
         {
-            var branding = await GetOrgBrandingAsync(token);
-            if (!string.IsNullOrWhiteSpace(branding.OrgName))
-                OrgName = branding.OrgName.Trim();
-            OrgLogoUrl = branding.OrgLogoUrl;
+            var data = await FetchEmployeeManagementDataAsync(token, baseUrl);
+            Employees = data.employees;
+            Departments = data.departments;
+        }
+        catch
+        {
+            Error = "Unable to load employees right now.";
+            Employees = new List<EmployeeItem>();
+            Departments = new List<DepartmentItem>();
         }
     }
 
@@ -339,8 +353,8 @@ public class EmployeeManagementModel : PageModel
         if (string.IsNullOrWhiteSpace(frontImageBase64) || string.IsNullOrWhiteSpace(backImageBase64))
             return BadRequest("Missing front or back image.");
 
-        byte[] frontBytes = DecodeBase64Image(frontImageBase64);
-        byte[] backBytes = DecodeBase64Image(backImageBase64);
+        byte[]? frontBytes = DecodeBase64Image(frontImageBase64);
+        byte[]? backBytes = DecodeBase64Image(backImageBase64);
         if (frontBytes == null || frontBytes.Length == 0 || backBytes == null || backBytes.Length == 0)
             return BadRequest("Invalid image data.");
 

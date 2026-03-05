@@ -72,8 +72,8 @@ await Task.Delay(10);
     // Mock data - replace with actual repository call
       await Task.Delay(10);
 
-       return new OrganizationSettingsViewModel
-  {
+     return new OrganizationSettingsViewModel
+   {
         OrgID = orgId,
      Timezone = "Asia/Manila",
    Currency = "PHP",
@@ -86,11 +86,9 @@ RequireGeo = true,
  OTEnabled = true,
       OTThresholdHours = 8,
         OTApprovalRequired = true,
-         OTMaxHoursPerDay = 12,
-         LeaveEnabled = true,
-    LeaveApprovalRequired = true
-    };
-  }
+          OTMaxHoursPerDay = 12
+     };
+   }
 
  private async Task<SubscriptionDetailViewModel?> LoadCurrentSubscription(int orgId)
  {
@@ -169,10 +167,8 @@ RequireGeo = true,
   public bool OTEnabled { get; set; }
      public int OTThresholdHours { get; set; }
      public bool OTApprovalRequired { get; set; }
-       public int OTMaxHoursPerDay { get; set; }
-    public bool LeaveEnabled { get; set; }
-      public bool LeaveApprovalRequired { get; set; }
-    }
+     public int OTMaxHoursPerDay { get; set; }
+     }
 
     public class SubscriptionDetailViewModel
     {

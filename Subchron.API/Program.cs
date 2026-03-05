@@ -77,6 +77,8 @@ builder.Services.AddHttpClient<ILocationIqService, LocationIqService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IAttendanceComputationService, AttendanceComputationService>();
+builder.Services.AddScoped<IOvertimeApprovalWorkflowService, OvertimeApprovalWorkflowService>();
 builder.Services.AddHostedService<PendingPaymentCleanupService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 

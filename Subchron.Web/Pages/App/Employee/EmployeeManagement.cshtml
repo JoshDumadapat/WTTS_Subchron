@@ -9,33 +9,78 @@
 
 <div id="employeePageHost" class="mx-auto" aria-busy="true">
 
-    <!-- Skeleton -->
     <div id="employeeSkeleton" class="space-y-6 animate-pulse">
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="h-8 w-56 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-28 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="h-8 w-60 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+            <div class="flex flex-wrap gap-3">
                 <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="h-10 w-28 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
             </div>
         </div>
-        <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
-            <div class="grid grid-cols-2 border-b border-slate-300 lg:grid-cols-4 dark:border-slate-800">
-                <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
-                <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
-                <div class="p-4"><div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
-                <div class="p-4"><div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div><div class="mt-2 h-6 w-16 rounded bg-slate-200 dark:bg-slate-700"></div></div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <div class="h-11 flex-1 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex flex-wrap gap-3">
+                    <div class="h-10 w-28 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="h-10 w-32 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="h-10 w-24 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                </div>
             </div>
-            <div class="space-y-3 p-4">
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="grid grid-cols-2 divide-y border-b border-slate-200 dark:divide-slate-700 dark:border-slate-700 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
+                @for (var i = 0; i < 4; i++)
+                {
+                    <div class="space-y-2 p-4">
+                        <div class="h-3 w-16 rounded bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="h-5 w-12 rounded bg-slate-200 dark:bg-slate-700"></div>
+                    </div>
+                }
+            </div>
+
+            <div class="divide-y border-t border-slate-200 dark:border-slate-700">
+                @for (var i = 0; i < 6; i++)
+                {
+                    <div class="flex flex-col gap-4 px-5 py-4 sm:grid sm:grid-cols-[40px_minmax(160px,1.3fr)_minmax(140px,1fr)_minmax(180px,1fr)_minmax(160px,1fr)_minmax(110px,1fr)_minmax(120px,1fr)_90px] sm:items-center">
+                        <div class="hidden h-4 w-4 rounded bg-slate-200 dark:bg-slate-700 sm:block"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="space-y-2">
+                                <div class="h-3 w-32 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 w-28 rounded bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-3 w-20 rounded bg-slate-200 dark:bg-slate-700"></div>
+                        </div>
+                        <div class="h-3 w-40 rounded bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="h-3 w-36 rounded bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="h-5 w-16 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="flex justify-end gap-2">
+                            <div class="h-7 w-10 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-7 w-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="h-7 w-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                <div class="h-4 w-44 rounded bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex gap-2">
+                    @for (var i = 0; i < 3; i++)
+                    {
+                        <div class="h-9 w-9 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Real content -->
     <div id="employeeContent" class="hidden">
 
         <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -94,6 +139,10 @@
                     <select id="filterDepartment"
                             class="hidden sm:inline-block h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All Departments</option>
+                        @foreach (var dep in Model.Departments)
+                        {
+                            <option value="@dep.DepID">@dep.DepartmentName</option>
+                        }
                     </select>
 
                     <button type="button" id="resetFilters" aria-label="Reset filters"
@@ -478,9 +527,13 @@
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
-                        <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                            <option value="">— Select —</option>
-                        </select>
+                         <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                             <option value="">— Select —</option>
+                             @foreach (var dep in Model.Departments)
+                             {
+                                 <option value="@dep.DepID">@dep.DepartmentName</option>
+                             }
+                         </select>
                     </div>
 
                     <div>
@@ -652,18 +705,22 @@
         var content = document.getElementById('employeeContent');
         var tbody = document.getElementById('employeeTableBody');
         var placeholder = document.getElementById('employeeEmptyPlaceholder');
-        if (!host || !skeleton || !content || !tbody) return;
+        if (!host || !content || !tbody) return;
 
         var shownAt = Date.now();
         var revealTimer = null;
-        var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 80;
+        var minVisibleMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
+        var hasRevealed = false;
         var employeeRowsCache = Array.prototype.slice.call(tbody.querySelectorAll('.employee-row'));
+
+        showSkeleton();
 
         function showSkeleton() {
             if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
             shownAt = Date.now();
+            hasRevealed = false;
             host.setAttribute('aria-busy', 'true');
-            skeleton.classList.remove('hidden');
+            if (skeleton) skeleton.classList.remove('hidden');
             content.classList.add('hidden');
         }
 
@@ -672,7 +729,7 @@
             var wait = Math.max(0, minVisibleMs - elapsed);
             revealTimer = setTimeout(function () {
                 requestAnimationFrame(function () {
-                    skeleton.classList.add('hidden');
+                    if (skeleton) skeleton.classList.add('hidden');
                     content.classList.remove('hidden');
                     host.setAttribute('aria-busy', 'false');
                     revealTimer = null;
@@ -794,92 +851,12 @@
             return tr;
         }
 
-        showSkeleton();
-
         function onDataReady() {
-            var filterDept = document.getElementById('filterDepartment');
-            var editDept = document.getElementById('editDepartmentID');
-
-            var fallbackTimer = setTimeout(function () {
-                skeleton.classList.add('hidden');
-                content.classList.remove('hidden');
-                host.setAttribute('aria-busy', 'false');
-                if (placeholder) {
-                    var emptyTd = placeholder.querySelector('td');
-                    if (emptyTd) emptyTd.innerHTML = '<p class="text-sm text-slate-600 dark:text-slate-400">Loading timed out. Please refresh the page.</p>';
-                    placeholder.classList.remove('hidden');
-                }
-            }, 4000);
-
-            fetch(window.location.pathname + '?handler=Data', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin', cache: 'no-store' })
-                .then(function (r) { if (!r.ok) throw new Error('Request failed: ' + r.status); return r.json(); })
-                .then(function (data) {
-                    clearTimeout(fallbackTimer);
-
-                    var employees = (data && data.employees) ? data.employees : [];
-                    var departments = (data && data.departments) ? data.departments : [];
-
-                    if (filterDept) {
-                        filterDept.innerHTML = '<option value="">All Departments</option>';
-                        departments.forEach(function (d) {
-                            var opt = document.createElement('option');
-                            opt.value = String(d.depID != null ? d.depID : d.DepID);
-                            opt.textContent = d.departmentName || d.DepartmentName || '';
-                            filterDept.appendChild(opt);
-                        });
-                    }
-
-                    if (editDept) {
-                        editDept.innerHTML = '<option value="">— Select —</option>';
-                        departments.forEach(function (d) {
-                            var opt = document.createElement('option');
-                            opt.value = String(d.depID != null ? d.depID : d.DepID);
-                            opt.textContent = d.departmentName || d.DepartmentName || '';
-                            editDept.appendChild(opt);
-                        });
-                    }
-
-                    tbody.querySelectorAll('.employee-row').forEach(function (r) { r.remove(); });
-                    var rowsFragment = document.createDocumentFragment();
-                    employees.forEach(function (e) {
-                        try { rowsFragment.appendChild(buildRow(e)); } catch (err) { }
-                    });
-                    if (placeholder) tbody.insertBefore(rowsFragment, placeholder);
-                    else tbody.appendChild(rowsFragment);
-                    employeeRowsCache = Array.prototype.slice.call(tbody.querySelectorAll('.employee-row'));
-
-                    if (placeholder) placeholder.classList.toggle('hidden', employees.length > 0);
-
-                    var statTotal = document.getElementById('statTotal');
-                    var statActive = document.getElementById('statActive');
-                    var statInactive = document.getElementById('statInactive');
-
-                    if (statTotal) statTotal.textContent = employees.length;
-
-                    var activeCount = employees.filter(function (e) {
-                        return ((e.workState || e.WorkState) || '').toLowerCase() === 'active';
-                    }).length;
-
-                    if (statActive) statActive.textContent = activeCount;
-                    if (statInactive) statInactive.textContent = employees.length - activeCount;
-
-                    revealEmployeeContent();
-                    if (typeof filterRows === 'function') filterRows();
-                })
-                .catch(function () {
-                    clearTimeout(fallbackTimer);
-                    skeleton.classList.add('hidden');
-                    content.classList.remove('hidden');
-                    host.setAttribute('aria-busy', 'false');
-                    if (placeholder) {
-                        placeholder.classList.remove('hidden');
-                        var emptyTd = placeholder.querySelector('td');
-                        if (emptyTd) emptyTd.innerHTML = 'Unable to load employees. Please refresh the page.';
-                    }
-                });
+            if (hasRevealed) return;
+            hasRevealed = true;
+            if (typeof filterRows === 'function') filterRows();
+            revealEmployeeContent();
         }
-
-        onDataReady();
 
         function getRows() { return employeeRowsCache; }
         function getSelectedEmpIds() {
@@ -1037,7 +1014,7 @@
             });
         }
 
-        filterRows();
+        onDataReady();
     })();
 </script>
 

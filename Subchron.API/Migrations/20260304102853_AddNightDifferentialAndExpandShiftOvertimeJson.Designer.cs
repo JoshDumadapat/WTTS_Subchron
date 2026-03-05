@@ -12,8 +12,8 @@ using Subchron.API.Data;
 namespace Subchron.API.Migrations
 {
     [DbContext(typeof(SubchronDbContext))]
-    [Migration("20260228195207_AddOrganizationProfiles")]
-    partial class AddOrganizationProfiles
+    [Migration("20260304102853_AddNightDifferentialAndExpandShiftOvertimeJson")]
+    partial class AddNightDifferentialAndExpandShiftOvertimeJson
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -501,6 +501,12 @@ namespace Subchron.API.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("AutoClockOutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("AutoClockOutMaxHours")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -514,14 +520,26 @@ namespace Subchron.API.Migrations
                     b.Property<int>("DefaultGraceMinutes")
                         .HasColumnType("int");
 
+                    b.Property<string>("DefaultShiftTemplateCode")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<bool>("EnforceGeofence")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("LeaveApprovalRequired")
-                        .HasColumnType("bit");
+                    b.Property<int>("LeaveBalanceResetRule")
+                        .HasColumnType("int");
 
-                    b.Property<bool>("LeaveEnabled")
-                        .HasColumnType("bit");
+                    b.Property<int>("LeaveFiscalYearStart")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("LeaveProratedForNewHires")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NightDifferentialSettingsJson")
+                        .HasColumnType("NVARCHAR(MAX)");
 
                     b.Property<bool>("OTApprovalRequired")
                         .HasColumnType("bit");
@@ -535,13 +553,25 @@ namespace Subchron.API.Migrations
                     b.Property<decimal>("OTThresholdHours")
                         .HasColumnType("decimal(6,2)");
 
+                    b.Property<string>("OvertimeSettingsJson")
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<bool>("PreventDoubleClockIn")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("RequireGeo")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RestrictByIp")
                         .HasColumnType("bit");
 
                     b.Property<string>("RoundRule")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ShiftTemplatesJson")
+                        .HasColumnType("NVARCHAR(MAX)");
 
                     b.Property<string>("Timezone")
                         .IsRequired()

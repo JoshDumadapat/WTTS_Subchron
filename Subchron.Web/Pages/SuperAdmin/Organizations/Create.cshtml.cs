@@ -105,8 +105,6 @@ OTEnabled = false,
         OTThresholdHours = 0,
                OTApprovalRequired = true,
           OTMaxHoursPerDay = 0,
-       LeaveEnabled = true,
-LeaveApprovalRequired = true,
       CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
      };

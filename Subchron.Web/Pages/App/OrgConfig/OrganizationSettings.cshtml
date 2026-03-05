@@ -35,10 +35,10 @@
     </div>
 
     <!-- Card container: LEFT tabs + RIGHT content -->
-    <div class="flex min-h-[600px] flex-col overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-lg sm:flex-row dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex min-h-[620px] flex-col overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-lg sm:flex-row dark:border-slate-700 dark:bg-slate-800 lg:min-h-[calc(100vh-180px)]">
 
         <!-- LEFT: NAV (tabs) -->
-        <aside class="order-1 hidden flex-shrink-0 border-b border-slate-200 bg-slate-100 sm:block sm:w-52 sm:border-r sm:border-b-0 dark:border-slate-700 dark:bg-slate-900/40">
+        <aside class="order-1 hidden flex-shrink-0 border-b border-slate-200 bg-slate-100 sm:block sm:w-56 sm:border-r sm:border-b-0 dark:border-slate-700 dark:bg-slate-900/40">
             <nav class="space-y-1 p-4">
 
                 <button onclick="switchTab('tab-profile')" id="nav-profile"
@@ -94,7 +94,8 @@
         </aside>
 
         <!-- RIGHT: CONTENT -->
-        <main class="order-2 flex-1 overflow-y-auto bg-slate-50 p-6 dark:bg-slate-800">
+        <main class="order-2 flex-1 overflow-hidden bg-slate-50 dark:bg-slate-800">
+            <div class="h-full overflow-y-auto p-6" id="org-settings-scroll">
 
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabProfile.cshtml" />
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabAttendance.cshtml" />
@@ -102,7 +103,7 @@
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabShifts.cshtml" />
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabLeave.cshtml" />
             <partial name="~/Pages/App/OrgConfig/Partials/_OrgTabPay.cshtml" />
-
+            </div>
         </main>
     </div>
 </div>
@@ -129,6 +130,9 @@
             if (tabEl) tabEl.classList.remove('hidden');
             // So the map can reflow when Locations tab is shown (was hidden = wrong size)
             if (tabId === 'tab-locations') tabEl.dispatchEvent(new CustomEvent('org-locations-tab-shown'));
+
+            // Reset scroll position to top when switching tabs
+            document.getElementById('org-settings-scroll').scrollTop = 0;
 
             // --- Update Desktop Sidebar (local page nav) ---
             document.querySelectorAll('.nav-item').forEach(btn => {
@@ -182,6 +186,8 @@
             const hash = (window.location.hash || "").replace("#", "");
             if (hash && document.getElementById(hash)) {
                 switchTab(hash);
+                // Reset scroll position to top - browser auto-scrolls to hash element by default
+                document.getElementById('org-settings-scroll').scrollTop = 0;
             } else {
                 switchTab("tab-profile");
             }

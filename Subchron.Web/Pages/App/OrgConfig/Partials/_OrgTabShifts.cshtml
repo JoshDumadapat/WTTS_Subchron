@@ -16,7 +16,7 @@
     <div class="flex-1 overflow-y-auto p-8">
         <div class="space-y-6">
 
-            @* ── SHIFT TEMPLATE CARDS LIST (shown above OT Rules) ── *@
+            @* ── SHIFT TEMPLATE CARDS LIST ── *@
             <div id="shiftsList" class="space-y-4">
 
                 @* Sample: Regular Day Shift (Fixed) *@
@@ -152,204 +152,10 @@
                 </div>
 
             </div>
-
-            @* ── OVERTIME RULES ───────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center gap-3 border-b border-slate-300 bg-slate-100/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/30">
-                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Overtime Rules</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Configure when OT counts, how it's approved, rounded, and limited across day types.</p>
-                    </div>
-                </div>
-                <div class="divide-y divide-slate-200 dark:divide-gray-700">
-
-                    @* 1) OT Eligibility *@
-                    <div class="px-6 py-5">
-                        <div class="mb-3 flex items-center gap-2">
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">1</span>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">OT Eligibility</h4>
-                        </div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">OT Enabled</p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">Allow overtime tracking</p>
-                                </div>
-                                <select id="ot-enabled" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
-                                    <option value="on">On</option>
-                                    <option value="off">Off</option>
-                                </select>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Min Hours Before OT</p>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" id="ot-min-hours" min="0" max="24" step="0.5" value="8" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
-                                    <span class="text-xs text-gray-400">hrs / day</span>
-                                </div>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">OT Basis</p>
-                                <select id="ot-basis" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                    <option value="after_shift_end">After scheduled shift end</option>
-                                    <option value="after_x_hours_day">After X total hours / day</option>
-                                    <option value="after_x_hours_week">After X total hours / week</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* 2) Approval Rules *@
-                    <div class="px-6 py-5">
-                        <div class="mb-3 flex items-center gap-2">
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">2</span>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Approval Rules</h4>
-                        </div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Pre-Approval</p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">Required before OT</p>
-                                </div>
-                                <select id="ot-preapproval" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
-                                    <option value="on">On</option>
-                                    <option value="off" selected>Off</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Post-Approval</p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">File OT after the fact</p>
-                                </div>
-                                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">Auto when Off</span>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Approver Role</p>
-                                <select id="ot-approver-role" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                    <option value="Supervisor">Supervisor</option>
-                                    <option value="Manager">Manager</option>
-                                    <option value="HR">HR</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Auto-Approve</p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">Skip workflow (small orgs)</p>
-                                </div>
-                                <select id="ot-auto-approve" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
-                                    <option value="on">On</option>
-                                    <option value="off" selected>Off</option>
-                                </select>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500">Tip: Small orgs can enable Auto-Approve to skip the approval workflow entirely.</p>
-                    </div>
-
-                    @* 3) Rounding Rules *@
-                    <div class="px-6 py-5">
-                        <div class="mb-3 flex items-center gap-2">
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">3</span>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Rounding Rules</h4>
-                        </div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Round OT Minutes To</p>
-                                <select id="ot-round-to" class="block w-full rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                    <option value="none">None</option>
-                                    <option value="5">5 mins</option>
-                                    <option value="15" selected>15 mins</option>
-                                    <option value="30">30 mins</option>
-                                </select>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Minimum OT Block</p>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" id="ot-min-block" min="0" max="120" value="30" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
-                                    <span class="text-xs text-gray-400">min — must reach this before counting</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* 4) Limits & Controls *@
-                    <div class="px-6 py-5">
-                        <div class="mb-3 flex items-center gap-2">
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">4</span>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Limits &amp; Controls</h4>
-                        </div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Max OT Per Day</p>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" id="ot-max-per-day" min="0" max="24" step="0.5" value="4" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
-                                    <span class="text-xs text-gray-400">hrs</span>
-                                </div>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <p class="mb-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">Max OT Per Week</p>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" id="ot-max-per-week" min="0" max="168" value="20" class="w-20 rounded-lg border-0 py-1.5 px-3 text-sm font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
-                                    <span class="text-xs text-gray-400">hrs</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div>
-                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Hard Stop</p>
-                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">Block clock-in beyond max shift</p>
-                                </div>
-                                <select id="ot-hard-stop" class="rounded-lg border-0 bg-slate-100 py-1.5 px-3 text-xs font-medium ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-400 dark:bg-gray-800 dark:ring-gray-600 dark:text-white">
-                                    <option value="on">On</option>
-                                    <option value="off">Off</option>
-                                </select>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500">Hard stop prevents abuse — employees cannot clock in beyond the configured maximum shift length.</p>
-                    </div>
-
-                    @* 5) Day Type Behavior (optional) *@
-                    <div class="px-6 py-5">
-                        <div class="mb-1 flex items-center gap-2">
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">5</span>
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Day Type Behavior <span class="ml-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:bg-gray-700 dark:text-gray-500">optional</span></h4>
-                        </div>
-                        <p class="mb-3 text-[10px] text-gray-400 dark:text-gray-500">OT hours are tracked per day type. Pay rates are configured separately in Pay Configuration.</p>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div class="mb-1 flex items-center gap-1.5">
-                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Regular Day</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500">OT after scheduled end or threshold</p>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div class="mb-1 flex items-center gap-1.5">
-                                    <span class="h-2 w-2 rounded-full bg-blue-400"></span>
-                                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Rest Day</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500">Tracked in a separate OT bucket</p>
-                            </div>
-                            <div class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700/40">
-                                <div class="mb-1 flex items-center gap-1.5">
-                                    <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-                                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Holiday</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500">Tracked in a separate OT bucket</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
         </div>
     </div>
 
 </div>
-
 @* ─── DELETE SHIFT CONFIRMATION MODAL ─── *@
 <div id="deleteShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
     <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
@@ -834,7 +640,6 @@
                 </div>
             </div>`;
 
-        // Insert before the OT rules card (first non-shiftsList child of the container)
         const list = document.getElementById('shiftsList');
         list.appendChild(card);
         document.getElementById('shiftName').value = '';
@@ -996,13 +801,16 @@
         closeEditShiftModal();
     }
 
-    document.getElementById('addShiftModal').addEventListener('click', function(e) {
-        if (e.target === this) closeAddShiftModal();
-    });
-    document.getElementById('deleteShiftModal').addEventListener('click', function(e) {
-        if (e.target === this) closeDeleteShiftModal();
-    });
-    document.getElementById('editShiftModal').addEventListener('click', function(e) {
-        if (e.target === this) closeEditShiftModal();
+    [
+        { id: 'addShiftModal', handler: closeAddShiftModal },
+        { id: 'deleteShiftModal', handler: closeDeleteShiftModal },
+        { id: 'editShiftModal', handler: closeEditShiftModal }
+    ].forEach(({ id, handler }) => {
+        const modalEl = document.getElementById(id);
+        if (!modalEl) return;
+        modalEl.addEventListener('click', function(e) {
+            if (e.target === this) handler();
+        });
     });
 </script>
+

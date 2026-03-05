@@ -10,11 +10,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Scan Station - Subchron</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { subgreen: { 500: '#28a84d', 600: '#209030' }, subblue: { 600: '#0060B0' } } } } };
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        subgreen: { 500: '#28a84d', 600: '#209030' },
+                        subblue: { 600: '#0060B0' }
+                    }
+                }
+            }
+        };
     </script>
+
     <script>
         (function () {
             var stored = localStorage.getItem('subchron-theme');
@@ -22,116 +35,640 @@
             document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
         })();
     </script>
+
     <style>
-        .kiosk-screen { display: none; }
-        .kiosk-screen.active { display: flex; }
-        #scanVideo { object-fit: cover; width: 100%; height: 100%; border-radius: 1rem; }
-        #scanCanvas { display: none; }
+        #htmlRoot, body {
+            height: 100%;
+        }
+
+        #htmlRoot {
+            overflow: hidden;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.35s ease-in forwards;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px) scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @@keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(6px) scale(0.99);
+            }
+        }
+
+        .qr-guide-path {
+            stroke-width: 1px;
+            fill: none;
+            stroke: white;
+            stroke-linecap: round;
+        }
+
+        /* scanline slower */
+        .scan-line {
+            position: absolute;
+            left: var(--scan-left, 10%);
+            right: var(--scan-right, 10%);
+            top: var(--scan-top, 12%);
+            height: 2px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.95);
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.55);
+            animation: scanSweep 2.6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+            .scan-line.paused {
+                animation-play-state: paused;
+                opacity: 0.25;
+            }
+
+        @@keyframes scanSweep {
+            0% {
+                transform: translateY(0);
+                opacity: 0.35;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            50% {
+                transform: translateY(var(--scan-range, 210px));
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 0.35;
+            }
+        }
+
+        .qr-focus {
+            position: absolute;
+            display: none;
+            pointer-events: none;
+            border-radius: 18px;
+            z-index: 35;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+            backdrop-filter: blur(1px);
+        }
+
+            .qr-focus.active {
+                display: block;
+            }
+
+        .qr-box {
+            position: absolute;
+            display: none;
+            pointer-events: none;
+            z-index: 40;
+            border-radius: 16px;
+            transform-origin: center;
+        }
+
+            .qr-box.active {
+                display: block;
+            }
+
+        .qr-corner {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-color: rgba(255,255,255,0.95);
+            border-style: solid;
+            border-width: 0;
+            filter: drop-shadow(0 0 10px rgba(16,185,129,0.25));
+        }
+
+            .qr-corner.tl {
+                left: 0;
+                top: 0;
+                border-left-width: 3px;
+                border-top-width: 3px;
+                border-top-left-radius: 10px;
+            }
+
+            .qr-corner.tr {
+                right: 0;
+                top: 0;
+                border-right-width: 3px;
+                border-top-width: 3px;
+                border-top-right-radius: 10px;
+            }
+
+            .qr-corner.bl {
+                left: 0;
+                bottom: 0;
+                border-left-width: 3px;
+                border-bottom-width: 3px;
+                border-bottom-left-radius: 10px;
+            }
+
+            .qr-corner.br {
+                right: 0;
+                bottom: 0;
+                border-right-width: 3px;
+                border-bottom-width: 3px;
+                border-bottom-right-radius: 10px;
+            }
+
+        .qr-box.capturing {
+            animation: capturePop 520ms cubic-bezier(.2,.9,.2,1) forwards;
+        }
+
+        @@keyframes capturePop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            60% {
+                transform: scale(1.09);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.02);
+                opacity: 1;
+            }
+        }
+
+        .qr-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            border: 1px solid rgba(16,185,129,0.35);
+            box-shadow: 0 0 30px rgba(16,185,129,0.22);
+            opacity: 0;
+        }
+
+        .qr-box.capturing .qr-glow {
+            animation: glowIn 520ms ease-out forwards;
+        }
+
+        @@keyframes glowIn {
+            0% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.65;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
-    <div class="flex min-h-screen flex-col items-center justify-center p-6">
-        <!-- SCAN SCREEN -->
-        <div id="screenScan" class="kiosk-screen active w-full max-w-md flex-col items-center text-center">
-            <p class="text-lg font-semibold text-slate-600 dark:text-slate-400" id="kioskSiteName">HQ Building</p>
-            <p class="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-white" id="kioskTime">--:--:--</p>
-            <p class="mt-6 text-xl font-semibold text-slate-800 dark:text-slate-200">Scan QR</p>
-            <div class="scan-area relative mt-4 h-56 w-full max-w-sm overflow-hidden rounded-2xl border-2 border-slate-300 bg-slate-900 dark:border-slate-600">
-                <video id="scanVideo" class="absolute inset-0 h-full w-full object-cover" autoplay playsinline muted></video>
-                <canvas id="scanCanvas"></canvas>
-                <div id="scanPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95 p-4 text-slate-400">
-                    <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                    <p class="text-center text-sm font-medium">Hold QR code or ID in front of camera</p>
-                    <button type="button" id="btnStartCamera" class="btn-primary px-6 py-3 text-base shadow-lg">
-                        Start camera
+
+<body class="bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-200">
+    <!-- IMPORTANT: each screen is full-height and centers its own content -->
+    <div id="kioskContainer" class="relative w-full overflow-hidden">
+        <!-- OFF SCREEN -->
+        <div id="screenOff" class="min-h-[100svh] w-full flex items-center justify-center p-4 text-center">
+            <div class="w-full max-w-md flex flex-col items-center justify-center">
+                <button id="powerButton" type="button"
+                        class="group flex h-44 w-44 flex-col items-center justify-center rounded-full border-4 border-slate-700 bg-slate-800 text-slate-500 transition-all duration-300 hover:border-emerald-500 hover:bg-emerald-950 hover:text-white hover:shadow-2xl hover:shadow-emerald-500/20">
+                    <svg class="h-16 w-16 transition-transform duration-300 group-hover:scale-110"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                    <span class="mt-2 text-base font-semibold">Power On</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- BOOTING SCREEN -->
+        <div id="screenBooting" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4 text-center">
+            <div class="w-full max-w-md flex flex-col items-center justify-center">
+                <img src="~/images/logo/logo.png" alt="Subchron Logo" class="h-24 w-auto" />
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Kiosk Interface v1.1</p>
+                <div class="mt-7 h-1.5 w-56 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                    <div id="bootProgress"
+                         class="h-full w-0 rounded-full bg-gradient-to-r from-subgreen-500 to-emerald-500 transition-all duration-[3000ms] ease-linear"></div>
+                </div>
+                <p class="mt-3 text-sm font-medium text-slate-600 dark:text-slate-400">Booting system...</p>
+            </div>
+        </div>
+
+        <!-- THEME SELECTION SCREEN -->
+        <div id="screenTheme" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4 text-center">
+            <div class="w-full max-w-lg flex flex-col items-center justify-center">
+                <h1 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Choose Your Theme</h1>
+                <p class="mt-1.5 text-base text-slate-600 dark:text-slate-400">Pick a visual mode for this kiosk.</p>
+
+                <div class="mt-7 grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
+                    <button data-theme="light"
+                            class="theme-btn group relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-md transition-all hover:-translate-y-0.5 hover:border-subgreen-500 hover:shadow-xl">
+                        <div class="absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+                             style="background: radial-gradient(circle at 30% 20%, rgba(40,168,77,0.12), transparent 55%);"></div>
+                        <div class="relative flex h-full flex-col justify-between">
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+                                    <svg class="h-6 w-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-semibold text-slate-800">Light Mode</div>
+                                    <div class="mt-1 text-sm text-slate-500">Bright and clear for well-lit areas.</div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-400">Recommended for daylight kiosks</div>
+                        </div>
                     </button>
-                    <p id="scanError" class="hidden text-center text-sm text-red-400"></p>
+
+                    <button data-theme="dark"
+                            class="theme-btn group relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-700 bg-slate-900/70 p-6 text-left shadow-md transition-all hover:-translate-y-0.5 hover:border-subgreen-500 hover:shadow-xl">
+                        <div class="absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+                             style="background: radial-gradient(circle at 30% 20%, rgba(40,168,77,0.14), transparent 55%);"></div>
+                        <div class="relative flex h-full flex-col justify-between">
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800">
+                                    <svg class="h-6 w-6 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-semibold text-slate-100">Dark Mode</div>
+                                    <div class="mt-1 text-sm text-slate-400">Comfortable for low-light environments.</div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-500">Recommended for night shifts</div>
+                        </div>
+                    </button>
                 </div>
-                <div id="scanLiveWrap" class="absolute bottom-2 right-2 hidden">
-                    <span class="rounded bg-black/60 px-2 py-1 text-xs text-white">Live</span>
-                </div>
+
+                <p class="mt-5 text-xs text-slate-500 dark:text-slate-500">Tip: Theme is saved on this device.</p>
             </div>
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">No camera? <button type="button" id="btnSimulateScan" class="text-subgreen-600 hover:underline dark:text-subgreen-400">Simulate QR scan</button></p>
-            @if (Model.IdEntryEnabled)
-            {
-                <p class="mt-6 text-xl font-semibold text-slate-800 dark:text-slate-200">Enter ID</p>
-                <div class="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row">
-                    <input type="text" id="employeeIdInput" placeholder="Employee ID" class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-lg text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500" />
-                    <button type="button" id="btnSubmitId" class="btn-primary px-6 py-3 text-lg">Submit</button>
-                </div>
-            }
         </div>
 
-        <!-- SUCCESS SCREEN (2–3 sec then auto reset) -->
-        <div id="screenSuccess" class="kiosk-screen w-full max-w-md flex-col items-center text-center">
-            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-subgreen-100 dark:bg-subgreen-900/40">
-                <svg class="h-12 w-12 text-subgreen-600 dark:text-subgreen-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+        <!-- SCAN SCREEN -->
+        <div id="screenScan" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4">
+            <div class="w-full max-w-md flex flex-col items-center text-center">
+                <div>
+                    <p class="text-lg font-semibold text-slate-600 dark:text-slate-400" id="kioskSiteName">HQ Main Entrance</p>
+                    <p class="mt-1 text-5xl font-bold tracking-tight text-slate-900 dark:text-white" id="kioskTime">--:--:--</p>
+                </div>
+
+                <div class="mt-7 flex w-full flex-col items-center">
+                    <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">Scan Team QR Code</h2>
+                    <p class="mt-1 text-sm text-slate-500">Hold your device up to the camera</p>
+
+                    <div id="scanBox" class="relative mt-4 h-72 w-72 overflow-hidden rounded-3xl bg-slate-800 shadow-2xl ring-2 ring-slate-200 dark:ring-slate-800">
+                        <video id="scanVideo" class="absolute inset-0 h-full w-full object-cover" autoplay playsinline muted></video>
+                        <canvas id="scanCanvas" class="hidden"></canvas>
+
+                        <div id="scanLine" class="scan-line hidden" aria-hidden="true"></div>
+
+                        <div id="qrFocus" class="qr-focus" aria-hidden="true"></div>
+                        <div id="qrBox" class="qr-box" aria-hidden="true">
+                            <div class="qr-glow"></div>
+                            <div class="qr-corner tl"></div>
+                            <div class="qr-corner tr"></div>
+                            <div class="qr-corner bl"></div>
+                            <div class="qr-corner br"></div>
+                        </div>
+
+                        <div class="pointer-events-none absolute inset-0 z-10">
+                            <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <path class="qr-guide-path"
+                                      d="M 30 10 L 18 10 C 13.581722 10 10 13.581722 10 18 L 10 30
+                                         M 70 10 L 82 10 C 86.418278 10 90 13.581722 90 18 L 90 30
+                                         M 30 90 L 18 90 C 13.581722 90 10 86.418278 10 82 L 10 70
+                                         M 70 90 L 82 90 C 86.418278 90 90 86.418278 90 82 L 90 70" />
+                            </svg>
+                        </div>
+
+                        <div id="scanPlaceholder" class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-slate-900/95 p-4 text-center text-slate-300">
+                            <svg class="h-14 w-14 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            </svg>
+                            <p class="text-sm font-semibold">Position QR code inside the guides</p>
+
+                            <button type="button" id="btnStartCamera"
+                                    class="mt-1 rounded-lg bg-subgreen-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg hover:bg-subgreen-500 focus:outline-none focus:ring-4 focus:ring-subgreen-500/50">
+                                Enable Camera
+                            </button>
+                            <p id="scanError" class="hidden text-xs text-red-400"></p>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 text-xs text-slate-500">
+                        Having trouble?
+                        <button type="button" id="btnSimulateScan" class="font-semibold text-subgreen-600 hover:underline dark:text-subgreen-500">
+                            Simulate a scan
+                        </button>
+                    </p>
+                </div>
+
+                @if (Model.IdEntryEnabled)
+                {
+                    <div class="my-7 w-full max-w-sm border-t border-slate-200 dark:border-slate-800"></div>
+
+                    <div class="flex w-full flex-col items-center">
+                        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">Or Enter ID Manually</h2>
+                        <p class="mt-1 text-sm text-slate-500">For staff without a QR code</p>
+
+                        <div class="mt-4 flex w-full max-w-xs flex-col gap-3 sm:flex-row">
+                            <input type="text" id="employeeIdInput" placeholder="e.g. 12345"
+                                   class="flex-1 rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-lg text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500" />
+                            <button type="button" id="btnSubmitId"
+                                    class="rounded-xl bg-subblue-600 px-7 py-3 text-base font-semibold text-white shadow-md transition hover:bg-subblue-700 focus:outline-none focus:ring-4 focus:ring-subblue-600/50">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                }
             </div>
-            <p class="mt-4 text-2xl font-bold text-subgreen-700 dark:text-subgreen-300">Success</p>
-            <p class="mt-1 text-slate-600 dark:text-slate-400" id="successMessage">Attendance recorded.</p>
         </div>
 
-        <!-- FAIL SCREEN (2–3 sec then auto reset) -->
-        <div id="screenFail" class="kiosk-screen w-full max-w-md flex-col items-center text-center">
-            <div class="flex h-24 w-24 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
-                <svg class="h-12 w-12 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        <!-- SUCCESS SCREEN -->
+        <div id="screenSuccess" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4 text-center">
+            <div class="w-full max-w-md flex flex-col items-center justify-center">
+                <div class="flex h-28 w-28 items-center justify-center rounded-full bg-subgreen-100 dark:bg-subgreen-900/40">
+                    <svg class="h-16 w-16 text-subgreen-600 dark:text-subgreen-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-subgreen-700 dark:text-subgreen-300">Success!</p>
+                <p class="mt-2 text-base text-slate-600 dark:text-slate-400" id="successMessage">Your attendance has been recorded.</p>
             </div>
-            <p class="mt-4 text-2xl font-bold text-red-700 dark:text-red-300">Failed</p>
-            <p class="mt-1 text-slate-600 dark:text-slate-400" id="failMessage">Invalid or expired. Try again.</p>
+        </div>
+
+        <!-- FAIL SCREEN -->
+        <div id="screenFail" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4 text-center">
+            <div class="w-full max-w-md flex flex-col items-center justify-center">
+                <div class="flex h-28 w-28 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                    <svg class="h-16 w-16 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+                <p class="mt-5 text-3xl font-bold text-red-700 dark:text-red-300">Scan Failed</p>
+                <p class="mt-2 text-base text-slate-600 dark:text-slate-400" id="failMessage">Invalid or expired code. Please try again.</p>
+            </div>
         </div>
     </div>
 
     <script>
         (function () {
+            var screenOff = document.getElementById('screenOff');
+            var screenBooting = document.getElementById('screenBooting');
+            var screenTheme = document.getElementById('screenTheme');
             var screenScan = document.getElementById('screenScan');
             var screenSuccess = document.getElementById('screenSuccess');
             var screenFail = document.getElementById('screenFail');
+
+            var powerButton = document.getElementById('powerButton');
+            var bootProgress = document.getElementById('bootProgress');
+            var themeButtons = document.querySelectorAll('.theme-btn');
+
             var kioskTime = document.getElementById('kioskTime');
             var btnSimulateScan = document.getElementById('btnSimulateScan');
             var btnSubmitId = document.getElementById('btnSubmitId');
             var employeeIdInput = document.getElementById('employeeIdInput');
+
+            var scanBox = document.getElementById('scanBox');
             var scanVideo = document.getElementById('scanVideo');
             var scanCanvas = document.getElementById('scanCanvas');
             var scanPlaceholder = document.getElementById('scanPlaceholder');
             var scanError = document.getElementById('scanError');
-            var scanLiveWrap = document.getElementById('scanLiveWrap');
             var btnStartCamera = document.getElementById('btnStartCamera');
-            var RESET_MS = 2500;
-            var COOLDOWN_MS = 2000;
+
+            var scanLine = document.getElementById('scanLine');
+            var qrFocus = document.getElementById('qrFocus');
+            var qrBox = document.getElementById('qrBox');
+
+            var RESET_MS = 3000;
+            var COOLDOWN_MS = 1200;
+            var CAPTURE_ANIM_MS = 750;
             var stream = null;
             var scanCooldownUntil = 0;
             var rafId = null;
+            var isCapturing = false;
+
+            var allScreens = [screenOff, screenBooting, screenTheme, screenScan, screenSuccess, screenFail].filter(Boolean);
 
             function showScreen(el) {
-                [screenScan, screenSuccess, screenFail].forEach(function (s) { if (s) s.classList.remove('active'); });
-                if (el) el.classList.add('active');
+                allScreens.forEach(function (s) {
+                    s.classList.add('hidden');
+                    s.classList.remove('fade-in', 'fade-out');
+                });
+                if (!el) return;
+                el.classList.remove('hidden');
+                el.classList.add('fade-in');
             }
+
+            function hideScreen(el, callback) {
+                if (!el) { callback && callback(); return; }
+                el.classList.remove('fade-in');
+                el.classList.add('fade-out');
+                setTimeout(function () {
+                    el.classList.add('hidden');
+                    el.classList.remove('fade-out');
+                    callback && callback();
+                }, 350);
+            }
+
+            function bootUp() {
+                showScreen(screenBooting);
+                setTimeout(function () { if (bootProgress) bootProgress.style.width = '100%'; }, 80);
+
+                setTimeout(function () {
+                    hideScreen(screenBooting, function () {
+                        showScreen(screenTheme);
+                    });
+                }, 3200);
+            }
+
+            powerButton && powerButton.addEventListener('click', function () {
+                hideScreen(screenOff, function () {
+                    document.documentElement.classList.add('dark');
+                    bootUp();
+                });
+            });
+
+            themeButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var theme = btn.getAttribute('data-theme');
+                    document.documentElement.classList.toggle('dark', theme === 'dark');
+                    try { localStorage.setItem('subchron-theme', theme); } catch (e) { }
+
+                    hideScreen(screenTheme, function () {
+                        showScreen(screenScan);
+                        startCamera();
+                        updateTime();
+                        setInterval(updateTime, 1000);
+                    });
+                });
+            });
 
             function showSuccess(msg) {
                 var m = document.getElementById('successMessage');
-                if (m) m.textContent = msg || 'Attendance recorded.';
+                if (m) m.textContent = msg || 'Your attendance has been recorded.';
                 showScreen(screenSuccess);
                 setTimeout(function () { showScreen(screenScan); }, RESET_MS);
             }
 
             function showFail(msg) {
                 var m = document.getElementById('failMessage');
-                if (m) m.textContent = msg || 'Invalid or expired. Try again.';
+                if (m) m.textContent = msg || 'Invalid or expired code. Please try again.';
                 showScreen(screenFail);
                 setTimeout(function () { showScreen(screenScan); }, RESET_MS);
             }
 
             function updateTime() {
-                if (kioskTime) kioskTime.textContent = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                if (kioskTime) kioskTime.textContent =
+                    new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             }
-            updateTime();
-            setInterval(updateTime, 1000);
 
             function setScanError(msg) {
-                if (scanError) {
-                    scanError.textContent = msg || '';
-                    scanError.classList.toggle('hidden', !msg);
+                if (!scanError) return;
+                scanError.textContent = msg || '';
+                scanError.classList.toggle('hidden', !msg);
+            }
+
+            function resetCaptureOverlay() {
+                isCapturing = false;
+
+                if (qrFocus) qrFocus.classList.remove('active');
+                if (qrBox) {
+                    qrBox.classList.remove('active', 'capturing');
+                    qrBox.style.left = qrBox.style.top = qrBox.style.width = qrBox.style.height = '';
                 }
+
+                if (scanLine) {
+                    scanLine.classList.remove('paused');
+                    scanLine.style.removeProperty('--scan-left');
+                    scanLine.style.removeProperty('--scan-right');
+                    scanLine.style.removeProperty('--scan-top');
+                    scanLine.style.removeProperty('--scan-range');
+                }
+            }
+
+            function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+            function mapPointToBox(px, py, videoW, videoH) {
+                if (!scanBox) return { x: px, y: py };
+                var rect = scanBox.getBoundingClientRect();
+                var cw = rect.width, ch = rect.height;
+
+                var scale = Math.max(cw / videoW, ch / videoH);
+                var displayW = videoW * scale;
+                var displayH = videoH * scale;
+                var offsetX = (cw - displayW) / 2;
+                var offsetY = (ch - displayH) / 2;
+
+                return { x: px * scale + offsetX, y: py * scale + offsetY };
+            }
+
+            function runCaptureAnimation(code) {
+                if (!code || !code.location || !scanVideo || !scanCanvas || !scanBox) return;
+
+                isCapturing = true;
+
+                var w = scanVideo.videoWidth;
+                var h = scanVideo.videoHeight;
+                if (!w || !h) { isCapturing = false; return; }
+
+                var pts = [
+                    code.location.topLeftCorner,
+                    code.location.topRightCorner,
+                    code.location.bottomRightCorner,
+                    code.location.bottomLeftCorner
+                ].filter(Boolean);
+
+                if (pts.length < 4) { isCapturing = false; return; }
+
+                var mapped = pts.map(function (p) { return mapPointToBox(p.x, p.y, w, h); });
+                var xs = mapped.map(function (p) { return p.x; });
+                var ys = mapped.map(function (p) { return p.y; });
+
+                var minX = Math.min.apply(null, xs);
+                var maxX = Math.max.apply(null, xs);
+                var minY = Math.min.apply(null, ys);
+                var maxY = Math.max.apply(null, ys);
+
+                var pad = 10;
+                minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+
+                var rect = scanBox.getBoundingClientRect();
+                minX = clamp(minX, 8, rect.width - 8);
+                maxX = clamp(maxX, 8, rect.width - 8);
+                minY = clamp(minY, 8, rect.height - 8);
+                maxY = clamp(maxY, 8, rect.height - 8);
+
+                var boxW = Math.max(40, maxX - minX);
+                var boxH = Math.max(40, maxY - minY);
+
+                if (qrFocus) {
+                    qrFocus.style.left = minX + 'px';
+                    qrFocus.style.top = minY + 'px';
+                    qrFocus.style.width = boxW + 'px';
+                    qrFocus.style.height = boxH + 'px';
+                    qrFocus.classList.add('active');
+                }
+
+                if (qrBox) {
+                    qrBox.style.left = minX + 'px';
+                    qrBox.style.top = minY + 'px';
+                    qrBox.style.width = boxW + 'px';
+                    qrBox.style.height = boxH + 'px';
+                    qrBox.classList.add('active');
+                    void qrBox.offsetWidth;
+                    qrBox.classList.add('capturing');
+                }
+
+                if (scanLine) {
+                    scanLine.classList.remove('hidden');
+                    scanLine.classList.add('paused');
+
+                    var inset = 8;
+                    scanLine.style.setProperty('--scan-left', (minX + inset) + 'px');
+                    scanLine.style.setProperty('--scan-right', (rect.width - (minX + boxW - inset)) + 'px');
+                    scanLine.style.setProperty('--scan-top', (minY + inset) + 'px');
+                    scanLine.style.setProperty('--scan-range', Math.max(18, boxH - inset * 2 - 2) + 'px');
+
+                    setTimeout(function () { scanLine.classList.remove('paused'); }, 60);
+                }
+
+                setTimeout(function () {
+                    var data = (code.data || '').trim();
+                    showSuccess('Success! Scanned: ' + data.substring(0, 20) + (data.length > 20 ? '...' : ''));
+                    setTimeout(resetCaptureOverlay, 250);
+                }, CAPTURE_ANIM_MS);
             }
 
             function tick() {
@@ -143,80 +680,120 @@
                     rafId = requestAnimationFrame(tick);
                     return;
                 }
+                if (isCapturing) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+
                 var now = Date.now();
                 if (now < scanCooldownUntil) {
                     rafId = requestAnimationFrame(tick);
                     return;
                 }
+
                 var w = scanVideo.videoWidth;
                 var h = scanVideo.videoHeight;
                 if (!w || !h) {
                     rafId = requestAnimationFrame(tick);
                     return;
                 }
+
                 scanCanvas.width = w;
                 scanCanvas.height = h;
+
                 var ctx = scanCanvas.getContext('2d');
                 if (!ctx) {
                     rafId = requestAnimationFrame(tick);
                     return;
                 }
-                ctx.drawImage(scanVideo, 0, 0);
+
+                ctx.drawImage(scanVideo, 0, 0, w, h);
+
                 var imageData = ctx.getImageData(0, 0, w, h);
                 var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+
                 if (code && code.data) {
                     scanCooldownUntil = now + COOLDOWN_MS;
-                    var data = (code.data || '').trim();
-                    showSuccess(data.length > 40 ? 'Attendance recorded.' : 'Scanned: ' + data);
+                    runCaptureAnimation(code);
                 }
+
                 rafId = requestAnimationFrame(tick);
             }
 
             function startCamera() {
                 if (stream) return;
                 setScanError('');
+
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     setScanError('Camera not supported in this browser.');
                     return;
                 }
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+                })
                     .then(function (s) {
                         stream = s;
                         if (scanVideo) scanVideo.srcObject = stream;
+
                         if (scanPlaceholder) scanPlaceholder.classList.add('hidden');
-                        if (scanLiveWrap) scanLiveWrap.classList.remove('hidden');
+
+                        if (scanLine) scanLine.classList.remove('hidden');
+
+                        resetCaptureOverlay();
+
                         if (rafId != null) cancelAnimationFrame(rafId);
                         rafId = requestAnimationFrame(tick);
                     })
                     .catch(function (err) {
-                        var msg = err.name === 'NotAllowedError' ? 'Camera permission denied.' : (err.message || 'Could not start camera.');
+                        console.error(err);
+                        var msg = (err && err.name === 'NotAllowedError')
+                            ? 'Camera permission has been denied.'
+                            : ((err && err.message) || 'Could not start the camera.');
                         setScanError(msg);
+
+                        if (scanLine) scanLine.classList.add('hidden');
+                        resetCaptureOverlay();
                     });
             }
 
-            if (btnStartCamera) btnStartCamera.addEventListener('click', startCamera);
-            if (btnSimulateScan) btnSimulateScan.addEventListener('click', function () { showSuccess('Attendance recorded.'); });
+            btnStartCamera && btnStartCamera.addEventListener('click', startCamera);
+
+            btnSimulateScan && btnSimulateScan.addEventListener('click', function () {
+                if (!scanVideo || !scanBox) {
+                    showSuccess('Simulated scan successful.');
+                    return;
+                }
+
+                var fake = {
+                    data: 'SIMULATED-QR-CODE-12345',
+                    location: {
+                        topLeftCorner: { x: scanVideo.videoWidth * 0.33, y: scanVideo.videoHeight * 0.33 },
+                        topRightCorner: { x: scanVideo.videoWidth * 0.67, y: scanVideo.videoHeight * 0.33 },
+                        bottomRightCorner: { x: scanVideo.videoWidth * 0.67, y: scanVideo.videoHeight * 0.67 },
+                        bottomLeftCorner: { x: scanVideo.videoWidth * 0.33, y: scanVideo.videoHeight * 0.67 }
+                    }
+                };
+                runCaptureAnimation(fake);
+            });
+
             if (btnSubmitId && employeeIdInput) {
                 btnSubmitId.addEventListener('click', function () {
                     var id = (employeeIdInput.value || '').trim();
                     if (!id) return;
+
                     if (id === '0' || id.toLowerCase() === 'fail') showFail('Invalid or expired. Try again.');
                     else showSuccess('Attendance recorded for ID ' + id);
+
                     employeeIdInput.value = '';
                 });
-                employeeIdInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') btnSubmitId.click(); });
-            }
 
-            if (scanVideo) {
-                scanVideo.addEventListener('loadedmetadata', function () {
-                    if (scanCanvas && scanVideo.videoWidth) {
-                        scanCanvas.width = scanVideo.videoWidth;
-                        scanCanvas.height = scanVideo.videoHeight;
-                    }
+                employeeIdInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') btnSubmitId.click();
                 });
             }
 
-            startCamera();
+            showScreen(screenOff);
         })();
     </script>
 </body>

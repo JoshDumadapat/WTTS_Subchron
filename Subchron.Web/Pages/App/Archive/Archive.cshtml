@@ -7,49 +7,45 @@
 }
 
 <div class="mx-auto">
+
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Archive</h1>
         </div>
-        <div>
-            <a asp-page="/App/Employee/EmployeeManagement" class="btn-secondary">
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                Back to Employees
-            </a>
-        </div>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <!-- Stats: same layout as Employee -->
-        <div class="grid grid-cols-2 border-b border-slate-100 lg:grid-cols-4 dark:border-slate-800">
-            <div class="flex flex-col justify-center border-r border-slate-100 p-4 last:border-r-0 dark:border-slate-800 lg:col-span-4">
+    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
+        <!-- Stats: match employee layout -->
+        <div class="grid grid-cols-2 divide-y divide-slate-300 border-b border-slate-300 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700 dark:border-slate-700">
+            <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total archived</p>
-                <p class="mt-0.5 text-right text-lg font-semibold text-slate-900 dark:text-white" id="archiveStatTotal">@Model.ArchivedEmployees.Count</p>
+                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-900 dark:text-white" id="archiveStatTotal">@Model.ArchivedEmployees.Count</p>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+        <!-- Filters: match employee style -->
+        <div class="p-5">
+            <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </span>
-                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search by name or email..." />
+                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-300 bg-white pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search by name or email..." />
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All reasons</option>
                         <option value="Resignation">Resignation</option>
                         <option value="End of Contract">End of Contract</option>
                         <option value="Redundancy">Redundancy</option>
                         <option value="Other">Other</option>
                     </select>
-                    <select id="archiveFilterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                        <option value="">All status</option>
-                        <option value="Archived">Archived</option>
-                    </select>
-                    <button type="button" id="archiveResetFilters" class="btn-secondary h-10 text-xs font-medium uppercase tracking-wider">Reset</button>
+                    <button type="button" id="archiveResetFilters" class="h-10 rounded-xl border border-slate-300 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
+                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset
+                    </button>
                 </div>
             </div>
         </div>
@@ -57,17 +53,16 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                    <tr class="border-y border-slate-300 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Team Member</th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Role</th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Department</th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Archived date</th>
                         <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="archiveTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody id="archiveTableBody" class="divide-y divide-slate-300 dark:divide-slate-700 text-sm">
                     @{
                         var initials = (string? fn, string? ln) =>
                         {
@@ -102,29 +97,46 @@
                             <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@emp.Role</td>
                             <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.DepartmentName ?? "—")</td>
                             <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.ArchivedReason ?? "—")</td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Archived</td>
                             <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">@archivedDate</td>
                             <td class="px-5 py-3 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <button type="button" onclick="openArchiveViewModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button>
-                                    <button type="button" onclick="openRestoreModal(this)" class="btn-primary px-2 py-1 text-xs gap-1"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore</button>
+                                <div class="flex justify-end gap-1 flex-wrap">
+                                    <a asp-page="/App/Employee/EmployeeManagement" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                        Back to Employee
+                                    </a>
+                                    <button type="button" onclick="openArchiveViewModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View
+                                    </button>
+                                    <button type="button" onclick="openRestoreModal(this)" class="btn-primary px-2 py-1 text-xs gap-1">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     }
+                    <tr id="archiveEmpty" class="hidden">
+                        <td colspan="6" class="px-5 py-12 text-center">
+                            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                                <svg class="h-7 w-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                            </div>
+                            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">No archived employees</h3>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Archived employees will appear here. Use the status badge on the Employee Management page to archive someone.</p>
+                            <a asp-page="/App/Employee/EmployeeManagement" class="btn-primary mt-4">Go to Employees</a>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="archivePaginationShowing">2</span> of <span id="archivePaginationTotal">2</span>
+        <!-- Pagination: match employee style -->
+        <div class="flex flex-col gap-4 border-t border-slate-300 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Showing <span class="font-semibold text-slate-900 dark:text-white" id="archivePaginationShowing">0</span> of <span id="archivePaginationTotal" class="font-semibold text-slate-900 dark:text-white">0</span>
                 </span>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">Rows</span>
-                    <select id="archiveRowsPerPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
+                    <select id="archiveRowsPerPage" class="hidden h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="20">20</option>
@@ -132,14 +144,22 @@
                     </select>
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-2">
-                <button type="button" id="archivePaginationPrev" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <div class="flex items-center gap-1" id="archivePaginationNumbers"></div>
-                <button type="button" id="archivePaginationNext" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
+            <div class="flex items-center justify-center gap-0 sm:justify-end">
+                <nav class="isolate inline-flex -space-x-px rounded-lg shadow-md" aria-label="Pagination">
+                    <button type="button" id="archivePaginationPrev" class="inline-flex items-center rounded-l-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="archivePaginationNumbers" class="inline-flex -space-x-px text-sm"></div>
+                    <button type="button" id="archivePaginationNext" class="inline-flex items-center rounded-r-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </nav>
             </div>
         </div>
     </div>
@@ -238,14 +258,6 @@
         </div>
     </div>
 
-    <div id="archiveEmpty" class="hidden rounded-2xl border border-slate-200 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-            <svg class="h-7 w-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-        </div>
-        <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">No archived employees</h3>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Archived employees will appear here. Use the status badge on the Employee Management page to archive someone.</p>
-        <a asp-page="/App/Employee/EmployeeManagement" class="btn-primary mt-4">Go to Employees</a>
-    </div>
 </div>
 
 @section Scripts {
@@ -308,7 +320,6 @@
                 document.getElementById('archivePaginationPrev').disabled = currentPage <= 1;
                 document.getElementById('archivePaginationNext').disabled = currentPage >= totalPages;
                 if (table && empty) {
-                    table.closest('.overflow-x-auto').style.display = visible.length ? '' : 'none';
                     empty.classList.toggle('hidden', visible.length > 0);
                 }
             }

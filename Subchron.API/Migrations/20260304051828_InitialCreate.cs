@@ -109,6 +109,66 @@ namespace Subchron.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DeductionRules",
+                columns: table => new
+                {
+                    DeductionRuleID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrgID = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DeductionType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(10,4)", nullable: true),
+                    FormulaExpression = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    HasEmployerShare = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    HasEmployeeShare = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    EmployerSharePercent = table.Column<decimal>(type: "decimal(6,4)", nullable: true),
+                    EmployeeSharePercent = table.Column<decimal>(type: "decimal(6,4)", nullable: true),
+                    AutoCompute = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeductionRules", x => x.DeductionRuleID);
+                    table.ForeignKey(
+                        name: "FK_DeductionRules_Organizations_OrgID",
+                        column: x => x.OrgID,
+                        principalTable: "Organizations",
+                        principalColumn: "OrgID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EarningRules",
+                columns: table => new
+                {
+                    EarningRuleID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrgID = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    AppliesTo = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    RateType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RateValue = table.Column<decimal>(type: "decimal(10,4)", nullable: false),
+                    IsTaxable = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    IncludeInBenefitBase = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    RequiresApproval = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EarningRules", x => x.EarningRuleID);
+                    table.ForeignKey(
+                        name: "FK_EarningRules_Organizations_OrgID",
+                        column: x => x.OrgID,
+                        principalTable: "Organizations",
+                        principalColumn: "OrgID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrganizationPaymentMethods",
                 columns: table => new
                 {
@@ -135,6 +195,34 @@ namespace Subchron.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrganizationProfiles",
+                columns: table => new
+                {
+                    OrgID = table.Column<int>(type: "int", nullable: false),
+                    LogoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    AddressLine1 = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    AddressLine2 = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    City = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    StateProvince = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    PostalCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Country = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    ContactEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ContactPhone = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrganizationProfiles", x => x.OrgID);
+                    table.ForeignKey(
+                        name: "FK_OrganizationProfiles_Organizations_OrgID",
+                        column: x => x.OrgID,
+                        principalTable: "Organizations",
+                        principalColumn: "OrgID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrganizationSettings",
                 columns: table => new
                 {
@@ -145,14 +233,22 @@ namespace Subchron.API.Migrations
                     AllowManualEntry = table.Column<bool>(type: "bit", nullable: false),
                     RequireGeo = table.Column<bool>(type: "bit", nullable: false),
                     EnforceGeofence = table.Column<bool>(type: "bit", nullable: false),
+                    RestrictByIp = table.Column<bool>(type: "bit", nullable: false),
+                    PreventDoubleClockIn = table.Column<bool>(type: "bit", nullable: false),
                     DefaultGraceMinutes = table.Column<int>(type: "int", nullable: false),
                     RoundRule = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    AutoClockOutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AutoClockOutMaxHours = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    DefaultShiftTemplateCode = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: true),
+                    ShiftTemplatesJson = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
+                    OvertimeSettingsJson = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
                     OTEnabled = table.Column<bool>(type: "bit", nullable: false),
                     OTThresholdHours = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     OTApprovalRequired = table.Column<bool>(type: "bit", nullable: false),
                     OTMaxHoursPerDay = table.Column<decimal>(type: "decimal(6,2)", nullable: true),
-                    LeaveEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LeaveApprovalRequired = table.Column<bool>(type: "bit", nullable: false),
+                    LeaveFiscalYearStart = table.Column<int>(type: "int", nullable: false),
+                    LeaveBalanceResetRule = table.Column<int>(type: "int", nullable: false),
+                    LeaveProratedForNewHires = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSUTCDATETIME()")
                 },
@@ -397,8 +493,18 @@ namespace Subchron.API.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DeductionRules_OrgID",
+                table: "DeductionRules",
+                column: "OrgID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DemoRequests_OrgID",
                 table: "DemoRequests",
+                column: "OrgID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EarningRules_OrgID",
+                table: "EarningRules",
                 column: "OrgID");
 
             migrationBuilder.CreateIndex(
@@ -509,13 +615,22 @@ namespace Subchron.API.Migrations
                 name: "BillingRecords");
 
             migrationBuilder.DropTable(
+                name: "DeductionRules");
+
+            migrationBuilder.DropTable(
                 name: "DemoRequests");
+
+            migrationBuilder.DropTable(
+                name: "EarningRules");
 
             migrationBuilder.DropTable(
                 name: "EmailVerificationCodes");
 
             migrationBuilder.DropTable(
                 name: "OrganizationPaymentMethods");
+
+            migrationBuilder.DropTable(
+                name: "OrganizationProfiles");
 
             migrationBuilder.DropTable(
                 name: "OrganizationSettings");

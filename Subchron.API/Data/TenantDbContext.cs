@@ -179,6 +179,13 @@ public class TenantDbContext : DbContext
             e.Property(x => x.DefaultDaysPerYear).HasColumnType("decimal(5,2)");
             e.Property(x => x.IsPaid).HasDefaultValue(true);
             e.Property(x => x.IsActive).HasDefaultValue(true);
+            e.Property(x => x.AccrualType).HasConversion<int>().HasColumnType("int").IsRequired();
+            e.Property(x => x.CarryOverType).HasConversion<int>().HasColumnType("int").IsRequired();
+            e.Property(x => x.CarryOverMaxDays);
+            e.Property(x => x.AppliesTo).HasConversion<int>().HasColumnType("int").IsRequired();
+            e.Property(x => x.RequireApproval).HasDefaultValue(true);
+            e.Property(x => x.RequireDocument).HasDefaultValue(false);
+            e.Property(x => x.AllowNegativeBalance).HasDefaultValue(false);
             e.HasIndex(x => x.OrgID);
         });
 

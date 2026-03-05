@@ -65,9 +65,6 @@ public class OrganizationsController : ControllerBase
         settings.OTApprovalRequired = req.OTApprovalRequired;
         settings.OTMaxHoursPerDay = req.OTMaxHoursPerDay;
 
-        settings.LeaveEnabled = req.LeaveEnabled;
-        settings.LeaveApprovalRequired = req.LeaveApprovalRequired;
-
         settings.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();

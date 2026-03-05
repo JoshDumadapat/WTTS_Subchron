@@ -83,9 +83,17 @@ public static class RoleModuleAccess
     public static bool CanAccessModule(ClaimsPrincipal? user, string module)
     {
         if (user == null || string.IsNullOrEmpty(module)) return false;
-        var roleStr = user.FindFirst(ClaimTypes.Role)?.Value ?? user.FindFirst("role")?.Value;
+
+        var roleStr = (user.FindFirst(ClaimTypes.Role)?.Value ?? user.FindFirst("role")?.Value)?.Trim();
         if (string.IsNullOrEmpty(roleStr)) return false;
-        if (!Enum.TryParse<UserRoleType>(roleStr, ignoreCase: true, out var role)) return false;
+
+        // Some tenants label their administrators as "Admin" instead of "OrgAdmin" (Web handles this alias).
+        if (string.Equals(roleStr, "Admin", StringComparison.OrdinalIgnoreCase))
+            return CanAccessModule(UserRoleType.OrgAdmin, module);
+
+        if (!Enum.TryParse<UserRoleType>(roleStr, ignoreCase: true, out var role))
+            return false;
+
         return CanAccessModule(role, module);
     }
 }
