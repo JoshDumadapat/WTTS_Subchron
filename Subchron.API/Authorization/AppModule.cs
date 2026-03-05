@@ -17,4 +17,5 @@ public static class AppModule
     public const string SystemSettings = "SystemSettings";
     public const string LeaveManagement = "LeaveManagement";
     public const string ShiftSchedule = "ShiftSchedule";
+    public const string Finance = "Finance";
 }

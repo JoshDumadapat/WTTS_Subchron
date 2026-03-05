@@ -33,10 +33,10 @@ public static class RoleModuleAccess
 
     private static bool IsHRModule(string module) =>
         module == AppModule.Dashboard || module == AppModule.EmployeeManagement ||
-        module == AppModule.DepartmentManagement || module == AppModule.Archive;
+        module == AppModule.DepartmentManagement || module == AppModule.Archive || module == AppModule.Finance;
 
     private static bool IsPayrollModule(string module) =>
-        module == AppModule.Dashboard || module == AppModule.Payroll || module == AppModule.Reports;
+        module == AppModule.Dashboard || module == AppModule.Payroll || module == AppModule.Reports || module == AppModule.Finance;
 
     private static bool IsManagerModule(string module) =>
         module == AppModule.Operations || module == AppModule.Dashboard ||

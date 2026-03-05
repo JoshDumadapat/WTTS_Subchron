@@ -36,6 +36,7 @@ public class OrganizationSettings
     public string? ShiftTemplatesJson { get; set; }
     public string? OvertimeSettingsJson { get; set; }
     public string? NightDifferentialSettingsJson { get; set; }
+    public string? AttendanceOvertimeSettingsJson { get; set; }
     public decimal? WeeklyOtThresholdHours { get; set; }
 
     public bool OTEnabled { get; set; } = false;
@@ -69,6 +70,13 @@ public class OrganizationSettings
     {
         get => DeserializeOrDefault(NightDifferentialSettingsJson, new OrgNightDifferentialSettingsDto());
         set => NightDifferentialSettingsJson = SerializeOrDefault(value, new OrgNightDifferentialSettingsDto());
+    }
+
+    [NotMapped]
+    public OrgAttendanceOvertimeDto AttendanceOvertimeSettings
+    {
+        get => DeserializeOrDefault(AttendanceOvertimeSettingsJson, OrgAttendanceOvertimeDefaults.BuildSettings());
+        set => AttendanceOvertimeSettingsJson = SerializeOrDefault(value, OrgAttendanceOvertimeDefaults.BuildSettings());
     }
 
     private static T DeserializeOrDefault<T>(string? json, T fallback)

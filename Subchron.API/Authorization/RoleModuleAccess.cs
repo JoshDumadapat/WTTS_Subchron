@@ -22,7 +22,8 @@ public static class RoleModuleAccess
         AppModule.UsersAndRoles,
         AppModule.SystemSettings,
         AppModule.LeaveManagement,
-        AppModule.ShiftSchedule
+        AppModule.ShiftSchedule,
+        AppModule.Finance
     );
 
     // HR: Dashboard, Employee Management, Department Management, Archive only (no Leave/Shift)
@@ -30,14 +31,16 @@ public static class RoleModuleAccess
         AppModule.Dashboard,
         AppModule.EmployeeManagement,
         AppModule.DepartmentManagement,
-        AppModule.Archive
+        AppModule.Archive,
+        AppModule.Finance
     );
 
     // Payroll Personnel: Dashboard, Payroll, Reports
     private static readonly ImmutableHashSet<string> PayrollModules = ImmutableHashSet.Create(
         AppModule.Dashboard,
         AppModule.Payroll,
-        AppModule.Reports
+        AppModule.Reports,
+        AppModule.Finance
     );
 
     // Manager: Operations, Dashboard, Leave Management, Shift/Schedule

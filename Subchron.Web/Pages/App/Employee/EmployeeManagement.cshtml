@@ -304,7 +304,14 @@
 
                                 <td class="px-5 py-3">
                                     <div class="relative inline-block" data-emp-id="@e.EmpID">
-                                        <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium @issuedStatusClass">@issuedStatus</span>
+                                        <button type="button"
+                                                onclick="toggleStatusMenu(this)"
+                                                class="status-badge inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 text-xs font-semibold transition-all duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-subgreen-500 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 @issuedStatusClass">
+                                            <span>@issuedStatus</span>
+                                            <svg class="h-3 w-3 text-current" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.188l3.71-3.96a.75.75 0 111.08 1.04l-4.24 4.526a.75.75 0 01-1.09 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
 
@@ -840,7 +847,7 @@
                 '<div class="text-xs text-slate-500 dark:text-slate-400">' + esc(deptName) + '</div></td>' +
                 '<td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + (email ? esc(email) : '—') + '</td>' +
                 '<td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + (address ? esc(address) : '—') + '</td>' +
-                '<td class="px-5 py-3"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ' + issuedStatusClass + '">' + esc(issuedStatus) + '</span></td>' +
+                '<td class="px-5 py-3"><div class="relative inline-block" data-emp-id="' + empId + '"><button type="button" onclick="toggleStatusMenu(this)" class="status-badge inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 text-xs font-semibold transition-all duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-subgreen-500 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 ' + issuedStatusClass + '"><span>' + esc(issuedStatus) + '</span><svg class="h-3 w-3 text-current" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.188l3.71-3.96a.75.75 0 111.08 1.04l-4.24 4.526a.75.75 0 01-1.09 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg></button></div></td>' +
                 '<td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">' + esc(joinedStr) + '</td>' +
                 '<td class="px-5 py-3 text-right"><div class="flex justify-end gap-1 flex-wrap">' +
                 '<button type="button" onclick="openIdModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 transition-all hover:bg-subgreen-200 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-800/50" title="View / Print ID">ID</button>' +

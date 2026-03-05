@@ -276,12 +276,12 @@
 </div>
 
 <script>
+window.SubchronOrgTabLeave = window.SubchronOrgTabLeave || (() => {
     let currentEditLeaveTypeId = null;
     let isSavingLeaveType = false;
     const leaveTypeStore = new Map();
-    const appRoot = document.getElementById('appRoot');
-    const apiBase = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim().replace(/\/$/, '');
-    const apiToken = appRoot?.getAttribute('data-access-token') || appRoot?.dataset?.accessToken || '';
+    let apiBase = '';
+    let apiToken = '';
 
     const buildApiUrl = (path) => {
         if (!path) return apiBase;
@@ -299,12 +299,19 @@
         return fetch(url, { ...options, headers });
     };
 
-    if (!apiBase) {
-        console.warn('Org Leave tab: API base URL missing on #appRoot. Calls will target current origin.');
-    }
-    if (!apiToken) {
-        console.warn('Org Leave tab: access token missing. Leave API calls may fail with 401.');
-    }
+    const refreshApiContext = () => {
+        const appRoot = document.getElementById('appRoot');
+        const baseAttr = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim();
+        apiBase = baseAttr.replace(/\/$/, '');
+        apiToken = appRoot?.getAttribute('data-access-token') || appRoot?.dataset?.accessToken || '';
+
+        if (!apiBase) {
+            console.warn('Org Leave tab: API base URL missing on #appRoot. Calls will target current origin.');
+        }
+        if (!apiToken) {
+            console.warn('Org Leave tab: access token missing. Leave API calls may fail with 401.');
+        }
+    };
 
     function openLeaveModal() {
         resetLeaveModal();
@@ -663,12 +670,35 @@
         m.classList.add('flex');
     }
 
-        document.getElementById('leaveModal').addEventListener('click', function(e) {
+    function attachLeaveModalDismiss() {
+        const modal = document.getElementById('leaveModal');
+        if (!modal || modal.dataset.leaveModalBound === 'true') return;
+        modal.dataset.leaveModalBound = 'true';
+        modal.addEventListener('click', function(e) {
             if (e.target === this) closeLeaveModal();
         });
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function init() {
+        currentEditLeaveTypeId = null;
+        isSavingLeaveType = false;
+        leaveTypeStore.clear();
+        refreshApiContext();
+        attachLeaveModalDismiss();
         loadLeaveTypes();
         loadLeaveSettings();
-    });
+    }
+
+    window.openLeaveModal = openLeaveModal;
+    window.closeLeaveModal = closeLeaveModal;
+    window.onLeaveTypeChange = onLeaveTypeChange;
+    window.toggleCarryOverInput = toggleCarryOverInput;
+    window.saveLeavePolicy = saveLeavePolicy;
+    window.saveLeaveSettings = saveLeaveSettings;
+    window.deleteLeaveType = deleteLeaveType;
+    window.openEditLeaveType = openEditLeaveType;
+    return { init };
+})();
+
+window.SubchronOrgTabLeave.init();
 </script>

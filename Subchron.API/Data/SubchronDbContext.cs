@@ -58,8 +58,10 @@ public class SubchronDbContext : DbContext
             e.Property(x => x.ShiftTemplatesJson).HasColumnType("NVARCHAR(MAX)");
             e.Property(x => x.OvertimeSettingsJson).HasColumnType("NVARCHAR(MAX)");
             e.Property(x => x.NightDifferentialSettingsJson).HasColumnType("NVARCHAR(MAX)");
+            e.Property(x => x.AttendanceOvertimeSettingsJson).HasColumnType("NVARCHAR(MAX)");
             e.Property(x => x.OTThresholdHours).HasColumnType("decimal(6,2)");
             e.Property(x => x.OTMaxHoursPerDay).HasColumnType("decimal(6,2)");
+            e.Property(x => x.WeeklyOtThresholdHours).HasColumnType("decimal(6,2)");
             e.Property(x => x.LeaveFiscalYearStart).HasConversion<int>().HasColumnType("int").IsRequired();
             e.Property(x => x.LeaveBalanceResetRule).HasConversion<int>().HasColumnType("int").IsRequired();
             e.Property(x => x.LeaveProratedForNewHires).HasDefaultValue(true);

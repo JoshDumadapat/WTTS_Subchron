@@ -2,17 +2,22 @@
     <!-- Scroll container (prevents weird vertical overflow) -->
     <div class="flex-1 min-h-0 overflow-y-auto p-8">
 
-        <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Attendance Capture Settings</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure how employees clock in and out across your organization.</p>
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-white">Attendance Capture Settings</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure how employees clock in and out across your organization.</p>
+            </div>
+            <button type="button" id="attendanceEditBtn" class="btn-secondary h-11 px-5 text-sm font-semibold">Edit</button>
         </div>
 
         <hr class="mb-8 border-slate-300 dark:border-gray-700" />
 
-        <form id="org-attendance-settings-form" class="space-y-8">
+        <form id="org-attendance-settings-form">
 
             <div id="attendanceSettingsError"
                  class="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-900/30 dark:text-red-200"></div>
+
+            <fieldset id="attendanceSettingsFieldset" class="space-y-8">
 
             <!-- SECTION 1: PRIMARY MODE -->
             <section>
@@ -213,21 +218,45 @@
                 </div>
             </section>
 
+            </fieldset>
+
             <datalist id="defaultShiftTemplateOptions">
                 <option value="DAYSHIFT_9_6">Standard Day (9 AM - 6 PM)</option>
                 <option value="MIDSHIFT_2_11">Mid Shift (2 PM - 11 PM)</option>
                 <option value="NIGHTSHIFT_10_7">Night Shift (10 PM - 7 AM)</option>
             </datalist>
 
-            <!-- =========================
-                 OVERTIME RULES (ONE CARD)
-                 ========================= -->
-            <section id="ot-nd-settings" class="mt-2" aria-labelledby="ot-settings-heading">
+            <div class="mt-6 flex flex-wrap items-center justify-end gap-3 hidden" id="attendanceFormActions">
+                <button type="button" id="attendanceCancelBtn" class="btn-secondary h-11 px-5 text-sm">Cancel</button>
+                <button type="submit" id="attendanceSettingsSaveBtn" class="btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    Save Attendance Settings
+                </button>
+            </div>
 
-                <div class="mb-6">
+        </form>
+
+        <!-- =========================
+             OVERTIME RULES (SEPARATE FORM)
+             ========================= -->
+        <form id="org-ot-settings-form" class="mt-12">
+
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
                     <h2 id="ot-settings-heading" class="text-xl font-bold text-gray-900 dark:text-white">Overtime Rules</h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure overtime tagging, approval workflow, rounding, caps, scope, and night differential.</p>
                 </div>
+                <button type="button" id="otEditBtn" class="btn-secondary h-11 px-5 text-sm font-semibold">Edit</button>
+            </div>
+
+            <div id="otSettingsError"
+                 class="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-900/30 dark:text-red-200"></div>
+
+            <fieldset id="otSettingsFieldset" class="space-y-8">
+
+                <section id="ot-nd-settings" aria-labelledby="ot-settings-heading">
 
                 <!-- ONE unified card -->
                 <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
@@ -341,8 +370,8 @@
                                         <p class="text-xs text-gray-500 dark:text-gray-400">Ignore this many overtime minutes before counting them.</p>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <input type="number" id="microOtBuffer" min="0" max="120" step="1" value="0"
-                                               class="w-24 rounded-lg border-0 px-3 py-1.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
+                                    <input type="number" id="microOtBuffer" min="0" max="120" step="1" value="0" data-whole-number
+                                                class="w-24 rounded-lg border-0 px-3 py-1.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
                                         <span class="text-xs text-gray-500 dark:text-gray-400">mins</span>
                                     </div>
                                 </div>
@@ -486,7 +515,7 @@
                                 <div>
                                     <label for="minimumOtBlock" class="text-sm font-medium text-gray-700 dark:text-gray-300">Min OT Block</label>
                                     <div class="mt-1.5 flex items-center gap-2">
-                                        <input type="number" id="minimumOtBlock" min="0" max="480" step="5" value="30"
+                                        <input type="number" id="minimumOtBlock" min="0" max="480" step="5" value="30" data-whole-number
                                                class="w-24 rounded-lg border-0 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
                                         <span class="text-sm text-gray-500 dark:text-gray-400">mins</span>
                                     </div>
@@ -555,7 +584,7 @@
                                     data-accordion-target="attendanceBucketsBody"
                                     aria-expanded="false"
                                     aria-controls="attendanceBucketsBody">
-                                <div>
+                                <div class="accordion-trigger__content flex flex-col items-start text-left">
                                     <span class="text-xs uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Overtime Day Types</span>
                                     <p class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Customize Each Day Type</p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">Turn day types on/off and optionally override their thresholds, caps, and minimum blocks.</p>
@@ -632,7 +661,7 @@
                                                     </td>
                                                     <td class="px-3 py-3">
                                                         <div class="flex items-center gap-2">
-                                                            <input type="number" id="@minBlockId" min="0" max="720" step="5"
+                                            <input type="number" id="@minBlockId" min="0" max="720" step="5" data-whole-number
                                                                    class="w-28 rounded-lg border-0 px-2 py-1.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700"
                                                                    placeholder="optional" aria-label="@bucket.Label minimum OT block in minutes">
                                                             <span class="text-xs text-gray-500 dark:text-gray-400">mins</span>
@@ -653,7 +682,7 @@
                                     data-accordion-target="scopeRulesBody"
                                     aria-expanded="false"
                                     aria-controls="scopeRulesBody">
-                                <div>
+                                <div class="accordion-trigger__content flex flex-col items-start text-left">
                                     <span class="text-xs uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Scope</span>
                                     <p class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Eligibility Controls</p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">Choose who these overtime rules cover.</p>
@@ -777,7 +806,7 @@
                                         <label for="ndMinimumMinutes" class="text-sm font-semibold text-gray-800 dark:text-white">Minimum Consecutive Minutes</label>
                                         <p id="nd-min-help" class="text-xs text-gray-500 dark:text-gray-400">ND minutes count after hitting this duration.</p>
                                         <div class="mt-2 flex items-center gap-2">
-                                            <input type="number" id="ndMinimumMinutes" min="0" max="720" step="5" value="30" aria-describedby="nd-min-help"
+                        <input type="number" id="ndMinimumMinutes" min="0" max="720" step="5" value="30" aria-describedby="nd-min-help" data-whole-number
                                                    class="w-32 rounded-lg border-0 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
                                             <span class="text-sm text-gray-500 dark:text-gray-400">minutes</span>
                                         </div>
@@ -815,36 +844,56 @@
                                     <div id="ndExclusionsBody" class="hidden border-t border-slate-200 px-4 pb-4 pt-3 dark:border-gray-700/60">
                                         <p class="text-xs text-gray-500 dark:text-gray-400">Exclude ND tagging for selected scopes.</p>
 
-                                        <div class="mt-4 grid gap-4 md:grid-cols-3">
-                                            <div>
-                                                <label for="ndExcludeDepartments" class="text-sm font-semibold text-gray-800 dark:text-white">Departments</label>
-                                                <select id="ndExcludeDepartments" multiple size="4"
-                                                        class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
-                                                    <option>Support</option>
-                                                    <option>Sales</option>
-                                                    <option>Field Ops</option>
-                                                    <option>Warehouse</option>
-                                                </select>
+                                        <div class="mt-4 space-y-4">
+                                            <p class="text-xs text-slate-500 dark:text-gray-400">Choose a Department, Site, and Role combination, then add it below. Each row represents a scoped exclusion.</p>
+
+                                            <div class="grid gap-4 md:grid-cols-3">
+                                                <div>
+                                                    <label for="ndComboDepartment" class="text-sm font-semibold text-gray-800 dark:text-white">Departments</label>
+                                                    <select id="ndComboDepartment" size="4"
+                                                            class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700"></select>
+                                                </div>
+
+                                                <div>
+                                                    <label for="ndComboSite" class="text-sm font-semibold text-gray-800 dark:text-white">Sites</label>
+                                                    <select id="ndComboSite" size="4"
+                                                            class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700"></select>
+                                                </div>
+
+                                                <div>
+                                                    <label for="ndComboRole" class="text-sm font-semibold text-gray-800 dark:text-white">Roles</label>
+                                                    <select id="ndComboRole" size="4"
+                                                            class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700"></select>
+                                                </div>
                                             </div>
 
-                                            <div>
-                                                <label for="ndExcludeSites" class="text-sm font-semibold text-gray-800 dark:text-white">Sites</label>
-                                                <select id="ndExcludeSites" multiple size="4"
-                                                        class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
-                                                    <option>Baguio Site</option>
-                                                    <option>Iloilo Hub</option>
-                                                    <option>Remote-only</option>
-                                                </select>
+                                            <div class="flex flex-wrap items-center gap-3 justify-end">
+                                                <button type="button" id="ndAddExclusionBtn" class="btn-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                    Add Exclusion
+                                                </button>
+                                                <button type="button" id="ndCancelExclusionEditBtn" class="btn-secondary h-10 px-4 text-sm hidden">Cancel Edit</button>
+                                                <p id="ndComboError" class="text-sm font-medium text-red-600 dark:text-red-400 hidden"></p>
                                             </div>
 
-                                            <div>
-                                                <label for="ndExcludeRoles" class="text-sm font-semibold text-gray-800 dark:text-white">Roles</label>
-                                                <select id="ndExcludeRoles" multiple size="4"
-                                                        class="mt-2 w-full rounded-xl border-0 bg-slate-100 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
-                                                    <option>Executives</option>
-                                                    <option>Supervisors</option>
-                                                    <option>Apprentices</option>
-                                                </select>
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-gray-800" aria-label="Night differential scoped exclusions table">
+                                                    <thead class="bg-slate-100 text-xs uppercase text-gray-500 dark:bg-gray-800/60 dark:text-gray-400">
+                                                        <tr>
+                                                            <th class="px-3 py-2 text-left">Department</th>
+                                                            <th class="px-3 py-2 text-left">Site</th>
+                                                            <th class="px-3 py-2 text-left">Role</th>
+                                                            <th class="px-3 py-2 text-left">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="ndCombosTableBody" class="divide-y divide-slate-200 bg-white dark:divide-gray-800 dark:bg-gray-900/30">
+                                                        <tr data-empty-row>
+                                                            <td colspan="4" class="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">No scoped exclusions added yet.</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -856,15 +905,15 @@
                 </div><!-- /one OT card -->
             </section>
 
-            <hr class="border-slate-300 dark:border-gray-700" />
+            </fieldset>
 
-            <!-- SAVE -->
-            <div class="flex justify-end">
-                <button type="submit" id="attendanceSettingsSaveBtn" class="btn-primary">
+            <div class="mt-6 flex flex-wrap items-center justify-end gap-3 hidden" id="otFormActions">
+                <button type="button" id="otCancelBtn" class="btn-secondary h-11 px-5 text-sm">Cancel</button>
+                <button type="submit" id="otSettingsSaveBtn" class="btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Save Attendance Settings
+                    Save Overtime Rules
                 </button>
             </div>
 
@@ -956,12 +1005,31 @@
     #tab-attendance .accordion-trigger {
         width: 100%;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 1.5rem;
         padding: 1.1rem 1.5rem;
         border-radius: 1.25rem;
+        text-align: left;
         transition: background .2s ease, color .2s ease;
+    }
+
+    #tab-attendance .accordion-trigger__content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    #tab-attendance .accordion-trigger svg {
+        flex-shrink: 0;
+        align-self: center;
+    }
+
+    #tab-attendance fieldset.is-readonly {
+        opacity: 0.85;
+    }
+
+    #tab-attendance select[data-readonly-select="true"] {
+        cursor: not-allowed;
     }
 
         #tab-attendance .accordion-trigger:hover {
@@ -1023,8 +1091,9 @@
     }
 
     (function initAttendanceSettings() {
-        const form = document.getElementById('org-attendance-settings-form');
-        if (!form) return;
+        const attendanceForm = document.getElementById('org-attendance-settings-form');
+        const otForm = document.getElementById('org-ot-settings-form');
+        if (!attendanceForm && !otForm) return;
 
         const appRoot = document.getElementById('appRoot');
         const apiBase = (appRoot?.getAttribute('data-api-base') || '').trim().replace(/\/$/, '');
@@ -1038,13 +1107,28 @@
         const autoClockOutToggle = document.getElementById('autoClockOutToggle');
         const autoClockOutHours = document.getElementById('autoClockOutHours');
         const defaultShiftInput = document.getElementById('defaultShiftTemplateCode');
-        const saveBtn = document.getElementById('attendanceSettingsSaveBtn');
-        const errorBox = document.getElementById('attendanceSettingsError');
+        const attendanceSaveBtn = document.getElementById('attendanceSettingsSaveBtn');
+        const attendanceErrorBox = document.getElementById('attendanceSettingsError');
+        const otSaveBtn = document.getElementById('otSettingsSaveBtn');
+        const otErrorBox = document.getElementById('otSettingsError');
+        const attendanceButtonDefault = attendanceSaveBtn?.innerHTML || '';
+        const otButtonDefault = otSaveBtn?.innerHTML || '';
+
+        const attendanceFieldset = document.getElementById('attendanceSettingsFieldset');
+        const attendanceActions = document.getElementById('attendanceFormActions');
+        const attendanceEditBtn = document.getElementById('attendanceEditBtn');
+        const attendanceCancelBtn = document.getElementById('attendanceCancelBtn');
+
+        const otFieldset = document.getElementById('otSettingsFieldset');
+        const otActions = document.getElementById('otFormActions');
+        const otEditBtn = document.getElementById('otEditBtn');
+        const otCancelBtn = document.getElementById('otCancelBtn');
+        const readonlySelectHandlers = new WeakMap();
 
         const otEnabledToggle = document.getElementById('otEnabledToggle');
         const otSections = document.querySelectorAll('[data-ot-section]');
 
-        const otBasisRadios = form.querySelectorAll('input[name="otBasisOption"]');
+        const otBasisRadios = otForm?.querySelectorAll('input[name="otBasisOption"]') || [];
         const basisDailyInputRow = document.getElementById('basisDailyInputRow');
         const basisWeeklyInputRow = document.getElementById('basisWeeklyInputRow');
         const otBasisDailyHours = document.getElementById('otBasisDailyHours');
@@ -1078,7 +1162,7 @@
         const addScopeEntryBtn = document.getElementById('addScopeEntryBtn');
         const scopeEntryError = document.getElementById('scopeEntryError');
         const scopeEntriesTableBody = document.getElementById('scopeEntriesTableBody');
-        const scopeRadios = form.querySelectorAll('input[name="otScopeMode"]');
+        const scopeRadios = otForm?.querySelectorAll('input[name="otScopeMode"]') || [];
 
         const nightDiffFields = document.getElementById('nightDiffFields');
         const ndEnabledToggle = document.getElementById('ndEnabledToggle');
@@ -1086,9 +1170,13 @@
         const ndEndTime = document.getElementById('ndEndTime');
         const ndMinimumMinutes = document.getElementById('ndMinimumMinutes');
         const ndExcludeBreaksToggle = document.getElementById('ndExcludeBreaksToggle');
-        const ndExcludeDepartments = document.getElementById('ndExcludeDepartments');
-        const ndExcludeSites = document.getElementById('ndExcludeSites');
-        const ndExcludeRoles = document.getElementById('ndExcludeRoles');
+        const ndComboDepartment = document.getElementById('ndComboDepartment');
+        const ndComboSite = document.getElementById('ndComboSite');
+        const ndComboRole = document.getElementById('ndComboRole');
+        const ndAddExclusionBtn = document.getElementById('ndAddExclusionBtn');
+        const ndCancelExclusionEditBtn = document.getElementById('ndCancelExclusionEditBtn');
+        const ndComboError = document.getElementById('ndComboError');
+        const ndCombosTableBody = document.getElementById('ndCombosTableBody');
 
         const accordionButtons = document.querySelectorAll('[data-accordion-target]');
 
@@ -1118,8 +1206,22 @@
             EMPLOYMENT_TYPE: ['Regular', 'Project-based', 'Seasonal', 'Probationary']
         };
 
+        const ndScopedOptions = {
+            DEPARTMENT: ['Support', 'Sales', 'Field Ops', 'Warehouse'],
+            SITE: ['Baguio Site', 'Iloilo Hub', 'Remote-only'],
+            ROLE: ['Executives', 'Supervisors', 'Apprentices']
+        };
+        const ndAddExclusionBtnDefault = ndAddExclusionBtn?.innerHTML || 'Add Exclusion';
+
         let scopeEntries = [];
-        let isSaving = false;
+        let ndExclusionCombos = [];
+        let ndComboEditingIndex = null;
+        let isAttendanceSaving = false;
+        let isOtSaving = false;
+        let attendanceEditing = false;
+        let otEditing = false;
+        let lastAttendanceSettings = null;
+        let lastOvertimeSettings = null;
 
         const defaultOvertimeSettings = {
             enabled: false,
@@ -1162,8 +1264,19 @@
             excludeBreaks: true,
             excludeDepartments: [],
             excludeSites: [],
-            excludeRoles: []
+            excludeRoles: [],
+            scopedExclusions: []
         };
+
+        const deepClone = (value) => (value == null ? null : JSON.parse(JSON.stringify(value)));
+
+        const numericOnlyInputs = document.querySelectorAll('[data-whole-number]');
+        numericOnlyInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const sanitized = (input.value || '').replace(/[^0-9]/g, '');
+                if (sanitized !== input.value) input.value = sanitized;
+            });
+        });
 
         const switchInputs = [
             otEnabledToggle,
@@ -1193,6 +1306,10 @@
         setNightDiffDisabled(!(ndEnabledToggle?.checked ?? true));
         handleScopeEntryTypeChange();
         renderScopeEntries();
+        populateNdComboSelects();
+        setNdScopedExclusions(defaultNightDiffSettings.scopedExclusions || []);
+        setAttendanceEditMode(false);
+        setOtEditMode(false);
 
         otEnabledToggle?.addEventListener('change', () => setOtSectionsDisabled(!otEnabledToggle.checked));
         otBasisRadios.forEach(radio => radio.addEventListener('change', handleBasisSelection));
@@ -1203,6 +1320,29 @@
         scopeEntryType?.addEventListener('change', handleScopeEntryTypeChange);
         addScopeEntryBtn?.addEventListener('click', handleAddScopeEntry);
         scopeEntriesTableBody?.addEventListener('click', handleScopeEntryTableClick);
+        ndAddExclusionBtn?.addEventListener('click', handleNdAddCombo);
+        ndCancelExclusionEditBtn?.addEventListener('click', () => resetNdComboForm());
+        ndCombosTableBody?.addEventListener('click', handleNdCombosTableClick);
+        attendanceEditBtn?.addEventListener('click', () => {
+            if (isAttendanceSaving) return;
+            setAttendanceEditMode(true);
+        });
+        attendanceCancelBtn?.addEventListener('click', () => {
+            if (isAttendanceSaving) return;
+            if (lastAttendanceSettings) hydrateAttendanceSettings(deepClone(lastAttendanceSettings));
+            setAttendanceEditMode(false);
+            showAttendanceError('');
+        });
+        otEditBtn?.addEventListener('click', () => {
+            if (isOtSaving) return;
+            setOtEditMode(true);
+        });
+        otCancelBtn?.addEventListener('click', () => {
+            if (isOtSaving) return;
+            if (lastOvertimeSettings) hydrateOvertimeSettings(deepClone(lastOvertimeSettings));
+            setOtEditMode(false);
+            showOtError('');
+        });
 
         accordionButtons.forEach(btn => {
             const targetId = btn.getAttribute('data-accordion-target');
@@ -1236,22 +1376,54 @@
             }
         });
 
-        function showError(message) {
-            if (!errorBox) return;
+        function showAttendanceError(message) {
+            if (!attendanceErrorBox) return;
             if (message) {
-                errorBox.textContent = message;
-                errorBox.classList.remove('hidden');
+                attendanceErrorBox.textContent = message;
+                attendanceErrorBox.classList.remove('hidden');
             } else {
-                errorBox.textContent = '';
-                errorBox.classList.add('hidden');
+                attendanceErrorBox.textContent = '';
+                attendanceErrorBox.classList.add('hidden');
             }
         }
 
-        function setSaving(state) {
-            isSaving = state;
-            if (!saveBtn) return;
-            saveBtn.disabled = state;
-            saveBtn.textContent = state ? 'Saving...' : 'Save Attendance Settings';
+        function showOtError(message) {
+            if (!otErrorBox) return;
+            if (message) {
+                otErrorBox.textContent = message;
+                otErrorBox.classList.remove('hidden');
+            } else {
+                otErrorBox.textContent = '';
+                otErrorBox.classList.add('hidden');
+            }
+        }
+
+        function setAttendanceSaving(state) {
+            isAttendanceSaving = state;
+            if (!attendanceSaveBtn) return;
+            attendanceSaveBtn.disabled = state;
+            attendanceSaveBtn.innerHTML = state ? 'Saving...' : attendanceButtonDefault;
+        }
+
+        function setOtSaving(state) {
+            isOtSaving = state;
+            if (!otSaveBtn) return;
+            otSaveBtn.disabled = state;
+            otSaveBtn.innerHTML = state ? 'Saving...' : otButtonDefault;
+        }
+
+        function setAttendanceEditMode(enabled) {
+            attendanceEditing = !!enabled;
+            toggleFieldsetInteractivity(attendanceFieldset, enabled);
+            attendanceActions?.classList.toggle('hidden', !enabled);
+            attendanceEditBtn?.classList.toggle('hidden', enabled);
+        }
+
+        function setOtEditMode(enabled) {
+            otEditing = !!enabled;
+            toggleFieldsetInteractivity(otFieldset, enabled, { readOnlySelects: true });
+            otActions?.classList.toggle('hidden', !enabled);
+            otEditBtn?.classList.toggle('hidden', enabled);
         }
 
         function syncSwitchAria(input) {
@@ -1417,7 +1589,7 @@
         }
 
         function getScopeMode() {
-            const selected = form.querySelector('input[name="otScopeMode"]:checked');
+            const selected = otForm?.querySelector('input[name="otScopeMode"]:checked');
             return selected ? selected.value : 'ALL';
         }
 
@@ -1519,8 +1691,215 @@
             toggleScopeEntryControls(getScopeMode() !== 'SELECTED');
         }
 
+        function populateNdComboSelects() {
+            populateNdComboSelect(ndComboDepartment, ndScopedOptions.DEPARTMENT, 'Select department');
+            populateNdComboSelect(ndComboSite, ndScopedOptions.SITE, 'Select site');
+            populateNdComboSelect(ndComboRole, ndScopedOptions.ROLE, 'Select role');
+        }
+
+        function populateNdComboSelect(selectEl, options, placeholder) {
+            if (!selectEl) return;
+            const opts = Array.isArray(options) ? options : [];
+            const html = ['<option value="">' + placeholder + '</option>', ...opts.map(opt => `<option value="${opt}">${opt}</option>`)].join('');
+            selectEl.innerHTML = html;
+            selectEl.selectedIndex = 0;
+        }
+
+        function ensureOption(selectEl, value) {
+            if (!selectEl) return;
+            if (!value) return;
+            const exists = Array.from(selectEl.options).some(opt => (opt.value || opt.textContent) === value);
+            if (!exists) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectEl.appendChild(option);
+            }
+            selectEl.value = value;
+        }
+
+        function setNdComboError(message) {
+            if (!ndComboError) return;
+            ndComboError.textContent = message || '';
+            ndComboError.classList.toggle('hidden', !message);
+        }
+
+        function resetNdComboForm() {
+            ndComboEditingIndex = null;
+            ndComboDepartment && (ndComboDepartment.selectedIndex = 0);
+            ndComboSite && (ndComboSite.selectedIndex = 0);
+            ndComboRole && (ndComboRole.selectedIndex = 0);
+            ndCancelExclusionEditBtn?.classList.add('hidden');
+            if (ndAddExclusionBtn) ndAddExclusionBtn.innerHTML = ndAddExclusionBtnDefault;
+            setNdComboError('');
+        }
+
+        function handleNdAddCombo() {
+            if (!ndComboDepartment || !ndComboSite || !ndComboRole) return;
+            const department = (ndComboDepartment.value || '').trim();
+            const site = (ndComboSite.value || '').trim();
+            const role = (ndComboRole.value || '').trim();
+
+            if (!department || !site || !role) {
+                setNdComboError('Select a department, site, and role.');
+                return;
+            }
+
+            const normalized = {
+                department,
+                site,
+                role
+            };
+
+            const duplicateIndex = ndExclusionCombos.findIndex((combo, index) => {
+                if (ndComboEditingIndex !== null && index === ndComboEditingIndex) return false;
+                return combo.department?.toLowerCase() === department.toLowerCase()
+                    && combo.site?.toLowerCase() === site.toLowerCase()
+                    && combo.role?.toLowerCase() === role.toLowerCase();
+            });
+
+            if (duplicateIndex >= 0) {
+                setNdComboError('That exclusion already exists.');
+                return;
+            }
+
+            if (ndComboEditingIndex !== null) {
+                ndExclusionCombos[ndComboEditingIndex] = normalized;
+            } else {
+                ndExclusionCombos.push(normalized);
+            }
+
+            renderNdCombosTable();
+            resetNdComboForm();
+        }
+
+        function handleNdCombosTableClick(evt) {
+            const editBtn = evt.target.closest('[data-edit-nd-combo]');
+            if (editBtn) {
+                const index = Number(editBtn.dataset.index);
+                if (!Number.isNaN(index)) startNdComboEdit(index);
+                return;
+            }
+
+            const removeBtn = evt.target.closest('[data-remove-nd-combo]');
+            if (removeBtn) {
+                const index = Number(removeBtn.dataset.index);
+                if (Number.isNaN(index)) return;
+                ndExclusionCombos.splice(index, 1);
+                renderNdCombosTable();
+                if (ndComboEditingIndex === index) resetNdComboForm();
+                return;
+            }
+        }
+
+        function startNdComboEdit(index) {
+            if (!ndComboDepartment || !ndComboSite || !ndComboRole) return;
+            const target = ndExclusionCombos[index];
+            if (!target) return;
+            ndComboEditingIndex = index;
+            ensureOption(ndComboDepartment, target.department);
+            ensureOption(ndComboSite, target.site);
+            ensureOption(ndComboRole, target.role);
+            if (ndAddExclusionBtn) ndAddExclusionBtn.innerHTML = 'Save Changes';
+            ndCancelExclusionEditBtn?.classList.remove('hidden');
+            setNdComboError('');
+        }
+
+        function setNdScopedExclusions(entries) {
+            const list = Array.isArray(entries) ? entries : [];
+            ndExclusionCombos = list.map(entry => ({
+                department: (entry.department ?? entry.Department ?? '').trim(),
+                site: (entry.site ?? entry.Site ?? '').trim(),
+                role: (entry.role ?? entry.Role ?? '').trim()
+            })).filter(entry => entry.department && entry.site && entry.role);
+            renderNdCombosTable();
+            resetNdComboForm();
+        }
+
+        function renderNdCombosTable() {
+            if (!ndCombosTableBody) return;
+            if (!ndExclusionCombos.length) {
+                ndCombosTableBody.innerHTML = '<tr data-empty-row><td colspan="4" class="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">No scoped exclusions added yet.</td></tr>';
+                return;
+            }
+
+            ndCombosTableBody.innerHTML = ndExclusionCombos.map((combo, index) => `
+                <tr>
+                    <td class="px-3 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">${combo.department || '—'}</td>
+                    <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">${combo.site || '—'}</td>
+                    <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">${combo.role || '—'}</td>
+                    <td class="px-3 py-3">
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="btn-secondary h-9 px-3 text-xs" data-edit-nd-combo data-index="${index}">Edit</button>
+                            <button type="button" class="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 dark:border-red-500/60 dark:text-red-300 dark:hover:bg-red-500/10" data-remove-nd-combo data-index="${index}">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function dedupeStrings(values) {
+            if (!Array.isArray(values)) return [];
+            const seen = new Set();
+            const result = [];
+            values.forEach(value => {
+                const trimmed = (value ?? '').toString().trim();
+                if (!trimmed || seen.has(trimmed.toLowerCase())) return;
+                seen.add(trimmed.toLowerCase());
+                result.push(trimmed);
+            });
+            return result;
+        }
+
+        function toggleFieldsetInteractivity(fieldset, enabled, options = {}) {
+            if (!fieldset) return;
+            const controls = fieldset.querySelectorAll('input, select, textarea, button, [contenteditable="true"]');
+            controls.forEach(control => {
+                if (control.tagName === 'SELECT' && options.readOnlySelects) {
+                    if (!enabled) {
+                        lockSelect(control);
+                    } else {
+                        unlockSelect(control);
+                    }
+                } else {
+                    control.disabled = !enabled;
+                    if (control.tagName === 'SELECT') unlockSelect(control);
+                }
+            });
+            fieldset.classList.toggle('is-readonly', !enabled);
+        }
+
+        function lockSelect(select) {
+            if (!select) return;
+            select.disabled = false;
+            select.dataset.readonlySelect = 'true';
+            select.dataset.lockedValue = select.value;
+            if (readonlySelectHandlers.has(select)) return;
+            const handler = evt => {
+                if (select.dataset.readonlySelect !== 'true') return;
+                select.value = select.dataset.lockedValue ?? select.value;
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
+            };
+            select.addEventListener('change', handler, true);
+            select.addEventListener('input', handler, true);
+            readonlySelectHandlers.set(select, handler);
+        }
+
+        function unlockSelect(select) {
+            if (!select) return;
+            const handler = readonlySelectHandlers.get(select);
+            if (handler) {
+                select.removeEventListener('change', handler, true);
+                select.removeEventListener('input', handler, true);
+                readonlySelectHandlers.delete(select);
+            }
+            delete select.dataset.readonlySelect;
+            delete select.dataset.lockedValue;
+        }
+
         function getSelectedMode() {
-            const selected = form.querySelector('input[name="primaryMode"]:checked');
+            const selected = attendanceForm?.querySelector('input[name="primaryMode"]:checked');
             return selected ? selected.value : null;
         }
 
@@ -1548,20 +1927,6 @@
             return Number.isFinite(parsed) ? parsed : null;
         }
 
-        function collectSelectValues(select) {
-            if (!select) return [];
-            return Array.from(select.selectedOptions || []).map(opt => opt.value || opt.textContent?.trim() || '');
-        }
-
-        function setMultiSelectValues(select, values) {
-            if (!select) return;
-            const normalized = Array.isArray(values) ? values.map(v => (v ?? '').toString()) : [];
-            Array.from(select.options).forEach(opt => {
-                const key = opt.value || opt.textContent || '';
-                opt.selected = normalized.includes(key);
-            });
-        }
-
         function collectApprovalSteps() {
             if (!approvalStepsList) return [];
             return Array.from(approvalStepsList.querySelectorAll('[data-approval-step]')).map(row => {
@@ -1582,6 +1947,39 @@
                 maxHours: normalizeDecimal(document.getElementById(`bucketMax-${key}`)),
                 minimumBlockMinutes: normalizeInt(document.getElementById(`bucketMinBlock-${key}`))
             }));
+        }
+
+        function collectAttendancePayload() {
+            const payload = {
+                primaryMode: getSelectedMode(),
+                allowManualEntry: manualToggle?.checked ?? false,
+                requireGeo: requireGeofenceToggle?.checked ?? false,
+                enforceGeofence: requireGeofenceToggle?.checked ?? false,
+                restrictByIp: restrictByIpToggle?.checked ?? false,
+                preventDoubleClockIn: preventDoubleClockInToggle?.checked ?? false,
+                autoClockOutEnabled: autoClockOutToggle?.checked ?? false,
+                autoClockOutMaxHours: null,
+                defaultShiftTemplateCode: defaultShiftInput?.value?.trim() || null
+            };
+
+            if (!payload.primaryMode) {
+                throw new Error('Select a primary attendance mode.');
+            }
+
+            if (payload.autoClockOutEnabled) {
+                const parsedHours = parseHours();
+                if (parsedHours == null) {
+                    const err = new Error('Enter the number of hours before auto clock-out.');
+                    err.code = 'AUTO_CLOCK_OUT';
+                    throw err;
+                }
+
+                payload.autoClockOutMaxHours = parsedHours;
+            } else {
+                payload.autoClockOutMaxHours = null;
+            }
+
+            return payload;
         }
 
         function getScopePayload() {
@@ -1662,15 +2060,24 @@
         }
 
         function collectNightDiffSettings() {
+            const departments = dedupeStrings(ndExclusionCombos.map(combo => combo.department));
+            const sites = dedupeStrings(ndExclusionCombos.map(combo => combo.site));
+            const roles = dedupeStrings(ndExclusionCombos.map(combo => combo.role));
+
             return {
                 enabled: ndEnabledToggle?.checked ?? true,
                 windowStart: ndStartTime?.value || defaultNightDiffSettings.windowStart,
                 windowEnd: ndEndTime?.value || defaultNightDiffSettings.windowEnd,
                 minimumMinutes: normalizeInt(ndMinimumMinutes) ?? defaultNightDiffSettings.minimumMinutes,
                 excludeBreaks: ndExcludeBreaksToggle?.checked ?? true,
-                excludeDepartments: collectSelectValues(ndExcludeDepartments),
-                excludeSites: collectSelectValues(ndExcludeSites),
-                excludeRoles: collectSelectValues(ndExcludeRoles)
+                excludeDepartments: departments,
+                excludeSites: sites,
+                excludeRoles: roles,
+                scopedExclusions: ndExclusionCombos.map(combo => ({
+                    department: combo.department,
+                    site: combo.site,
+                    role: combo.role
+                }))
             };
         }
 
@@ -1782,7 +2189,7 @@
             });
 
             const scopeMode = merged.scopeMode === 'SELECTED' ? 'SELECTED' : 'ALL';
-            form.querySelector(`input[name="otScopeMode"][value="${scopeMode}"]`)?.click();
+            otForm?.querySelector(`input[name="otScopeMode"][value="${scopeMode}"]`)?.click();
             setScopeEntriesFromFilters(merged.scopeFilters || merged.scopeRules);
             handleScopeModeChange();
         }
@@ -1801,14 +2208,11 @@
             if (ndMinimumMinutes) ndMinimumMinutes.value = merged.minimumMinutes ?? defaultNightDiffSettings.minimumMinutes;
 
             if (ndExcludeBreaksToggle) { ndExcludeBreaksToggle.checked = !!merged.excludeBreaks; syncSwitchAria(ndExcludeBreaksToggle); }
-
-            setMultiSelectValues(ndExcludeDepartments, merged.excludeDepartments || []);
-            setMultiSelectValues(ndExcludeSites, merged.excludeSites || []);
-            setMultiSelectValues(ndExcludeRoles, merged.excludeRoles || []);
+            setNdScopedExclusions(merged.scopedExclusions || []);
         }
 
         function selectPrimaryMode(value) {
-            const radios = form.querySelectorAll('input[name="primaryMode"]');
+            const radios = attendanceForm?.querySelectorAll('input[name="primaryMode"]') || [];
             let matched = false;
             radios.forEach(radio => {
                 if (value && radio.value === value) { radio.checked = true; matched = true; }
@@ -1816,7 +2220,7 @@
             if (!matched && radios[0]) radios[0].checked = true;
         }
 
-        function hydrate(data) {
+        function hydrateAttendanceSettings(data) {
             selectPrimaryMode(data?.primaryMode || 'QR');
 
             if (manualToggle) {
@@ -1837,17 +2241,20 @@
                 toggleAutoClockOut(autoClockOutToggle);
             }
 
-            if (autoClockOutHours && data?.autoClockOutMaxHours) {
-                autoClockOutHours.value = Number(data.autoClockOutMaxHours).toString();
+            if (autoClockOutHours) {
+                if (data?.autoClockOutMaxHours != null) autoClockOutHours.value = Number(data.autoClockOutMaxHours).toString();
+                else autoClockOutHours.value = '';
             }
 
             if (defaultShiftInput) defaultShiftInput.value = data?.defaultShiftTemplateCode || '';
+        }
 
-            applyOvertimeSettings(data?.overtimeRules);
+        function hydrateOvertimeSettings(data) {
+            applyOvertimeSettings(data);
             applyNightDiffSettings(data?.nightDifferential);
         }
 
-        async function loadSettings() {
+        async function loadAttendanceSettings() {
             try {
                 const resp = await fetch(`${apiBase}/api/org-attendance-settings/current`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -1857,13 +2264,39 @@
                 const data = text ? JSON.parse(text) : null;
 
                 if (!resp.ok) {
-                    showError(data?.message || 'Unable to load attendance settings.');
+                    showAttendanceError(data?.message || 'Unable to load attendance settings.');
                     return;
                 }
 
-                hydrate(data);
+                lastAttendanceSettings = deepClone(data);
+                hydrateAttendanceSettings(deepClone(lastAttendanceSettings));
+                showAttendanceError('');
+                setAttendanceEditMode(false);
             } catch {
-                showError('Unable to load attendance settings.');
+                showAttendanceError('Unable to load attendance settings.');
+            }
+        }
+
+        async function loadOvertimeSettings() {
+            try {
+                const resp = await fetch(`${apiBase}/api/org-attendance-overtime/current`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const text = await resp.text();
+                const data = text ? JSON.parse(text) : null;
+
+                if (!resp.ok) {
+                    showOtError(data?.message || 'Unable to load overtime rules.');
+                    return;
+                }
+
+                lastOvertimeSettings = deepClone(data);
+                hydrateOvertimeSettings(deepClone(lastOvertimeSettings));
+                showOtError('');
+                setOtEditMode(false);
+            } catch {
+                showOtError('Unable to load overtime rules.');
             }
         }
 
@@ -1882,48 +2315,21 @@
             });
         });
 
-        async function saveSettings() {
-            if (isSaving) return;
+        async function saveAttendanceSettings() {
+            if (isAttendanceSaving || !attendanceForm) return;
+            if (!attendanceEditing) return;
 
-            let overtimeRules;
+            let payload;
             try {
-                overtimeRules = collectOvertimeSettings();
+                payload = collectAttendancePayload();
             } catch (err) {
-                showError(err?.message || 'Fix the errors in overtime rules before saving.');
+                showAttendanceError(err?.message || 'Unable to save attendance settings.');
+                if (err?.code === 'AUTO_CLOCK_OUT') autoClockOutHours?.focus();
                 return;
             }
 
-            const payload = {
-                primaryMode: getSelectedMode(),
-                allowManualEntry: manualToggle?.checked ?? false,
-                requireGeo: requireGeofenceToggle?.checked ?? false,
-                enforceGeofence: requireGeofenceToggle?.checked ?? false,
-                restrictByIp: restrictByIpToggle?.checked ?? false,
-                preventDoubleClockIn: preventDoubleClockInToggle?.checked ?? false,
-                autoClockOutEnabled: autoClockOutToggle?.checked ?? false,
-                autoClockOutMaxHours: null,
-                defaultShiftTemplateCode: defaultShiftInput?.value?.trim() || null,
-                overtimeRules,
-                nightDifferential: collectNightDiffSettings()
-            };
-
-            const hours = parseHours();
-            if (payload.autoClockOutEnabled) {
-                payload.autoClockOutMaxHours = hours;
-                if (!hours) {
-                    showError('Enter the number of hours before auto clock-out.');
-                    autoClockOutHours?.focus();
-                    return;
-                }
-            }
-
-            if (!payload.primaryMode) {
-                showError('Select a primary attendance mode.');
-                return;
-            }
-
-            showError('');
-            setSaving(true);
+            showAttendanceError('');
+            setAttendanceSaving(true);
 
             try {
                 const resp = await fetch(`${apiBase}/api/org-attendance-settings/current`, {
@@ -1941,25 +2347,81 @@
 
                 if (!resp.ok) throw new Error(data?.message || 'Failed to save attendance settings.');
 
-                await loadSettings();
+                await loadAttendanceSettings();
+                setAttendanceEditMode(false);
 
                 const persisted = data?.persisted !== false;
                 const toastMessage = data?.message
                     || (persisted ? 'Attendance settings updated.' : 'Attendance settings saved locally and will sync once reconnected.');
                 window.showToast?.(toastMessage, persisted);
             } catch (err) {
-                showError(err?.message || 'Failed to save attendance settings.');
+                showAttendanceError(err?.message || 'Failed to save attendance settings.');
                 window.showToast?.('Unable to save attendance settings.', false);
             } finally {
-                setSaving(false);
+                setAttendanceSaving(false);
             }
         }
 
-        form.addEventListener('submit', (evt) => {
+        async function saveOvertimeSettings() {
+            if (isOtSaving || !otForm) return;
+            if (!otEditing) return;
+
+            let overtimeRules;
+            try {
+                overtimeRules = collectOvertimeSettings();
+            } catch (err) {
+                showOtError(err?.message || 'Fix the errors in overtime rules before saving.');
+                return;
+            }
+
+            const nightDifferential = collectNightDiffSettings();
+
+            const payload = { ...overtimeRules, nightDifferential };
+
+            showOtError('');
+            setOtSaving(true);
+
+            try {
+                const resp = await fetch(`${apiBase}/api/org-attendance-overtime/current`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const text = await resp.text();
+                let data = null;
+                if (text) { try { data = JSON.parse(text); } catch { } }
+
+                if (!resp.ok) throw new Error(data?.message || 'Failed to save overtime settings.');
+
+                await loadOvertimeSettings();
+                setOtEditMode(false);
+
+                const persisted = data?.persisted !== false;
+                const toastMessage = data?.message
+                    || (persisted ? 'Overtime rules updated.' : 'Overtime rules saved locally and will sync once reconnected.');
+                window.showToast?.(toastMessage, persisted);
+            } catch (err) {
+                showOtError(err?.message || 'Failed to save overtime settings.');
+                window.showToast?.('Unable to save overtime settings.', false);
+            } finally {
+                setOtSaving(false);
+            }
+        }
+
+        attendanceForm?.addEventListener('submit', (evt) => {
             evt.preventDefault();
-            saveSettings();
+            saveAttendanceSettings();
         });
 
-        loadSettings();
+        otForm?.addEventListener('submit', (evt) => {
+            evt.preventDefault();
+            saveOvertimeSettings();
+        });
+
+        Promise.all([loadAttendanceSettings(), loadOvertimeSettings()]);
     })();
 </script>
