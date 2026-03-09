@@ -25,33 +25,89 @@
     </div>
 
 </div>
-@* ─── DELETE SHIFT CONFIRMATION MODAL ─── *@
-<div id="deleteShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        padding: 1rem;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .modal-overlay:not(.hidden) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-shell {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-height: calc(100vh - 2rem);
+        overflow: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin: auto;
+    }
+
+    .modal-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .modal-shell::-webkit-scrollbar,
+        .modal-overlay::-webkit-scrollbar,
+        .modal-table::-webkit-scrollbar,
+        .modal-body::-webkit-scrollbar {
+            display: none;
+        }
+
+    .modal-table {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .modal-table table {
+            min-width: 960px;
+        }
+</style>
+
+@* ─── EDIT SHIFT MODAL ─── *@
+<div id="editShiftModal" class="modal-overlay hidden bg-black/50 px-4 backdrop-blur-sm">
+    <div class="modal-shell w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
 
         <div class="h-1.5 w-full bg-amber-400"></div>
         <div class="flex items-center justify-between border-b border-amber-200 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
             <div class="flex items-center gap-2.5">
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                    </svg>
                 </div>
                 <h3 class="text-base font-bold text-amber-900 dark:text-amber-200">Edit Shift Template</h3>
             </div>
             <button onclick="closeEditShiftModal()" class="rounded-lg p-1.5 text-amber-400 hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/30">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
 
-        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-5">
+        <div class="modal-body px-6 py-5 space-y-5">
 
-            @* Shift Name *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Name</label>
                 <input type="text" id="editShiftName" maxlength="60"
                        class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 placeholder:text-gray-400 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50 dark:placeholder:text-gray-500">
             </div>
 
-            @* Shift Type *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Type</label>
                 <div class="grid grid-cols-3 gap-2">
@@ -67,6 +123,7 @@
                             <span class="text-[10px] text-gray-400 dark:text-gray-500">Strict times</span>
                         </div>
                     </label>
+
                     <label class="group cursor-pointer">
                         <input type="radio" name="edit_shift_type" value="flexible" class="peer sr-only" onchange="onEditShiftTypeChange('flexible')">
                         <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
@@ -79,6 +136,7 @@
                             <span class="text-[10px] text-gray-400 dark:text-gray-500">Allowed window</span>
                         </div>
                     </label>
+
                     <label class="group cursor-pointer">
                         <input type="radio" name="edit_shift_type" value="open" class="peer sr-only" onchange="onEditShiftTypeChange('open')">
                         <div class="flex flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center transition-all shadow-sm
@@ -95,38 +153,105 @@
                 <p id="editShiftTypeHint" class="mt-2 text-xs text-amber-600 dark:text-amber-500">Fixed: strict start and end times each shift.</p>
             </div>
 
-            @* Work Days *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Days</label>
                 <div class="flex gap-2">
-                    <button type="button" onclick="toggleEditDay(this)" data-day="Mon" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">M</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-day="Tue" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">T</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-day="Wed" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">W</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-day="Thu" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">T</button>
-                    <button type="button" onclick="toggleEditDay(this)" data-day="Fri" data-active="true"  class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">F</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-day="Mon" data-active="true" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">M</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-day="Tue" data-active="true" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">T</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-day="Wed" data-active="true" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">W</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-day="Thu" data-active="true" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">T</button>
+                    <button type="button" onclick="toggleEditDay(this)" data-day="Fri" data-active="true" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all">F</button>
                     <button type="button" onclick="toggleEditDay(this)" data-day="Sat" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                     <button type="button" onclick="toggleEditDay(this)" data-day="Sun" data-active="false" class="edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                 </div>
             </div>
 
-            @* EDIT FIXED FIELDS *@
             <div id="edit-fields-fixed" class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Start Time</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Start Time</label>
                         <input type="time" id="editFixedStart" value="09:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">End Time</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift End Time</label>
                         <input type="time" id="editFixedEnd" value="18:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
                     </div>
                 </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Rules</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="edit_break_rule_type" value="single" class="h-4 w-4 accent-amber-500" checked onchange="onBreakRuleChange('single', 'edit')">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Single Break</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="edit_break_rule_type" value="multiple" class="h-4 w-4 accent-amber-500" onchange="onBreakRuleChange('multiple', 'edit')">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Multiple Break</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="edit-break-rule-single">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-gray-700 dark:bg-gray-700/30">
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Start</label>
+                                <input type="time" id="editSingleBreakStart" value="12:00" onchange="calculateSingleBreakDuration('edit')" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break End</label>
+                                <input type="time" id="editSingleBreakEnd" value="13:00" onchange="calculateSingleBreakDuration('edit')" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Duration</label>
+                                <input type="text" id="editSingleBreakDuration" readonly value="1h 0m" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-500 bg-slate-100 ring-1 ring-inset ring-amber-300 focus:outline-none dark:bg-gray-700 dark:text-gray-400 dark:ring-amber-700/50">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Type</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="edit_single_break_type" value="paid" class="h-4 w-4 accent-amber-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">Paid</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="edit_single_break_type" value="unpaid" class="h-4 w-4 accent-amber-500" checked>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">Unpaid</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="edit-break-rule-multiple" class="hidden">
+                    <div class="modal-table overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-100 dark:bg-gray-700/40">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Label</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Start</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">End</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Duration</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Auto-Deduct</th>
+                                    <th class="w-12 px-3 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit-multiple-breaks-container" class="divide-y divide-slate-200 dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                    <div class="text-right">
+                        <button type="button" onclick="addMultipleBreakRow('edit')" class="mt-2 text-sm text-amber-600 hover:text-amber-700 font-semibold">+ Add Break Rule</button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Duration</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Required Work Hours Per Shift</label>
                         <div class="flex items-center gap-2">
-                            <input type="number" id="editFixedBreak" min="0" max="120" value="60" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
-                            <span class="text-xs text-gray-400 whitespace-nowrap">min</span>
+                            <input type="number" id="editFixedRequiredHours" min="0" max="24" step="0.25" value="8" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-amber-300 focus:ring-2 focus:ring-amber-400 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-amber-700/50">
+                            <span class="text-xs text-gray-400 whitespace-nowrap">hours</span>
                         </div>
                     </div>
                     <div>
@@ -139,7 +264,6 @@
                 </div>
             </div>
 
-            @* EDIT FLEXIBLE FIELDS *@
             <div id="edit-fields-flexible" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -169,7 +293,6 @@
                 </div>
             </div>
 
-            @* EDIT OPEN FIELDS *@
             <div id="edit-fields-open" class="hidden space-y-4">
                 <div class="rounded-lg bg-amber-50 px-4 py-3 text-xs text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-500/30">
                     No strict clock-in window. Employees log total hours worked per day or week.
@@ -188,34 +311,71 @@
         <div class="flex items-center justify-end gap-3 border-t border-amber-200 bg-amber-50/60 px-6 py-4 dark:border-amber-900/40 dark:bg-amber-900/10">
             <button onclick="closeEditShiftModal()" class="btn-secondary">Cancel</button>
             <button onclick="saveEditShiftTemplate()" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 transition-colors dark:bg-amber-500 dark:hover:bg-amber-400">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
                 Save Changes
             </button>
         </div>
     </div>
 </div>
 
+@* ─── DELETE SHIFT CONFIRMATION MODAL ─── *@
+<div id="deleteShiftModal" class="modal-overlay hidden bg-black/50 px-4 backdrop-blur-sm">
+    <div class="modal-shell w-full max-w-xl rounded-2xl border border-red-200 bg-white shadow-2xl dark:border-red-900/40 dark:bg-gray-800">
+        <div class="h-1.5 w-full bg-red-500"></div>
+        <div class="flex items-center justify-between border-b border-red-100 bg-red-50/70 px-6 py-4 dark:border-red-900/40 dark:bg-red-900/10">
+            <div class="flex items-center gap-2.5 text-red-600 dark:text-red-400">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold">Delete Shift Template</h3>
+            </div>
+            <button onclick="closeDeleteShiftModal()" class="rounded-lg p-1.5 text-red-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body space-y-3 px-6 py-5 text-sm text-gray-600 dark:text-gray-200">
+            <p>Are you sure you want to permanently remove <span id="deleteShiftName" class="font-semibold text-gray-900 dark:text-white">this shift</span>? This action cannot be undone.</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500">Employees assigned to this template will lose the schedule until a new one is set.</p>
+        </div>
+        <div class="flex items-center justify-end gap-3 border-t border-red-100 bg-red-50/40 px-6 py-4 dark:border-red-900/30 dark:bg-red-900/5">
+            <button onclick="closeDeleteShiftModal()" class="btn-secondary">Cancel</button>
+            <button onclick="confirmDeleteShift()" class="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 transition-colors dark:bg-red-600 dark:hover:bg-red-500">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-8.954 8.955c-.44.439-1.152.439-1.591 0L3.75 10.5" />
+                </svg>
+                Delete Template
+            </button>
+        </div>
+    </div>
+</div>
+
 @* ─── ADD SHIFT MODAL ─── *@
-<div id="addShiftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+<div id="addShiftModal" class="modal-overlay hidden bg-black/50 px-4 backdrop-blur-sm">
+    <div class="modal-shell w-full max-w-5xl rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
 
         <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-gray-700">
             <h3 class="text-base font-bold text-gray-900 dark:text-white">New Shift Template</h3>
             <button onclick="closeAddShiftModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
 
-        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-5">
+        <div class="modal-body px-6 py-5 space-y-5">
 
-            @* Shift Name *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Name</label>
                 <input type="text" id="shiftName" placeholder="e.g. Morning Shift, Night BPO..." maxlength="60"
                        class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600 dark:placeholder:text-gray-500">
             </div>
 
-            @* Shift Type *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Type</label>
                 <div class="grid grid-cols-3 gap-2">
@@ -263,38 +423,106 @@
                 <p id="shiftTypeHint" class="mt-2 text-xs text-gray-400 dark:text-gray-500">Fixed: strict start and end times each shift.</p>
             </div>
 
-            @* Work Days *@
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Days</label>
                 <div class="flex gap-2">
-                    <button type="button" onclick="toggleModalDay(this)" data-day="Mon" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">M</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-day="Tue" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">T</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-day="Wed" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">W</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-day="Thu" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">T</button>
-                    <button type="button" onclick="toggleModalDay(this)" data-day="Fri" data-active="true"  class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">F</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-day="Mon" data-active="true" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">M</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-day="Tue" data-active="true" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">T</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-day="Wed" data-active="true" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">W</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-day="Thu" data-active="true" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">T</button>
+                    <button type="button" onclick="toggleModalDay(this)" data-day="Fri" data-active="true" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all">F</button>
                     <button type="button" onclick="toggleModalDay(this)" data-day="Sat" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                     <button type="button" onclick="toggleModalDay(this)" data-day="Sun" data-active="false" class="modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 hover:shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500">S</button>
                 </div>
             </div>
 
-            @* FIXED FIELDS *@
             <div id="fields-fixed" class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Start Time</label>
-                        <input type="time" id="addFixedStart" value="09:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">End Time</label>
-                        <input type="time" id="addFixedEnd" value="18:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Shift Schedule</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="sr-only" for="addFixedStart">Shift Start</label>
+                            <input type="time" id="addFixedStart" value="09:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        </div>
+                        <div>
+                            <label class="sr-only" for="addFixedEnd">Shift End</label>
+                            <input type="time" id="addFixedEnd" value="18:00" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        </div>
                     </div>
                 </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Rules</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="break_rule_type" value="single" class="h-4 w-4 accent-emerald-500" checked onchange="onBreakRuleChange('single', 'add')">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Single Break</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="break_rule_type" value="multiple" class="h-4 w-4 accent-emerald-500" onchange="onBreakRuleChange('multiple', 'add')">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Multiple Break</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="add-break-rule-single" class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-gray-700 dark:bg-gray-700/30">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Start</label>
+                            <input type="time" id="addSingleBreakStart" value="12:00" onchange="calculateSingleBreakDuration('add')" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break End</label>
+                            <input type="time" id="addSingleBreakEnd" value="13:00" onchange="calculateSingleBreakDuration('add')" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Duration</label>
+                            <input type="text" id="addSingleBreakDuration" readonly value="1h 0m" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-500 bg-slate-100 ring-1 ring-inset ring-gray-300 focus:outline-none dark:bg-gray-700 dark:text-gray-400 dark:ring-gray-600">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Type</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="add_single_break_type" value="paid" class="h-4 w-4 accent-emerald-500">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Paid</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="add_single_break_type" value="unpaid" class="h-4 w-4 accent-emerald-500" checked>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Unpaid</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="add-break-rule-multiple" class="hidden">
+                    <div class="modal-table overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700">
+                        <table class="min-w-full">
+                            <thead class="bg-slate-100 dark:bg-gray-700/40">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Label</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Start</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">End</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Duration</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Auto-Deduct</th>
+                                    <th class="w-12 px-3 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="add-multiple-breaks-container" class="divide-y divide-slate-200 dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                    <div class="text-right">
+                        <button type="button" onclick="addMultipleBreakRow('add')" class="mt-2 text-sm text-emerald-600 hover:text-emerald-700 font-semibold">+ Add Break Rule</button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Break Duration</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Required Work Hours Per Shift</label>
                         <div class="flex items-center gap-2">
-                            <input type="number" id="addFixedBreak" min="0" max="120" value="60" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                            <span class="text-xs text-gray-400 whitespace-nowrap">min</span>
+                            <input type="number" id="addFixedRequiredHours" min="0" max="24" step="0.25" value="8" class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <span class="text-xs text-gray-400 whitespace-nowrap">hours</span>
                         </div>
                     </div>
                     <div>
@@ -307,7 +535,6 @@
                 </div>
             </div>
 
-            @* FLEXIBLE FIELDS *@
             <div id="fields-flexible" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -337,7 +564,6 @@
                 </div>
             </div>
 
-            @* OPEN FIELDS *@
             <div id="fields-open" class="hidden space-y-4">
                 <div class="rounded-lg bg-violet-50 px-4 py-3 text-xs text-violet-700 ring-1 ring-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:ring-violet-500/30">
                     No strict clock-in window. Employees log total hours worked per day or week.
@@ -356,7 +582,9 @@
         <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button onclick="closeAddShiftModal()" class="btn-secondary">Cancel</button>
             <button onclick="saveShiftTemplate()" class="btn-primary gap-1.5">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
                 Save Template
             </button>
         </div>
@@ -365,831 +593,634 @@
 </div>
 
 <script>
-window.SubchronOrgTabShifts = window.SubchronOrgTabShifts || (() => {
-    const shiftTypeHints = {
-        fixed:    'Fixed: strict start and end times each shift.',
-        flexible: 'Flexible: employee picks when to start within an allowed window.',
-        open:     'Open: no time window - just total hours required per week.'
-    };
-
-    const typeLabels = { fixed: 'Fixed', flexible: 'Flexible', open: 'Open' };
-    const typeBadgeColors = {
-        fixed:    'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-500/30',
-        flexible: 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-400 dark:ring-blue-500/30',
-        open:     'bg-violet-50 text-violet-700 ring-1 ring-violet-600/20 dark:bg-violet-900/30 dark:text-violet-400 dark:ring-violet-500/30'
-    };
-    const typeIconColors = {
-        fixed:    'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
-        flexible: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
-        open:     'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400'
-    };
-
-    function openAddShiftModal() {
-        const modal = document.getElementById('addShiftModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeAddShiftModal() {
-        const modal = document.getElementById('addShiftModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    function onShiftTypeChange(type) {
-        ['fixed', 'flexible', 'open'].forEach(t => {
-            document.getElementById('fields-' + t).classList.add('hidden');
-        });
-        document.getElementById('fields-' + type).classList.remove('hidden');
-        document.getElementById('shiftTypeHint').textContent = shiftTypeHints[type];
-    }
-
-    function toggleModalDay(btn) {
-        const isActive = btn.getAttribute('data-active') === 'true';
-        if (isActive) {
-            btn.setAttribute('data-active', 'false');
-            btn.className = 'modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-emerald-300 hover:text-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
-        } else {
-            btn.setAttribute('data-active', 'true');
-            btn.className = 'modal-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white shadow-sm transition-all';
-        }
-    }
-
-    function saveShiftTemplate() {
-        const name = document.getElementById('shiftName').value.trim();
-        if (!name) { document.getElementById('shiftName').focus(); return; }
-        const type = document.querySelector('input[name="shift_type"]:checked').value;
-
-        // Collect active work days
-        const dayBtns = document.querySelectorAll('.modal-day-btn');
-        const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-        const activeDays = [];
-        dayBtns.forEach((btn, i) => { if (btn.getAttribute('data-active') === 'true') activeDays.push(dayNames[i]); });
-        const daysLabel = activeDays.length === 7 ? 'Every day' :
-                          activeDays.length === 0 ? 'No days set' :
-                          activeDays.join(', ');
-
-        // Collect type-specific details
-        let detailCells = '';
-        const accentColor = { fixed: 'emerald', flexible: 'blue', open: 'violet' }[type];
-
-        if (type === 'fixed') {
-            const startEl = document.querySelector('#fields-fixed input[type="time"]:nth-of-type(1)') ||
-                            document.querySelector('#fields-fixed input[type="time"]');
-            const inputs   = document.querySelectorAll('#fields-fixed input[type="time"]');
-            const start    = inputs[0] ? formatTime(inputs[0].value) : '—';
-            const end      = inputs[1] ? formatTime(inputs[1].value) : '—';
-            const numInputs = document.querySelectorAll('#fields-fixed input[type="number"]');
-            const brk      = numInputs[0] ? numInputs[0].value + ' min' : '—';
-            const grace    = numInputs[1] ? numInputs[1].value + ' min' : '—';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Time</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${start} – ${end}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Break</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${brk}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Grace Period</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${grace}</p></div>`;
-        } else if (type === 'flexible') {
-            const timeInputs = document.querySelectorAll('#fields-flexible input[type="time"]');
-            const earliest   = timeInputs[0] ? formatTime(timeInputs[0].value) : '—';
-            const latest     = timeInputs[1] ? formatTime(timeInputs[1].value) : '—';
-            const numInputs  = document.querySelectorAll('#fields-flexible input[type="number"]');
-            const reqHrs     = numInputs[0] ? numInputs[0].value + ' hrs' : '—';
-            const maxHrs     = numInputs[1] ? numInputs[1].value + ' hrs' : '—';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Window</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${earliest} – ${latest}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Required Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${reqHrs}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Max Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${maxHrs}</p></div>`;
-        } else {
-            const weekHrs = document.querySelector('#fields-open input[type="number"]');
-            const hrs     = weekHrs ? weekHrs.value + ' hrs' : '—';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Schedule</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">No strict window</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Required Weekly</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${hrs}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Basis</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">Hours only</p></div>`;
-        }
-
-        const borderColor = { fixed: 'border-emerald-200 dark:border-emerald-800/60', flexible: 'border-blue-200 dark:border-blue-800/60', open: 'border-violet-200 dark:border-violet-800/60' }[type];
-        const accentBar   = { fixed: 'bg-emerald-500', flexible: 'bg-blue-500', open: 'bg-violet-500' }[type];
-        const detailBg    = { fixed: 'bg-emerald-50/70 dark:bg-emerald-900/10', flexible: 'bg-blue-50/70 dark:bg-blue-900/10', open: 'bg-violet-50/70 dark:bg-violet-900/10' }[type];
-
-        const iconSvg = {
-            fixed:    '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
-            flexible: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />',
-            open:     '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />'
+    (() => {
+        const SHIFT_HINTS = {
+            fixed: 'Fixed: strict start and end times each shift.',
+            flexible: 'Flexible: employees pick a start within an allowed window.',
+            open: 'Open: no clock window — just total weekly hours.'
         };
-        const trashSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />';
-        const editSvg  = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />';
 
-        const card = document.createElement('div');
-        card.className = `shift-card overflow-hidden rounded-2xl border ${borderColor} bg-slate-50 shadow-sm dark:bg-gray-800`;
-        card.innerHTML = `
-            <div class="h-1.5 w-full ${accentBar}"></div>
-            <div class="px-5 pt-4 pb-4">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${typeIconColors[type]}">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${iconSvg[type]}</svg>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-900 dark:text-white">${name}</span>
-                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${typeBadgeColors[type]}">${typeLabels[type]}</span>
-                        </div>
-                    </div>
-                    <div class="flex shrink-0 items-center gap-1">
-                        <button onclick="openEditShiftModal(this.closest('.shift-card'))" class="rounded-lg p-1.5 text-amber-400 hover:bg-amber-50 hover:text-amber-600 dark:text-amber-500 dark:hover:bg-amber-900/20 dark:hover:text-amber-400" title="Edit">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${editSvg}</svg>
-                        </button>
-                        <button onclick="openDeleteShiftModal(this.closest('.shift-card'))" class="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 dark:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400" title="Delete">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${trashSvg}</svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl ${detailBg} px-4 py-3 sm:grid-cols-4">
-                    ${detailCells}
-                </div>
-            </div>`;
+        const TYPE_META = {
+            Fixed: {
+                label: 'Fixed', accent: 'emerald',
+                border: 'border-emerald-200 dark:border-emerald-800/60', bar: 'bg-emerald-500',
+                detailBg: 'bg-emerald-50/70 dark:bg-emerald-900/10',
+                iconWrapper: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
+                badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-500/30',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />'
+            },
+            Flexible: {
+                label: 'Flexible', accent: 'blue',
+                border: 'border-blue-200 dark:border-blue-800/60', bar: 'bg-blue-500',
+                detailBg: 'bg-blue-50/70 dark:bg-blue-900/10',
+                iconWrapper: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
+                badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-400 dark:ring-blue-500/30',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />'
+            },
+            Open: {
+                label: 'Open', accent: 'violet',
+                border: 'border-violet-200 dark:border-violet-800/60', bar: 'bg-violet-500',
+                detailBg: 'bg-violet-50/70 dark:bg-violet-900/10',
+                iconWrapper: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400',
+                badge: 'bg-violet-50 text-violet-700 ring-1 ring-violet-600/20 dark:bg-violet-900/30 dark:text-violet-400 dark:ring-violet-500/30',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />'
+            }
+        };
 
-        const list = document.getElementById('shiftsList');
-        list.appendChild(card);
-        document.getElementById('shiftName').value = '';
-        closeAddShiftModal();
-    }
+        const appRoot = document.getElementById('appRoot');
+        const apiBase = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim().replace(/\/$/, '');
+        const token = appRoot?.getAttribute('data-api-token') || appRoot?.dataset?.apiToken || '';
 
-    function formatTime(val) {
-        if (!val) return '—';
-        const [h, m] = val.split(':').map(Number);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const hour = h % 12 || 12;
-        return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
-    }
+        const refs = {
+            listEl: document.getElementById('shiftsList'),
+            emptyStateEl: document.getElementById('shiftsEmptyState'),
+            addModal: document.getElementById('addShiftModal'),
+            editModal: document.getElementById('editShiftModal'),
+            deleteModal: document.getElementById('deleteShiftModal'),
+            deleteNameEl: document.getElementById('deleteShiftName')
+        };
 
-    // ── DELETE MODAL ──────────────────────────────────────────────
-    let _cardToDelete = null;
+        if (!refs.listEl) return;
 
-    function openDeleteShiftModal(card) {
-        _cardToDelete = card;
-        const nameEl = card.querySelector('.text-sm.font-bold');
-        document.getElementById('deleteShiftName').textContent = nameEl ? '"' + nameEl.textContent.trim() + '"' : 'this shift';
-        document.querySelectorAll('input[name="deleteReason"]')[0].checked = true;
-        const modal = document.getElementById('deleteShiftModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+        const state = {
+            templates: [],
+            editingCode: null,
+            deleteCode: null,
+            isSaving: false,
+            multipleBreakCounter: 0
+        };
 
-    function closeDeleteShiftModal() {
-        _cardToDelete = null;
-        const modal = document.getElementById('deleteShiftModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+        const authHeaders = () => {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        };
 
-    function confirmDeleteShift() {
-        if (_cardToDelete) {
-            _cardToDelete.remove();
-            _cardToDelete = null;
-        }
-        closeDeleteShiftModal();
-    }
+        const showToast = (message, success = true) => {
+            if (typeof window.showToast === 'function') window.showToast(message, success);
+        };
 
-    // ── EDIT MODAL ────────────────────────────────────────────────
-    let _cardToEdit = null;
+        const canCallApi = () => {
+            if (!apiBase || !token) {
+                console.warn('Shift tab: missing API base or token.');
+                return false;
+            }
+            return true;
+        };
 
-    function openEditShiftModal(card) {
-        _cardToEdit = card;
+        const diffMinutes = (start, end) => {
+            if (!start || !end) return 0;
+            const startDate = new Date(`1970-01-01T${start}:00`);
+            const endDate = new Date(`1970-01-01T${end}:00`);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return 0;
+            let diff = endDate - startDate;
+            if (diff < 0) diff += 24 * 60 * 60 * 1000;
+            return Math.round(diff / 60000);
+        };
 
-        // Read name from card
-        const nameEl = card.querySelector('.text-sm.font-bold');
-        document.getElementById('editShiftName').value = nameEl ? nameEl.textContent.trim() : '';
+        const formatMinutes = (minutes) => {
+            if (!Number.isFinite(minutes) || minutes <= 0) return '0m';
+            const hrs = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            if (hrs && mins) return `${hrs}h ${mins}m`;
+            if (hrs) return `${hrs}h`;
+            return `${mins}m`;
+        };
 
-        // Detect type from badge text
-        const badgeEl = card.querySelector('.inline-flex.items-center.rounded-full');
-        const badgeText = badgeEl ? badgeEl.textContent.trim().toLowerCase() : 'fixed';
-        const type = badgeText.includes('flex') ? 'flexible' : badgeText.includes('open') ? 'open' : 'fixed';
+        const formatTime = (value) => {
+            if (!value) return '—';
+            const [h, m] = value.split(':');
+            if (h === undefined || m === undefined) return value;
+            const hour = Number(h);
+            const minute = Number(m);
+            if (Number.isNaN(hour) || Number.isNaN(minute)) return value;
+            const suffix = hour >= 12 ? 'PM' : 'AM';
+            const normalizedHour = hour % 12 || 12;
+            return `${normalizedHour}:${String(minute).padStart(2, '0')} ${suffix}`;
+        };
 
-        // Set the radio
-        const radio = document.querySelector(`input[name="edit_shift_type"][value="${type}"]`);
-        if (radio) radio.checked = true;
-        onEditShiftTypeChange(type);
+        const toggleDayButton = (btn, theme) => {
+            const active = btn.getAttribute('data-active') === 'true';
+            btn.setAttribute('data-active', active ? 'false' : 'true');
+            applyDayButtonClass(btn, !active, theme);
+        };
 
-        // Reset day buttons to Mon-Fri
-        document.querySelectorAll('.edit-day-btn').forEach((btn, i) => {
-            const active = i < 5;
-            btn.setAttribute('data-active', active ? 'true' : 'false');
+        const applyDayButtonClass = (btn, active, theme) => {
+            const baseClass = btn.classList.contains('edit-day-btn') ? 'edit-day-btn' : 'modal-day-btn';
             if (active) {
-                btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all';
+                btn.className = `${baseClass} flex h-10 w-10 items-center justify-center rounded-lg bg-${theme}-500 text-xs font-bold text-white shadow-sm transition-all`;
             } else {
-                btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
+                btn.className = `${baseClass} flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-${theme}-300 hover:text-${theme}-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500`;
             }
-        });
-
-        const modal = document.getElementById('editShiftModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeEditShiftModal() {
-        _cardToEdit = null;
-        const modal = document.getElementById('editShiftModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    function onEditShiftTypeChange(type) {
-        ['fixed', 'flexible', 'open'].forEach(t => {
-            document.getElementById('edit-fields-' + t).classList.toggle('hidden', t !== type);
-        });
-        const hints = { fixed: 'Fixed: strict start and end times each shift.', flexible: 'Flexible: employees work within an allowed window.', open: 'Open: no strict window — hours tracked per day or week.' };
-        document.getElementById('editShiftTypeHint').textContent = hints[type] || '';
-    }
-
-    function toggleEditDay(btn) {
-        const active = btn.getAttribute('data-active') === 'true';
-        btn.setAttribute('data-active', active ? 'false' : 'true');
-        if (!active) {
-            btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white shadow-sm transition-all';
-        } else {
-            btn.className = 'edit-day-btn flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-amber-300 hover:text-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500';
-        }
-    }
-
-    function saveEditShiftTemplate() {
-        if (!_cardToEdit) return;
-
-        const name = document.getElementById('editShiftName').value.trim();
-        if (!name) { document.getElementById('editShiftName').focus(); return; }
-
-        const type = document.querySelector('input[name="edit_shift_type"]:checked').value;
-
-        // Update name in card
-        const nameEl = _cardToEdit.querySelector('.text-sm.font-bold');
-        if (nameEl) nameEl.textContent = name;
-
-        // Rebuild detail grid
-        const dayBtns = document.querySelectorAll('.edit-day-btn');
-        const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-        const activeDays = [];
-        dayBtns.forEach((btn, i) => { if (btn.getAttribute('data-active') === 'true') activeDays.push(dayNames[i]); });
-        const daysLabel = activeDays.length === 7 ? 'Every day' : activeDays.length === 0 ? 'No days set' : activeDays.join(', ');
-
-        const accentColor = { fixed: 'emerald', flexible: 'blue', open: 'violet' }[type];
-        let detailCells = '';
-
-        if (type === 'fixed') {
-            const start = formatTime(document.getElementById('editFixedStart').value);
-            const end   = formatTime(document.getElementById('editFixedEnd').value);
-            const brk   = document.getElementById('editFixedBreak').value + ' min';
-            const grace = document.getElementById('editFixedGrace').value + ' min';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Time</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${start} – ${end}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Break</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${brk}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Grace Period</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${grace}</p></div>`;
-        } else if (type === 'flexible') {
-            const earliest = formatTime(document.getElementById('editFlexEarliest').value);
-            const latest   = formatTime(document.getElementById('editFlexLatest').value);
-            const reqHrs   = document.getElementById('editFlexReqHrs').value + ' hrs';
-            const maxHrs   = document.getElementById('editFlexMaxHrs').value + ' hrs';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Window</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${earliest} – ${latest}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Required Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${reqHrs}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Max Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${maxHrs}</p></div>`;
-        } else {
-            const hrs = document.getElementById('editOpenWeekHrs').value + ' hrs';
-            detailCells = `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Schedule</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">No strict window</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${daysLabel}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Required Weekly</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${hrs}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accentColor}-600 dark:text-${accentColor}-500">Basis</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">Hours only</p></div>`;
-        }
-
-        // Update the detail grid in the card
-        const grid = _cardToEdit.querySelector('.grid.grid-cols-2.gap-x-4');
-        if (grid) grid.innerHTML = detailCells;
-
-        closeEditShiftModal();
-    }
-
-    function attachModalDismissHandlers() {
-        [
-            { id: 'addShiftModal', handler: closeAddShiftModal },
-            { id: 'deleteShiftModal', handler: closeDeleteShiftModal },
-            { id: 'editShiftModal', handler: closeEditShiftModal }
-        ].forEach(({ id, handler }) => {
-            const modalEl = document.getElementById(id);
-            if (!modalEl || modalEl.dataset.shiftModalBound === 'true') return;
-            modalEl.dataset.shiftModalBound = 'true';
-            modalEl.addEventListener('click', function(e) {
-                if (e.target === this) handler();
-            });
-        });
-    }
-
-    function init() {
-        _cardToDelete = null;
-        _cardToEdit = null;
-        attachModalDismissHandlers();
-    }
-
-    window.openAddShiftModal = openAddShiftModal;
-    window.closeAddShiftModal = closeAddShiftModal;
-    window.onShiftTypeChange = onShiftTypeChange;
-    window.toggleModalDay = toggleModalDay;
-    window.saveShiftTemplate = saveShiftTemplate;
-    window.openDeleteShiftModal = openDeleteShiftModal;
-    window.closeDeleteShiftModal = closeDeleteShiftModal;
-    window.confirmDeleteShift = confirmDeleteShift;
-    window.openEditShiftModal = openEditShiftModal;
-    window.closeEditShiftModal = closeEditShiftModal;
-    window.onEditShiftTypeChange = onEditShiftTypeChange;
-    window.toggleEditDay = toggleEditDay;
-    window.saveEditShiftTemplate = saveEditShiftTemplate;
-
-    return { init };
-})();
-
-window.SubchronOrgTabShifts.init();
-</script>
-
-<script>
-(() => {
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const shiftTypeHints = {
-        Fixed: 'Fixed: strict start and end times each shift.',
-        Flexible: 'Flexible: employees pick a start within an allowed window.',
-        Open: 'Open: no clock window — just total weekly hours.'
-    };
-    const typeMeta = {
-        Fixed: {
-            label: 'Fixed', accent: 'emerald',
-            border: 'border-emerald-200 dark:border-emerald-800/60', bar: 'bg-emerald-500',
-            detailBg: 'bg-emerald-50/70 dark:bg-emerald-900/10',
-            iconWrapper: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
-            badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-400 dark:ring-emerald-500/30',
-            icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />'
-        },
-        Flexible: {
-            label: 'Flexible', accent: 'blue',
-            border: 'border-blue-200 dark:border-blue-800/60', bar: 'bg-blue-500',
-            detailBg: 'bg-blue-50/70 dark:bg-blue-900/10',
-            iconWrapper: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
-            badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-400 dark:ring-blue-500/30',
-            icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />'
-        },
-        Open: {
-            label: 'Open', accent: 'violet',
-            border: 'border-violet-200 dark:border-violet-800/60', bar: 'bg-violet-500',
-            detailBg: 'bg-violet-50/70 dark:bg-violet-900/10',
-            iconWrapper: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400',
-            badge: 'bg-violet-50 text-violet-700 ring-1 ring-violet-600/20 dark:bg-violet-900/30 dark:text-violet-400 dark:ring-violet-500/30',
-            icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />'
-        }
-    };
-
-    const appRoot = document.getElementById('appRoot');
-    const apiBase = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim().replace(/\/$/, '');
-    const token = appRoot?.getAttribute('data-api-token') || appRoot?.dataset?.apiToken || '';
-    const listEl = document.getElementById('shiftsList');
-    const emptyStateEl = document.getElementById('shiftsEmptyState');
-    const addModal = document.getElementById('addShiftModal');
-    const editModal = document.getElementById('editShiftModal');
-    const deleteModal = document.getElementById('deleteShiftModal');
-    const deleteNameEl = document.getElementById('deleteShiftName');
-
-    if (!listEl) return;
-
-    let templates = [];
-    let editingCode = null;
-    let deleteCode = null;
-    let isSaving = false;
-
-    const authHeaders = () => {
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        return headers;
-    };
-
-    const showToast = (message, success = true) => {
-        if (typeof window.showToast === 'function') window.showToast(message, success);
-    };
-
-    const canCallApi = () => {
-        if (!apiBase || !token) {
-            console.warn('Shift tab: missing API base or token.');
-            return false;
-        }
-        return true;
-    };
-
-    async function loadShiftTemplates() {
-        if (!canCallApi()) return;
-        try {
-            const resp = await fetch(`${apiBase}/api/org-shift-templates/current`, { headers: authHeaders() });
-            const data = await resp.json().catch(() => null);
-            if (!resp.ok) throw new Error(data?.message || 'Unable to load shift templates.');
-            templates = data?.templates || [];
-            renderTemplateCards();
-        } catch (err) {
-            console.error(err);
-            showToast(err instanceof Error ? err.message : 'Unable to load shift templates.', false);
-        }
-    }
-
-    function renderTemplateCards() {
-        listEl.innerHTML = '';
-        if (!templates.length) {
-            emptyStateEl?.classList.remove('hidden');
-            return;
-        }
-        emptyStateEl?.classList.add('hidden');
-
-        templates.forEach(template => {
-            const meta = typeMeta[template.Type ?? 'Fixed'] || typeMeta.Fixed;
-            const card = document.createElement('div');
-            card.className = `shift-card overflow-hidden rounded-2xl border ${meta.border} bg-slate-50 shadow-sm dark:bg-gray-800`;
-            card.dataset.shiftCode = template.Code || '';
-            card.innerHTML = `
-                <div class="h-1.5 w-full ${meta.bar}"></div>
-                <div class="px-5 pt-4 pb-4">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrapper}">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${meta.icon}</svg>
-                            </div>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-900 dark:text-white">${template.Name || 'Untitled Shift'}</span>
-                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${meta.badge}">${meta.label}</span>
-                            </div>
-                        </div>
-                        <div class="flex shrink-0 items-center gap-1">
-                            <button type="button" class="rounded-lg p-1.5 text-amber-400 hover:bg-amber-50 hover:text-amber-600 dark:text-amber-500 dark:hover:bg-amber-900/20" data-action="edit" title="Edit">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
-                            </button>
-                            <button type="button" class="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 dark:text-red-500 dark:hover:bg-red-900/20" data-action="delete" title="Delete">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl ${meta.detailBg} px-4 py-3 sm:grid-cols-4">
-                        ${buildDetailCells(template, meta)}
-                    </div>
-                </div>`;
-
-            card.querySelector('[data-action="edit"]').addEventListener('click', () => openEditModal(template.Code));
-            card.querySelector('[data-action="delete"]').addEventListener('click', () => openDeleteModal(template.Code));
-
-            listEl.appendChild(card);
-        });
-    }
-
-    function buildDetailCells(template, meta) {
-        const days = template.WorkDays?.length ? template.WorkDays.join(', ') : 'No days set';
-        const accent = meta.accent;
-        if ((template.Type ?? 'Fixed').toLowerCase() === 'flexible') {
-            const earliest = formatTime(template.Flexible?.EarliestStart);
-            const latest = formatTime(template.Flexible?.LatestEnd);
-            const req = template.Flexible?.RequiredDailyHours ? `${template.Flexible.RequiredDailyHours} hrs` : '—';
-            const max = template.Flexible?.MaxDailyHours ? `${template.Flexible.MaxDailyHours} hrs` : '—';
-            return `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Window</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${earliest} – ${latest}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Required Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${req}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Max Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${max}</p></div>`;
-        }
-
-        if ((template.Type ?? 'Fixed').toLowerCase() === 'open') {
-            const weekly = template.Open?.RequiredWeeklyHours ? `${template.Open.RequiredWeeklyHours} hrs` : '—';
-            return `
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Schedule</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">No strict window</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Required Weekly</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${weekly}</p></div>
-                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Basis</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">Hours only</p></div>`;
-        }
-
-        const start = formatTime(template.Fixed?.StartTime);
-        const end = formatTime(template.Fixed?.EndTime);
-        const breakText = template.Fixed?.BreakMinutes ? `${template.Fixed.BreakMinutes} min` : '—';
-        const graceText = template.Fixed?.GraceMinutes ? `${template.Fixed.GraceMinutes} min` : '—';
-        return `
-            <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Time</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${start} – ${end}</p></div>
-            <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
-            <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Break</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${breakText}</p></div>
-            <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Grace</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${graceText}</p></div>`;
-    }
-
-    function formatTime(value) {
-        if (!value) return '—';
-        const [h, m] = value.split(':');
-        if (h === undefined || m === undefined) return value;
-        const hour = Number(h);
-        const minute = Number(m);
-        const suffix = hour >= 12 ? 'PM' : 'AM';
-        const normalizedHour = hour % 12 || 12;
-        return `${normalizedHour}:${String(minute).padStart(2, '0')} ${suffix}`;
-    }
-
-    function openAddShiftModal() {
-        editingCode = null;
-        resetAddForm();
-        addModal?.classList.add('flex');
-        addModal?.classList.remove('hidden');
-    }
-
-    function closeAddShiftModal() {
-        addModal?.classList.add('hidden');
-        addModal?.classList.remove('flex');
-    }
-
-    function resetAddForm() {
-        document.getElementById('shiftName').value = '';
-        document.querySelector('input[name="shift_type"][value="fixed"]').checked = true;
-        onShiftTypeChange('fixed');
-        toggleDayButtons(addModal, '.modal-day-btn', new Set(['Mon','Tue','Wed','Thu','Fri']));
-        document.getElementById('addFixedStart').value = '09:00';
-        document.getElementById('addFixedEnd').value = '18:00';
-        document.getElementById('addFixedBreak').value = '60';
-        document.getElementById('addFixedGrace').value = '15';
-        document.getElementById('addFlexEarliest').value = '06:00';
-        document.getElementById('addFlexLatest').value = '22:00';
-        document.getElementById('addFlexReqHrs').value = '8';
-        document.getElementById('addFlexMaxHrs').value = '10';
-        document.getElementById('addOpenWeekHrs').value = '40';
-    }
-
-    function onShiftTypeChange(type) {
-        ['fixed', 'flexible', 'open'].forEach(t => document.getElementById('fields-' + t).classList.toggle('hidden', t !== type));
-        document.getElementById('shiftTypeHint').textContent = shiftTypeHints[type.charAt(0).toUpperCase() + type.slice(1)] || '';
-    }
-
-    function toggleModalDay(btn) {
-        toggleDayButton(btn, 'emerald');
-    }
-
-    function toggleDayButtons(container, selector, activeDays) {
-        if (!container) return;
-        container.querySelectorAll(selector).forEach(btn => {
-            const day = btn.getAttribute('data-day');
-            const shouldBeActive = activeDays.has(day);
-            btn.setAttribute('data-active', shouldBeActive ? 'true' : 'false');
-            applyDayButtonClass(btn, shouldBeActive, selector.includes('modal') ? 'emerald' : 'amber');
-        });
-    }
-
-    function toggleDayButton(btn, theme) {
-        const active = btn.getAttribute('data-active') === 'true';
-        btn.setAttribute('data-active', active ? 'false' : 'true');
-        applyDayButtonClass(btn, !active, theme);
-    }
-
-    function applyDayButtonClass(btn, active, theme) {
-        const baseClass = btn.classList.contains('edit-day-btn') ? 'edit-day-btn' : 'modal-day-btn';
-        if (active) {
-            btn.className = `${baseClass} flex h-10 w-10 items-center justify-center rounded-lg bg-${theme}-500 text-xs font-bold text-white shadow-sm transition-all`;
-        } else {
-            btn.className = `${baseClass} flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-gray-400 transition-all hover:border-${theme}-300 hover:text-${theme}-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-500`;
-        }
-    }
-
-    async function saveShiftTemplate() {
-        if (isSaving || !canCallApi()) return;
-        try {
-            const payload = buildPayloadFromForm('add');
-            if (!payload) return;
-            isSaving = true;
-            const resp = await fetch(`${apiBase}/api/org-shift-templates/current`, {
-                method: 'POST',
-                headers: authHeaders(),
-                body: JSON.stringify(payload)
-            });
-            const data = await resp.json().catch(() => null);
-            if (!resp.ok) throw new Error(data?.message || 'Unable to save shift template.');
-            showToast('Shift template added.');
-            closeAddShiftModal();
-            await loadShiftTemplates();
-        } catch (err) {
-            console.error(err);
-            showToast(err instanceof Error ? err.message : 'Unable to save shift template.', false);
-        } finally {
-            isSaving = false;
-        }
-    }
-
-    function openEditModal(code) {
-        if (!code) return;
-        const template = templates.find(t => stringEquals(t.Code, code));
-        if (!template) {
-            showToast('Shift template not found.', false);
-            return;
-        }
-        editingCode = template.Code;
-        document.getElementById('editShiftName').value = template.Name || '';
-        const type = (template.Type || 'Fixed');
-        const radio = document.querySelector(`input[name="edit_shift_type"][value="${type.toLowerCase()}"]`);
-        if (radio) radio.checked = true;
-        onEditShiftTypeChange(type.toLowerCase());
-        toggleDayButtons(editModal, '.edit-day-btn', new Set(template.WorkDays || ['Mon','Tue','Wed','Thu','Fri']));
-        document.getElementById('editFixedStart').value = template.Fixed?.StartTime || '09:00';
-        document.getElementById('editFixedEnd').value = template.Fixed?.EndTime || '18:00';
-        document.getElementById('editFixedBreak').value = template.Fixed?.BreakMinutes?.toString() || '60';
-        document.getElementById('editFixedGrace').value = template.Fixed?.GraceMinutes?.toString() || '15';
-        document.getElementById('editFlexEarliest').value = template.Flexible?.EarliestStart || '06:00';
-        document.getElementById('editFlexLatest').value = template.Flexible?.LatestEnd || '22:00';
-        document.getElementById('editFlexReqHrs').value = template.Flexible?.RequiredDailyHours?.toString() || '8';
-        document.getElementById('editFlexMaxHrs').value = template.Flexible?.MaxDailyHours?.toString() || '10';
-        document.getElementById('editOpenWeekHrs').value = template.Open?.RequiredWeeklyHours?.toString() || '40';
-        editModal?.classList.add('flex');
-        editModal?.classList.remove('hidden');
-    }
-
-    function closeEditShiftModal() {
-        editingCode = null;
-        editModal?.classList.add('hidden');
-        editModal?.classList.remove('flex');
-    }
-
-    function onEditShiftTypeChange(type) {
-        ['fixed', 'flexible', 'open'].forEach(t => document.getElementById('edit-fields-' + t).classList.toggle('hidden', t !== type));
-        const formatted = type.charAt(0).toUpperCase() + type.slice(1);
-        document.getElementById('editShiftTypeHint').textContent = shiftTypeHints[formatted] || '';
-    }
-
-    function toggleEditDay(btn) {
-        toggleDayButton(btn, 'amber');
-    }
-
-    async function saveEditShiftTemplate() {
-        if (!editingCode || isSaving || !canCallApi()) return;
-        try {
-            const payload = buildPayloadFromForm('edit');
-            if (!payload) return;
-            isSaving = true;
-            const resp = await fetch(`${apiBase}/api/org-shift-templates/current/${encodeURIComponent(editingCode)}`, {
-                method: 'PUT',
-                headers: authHeaders(),
-                body: JSON.stringify(payload)
-            });
-            const data = await resp.json().catch(() => null);
-            if (!resp.ok) throw new Error(data?.message || 'Unable to update shift template.');
-            showToast('Shift template updated.');
-            closeEditShiftModal();
-            await loadShiftTemplates();
-        } catch (err) {
-            console.error(err);
-            showToast(err instanceof Error ? err.message : 'Unable to update shift template.', false);
-        } finally {
-            isSaving = false;
-        }
-    }
-
-    function openDeleteModal(code) {
-        if (!code) return;
-        const template = templates.find(t => stringEquals(t.Code, code));
-        deleteCode = code;
-        deleteNameEl.textContent = template ? `"${template.Name}"` : 'this shift';
-        deleteModal?.classList.add('flex');
-        deleteModal?.classList.remove('hidden');
-    }
-
-    function closeDeleteShiftModal() {
-        deleteCode = null;
-        deleteModal?.classList.add('hidden');
-        deleteModal?.classList.remove('flex');
-    }
-
-    async function confirmDeleteShift() {
-        if (!deleteCode || isSaving || !canCallApi()) return;
-        try {
-            isSaving = true;
-            const resp = await fetch(`${apiBase}/api/org-shift-templates/current/${encodeURIComponent(deleteCode)}`, {
-                method: 'DELETE',
-                headers: authHeaders()
-            });
-            const data = await resp.json().catch(() => null);
-            if (!resp.ok) throw new Error(data?.message || 'Unable to delete shift template.');
-            showToast('Shift template deleted.');
-            closeDeleteShiftModal();
-            await loadShiftTemplates();
-        } catch (err) {
-            console.error(err);
-            showToast(err instanceof Error ? err.message : 'Unable to delete shift template.', false);
-        } finally {
-            isSaving = false;
-        }
-    }
-
-    function buildPayloadFromForm(mode) {
-        const isEdit = mode === 'edit';
-        const nameInput = document.getElementById(isEdit ? 'editShiftName' : 'shiftName');
-        const name = nameInput?.value.trim();
-        if (!name) {
-            nameInput?.focus();
-            return null;
-        }
-
-        const typeValue = document.querySelector(isEdit ? 'input[name="edit_shift_type"]:checked' : 'input[name="shift_type"]:checked')?.value || 'fixed';
-        const type = typeValue.charAt(0).toUpperCase() + typeValue.slice(1);
-        const days = collectActiveDays(isEdit ? editModal : addModal, isEdit ? '.edit-day-btn' : '.modal-day-btn');
-        if (!days.length) {
-            showToast('Select at least one work day.', false);
-            return null;
-        }
-
-        const payload = {
-            code: isEdit ? editingCode : undefined,
-            name,
-            type,
-            workDays: days,
-            breaks: [],
-            dayOverrides: [],
-            isActive: true,
-            fixed: null,
-            flexible: null,
-            open: null
         };
 
-        if (type === 'Fixed') {
-            payload.fixed = {
-                startTime: document.getElementById(isEdit ? 'editFixedStart' : 'addFixedStart').value,
-                endTime: document.getElementById(isEdit ? 'editFixedEnd' : 'addFixedEnd').value,
-                breakMinutes: parseInt(document.getElementById(isEdit ? 'editFixedBreak' : 'addFixedBreak').value || '0', 10) || 0,
-                graceMinutes: parseInt(document.getElementById(isEdit ? 'editFixedGrace' : 'addFixedGrace').value || '0', 10) || 0
-            };
-        } else if (type === 'Flexible') {
-            payload.flexible = {
-                earliestStart: document.getElementById(isEdit ? 'editFlexEarliest' : 'addFlexEarliest').value,
-                latestEnd: document.getElementById(isEdit ? 'editFlexLatest' : 'addFlexLatest').value,
-                requiredDailyHours: parseFloat(document.getElementById(isEdit ? 'editFlexReqHrs' : 'addFlexReqHrs').value || '0') || 0,
-                maxDailyHours: parseFloat(document.getElementById(isEdit ? 'editFlexMaxHrs' : 'addFlexMaxHrs').value || '0') || 0
-            };
-        } else {
-            payload.open = {
-                requiredWeeklyHours: parseFloat(document.getElementById(isEdit ? 'editOpenWeekHrs' : 'addOpenWeekHrs').value || '0') || 0
-            };
-        }
-
-        return payload;
-    }
-
-    function collectActiveDays(modal, selector) {
-        if (!modal) return [];
-        const days = [];
-        modal.querySelectorAll(selector).forEach(btn => {
-            if (btn.getAttribute('data-active') === 'true') {
+        const toggleDayButtons = (container, selector, activeDays) => {
+            if (!container) return;
+            container.querySelectorAll(selector).forEach(btn => {
                 const day = btn.getAttribute('data-day');
-                if (day) days.push(day);
-            }
-        });
-        return days;
-    }
-
-    function stringEquals(a, b) {
-        return (a || '').toUpperCase() === (b || '').toUpperCase();
-    }
-
-    function attachModalDismissHandlers() {
-        [
-            { el: addModal, handler: closeAddShiftModal },
-            { el: editModal, handler: closeEditShiftModal },
-            { el: deleteModal, handler: closeDeleteShiftModal }
-        ].forEach(({ el, handler }) => {
-            if (!el || el.dataset.dismissBound === 'true') return;
-            el.dataset.dismissBound = 'true';
-            el.addEventListener('click', evt => {
-                if (evt.target === el) handler();
+                const shouldBeActive = activeDays.has(day);
+                btn.setAttribute('data-active', shouldBeActive ? 'true' : 'false');
+                applyDayButtonClass(btn, shouldBeActive, selector.includes('modal') ? 'emerald' : 'amber');
             });
+        };
+
+        const collectActiveDays = (container, selector) => {
+            const days = [];
+            container?.querySelectorAll(selector).forEach(btn => {
+                if (btn.getAttribute('data-active') === 'true') {
+                    const day = btn.getAttribute('data-day');
+                    if (day) days.push(day);
+                }
+            });
+            return days;
+        };
+
+        const setShiftType = (mode, type) => {
+            const normalized = (type || 'fixed').toLowerCase();
+            const prefix = mode === 'edit' ? 'edit-fields-' : 'fields-';
+            ['fixed', 'flexible', 'open'].forEach(t => {
+                const el = document.getElementById(prefix + t);
+                if (el) el.classList.toggle('hidden', t !== normalized);
+            });
+            const hint = document.getElementById(mode === 'edit' ? 'editShiftTypeHint' : 'shiftTypeHint');
+            if (hint) hint.textContent = SHIFT_HINTS[normalized] || '';
+        };
+
+        const onBreakRuleChange = (type, mode) => {
+            const prefix = mode === 'edit' ? 'edit' : 'add';
+            const single = document.getElementById(`${prefix}-break-rule-single`);
+            const multiple = document.getElementById(`${prefix}-break-rule-multiple`);
+            if (single) single.classList.toggle('hidden', type !== 'single');
+            if (multiple) multiple.classList.toggle('hidden', type !== 'multiple');
+        };
+
+        const clearMultipleBreakRows = (mode) => {
+            const container = document.getElementById(`${mode}-multiple-breaks-container`);
+            if (container) container.innerHTML = '';
+        };
+
+        const addMultipleBreakRow = (mode) => {
+            const container = document.getElementById(`${mode}-multiple-breaks-container`);
+            if (!container) return;
+            state.multipleBreakCounter += 1;
+            const accent = mode === 'add' ? 'emerald' : 'amber';
+            const id = state.multipleBreakCounter;
+            const row = document.createElement('tr');
+            row.id = `multiple-break-row-${id}`;
+            row.innerHTML = `
+                <td class="px-3 py-2 align-top"><input type="text" placeholder="e.g. Lunch" class="block w-full text-sm rounded-md border-0 py-1.5 px-2 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-${accent}-500 dark:bg-gray-900 dark:ring-gray-600 dark:focus:ring-${accent}-500"></td>
+                <td class="px-3 py-2 align-top"><input type="time" onchange="window.SubchronOrgTabShifts.calculateDuration(${id})" class="block w-full text-sm rounded-md border-0 py-1.5 px-2 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-${accent}-500 dark:bg-gray-900 dark:ring-gray-600 dark:focus:ring-${accent}-500"></td>
+                <td class="px-3 py-2 align-top"><input type="time" onchange="window.SubchronOrgTabShifts.calculateDuration(${id})" class="block w-full text-sm rounded-md border-0 py-1.5 px-2 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-${accent}-500 dark:bg-gray-900 dark:ring-gray-600 dark:focus:ring-${accent}-500"></td>
+                <td class="px-3 py-2 align-top"><input type="text" id="multiple-break-duration-${id}" readonly class="block w-20 text-sm rounded-md border-0 py-1.5 px-2 bg-slate-100 ring-1 ring-inset ring-gray-300 dark:bg-gray-700/60 dark:ring-gray-600"></td>
+                <td class="px-3 py-2 align-top">
+                    <select class="block w-full text-sm rounded-md border-0 py-1.5 px-2 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-${accent}-500 dark:bg-gray-900 dark:ring-gray-600 dark:focus:ring-${accent}-500">
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                    </select>
+                </td>
+                <td class="px-3 py-2 align-top">
+                    <select class="block w-full text-sm rounded-md border-0 py-1.5 px-2 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-${accent}-500 dark:bg-gray-900 dark:ring-gray-600 dark:focus:ring-${accent}-500">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </td>
+                <td class="px-3 py-2 align-top">
+                    <button type="button" onclick="window.SubchronOrgTabShifts.removeMultipleBreakRow(${id})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
+                    </button>
+                </td>`;
+            container.appendChild(row);
+        };
+
+        const removeMultipleBreakRow = (id) => {
+            document.getElementById(`multiple-break-row-${id}`)?.remove();
+        };
+
+        const calculateDuration = (id) => {
+            const row = document.getElementById(`multiple-break-row-${id}`);
+            if (!row) return;
+            const times = row.querySelectorAll('input[type="time"]');
+            if (times.length < 2) return;
+            const minutes = diffMinutes(times[0].value, times[1].value);
+            const target = document.getElementById(`multiple-break-duration-${id}`);
+            if (target) target.value = formatMinutes(minutes);
+        };
+
+        const calculateSingleBreakDuration = (mode) => {
+            const prefix = mode === 'edit' ? 'edit' : 'add';
+            const startEl = document.getElementById(`${prefix}SingleBreakStart`);
+            const endEl = document.getElementById(`${prefix}SingleBreakEnd`);
+            const displayEl = document.getElementById(`${prefix}SingleBreakDuration`);
+            if (!startEl || !endEl || !displayEl) return 0;
+            const minutes = diffMinutes(startEl.value, endEl.value);
+            displayEl.value = formatMinutes(minutes);
+            return minutes;
+        };
+
+        const computeBreakMinutes = (mode) => {
+            const type = getBreakRuleType(mode);
+            if (type === 'multiple') {
+                return sumMultipleBreakMinutes(mode);
+            }
+            return calculateSingleBreakDuration(mode);
+        };
+
+        const getBreakRuleType = (mode) => {
+            const name = mode === 'edit' ? 'edit_break_rule_type' : 'break_rule_type';
+            return document.querySelector(`input[name="${name}"]:checked`)?.value || 'single';
+        };
+
+        const sumMultipleBreakMinutes = (mode) => {
+            const container = document.getElementById(`${mode}-multiple-breaks-container`);
+            if (!container) return 0;
+            let total = 0;
+            container.querySelectorAll('tr').forEach(row => {
+                const times = row.querySelectorAll('input[type="time"]');
+                if (times.length >= 2) total += diffMinutes(times[0].value, times[1].value);
+            });
+            return total;
+        };
+
+        const resetAddForm = () => {
+            const defaults = new Set(['Mon','Tue','Wed','Thu','Fri']);
+            toggleDayButtons(refs.addModal, '.modal-day-btn', defaults);
+            const nameInput = document.getElementById('shiftName');
+            if (nameInput) nameInput.value = '';
+            const fixedRadio = document.querySelector('input[name="shift_type"][value="fixed"]');
+            if (fixedRadio) fixedRadio.checked = true;
+            setShiftType('add', 'fixed');
+            document.getElementById('addFixedStart').value = '09:00';
+            document.getElementById('addFixedEnd').value = '18:00';
+            document.getElementById('addFixedRequiredHours').value = '8';
+            document.getElementById('addFixedGrace').value = '15';
+            document.getElementById('addFlexEarliest').value = '06:00';
+            document.getElementById('addFlexLatest').value = '22:00';
+            document.getElementById('addFlexReqHrs').value = '8';
+            document.getElementById('addFlexMaxHrs').value = '10';
+            document.getElementById('addOpenWeekHrs').value = '40';
+            const breakStart = document.getElementById('addSingleBreakStart');
+            const breakEnd = document.getElementById('addSingleBreakEnd');
+            if (breakStart) breakStart.value = '12:00';
+            if (breakEnd) breakEnd.value = '13:00';
+            document.querySelectorAll('input[name="break_rule_type"]').forEach(radio => radio.checked = radio.value === 'single');
+            document.querySelectorAll('input[name="add_single_break_type"]').forEach(radio => radio.checked = radio.value === 'unpaid');
+            clearMultipleBreakRows('add');
+            onBreakRuleChange('single', 'add');
+            calculateSingleBreakDuration('add');
+        };
+
+        const openAddShiftModal = () => {
+            state.editingCode = null;
+            resetAddForm();
+            refs.addModal?.classList.remove('hidden');
+        };
+
+        const closeAddShiftModal = () => {
+            refs.addModal?.classList.add('hidden');
+        };
+
+        const openEditModal = (code) => {
+            if (!code) return;
+            const template = state.templates.find(t => stringEquals(t.Code, code));
+            if (!template) {
+                showToast('Shift template not found.', false);
+                return;
+            }
+            state.editingCode = template.Code || null;
+            document.getElementById('editShiftName').value = template.Name || '';
+            const type = (template.Type || 'Fixed').toLowerCase();
+            const radio = document.querySelector(`input[name="edit_shift_type"][value="${type}"]`);
+            if (radio) radio.checked = true;
+            setShiftType('edit', type);
+            toggleDayButtons(refs.editModal, '.edit-day-btn', new Set(template.WorkDays || ['Mon','Tue','Wed','Thu','Fri']));
+            document.getElementById('editFixedStart').value = template.Fixed?.StartTime || '09:00';
+            document.getElementById('editFixedEnd').value = template.Fixed?.EndTime || '18:00';
+            document.getElementById('editFixedRequiredHours').value = template.Fixed?.RequiredHours?.toString() || '8';
+            document.getElementById('editFixedGrace').value = template.Fixed?.GraceMinutes?.toString() || '15';
+            document.getElementById('editFlexEarliest').value = template.Flexible?.EarliestStart || '06:00';
+            document.getElementById('editFlexLatest').value = template.Flexible?.LatestEnd || '22:00';
+            document.getElementById('editFlexReqHrs').value = template.Flexible?.RequiredDailyHours?.toString() || '8';
+            document.getElementById('editFlexMaxHrs').value = template.Flexible?.MaxDailyHours?.toString() || '10';
+            document.getElementById('editOpenWeekHrs').value = template.Open?.RequiredWeeklyHours?.toString() || '40';
+            clearMultipleBreakRows('edit');
+            onBreakRuleChange('single', 'edit');
+            document.querySelectorAll('input[name="edit_break_rule_type"]').forEach(radio => radio.checked = radio.value === 'single');
+            document.querySelectorAll('input[name="edit_single_break_type"]').forEach(radio => radio.checked = radio.value === 'unpaid');
+
+            const breakMinutes = template.Fixed?.BreakMinutes ?? 60;
+            const start = document.getElementById('editSingleBreakStart');
+            const end = document.getElementById('editSingleBreakEnd');
+            if (start) start.value = '12:00';
+            if (end) {
+                const total = 12 * 60 + breakMinutes;
+                const hour = Math.floor(total / 60) % 24;
+                const minute = total % 60;
+                end.value = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+            }
+            calculateSingleBreakDuration('edit');
+            refs.editModal?.classList.remove('hidden');
+        };
+
+        const closeEditShiftModal = () => {
+            state.editingCode = null;
+            refs.editModal?.classList.add('hidden');
+        };
+
+        const openDeleteModal = (code) => {
+            if (!code) return;
+            const template = state.templates.find(t => stringEquals(t.Code, code));
+            state.deleteCode = code;
+            if (refs.deleteNameEl) refs.deleteNameEl.textContent = template ? `"${template.Name}"` : 'this shift';
+            refs.deleteModal?.classList.remove('hidden');
+        };
+
+        const closeDeleteShiftModal = () => {
+            state.deleteCode = null;
+            refs.deleteModal?.classList.add('hidden');
+        };
+
+        const stringEquals = (a, b) => {
+            if (typeof a !== 'string' || typeof b !== 'string') return a === b;
+            return a.toLowerCase() === b.toLowerCase();
+        };
+
+        const buildPayloadFromForm = (mode) => {
+            const isEdit = mode === 'edit';
+            const nameInput = document.getElementById(isEdit ? 'editShiftName' : 'shiftName');
+            const name = nameInput?.value.trim();
+            if (!name) {
+                nameInput?.focus();
+                return null;
+            }
+            const typeValue = document.querySelector(isEdit ? 'input[name="edit_shift_type"]:checked' : 'input[name="shift_type"]:checked')?.value || 'fixed';
+            const type = typeValue.charAt(0).toUpperCase() + typeValue.slice(1);
+            const days = collectActiveDays(isEdit ? refs.editModal : refs.addModal, isEdit ? '.edit-day-btn' : '.modal-day-btn');
+            if (!days.length) {
+                showToast('Select at least one work day.', false);
+                return null;
+            }
+
+            const payload = {
+                code: isEdit ? state.editingCode : undefined,
+                name,
+                type,
+                workDays: days,
+                breaks: [],
+                dayOverrides: [],
+                isActive: true,
+                fixed: null,
+                flexible: null,
+                open: null
+            };
+
+            if (type === 'Fixed') {
+                const prefix = isEdit ? 'edit' : 'add';
+                payload.fixed = {
+                    startTime: document.getElementById(`${prefix}FixedStart`).value,
+                    endTime: document.getElementById(`${prefix}FixedEnd`).value,
+                    requiredHours: parseFloat(document.getElementById(`${prefix}FixedRequiredHours`).value || '0') || 0,
+                    breakMinutes: computeBreakMinutes(isEdit ? 'edit' : 'add'),
+                    graceMinutes: parseInt(document.getElementById(`${prefix}FixedGrace`).value || '0', 10) || 0
+                };
+            } else if (type === 'Flexible') {
+                const prefix = isEdit ? 'edit' : 'add';
+                payload.flexible = {
+                    earliestStart: document.getElementById(`${prefix}FlexEarliest`).value,
+                    latestEnd: document.getElementById(`${prefix}FlexLatest`).value,
+                    requiredDailyHours: parseFloat(document.getElementById(`${prefix}FlexReqHrs`).value || '0') || 0,
+                    maxDailyHours: parseFloat(document.getElementById(`${prefix}FlexMaxHrs`).value || '0') || 0
+                };
+            } else {
+                const prefix = isEdit ? 'edit' : 'add';
+                payload.open = {
+                    requiredWeeklyHours: parseFloat(document.getElementById(`${prefix}OpenWeekHrs`).value || '0') || 0
+                };
+            }
+
+            return payload;
+        };
+
+        const saveShiftTemplate = async () => {
+            if (state.isSaving || !canCallApi()) return;
+            try {
+                const payload = buildPayloadFromForm('add');
+                if (!payload) return;
+                state.isSaving = true;
+                const resp = await fetch(`${apiBase}/api/org-shift-templates/current`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(data?.message || 'Unable to save shift template.');
+                showToast('Shift template added.');
+                closeAddShiftModal();
+                await loadShiftTemplates();
+            } catch (err) {
+                console.error(err);
+                showToast(err instanceof Error ? err.message : 'Unable to save shift template.', false);
+            } finally {
+                state.isSaving = false;
+            }
+        };
+
+        const saveEditShiftTemplate = async () => {
+            if (!state.editingCode || state.isSaving || !canCallApi()) return;
+            try {
+                const payload = buildPayloadFromForm('edit');
+                if (!payload) return;
+                state.isSaving = true;
+                const resp = await fetch(`${apiBase}/api/org-shift-templates/current/${encodeURIComponent(state.editingCode)}`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(data?.message || 'Unable to update shift template.');
+                showToast('Shift template updated.');
+                closeEditShiftModal();
+                await loadShiftTemplates();
+            } catch (err) {
+                console.error(err);
+                showToast(err instanceof Error ? err.message : 'Unable to update shift template.', false);
+            } finally {
+                state.isSaving = false;
+            }
+        };
+
+        const confirmDeleteShift = async () => {
+            if (!state.deleteCode || state.isSaving || !canCallApi()) return;
+            try {
+                state.isSaving = true;
+                const resp = await fetch(`${apiBase}/api/org-shift-templates/current/${encodeURIComponent(state.deleteCode)}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(data?.message || 'Unable to delete shift template.');
+                showToast('Shift template deleted.');
+                closeDeleteShiftModal();
+                await loadShiftTemplates();
+            } catch (err) {
+                console.error(err);
+                showToast(err instanceof Error ? err.message : 'Unable to delete shift template.', false);
+            } finally {
+                state.isSaving = false;
+            }
+        };
+
+        const loadShiftTemplates = async () => {
+            if (!canCallApi()) return;
+            try {
+                const resp = await fetch(`${apiBase}/api/org-shift-templates/current`, { headers: authHeaders() });
+                const data = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(data?.message || 'Unable to load shift templates.');
+                state.templates = data?.templates || [];
+                renderTemplateCards();
+            } catch (err) {
+                console.error(err);
+                showToast(err instanceof Error ? err.message : 'Unable to load shift templates.', false);
+            }
+        };
+
+        const renderTemplateCards = () => {
+            refs.listEl.innerHTML = '';
+            if (!state.templates.length) {
+                refs.emptyStateEl?.classList.remove('hidden');
+                return;
+            }
+            refs.emptyStateEl?.classList.add('hidden');
+            state.templates.forEach(template => {
+                const meta = TYPE_META[template.Type ?? 'Fixed'] || TYPE_META.Fixed;
+                const card = document.createElement('div');
+                card.className = `shift-card overflow-hidden rounded-2xl border ${meta.border} bg-slate-50 shadow-sm dark:bg-gray-800`;
+                card.dataset.shiftCode = template.Code || '';
+                card.innerHTML = `
+                    <div class="h-1.5 w-full ${meta.bar}"></div>
+                    <div class="px-5 pt-4 pb-4">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrapper}">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${meta.icon}</svg>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-900 dark:text-white">${template.Name || 'Untitled Shift'}</span>
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${meta.badge}">${meta.label}</span>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1">
+                                <button type="button" class="rounded-lg p-1.5 text-amber-400 hover:bg-amber-50 hover:text-amber-600 dark:text-amber-500 dark:hover:bg-amber-900/20" data-action="edit" title="Edit">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                                </button>
+                                <button type="button" class="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 dark:text-red-500 dark:hover:bg-red-900/20" data-action="delete" title="Delete">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl ${meta.detailBg} px-4 py-3 sm:grid-cols-4">
+                            ${buildDetailCells(template, meta)}
+                        </div>
+                    </div>`;
+                card.querySelector('[data-action="edit"]').addEventListener('click', () => openEditModal(template.Code));
+                card.querySelector('[data-action="delete"]').addEventListener('click', () => openDeleteModal(template.Code));
+                refs.listEl.appendChild(card);
+            });
+        };
+
+        const buildDetailCells = (template, meta) => {
+            const days = template.WorkDays?.length ? template.WorkDays.join(', ') : 'No days set';
+            const accent = meta.accent;
+            const type = (template.Type ?? 'Fixed').toLowerCase();
+
+            if (type === 'flexible') {
+                const earliest = formatTime(template.Flexible?.EarliestStart);
+                const latest = formatTime(template.Flexible?.LatestEnd);
+                const req = template.Flexible?.RequiredDailyHours ? `${template.Flexible.RequiredDailyHours} hrs` : '—';
+                const max = template.Flexible?.MaxDailyHours ? `${template.Flexible.MaxDailyHours} hrs` : '—';
+                return `
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Window</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${earliest} – ${latest}</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Required Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${req}</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Max Daily</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${max}</p></div>`;
+            }
+
+            if (type === 'open') {
+                const weekly = template.Open?.RequiredWeeklyHours ? `${template.Open.RequiredWeeklyHours} hrs` : '—';
+                return `
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Schedule</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">No strict window</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Required Weekly</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${weekly}</p></div>
+                    <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Basis</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">Hours only</p></div>`;
+            }
+
+            const start = formatTime(template.Fixed?.StartTime);
+            const end = formatTime(template.Fixed?.EndTime);
+            const breakText = template.Fixed?.BreakMinutes ? `${template.Fixed.BreakMinutes} min` : '—';
+            const graceText = template.Fixed?.GraceMinutes ? `${template.Fixed.GraceMinutes} min` : '—';
+
+            return `
+                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Time</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${start} – ${end}</p></div>
+                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Work Days</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${days}</p></div>
+                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Break</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${breakText}</p></div>
+                <div><p class="text-[10px] font-semibold uppercase tracking-wider text-${accent}-600 dark:text-${accent}-500">Grace</p><p class="mt-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">${graceText}</p></div>`;
+        };
+
+        const attachModalDismissHandlers = () => {
+            [
+                { el: refs.addModal, close: closeAddShiftModal },
+                { el: refs.editModal, close: closeEditShiftModal },
+                { el: refs.deleteModal, close: closeDeleteShiftModal }
+            ].forEach(({ el, close }) => {
+                if (!el || el.dataset.dismissBound === 'true') return;
+                el.dataset.dismissBound = 'true';
+                el.addEventListener('click', evt => {
+                    if (evt.target === el) close();
+                });
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            resetAddForm();
+            calculateSingleBreakDuration('add');
+            attachModalDismissHandlers();
+            loadShiftTemplates();
         });
-    }
 
-    function openEditShiftModal(card) {
-        openEditModal(card?.dataset?.shiftCode);
-    }
+        const api = {
+            openAddShiftModal,
+            closeAddShiftModal,
+            onShiftTypeChange: (type) => setShiftType('add', type),
+            toggleModalDay: (btn) => toggleDayButton(btn, 'emerald'),
+            onBreakRuleChange,
+            calculateSingleBreakDuration,
+            addMultipleBreakRow,
+            removeMultipleBreakRow,
+            calculateDuration,
+            saveShiftTemplate,
+            openEditShiftModal: (target) => {
+                const code = typeof target === 'string' ? target : target?.dataset?.shiftCode;
+                openEditModal(code);
+            },
+            closeEditShiftModal,
+            onEditShiftTypeChange: (type) => setShiftType('edit', type),
+            toggleEditDay: (btn) => toggleDayButton(btn, 'amber'),
+            saveEditShiftTemplate,
+            openDeleteShiftModal: (target) => {
+                const code = typeof target === 'string' ? target : target?.dataset?.shiftCode;
+                openDeleteModal(code);
+            },
+            closeDeleteShiftModal,
+            confirmDeleteShift
+        };
 
-    function openDeleteShiftModal(card) {
-        openDeleteModal(card?.dataset?.shiftCode);
-    }
-
-    function init() {
-        attachModalDismissHandlers();
-        loadShiftTemplates();
-    }
-
-    window.openAddShiftModal = openAddShiftModal;
-    window.closeAddShiftModal = closeAddShiftModal;
-    window.onShiftTypeChange = onShiftTypeChange;
-    window.toggleModalDay = toggleModalDay;
-    window.saveShiftTemplate = saveShiftTemplate;
-    window.openDeleteShiftModal = openDeleteShiftModal;
-    window.closeDeleteShiftModal = closeDeleteShiftModal;
-    window.confirmDeleteShift = confirmDeleteShift;
-    window.openEditShiftModal = openEditShiftModal;
-    window.closeEditShiftModal = closeEditShiftModal;
-    window.onEditShiftTypeChange = onEditShiftTypeChange;
-    window.toggleEditDay = toggleEditDay;
-    window.saveEditShiftTemplate = saveEditShiftTemplate;
-
-    window.SubchronOrgTabShifts = { init };
-    window.SubchronOrgTabShifts.init();
-})();
+        window.SubchronOrgTabShifts = api;
+        [
+            'openAddShiftModal','closeAddShiftModal','onShiftTypeChange','toggleModalDay','onBreakRuleChange',
+            'calculateSingleBreakDuration','addMultipleBreakRow','removeMultipleBreakRow','calculateDuration',
+            'saveShiftTemplate','openEditShiftModal','closeEditShiftModal','onEditShiftTypeChange','toggleEditDay',
+            'saveEditShiftTemplate','openDeleteShiftModal','closeDeleteShiftModal','confirmDeleteShift'
+        ].forEach(name => {
+            window[name] = api[name];
+        });
+    })();
 </script>
-

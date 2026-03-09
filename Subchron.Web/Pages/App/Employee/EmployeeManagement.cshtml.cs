@@ -438,7 +438,7 @@ public class EmployeeManagementModel : PageModel
         string? empNumber, int? departmentID, string? role, string? workState, string? employmentType,
         DateTime? dateHired, string? phone,
         string? addressLine1, string? addressLine2, string? city, string? stateProvince, string? postalCode, string? country,
-        int? age, string? gender,
+        DateTime? birthDate, string? gender,
         string? emergencyContactName, string? emergencyContactPhone, string? emergencyContactRelation)
     {
         var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
@@ -476,7 +476,7 @@ public class EmployeeManagementModel : PageModel
                 StateProvince = stateProvince,
                 PostalCode = postalCode,
                 Country = country,
-                Age = age,
+                BirthDate = birthDate?.Date,
                 Gender = gender,
                 EmergencyContactName = emergencyContactName,
                 EmergencyContactPhone = emergencyContactPhone,
@@ -605,7 +605,7 @@ public class EmployeeManagementModel : PageModel
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
         public string? MiddleName { get; set; }
-        public int? Age { get; set; }
+        public DateTime? BirthDate { get; set; }
         public string? Gender { get; set; }
         public string Role { get; set; } = "";
         public string WorkState { get; set; } = "";

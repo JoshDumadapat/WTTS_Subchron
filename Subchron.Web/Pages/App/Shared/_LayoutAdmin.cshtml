@@ -390,46 +390,112 @@
     <div id="toast-container" class="pointer-events-none fixed top-4 right-4 z-[300] flex flex-col gap-2" aria-live="polite"></div>
     <script>
         (function () {
-            var TOAST_DURATION_MS = 5000;
+            var TOAST_DURATION_MS = 4200;
+            var activeToast = null;
+            var removeTimer = null;
+
+            function getToastVisual(type, isSuccess) {
+                if (type === 'warning') {
+                    return {
+                        iconClass: 'text-amber-600 dark:text-amber-400',
+                        accentClass: 'bg-amber-500/90 dark:bg-amber-400/80',
+                        sr: 'Warning',
+                        svg: '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+                    };
+                }
+                if (isSuccess) {
+                    return {
+                        iconClass: 'text-subgreen-600 dark:text-subgreen-400',
+                        accentClass: 'bg-subgreen-500/90 dark:bg-subgreen-400/80',
+                        sr: 'Success',
+                        svg: '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5"/></svg>'
+                    };
+                }
+                return {
+                    iconClass: 'text-red-600 dark:text-red-400',
+                    accentClass: 'bg-red-500/90 dark:bg-red-400/80',
+                    sr: 'Error',
+                    svg: '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                };
+            }
+
+            function dismissToast() {
+                if (!activeToast) return;
+                if (removeTimer) {
+                    clearTimeout(removeTimer);
+                    removeTimer = null;
+                }
+                var toastToRemove = activeToast;
+                toastToRemove.classList.remove('opacity-100', 'translate-y-0');
+                toastToRemove.classList.add('opacity-0', 'translate-y-1');
+                setTimeout(function () {
+                    if (toastToRemove.parentNode) toastToRemove.parentNode.removeChild(toastToRemove);
+                }, 180);
+                activeToast = null;
+            }
+
+            function createToastElement() {
+                var el = document.createElement('div');
+                el.className = 'pointer-events-auto relative flex w-full max-w-sm items-center gap-3 overflow-hidden rounded-xl border-[0.1px] border-slate-300/70 bg-slate-50/95 px-4 py-3 text-slate-800 shadow-xl ring-1 ring-slate-900/5 transition-all duration-200 opacity-0 translate-y-1 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-200 dark:ring-slate-500/20';
+                el.setAttribute('role', 'alert');
+
+                var accent = document.createElement('span');
+                accent.className = 'toast-accent absolute inset-y-0 left-0 w-1.5';
+
+                var iconWrap = document.createElement('div');
+                iconWrap.className = 'toast-icon inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg';
+
+                var text = document.createElement('div');
+                text.className = 'toast-text ms-1 flex-1 text-sm font-semibold leading-snug';
+
+                var closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'ms-auto inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/70 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200';
+                closeBtn.setAttribute('aria-label', 'Close');
+                closeBtn.innerHTML = '<svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>';
+                closeBtn.addEventListener('click', dismissToast);
+
+                el.appendChild(accent);
+                el.appendChild(iconWrap);
+                el.appendChild(text);
+                el.appendChild(closeBtn);
+                return el;
+            }
+
             function showToast(message, success, type) {
                 if (!message) return;
                 var container = document.getElementById('toast-container');
                 if (!container) return;
+
                 var isSuccess = success === true;
                 var toastType = (typeof type === 'string' && type) ? type : (isSuccess ? 'success' : 'error');
-                var el = document.createElement('div');
-                el.className = 'pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-xl border-2 border-slate-300 bg-white px-5 py-4 text-slate-800 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-500/20';
-                el.setAttribute('role', 'alert');
-                var iconColorClass = toastType === 'warning'
-                    ? 'text-amber-500 dark:text-amber-400'
-                    : isSuccess
-                    ? 'text-subgreen-600 dark:text-subgreen-400'
-                    : 'text-red-600 dark:text-red-400';
-                var iconWrap = document.createElement('div');
-                iconWrap.className = 'inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded ' + iconColorClass;
-                if (toastType === 'warning') {
-                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span class="sr-only">Warning</span>';
-                } else if (isSuccess) {
-                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5"/></svg><span class="sr-only">Success</span>';
-                } else {
-                    iconWrap.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="sr-only">Error</span>';
+                var visual = getToastVisual(toastType, isSuccess);
+
+                if (!activeToast || !activeToast.isConnected) {
+                    container.innerHTML = '';
+                    activeToast = createToastElement();
+                    container.appendChild(activeToast);
+                    requestAnimationFrame(function () {
+                        if (!activeToast) return;
+                        activeToast.classList.remove('opacity-0', 'translate-y-1');
+                        activeToast.classList.add('opacity-100', 'translate-y-0');
+                    });
                 }
-                var text = document.createElement('div');
-                text.className = 'ms-3 flex-1 text-base font-medium';
-                text.textContent = message;
-                var closeBtn = document.createElement('button');
-                closeBtn.type = 'button';
-                closeBtn.className = 'ms-auto inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200';
-                closeBtn.setAttribute('aria-label', 'Close');
-                closeBtn.innerHTML = '<svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>';
-                function remove() { if (el.parentNode) el.parentNode.removeChild(el); }
-                closeBtn.addEventListener('click', remove);
-                el.appendChild(iconWrap);
-                el.appendChild(text);
-                el.appendChild(closeBtn);
-                container.appendChild(el);
-                setTimeout(remove, TOAST_DURATION_MS);
+
+                var accentEl = activeToast.querySelector('.toast-accent');
+                var iconEl = activeToast.querySelector('.toast-icon');
+                var textEl = activeToast.querySelector('.toast-text');
+                if (accentEl) accentEl.className = 'toast-accent absolute inset-y-0 left-0 w-1.5 ' + visual.accentClass;
+                if (iconEl) {
+                    iconEl.className = 'toast-icon inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ' + visual.iconClass;
+                    iconEl.innerHTML = visual.svg + '<span class="sr-only">' + visual.sr + '</span>';
+                }
+                if (textEl) textEl.textContent = String(message);
+
+                if (removeTimer) clearTimeout(removeTimer);
+                removeTimer = setTimeout(dismissToast, TOAST_DURATION_MS);
             }
+
             window.showToast = showToast;
         })();
     </script>
@@ -698,7 +764,7 @@
             </div>
         </aside>
 
-        <main class="relative flex-1 overflow-auto bg-[#f2f2f2] dark:bg-slate-900" id="layout-main">
+        <main class="relative flex-1 overflow-auto bg-[#ececec] dark:bg-slate-900" id="layout-main">
             <header class="layout-header bg-white shadow-lg dark:bg-slate-800"
                     style="margin:20px; border-radius:18px; padding:16px 24px;">
                 <div class="flex items-center justify-between">

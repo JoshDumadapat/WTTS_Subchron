@@ -43,7 +43,7 @@ public class EditModel : PageModel
     public async Task<IActionResult> OnPostUpdateAsync(
         int id,
         string firstName, string lastName, string? middleName,
-        int? age, string? gender,
+        DateTime? birthDate, string? gender,
         string? empNumber, int? departmentID, DateTime? dateHired,
         string? phone, string? addressLine1, string? addressLine2,
         string? city, string? stateProvince, string? postalCode, string? country,
@@ -101,7 +101,7 @@ public class EditModel : PageModel
             StateProvince = string.IsNullOrWhiteSpace(stateProvince) ? null : stateProvince.Trim(),
             PostalCode = string.IsNullOrWhiteSpace(postalCode) ? null : postalCode.Trim(),
             Country = string.IsNullOrWhiteSpace(country) ? "Philippines" : country.Trim(),
-            Age = age,
+            BirthDate = birthDate?.Date,
             Gender = string.IsNullOrWhiteSpace(gender) ? null : gender.Trim(),
             EmergencyContactName = string.IsNullOrWhiteSpace(emergencyContactName) ? null : emergencyContactName.Trim(),
             EmergencyContactPhone = string.IsNullOrWhiteSpace(emergencyContactPhone) ? null : emergencyContactPhone.Trim(),
@@ -191,7 +191,7 @@ public class EditModel : PageModel
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? MiddleName { get; set; }
-        public int? Age { get; set; }
+        public DateTime? BirthDate { get; set; }
         public string? Gender { get; set; }
         public string? Role { get; set; }
         public string? WorkState { get; set; }

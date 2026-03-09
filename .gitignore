@@ -486,3 +486,4 @@ Subchron.API/appsettings.json
 Subchron.Web/appsettings.json
 **/appsettings.Development.json
 **/appsettings.*.Development.json
+/nul

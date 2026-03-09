@@ -24,7 +24,7 @@ public class Employee
     [MaxLength(80)]
     public string? MiddleName { get; set; }
 
-    public int? Age { get; set; }
+    public DateTime? BirthDate { get; set; }
 
     [MaxLength(20)]
     public string? Gender { get; set; }

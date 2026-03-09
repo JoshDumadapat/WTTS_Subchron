@@ -104,6 +104,32 @@ public class ArchiveModel : PageModel
         }
     }
 
+    public async Task<IActionResult> OnGetEmployeeAsync(int id)
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { });
+
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl))
+            return new JsonResult(new { });
+
+        try
+        {
+            var client = _http.CreateClient("Subchron.API");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var resp = await client.GetAsync(baseUrl + "/api/employees/" + id);
+            if (!resp.IsSuccessStatusCode)
+                return new JsonResult(new { });
+            var json = await resp.Content.ReadAsStringAsync();
+            return Content(json, "application/json");
+        }
+        catch
+        {
+            return new JsonResult(new { });
+        }
+    }
+
     public class ArchivedEmployeeItem
     {
         public int EmpID { get; set; }
@@ -114,7 +140,7 @@ public class ArchiveModel : PageModel
         public string LastName { get; set; } = "";
         public string? MiddleName { get; set; }
         public string? Email { get; set; }
-        public int? Age { get; set; }
+        public DateTime? BirthDate { get; set; }
         public string? Gender { get; set; }
         public DateTime? DateHired { get; set; }
         public string Role { get; set; } = "";
@@ -128,5 +154,13 @@ public class ArchiveModel : PageModel
         public string? EmergencyContactName { get; set; }
         public string? EmergencyContactPhone { get; set; }
         public string? EmergencyContactRelation { get; set; }
+        public string? AddressLine2 { get; set; }
+        public string? StateProvince { get; set; }
+        public string? PostalCode { get; set; }
+        public string? EmploymentType { get; set; }
+        public decimal? BaseSalary { get; set; }
+        public string? AvatarUrl { get; set; }
+        public string? IdPictureUrl { get; set; }
+        public string? SignatureUrl { get; set; }
     }
 }

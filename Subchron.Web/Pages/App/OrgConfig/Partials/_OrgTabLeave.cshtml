@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between border-b border-slate-300 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Leave Policies</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage time-off types, allowances, accrual rules, and global leave settings.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage statutory and company leave types, allowances, filing rules, and organization-wide leave settings.</p>
         </div>
         <button onclick="openLeaveModal()" class="btn-primary gap-1.5">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -23,21 +23,69 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
+                    <table class="min-w-full table-fixed divide-y divide-slate-300 dark:divide-gray-700">
                         <thead class="bg-slate-200 dark:bg-gray-700/40">
                             <tr>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Leave Type</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowance</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Accrual</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Carry Over</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Flags</th>
-                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                                <th class="w-[26%] px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Leave Type</th>
+                                <th class="w-[18%] px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Category</th>
+                                <th class="w-[22%] px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Entitlement</th>
+                                <th class="w-[18%] px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Usage Rules</th>
+                                <th class="w-[10%] px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Flags</th>
+                                <th class="w-[6%] px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="leavePoliciesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
-
                         </tbody>
                     </table>
+                </div>
+
+                <div class="flex flex-col gap-4 border-t border-slate-200 bg-white/80 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/20 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            Showing <span id="leavePaginationRange" class="font-semibold text-gray-900 dark:text-white">0</span> of <span id="leavePaginationTotal" class="font-semibold text-gray-900 dark:text-white">0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 sm:inline">Rows</span>
+                            <select id="leaveRowsPerPage" class="hidden h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm font-medium text-slate-600 focus:border-emerald-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 sm:inline-block">
+                                <option value="3">3</option>
+                                <option value="5" selected>5</option>
+                                <option value="7">7</option>
+                                <option value="10">10</option>
+                            </select>
+                            <div class="relative inline-flex sm:hidden">
+                                <button id="leaveRowsPerPageBtn" type="button" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" aria-haspopup="true" aria-expanded="false">
+                                    <span>Rows: <span id="leaveRowsPerPageBadge">5</span></span>
+                                    <svg class="h-3.5 w-3.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div id="leaveRowsPerPageMenu" class="absolute right-0 top-full z-20 mt-2 hidden min-w-[120px] rounded-xl border border-slate-200 bg-white p-1 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+                                    <button type="button" class="leave-rows-option w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-600 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800" data-value="3">3 rows</button>
+                                    <button type="button" class="leave-rows-option w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-600 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800" data-value="5">5 rows</button>
+                                    <button type="button" class="leave-rows-option w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-600 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800" data-value="7">7 rows</button>
+                                    <button type="button" class="leave-rows-option w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-600 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800" data-value="10">10 rows</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center sm:justify-end">
+                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Leave pagination">
+                            <button id="leavePaginationPrev" type="button" class="inline-flex items-center rounded-l-md border border-slate-300 bg-white px-2.5 py-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+                                <span class="sr-only">Previous</span>
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div id="leavePaginationNumbers" class="inline-flex gap-1 px-2"></div>
+                            <button id="leavePaginationNext" type="button" class="inline-flex items-center rounded-r-md border border-slate-300 bg-white px-2.5 py-2 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+                                <span class="sr-only">Next</span>
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </nav>
+                    </div>
                 </div>
             </div>
 
@@ -53,11 +101,10 @@
                     @* Left column *@
                     <div class="space-y-5 p-6">
 
-                        @* Fiscal Year Start *@
                         <div>
                             <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Fiscal Year Start</label>
                             <div class="relative">
-                            <select id="leaveFiscalYearStart" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <select id="leaveFiscalYearStart" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option>January 1</option>
                                     <option>April 1</option>
                                     <option>July 1</option>
@@ -69,11 +116,10 @@
                             </div>
                         </div>
 
-                        @* Leave Balance Reset *@
                         <div>
                             <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Balance Reset Rule</label>
                             <div class="relative">
-                            <select id="leaveResetRule" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <select id="leaveResetRule" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                     <option>Reset on Fiscal Year Start</option>
                                     <option>Reset on Employee Anniversary</option>
                                     <option>No Reset (Cumulative)</option>
@@ -89,7 +135,6 @@
                     @* Right column *@
                     <div class="space-y-0 divide-y divide-slate-300 dark:divide-gray-700">
 
-                        @* Prorated leave *@
                         <div class="flex items-center justify-between px-6 py-4">
                             <div>
                                 <span class="block text-sm font-semibold text-gray-800 dark:text-white">Prorated Leave for New Hires</span>
@@ -123,46 +168,129 @@
 
 @* ─── ADD LEAVE TYPE MODAL ─── *@
 <div id="leaveModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+    <div class="leave-modal-panel w-full max-w-2xl overflow-hidden rounded-2xl bg-slate-50 shadow-xl dark:bg-gray-800">
 
         <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-            <h3 id="leaveModalTitle" class="text-base font-bold text-gray-900 dark:text-white">New Leave Type</h3>
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h3 id="leaveModalTitle" class="text-base font-bold text-gray-900 dark:text-white">New Leave Type</h3>
+                    <span id="leaveProtectedBadge" class="hidden inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-500/20 dark:bg-purple-900/20 dark:text-purple-300">Statutory</span>
+                    <span id="leaveLockedBadge" class="hidden inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-400/30 dark:bg-slate-700 dark:text-slate-200">Protected</span>
+                </div>
+                <p id="leaveModalSubtitle" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Configure leave rules for your organization.</p>
+            </div>
             <button onclick="closeLeaveModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
 
-        <div class="max-h-[72vh] overflow-y-auto px-6 py-5 space-y-5">
+        <div id="leaveProtectedBanner" class="hidden border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-200">
+            This is a statutory leave template protected by Philippine labor rules. Core legal identity fields are read-only, while workflow and filing settings remain editable.
+        </div>
+
+        <div class="leave-modal-body max-h-[72vh] overflow-y-auto space-y-5 px-6 py-5">
+
+            <div id="leaveLockedLegalIdentity" class="hidden overflow-hidden rounded-xl border border-slate-300 bg-slate-100/70 dark:border-gray-700 dark:bg-gray-900/40">
+                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Legal Identity (Protected)</h4>
+                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">These fields define the legal identity of the leave type and cannot be edited while this leave is protected.</p>
+                </div>
+                <div class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                    You may still edit filing rules, approval flow, document requirements, and internal organization workflow settings below.
+                </div>
+            </div>
 
             @* Leave Type *@
-            <div>
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Type</label>
-                <div class="relative">
-                    <select id="leaveTypeSelect" onchange="onLeaveTypeChange(this)" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                        <option value="sick">Sick Leave</option>
-                        <option value="vacation">Vacation Leave</option>
-                        <option value="emergency">Emergency Leave</option>
-                        <option value="unpaid">Unpaid Leave</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                        <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Template</label>
+                    <div class="relative">
+                        <select id="leaveTypeSelect" onchange="onLeaveTypeChange(this)" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <optgroup label="Philippine Statutory Leaves">
+                                <option value="sil">Service Incentive Leave</option>
+                                <option value="maternity">Maternity Leave</option>
+                                <option value="paternity">Paternity Leave</option>
+                                <option value="solo_parent">Solo Parent Leave</option>
+                                <option value="vawc">VAWC Leave</option>
+                                <option value="special_women">Special Leave for Women</option>
+                            </optgroup>
+                            <optgroup label="Company Policy Leaves">
+                                <option value="sick">Sick Leave</option>
+                                <option value="vacation">Vacation Leave</option>
+                                <option value="emergency">Emergency Leave</option>
+                                <option value="unpaid">Unpaid Leave</option>
+                                <option value="custom">Custom</option>
+                            </optgroup>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Category</label>
+                    <div class="relative">
+                        <select id="leaveCategory" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="statutory">Statutory</option>
+                            <option value="company">Company Policy</option>
+                            <option value="unpaid_admin">Unpaid / Administrative</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            @* Custom name (shown only when Custom is selected) *@
             <div id="customNameField" class="hidden">
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Leave Name</label>
-                <input type="text" id="customLeaveName" placeholder="e.g. Bereavement Leave, Paternity Leave..." maxlength="60"
+                <input type="text" id="customLeaveName" placeholder="e.g. Bereavement Leave, Study Leave..." maxlength="60"
                        class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
             </div>
 
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compensation Source</label>
+                    <div class="relative">
+                        <select id="leaveCompensationSource" onchange="syncPaidFromCompensation()" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="company_paid">Company Paid</option>
+                            <option value="government_benefit">Government Benefit</option>
+                            <option value="unpaid">Unpaid</option>
+                            <option value="mixed">Mixed / Conditional</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Paid Status</label>
+                    <div class="relative">
+                        <select id="leavePaidStatus" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="paid">Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                            <option value="conditional">Conditional</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Statutory Code</label>
+                    <input type="text" id="leaveStatutoryCode" readonly
+                           class="block w-full rounded-lg border-0 bg-slate-100 py-2 px-3 text-sm text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-600">
+                </div>
+            </div>
+
             @* Allowance *@
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance (Days / Year)</label>
-                    <input type="number" id="leaveAllowance" min="1" max="365" value="15"
+                    <input type="number" id="leaveAllowance" min="0" max="365" value="15"
                            class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                 </div>
                 <div>
@@ -177,6 +305,11 @@
                             <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         </div>
                     </div>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Minimum Service (Months)</label>
+                    <input type="number" id="leaveMinServiceMonths" min="0" max="240" value="0"
+                           class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                 </div>
             </div>
 
@@ -194,7 +327,7 @@
                     </label>
                 </div>
                 <div id="carryOverInput" class="mt-2 hidden flex items-center gap-2">
-                    <input type="number" min="1" max="365" value="5" placeholder="e.g. 5"
+                    <input type="number" id="carryOverMaxDaysInput" min="1" max="365" value="5" placeholder="e.g. 5"
                            class="w-24 rounded-lg border-0 py-1.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                     <span class="text-xs text-gray-400">days max carry over</span>
                 </div>
@@ -210,9 +343,177 @@
                         <option>Part-Time Only</option>
                         <option>Probationary Only</option>
                         <option>Regular Only</option>
+                        <option>Female Employees Only</option>
+                        <option>Male Employees Only</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                         <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-300 dark:border-gray-700">
+                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Filing Rules</h4>
+                </div>
+                <div class="space-y-4 p-4">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Advance Filing Days Required</label>
+                        <input type="number" id="leaveAdvanceFiling" min="0" max="365" value="0"
+                               class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Retroactive Filing</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="flagRetroactive" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Max Consecutive Days Per Request</label>
+                        <input type="number" id="leaveMaxConsecutive" min="0" max="365" value="0"
+                               class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Filing Unit</label>
+                        <div class="relative">
+                            <select id="leaveFilingUnit" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="full_day">Full Day</option>
+                                <option value="half_day">Half Day</option>
+                                <option value="hourly">Hourly</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Balance Deduction Timing</label>
+                        <div class="relative">
+                            <select id="leaveDeductionTiming" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="approval">Approval</option>
+                                <option value="leave_date">Leave Date</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Leave Expiry Rule</label>
+                        <div class="relative">
+                            <select id="leaveExpiryRule" onchange="toggleLeaveExpiryCustomMonths(this.value === 'custom_months')" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="never">Never</option>
+                                <option value="fiscal_year_end">End of Fiscal Year</option>
+                                <option value="custom_months">Custom Months</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="leaveExpiryCustomMonthsWrap" class="hidden">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Expiry After (Months)</label>
+                        <input type="number" id="leaveExpiryCustomMonths" min="1" max="60" value="12"
+                               class="block w-full rounded-lg border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Leave on Rest Day</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="flagAllowRestDay" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Leave on Holiday</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="flagAllowHoliday" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-300 dark:border-gray-700">
+                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Legal / Organization Rules</h4>
+                </div>
+
+                <div class="grid grid-cols-1 gap-0 divide-y divide-slate-300 dark:divide-gray-700 md:grid-cols-2 md:divide-x md:divide-y-0">
+                    <div class="space-y-0 divide-y divide-slate-300 dark:divide-gray-700">
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-white">Requires Legal Qualification</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">Use for leaves needing special eligibility under law.</p>
+                            </div>
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" id="flagLegalQualification" class="peer sr-only">
+                                <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                            peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-white">Requires HR Validation</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">HR must validate legal documents or qualifications.</p>
+                            </div>
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" id="flagHrValidation" class="peer sr-only">
+                                <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                            peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-0 divide-y divide-slate-300 dark:divide-gray-700">
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-white">Organization Can Override</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">Allow the org to enhance or adjust this leave rule.</p>
+                            </div>
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" id="flagCanOrgOverride" checked class="peer sr-only">
+                                <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                            peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-white">System Protected</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">Protected templates are shown as baseline leaves and cannot be deleted in this UI flow.</p>
+                            </div>
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" id="flagSystemProtected" class="peer sr-only">
+                                <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                            peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,7 +524,7 @@
                 <div class="flex items-center justify-between border-b border-slate-300 px-4 py-3 dark:border-gray-700">
                     <div>
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Approval</span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Manager must approve before leave is confirmed.</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Manager or HR must approve before leave is confirmed.</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" id="flagApproval" checked class="peer sr-only">
@@ -233,10 +534,25 @@
                     </label>
                 </div>
 
+                <div id="approverRoleContainer" class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Approver Role</label>
+                    <div class="relative">
+                        <select id="leaveApproverRole" class="block w-full appearance-none rounded-lg border-0 bg-slate-200 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="supervisor">Supervisor</option>
+                            <option value="manager">Manager</option>
+                            <option value="hr">HR</option>
+                            <option value="auto">Auto Approve</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-between border-b border-slate-300 px-4 py-3 dark:border-gray-700">
                     <div>
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Document</span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Employee must upload supporting document (e.g. medical cert).</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Employee must upload supporting documents.</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" id="flagDoc" class="peer sr-only">
@@ -275,430 +591,1788 @@
     </div>
 </div>
 
+<style>
+    #leaveModal .leave-modal-panel {
+        border: none;
+        box-shadow: 0 26px 70px rgba(15, 23, 42, 0.35);
+    }
+
+    .dark #leaveModal .leave-modal-panel {
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    #leaveModal .leave-modal-panel:focus-visible {
+        outline: none;
+    }
+
+    #leaveModal .leave-modal-body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        #leaveModal .leave-modal-body::-webkit-scrollbar {
+            display: none;
+        }
+
+    #leaveModal .protected-field {
+        background-color: rgb(241 245 249) !important;
+        color: rgb(100 116 139) !important;
+        cursor: not-allowed !important;
+        opacity: 1 !important;
+    }
+
+    .dark #leaveModal .protected-field {
+        background-color: rgb(17 24 39) !important;
+        color: rgb(156 163 175) !important;
+    }
+
+    #leaveModal .protected-field[readonly],
+    #leaveModal .protected-field:disabled {
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.55);
+    }
+
+    #leaveModal .field-lock-note {
+        margin-top: 0.375rem;
+        display: none;
+        font-size: 0.7rem;
+        color: rgb(148 163 184);
+    }
+
+        #leaveModal .field-lock-note.is-visible {
+            display: block;
+        }
+
+    #leaveModal .protected-input-wrap {
+        position: relative;
+    }
+
+        #leaveModal .protected-input-wrap .lock-chip {
+            position: absolute;
+            top: 0.55rem;
+            right: 0.65rem;
+            display: none;
+            align-items: center;
+            gap: 0.2rem;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.18);
+            padding: 0.18rem 0.4rem;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: rgb(71 85 105);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+    .dark #leaveModal .protected-input-wrap .lock-chip {
+        background: rgba(148, 163, 184, 0.16);
+        color: rgb(203 213 225);
+    }
+
+    #leaveModal .protected-input-wrap.is-locked .lock-chip {
+        display: inline-flex;
+    }
+
+    .leave-flags-dropdown {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.35rem);
+        z-index: 30;
+        width: 220px;
+        border-radius: 0.9rem;
+        border: 1px solid rgb(203 213 225);
+        background: rgb(248 250 252);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+        padding: 0.75rem;
+    }
+
+    .dark .leave-flags-dropdown {
+        border-color: rgb(55 65 81);
+        background: rgb(31 41 55);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .leave-flag-trigger {
+        cursor: pointer;
+    }
+</style>
+
 <script>
-window.SubchronOrgTabLeave = window.SubchronOrgTabLeave || (() => {
-    let currentEditLeaveTypeId = null;
-    let isSavingLeaveType = false;
-    const leaveTypeStore = new Map();
-    let apiBase = '';
-    let apiToken = '';
+    window.SubchronOrgTabLeave = window.SubchronOrgTabLeave || (() => {
+        let currentEditLeaveTypeId = null;
+        let isSavingLeaveType = false;
+        const leaveTypeStore = new Map();
+        let leaveTypeList = [];
+        let leaveCurrentPage = 1;
+        let leaveRowsPerPage = 5;
+        const leaveRowsOptions = [3, 5, 7, 10];
+        let apiBase = '';
+        let apiToken = '';
+        let usingDemoTemplates = false;
+        let nextDemoId = -1000;
 
-    const buildApiUrl = (path) => {
-        if (!path) return apiBase;
-        if (/^https?:/i.test(path)) return path;
-        const normalized = path.startsWith('/') ? path : `/${path}`;
-        return apiBase ? `${apiBase}${normalized}` : normalized;
-    };
-
-    const apiFetch = (path, options = {}) => {
-        const url = buildApiUrl(path);
-        const headers = { ...(options.headers || {}) };
-        if (apiToken && !headers.Authorization) {
-            headers.Authorization = `Bearer ${apiToken}`;
-        }
-        return fetch(url, { ...options, headers });
-    };
-
-    const refreshApiContext = () => {
-        const appRoot = document.getElementById('appRoot');
-        const baseAttr = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim();
-        apiBase = baseAttr.replace(/\/$/, '');
-        apiToken = appRoot?.getAttribute('data-access-token') || appRoot?.dataset?.accessToken || '';
-
-        if (!apiBase) {
-            console.warn('Org Leave tab: API base URL missing on #appRoot. Calls will target current origin.');
-        }
-        if (!apiToken) {
-            console.warn('Org Leave tab: access token missing. Leave API calls may fail with 401.');
-        }
-    };
-
-    function openLeaveModal() {
-        resetLeaveModal();
-        const m = document.getElementById('leaveModal');
-        m.classList.remove('hidden');
-        m.classList.add('flex');
-    }
-    function closeLeaveModal() {
-        const m = document.getElementById('leaveModal');
-        m.classList.add('hidden');
-        m.classList.remove('flex');
-    }
-    function onLeaveTypeChange(sel) {
-        document.getElementById('customNameField').classList.toggle('hidden', sel.value !== 'custom');
-    }
-    function toggleCarryOverInput(show) {
-        document.getElementById('carryOverInput').classList.toggle('hidden', !show);
-    }
-
-    const leaveTypeLabels = { sick: 'Sick Leave', vacation: 'Vacation Leave', emergency: 'Emergency Leave', unpaid: 'Unpaid Leave', custom: '' };
-    const leaveTypeColors = {
-        sick:      'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
-        vacation:  'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-        emergency: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
-        unpaid:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-        custom:    'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400'
-    };
-
-    const accrualLabels = { lump: 'Lump Sum', monthly: 'Monthly', perperiod: 'Per Period' };
-    const accrualEnumMap = { lump: 1, monthly: 2, perperiod: 3 };
-    const carryOverEnumMap = { none: 1, max: 2 };
-    const appliesToEnumMap = {
-        'All Employees': 1,
-        'Full-Time Only': 2,
-        'Part-Time Only': 3,
-        'Probationary Only': 4,
-        'Regular Only': 5
-    };
-    const fiscalYearEnumMap = {
-        'January 1': 1,
-        'April 1': 2,
-        'July 1': 3,
-        'Employee Hire Date': 4
-    };
-    const resetRuleEnumMap = {
-        'Reset on Fiscal Year Start': 1,
-        'Reset on Employee Anniversary': 2,
-        'No Reset (Cumulative)': 3
-    };
-
-    async function loadLeaveTypes() {
-        const tbody = document.getElementById('leavePoliciesBody');
-        tbody.innerHTML = '';
-        const res = await apiFetch('/api/leave-types');
-        if (!res.ok) {
-            console.warn('Failed to load leave types');
-            return;
-        }
-        const items = await res.json();
-        items.filter(item => item.isActive).forEach(renderLeaveTypeRow);
-    }
-
-    async function loadLeaveSettings() {
-        const res = await apiFetch('/api/org-leave-settings/current');
-        if (!res.ok) {
-            console.warn('Failed to load leave settings');
-            return;
-        }
-        const data = await res.json();
-        const fiscalSelect = document.getElementById('leaveFiscalYearStart');
-        const resetSelect = document.getElementById('leaveResetRule');
-        const proratedToggle = document.getElementById('leaveProrated');
-
-        if (fiscalSelect) {
-            const fiscalLabel = data.fiscalYearStart === 1 ? 'January 1'
-                : data.fiscalYearStart === 2 ? 'April 1'
-                : data.fiscalYearStart === 3 ? 'July 1'
-                : 'Employee Hire Date';
-            fiscalSelect.value = fiscalLabel;
-        }
-
-        if (resetSelect) {
-            const resetLabel = data.balanceResetRule === 1 ? 'Reset on Fiscal Year Start'
-                : data.balanceResetRule === 2 ? 'Reset on Employee Anniversary'
-                : 'No Reset (Cumulative)';
-            resetSelect.value = resetLabel;
-        }
-
-        if (proratedToggle) {
-            proratedToggle.checked = !!data.proratedForNewHires;
-        }
-    }
-
-    function renderLeaveTypeRow(item) {
-        leaveTypeStore.set(item.leaveTypeID, item);
-        const tbody = document.getElementById('leavePoliciesBody');
-        const row = document.createElement('tr');
-        row.dataset.leaveTypeId = item.leaveTypeID;
-        row.className = 'leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10';
-
-        const lowerName = (item.leaveTypeName || '').toLowerCase();
-        const typeKey = lowerName.includes('sick') ? 'sick'
-            : lowerName.includes('vacation') ? 'vacation'
-            : lowerName.includes('emergency') ? 'emergency'
-            : lowerName.includes('unpaid') ? 'unpaid'
-            : 'custom';
-        const typeColor = leaveTypeColors[typeKey] || leaveTypeColors.custom;
-        const accrual = item.accrualType === 1 ? 'Lump Sum'
-            : item.accrualType === 2 ? 'Monthly'
-            : 'Per Period';
-        const carryHtml = item.carryOverType === 2
-            ? `<span class="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
-                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Max ${item.carryOverMaxDays ?? 0} days</span>`
-            : `<span class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
-                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>None</span>`;
-
-        const flags = [
-            item.requireApproval ? `<span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-400">Approval</span>` : '',
-            item.requireDocument ? `<span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-500/20 dark:bg-blue-900/20 dark:text-blue-400">Doc</span>` : '',
-            item.allowNegativeBalance ? `<span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 ring-1 ring-gray-400/30 dark:bg-gray-700 dark:text-gray-300">Negative</span>` : ''
-        ].filter(Boolean).join('') || '<span class="text-xs text-gray-400">-</span>';
-
-        const trashSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />';
-        const editSvg  = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />';
-
-        row.innerHTML = `
-            <td class="px-5 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg ${typeColor}">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                    </div>
-                    <div>
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white">${item.leaveTypeName}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500">${item.appliesTo === 1 ? 'All Employees' : item.appliesTo === 2 ? 'Full-Time Only' : item.appliesTo === 3 ? 'Part-Time Only' : item.appliesTo === 4 ? 'Probationary Only' : 'Regular Only'}</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-5 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">${item.defaultDaysPerYear} days / yr</span>
-            </td>
-            <td class="px-5 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">${accrual}</td>
-            <td class="px-5 py-4 whitespace-nowrap">${carryHtml}</td>
-            <td class="px-5 py-4 whitespace-nowrap"><div class="flex gap-1.5 flex-wrap">${flags}</div></td>
-            <td class="px-5 py-4 whitespace-nowrap text-right">
-                <div class="flex items-center justify-end gap-1">
-                    <button onclick="openEditLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${editSvg}</svg>
-                    </button>
-                    <button onclick="deleteLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${trashSvg}</svg>
-                    </button>
-                </div>
-            </td>`;
-
-        tbody.appendChild(row);
-    }
-
-    async function deleteLeaveType(id) {
-        const res = await apiFetch(`/api/leave-types/${id}`, { method: 'DELETE' });
-        if (!res.ok) {
-            console.warn('Failed to delete leave type');
-            return;
-        }
-        const row = document.querySelector(`tr[data-leave-type-id="${id}"]`);
-        if (row) row.remove();
-        leaveTypeStore.delete(id);
-    }
-
-    function setLeaveModalSaving(isSaving) {
-        const btn = document.getElementById('leaveModalSaveBtn');
-        const spinner = document.getElementById('leaveModalSaveSpinner');
-        const icon = document.getElementById('leaveModalSaveIcon');
-        const text = document.getElementById('leaveModalSaveText');
-        if (!btn || !spinner || !icon || !text) return;
-
-        if (isSaving) {
-            btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
-            spinner.classList.remove('hidden');
-            icon.classList.add('hidden');
-            text.textContent = currentEditLeaveTypeId ? 'Updating...' : 'Saving...';
-        } else {
-            btn.disabled = false;
-            btn.classList.remove('opacity-70', 'cursor-not-allowed');
-            spinner.classList.add('hidden');
-            icon.classList.remove('hidden');
-            text.textContent = currentEditLeaveTypeId ? 'Update Leave Type' : 'Save Leave Type';
-        }
-    }
-
-    async function saveLeavePolicy() {
-        if (isSavingLeaveType) return;
-        isSavingLeaveType = true;
-        setLeaveModalSaving(true);
-        const typeVal   = document.getElementById('leaveTypeSelect').value;
-        const typeName  = typeVal === 'custom'
-            ? (document.getElementById('customLeaveName').value.trim() || 'Custom Leave')
-            : leaveTypeLabels[typeVal];
-        const allowance = document.getElementById('leaveAllowance').value;
-        const accrualVal = document.getElementById('leaveAccrual').value;
-        const carryNone = document.querySelector('input[name="carry_over"]:checked').value === 'none';
-        const carryMax  = carryNone ? null : document.querySelector('#carryOverInput input').value;
-        const needApproval = document.getElementById('flagApproval').checked;
-        const needDoc      = document.getElementById('flagDoc').checked;
-        const allowNegative = document.getElementById('flagNegative').checked;
-        const appliesToLabel = document.getElementById('leaveAppliesTo')?.value || 'All Employees';
-        const appliesToValue = appliesToEnumMap[appliesToLabel] || 1;
-
-        const existing = currentEditLeaveTypeId ? leaveTypeStore.get(currentEditLeaveTypeId) : null;
-        const payload = {
-            leaveTypeName: typeName,
-            defaultDaysPerYear: Number(allowance || 0),
-            isPaid: existing ? existing.isPaid : true,
-            isActive: existing ? existing.isActive : true,
-            accrualType: accrualEnumMap[accrualVal] || 1,
-            carryOverType: carryOverEnumMap[carryNone ? 'none' : 'max'],
-            carryOverMaxDays: carryNone ? null : Number(carryMax || 0),
-            appliesTo: appliesToValue,
-            requireApproval: needApproval,
-            requireDocument: needDoc,
-            allowNegativeBalance: allowNegative
+        const buildApiUrl = (path) => {
+            if (!path) return apiBase;
+            if (/^https?:/i.test(path)) return path;
+            const normalized = path.startsWith('/') ? path : `/${path}`;
+            return apiBase ? `${apiBase}${normalized}` : normalized;
         };
 
-        const url = currentEditLeaveTypeId ? `/api/leave-types/${currentEditLeaveTypeId}` : '/api/leave-types';
-        const method = currentEditLeaveTypeId ? 'PUT' : 'POST';
-        try {
-            const res = await apiFetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) {
-                console.warn('Failed to save leave type');
-                return;
+        const apiFetch = (path, options = {}) => {
+            const url = buildApiUrl(path);
+            const headers = { ...(options.headers || {}) };
+            if (apiToken && !headers.Authorization) {
+                headers.Authorization = `Bearer ${apiToken}`;
             }
-            const created = await res.json();
-            const existingRow = document.querySelector(`tr[data-leave-type-id="${created.leaveTypeID}"]`);
-            if (existingRow) existingRow.remove();
-            renderLeaveTypeRow(created);
-            closeLeaveModal();
-        } catch (err) {
-            console.error('Failed to save leave type', err);
-        } finally {
-            isSavingLeaveType = false;
-            setLeaveModalSaving(false);
-        }
-        return;
-
-    }
-
-    async function saveLeaveSettings() {
-        const fiscalLabel = document.getElementById('leaveFiscalYearStart')?.value || 'January 1';
-        const resetLabel = document.getElementById('leaveResetRule')?.value || 'Reset on Fiscal Year Start';
-        const prorated = document.getElementById('leaveProrated')?.checked ?? true;
-
-        const payload = {
-            fiscalYearStart: fiscalYearEnumMap[fiscalLabel] || 1,
-            balanceResetRule: resetRuleEnumMap[resetLabel] || 1,
-            proratedForNewHires: prorated
+            return fetch(url, { ...options, headers });
         };
 
-        try {
-            const res = await apiFetch('/api/org-leave-settings/current', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        const refreshApiContext = () => {
+            const appRoot = document.getElementById('appRoot');
+            const baseAttr = (appRoot?.getAttribute('data-api-base') || appRoot?.dataset?.apiBase || '').trim();
+            apiBase = baseAttr.replace(/\/$/, '');
+            apiToken = appRoot?.getAttribute('data-access-token') || appRoot?.dataset?.accessToken || '';
+        };
+
+        const leaveTypeLabels = {
+            sil: 'Service Incentive Leave',
+            maternity: 'Maternity Leave',
+            paternity: 'Paternity Leave',
+            solo_parent: 'Solo Parent Leave',
+            vawc: 'VAWC Leave',
+            special_women: 'Special Leave for Women',
+            sick: 'Sick Leave',
+            vacation: 'Vacation Leave',
+            emergency: 'Emergency Leave',
+            unpaid: 'Unpaid Leave',
+            custom: ''
+        };
+
+        const leaveTypeColors = {
+            sil: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+            maternity: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+            paternity: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+            solo_parent: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+            vawc: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+            special_women: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
+            sick: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+            vacation: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+            emergency: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+            unpaid: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+            custom: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+        };
+
+        const statutoryCodeLabels = {
+            NONE: 'NONE',
+            SIL: 'SIL',
+            MATERNITY: 'MATERNITY',
+            PATERNITY: 'PATERNITY',
+            SOLO_PARENT: 'SOLO_PARENT',
+            VAWC: 'VAWC',
+            SPECIAL_LEAVE_WOMEN: 'SPECIAL_LEAVE_WOMEN'
+        };
+
+        const accrualEnumMap = { lump: 1, monthly: 2, perperiod: 3 };
+        const carryOverEnumMap = { none: 1, max: 2 };
+        const appliesToEnumMap = {
+            'All Employees': 1,
+            'Full-Time Only': 2,
+            'Part-Time Only': 3,
+            'Probationary Only': 4,
+            'Regular Only': 5,
+            'Female Employees Only': 6,
+            'Male Employees Only': 7
+        };
+        const fiscalYearEnumMap = {
+            'January 1': 1,
+            'April 1': 2,
+            'July 1': 3,
+            'Employee Hire Date': 4
+        };
+        const resetRuleEnumMap = {
+            'Reset on Fiscal Year Start': 1,
+            'Reset on Employee Anniversary': 2,
+            'No Reset (Cumulative)': 3
+        };
+        const filingUnitEnumMap = { full_day: 1, half_day: 2, hourly: 3 };
+        const deductionTimingEnumMap = { approval: 1, leave_date: 2 };
+        const approverRoleEnumMap = { supervisor: 1, manager: 2, hr: 3, auto: 4 };
+        const expiryRuleEnumMap = { never: 1, fiscal_year_end: 2, custom_months: 3 };
+        const leaveCategoryEnumMap = { statutory: 1, company: 2, unpaid_admin: 3 };
+        const compensationSourceEnumMap = {
+            company_paid: 1,
+            government_benefit: 2,
+            unpaid: 3,
+            mixed: 4
+        };
+        const paidStatusEnumMap = {
+            paid: 1,
+            unpaid: 2,
+            conditional: 3
+        };
+        const statutoryCodeEnumMap = {
+            NONE: 0,
+            SIL: 1,
+            MATERNITY: 2,
+            PATERNITY: 3,
+            SOLO_PARENT: 4,
+            VAWC: 5,
+            SPECIAL_LEAVE_WOMEN: 6
+        };
+
+        const protectedReadonlyInputIds = [
+            'leaveStatutoryCode',
+            'leaveAllowance',
+            'leaveMinServiceMonths'
+        ];
+
+        const protectedDisabledSelectIds = [
+            'leaveTypeSelect',
+            'leaveCategory',
+            'leaveCompensationSource',
+            'leavePaidStatus'
+        ];
+
+        const protectedToggleIds = [
+            'flagSystemProtected'
+        ];
+
+        const fieldLockNotesMap = {
+            leaveTypeSelect: 'Protected: statutory template identity cannot be changed.',
+            leaveCategory: 'Protected: statutory leave category is fixed.',
+            leaveCompensationSource: 'Protected: compensation source is part of the legal baseline.',
+            leavePaidStatus: 'Protected: paid status is part of the legal baseline.',
+            leaveAllowance: 'Protected: baseline statutory entitlement cannot be reduced here.',
+            leaveMinServiceMonths: 'Protected: statutory eligibility service rule is fixed here.',
+            leaveStatutoryCode: 'Protected: statutory code identifies the legal leave type.',
+            flagSystemProtected: 'Protected: this baseline leave cannot be unprotected from this form.'
+        };
+
+        const phLeaveTemplates = {
+            sil: {
+                leaveTypeName: 'Service Incentive Leave',
+                leaveCategory: 'statutory',
+                statutoryCode: 'SIL',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 5,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: false,
+                allowNegativeBalance: false,
+                advanceFilingDays: 1,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 5,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'supervisor',
+                leaveExpiryRule: 'fiscal_year_end',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 12,
+                requiresLegalQualification: false,
+                requiresHrValidation: false,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            maternity: {
+                leaveTypeName: 'Maternity Leave',
+                leaveCategory: 'statutory',
+                statutoryCode: 'MATERNITY',
+                compensationSource: 'government_benefit',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 105,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'Female Employees Only',
+                requireApproval: true,
+                requireDocument: true,
+                allowNegativeBalance: false,
+                advanceFilingDays: 30,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 105,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'hr',
+                leaveExpiryRule: 'never',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: true,
+                allowLeaveOnHoliday: true,
+                minServiceMonths: 0,
+                requiresLegalQualification: true,
+                requiresHrValidation: true,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            paternity: {
+                leaveTypeName: 'Paternity Leave',
+                leaveCategory: 'statutory',
+                statutoryCode: 'PATERNITY',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 7,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'Male Employees Only',
+                requireApproval: true,
+                requireDocument: true,
+                allowNegativeBalance: false,
+                advanceFilingDays: 7,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 7,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'hr',
+                leaveExpiryRule: 'never',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: true,
+                allowLeaveOnHoliday: true,
+                minServiceMonths: 0,
+                requiresLegalQualification: true,
+                requiresHrValidation: true,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            solo_parent: {
+                leaveTypeName: 'Solo Parent Leave',
+                leaveCategory: 'statutory',
+                statutoryCode: 'SOLO_PARENT',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 7,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: true,
+                allowNegativeBalance: false,
+                advanceFilingDays: 3,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 7,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'hr',
+                leaveExpiryRule: 'fiscal_year_end',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 12,
+                requiresLegalQualification: true,
+                requiresHrValidation: true,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            vawc: {
+                leaveTypeName: 'VAWC Leave',
+                leaveCategory: 'statutory',
+                statutoryCode: 'VAWC',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 10,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'Female Employees Only',
+                requireApproval: true,
+                requireDocument: true,
+                allowNegativeBalance: false,
+                advanceFilingDays: 0,
+                allowRetroactiveFiling: true,
+                maxConsecutiveDays: 10,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'hr',
+                leaveExpiryRule: 'never',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: true,
+                allowLeaveOnHoliday: true,
+                minServiceMonths: 0,
+                requiresLegalQualification: true,
+                requiresHrValidation: true,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            special_women: {
+                leaveTypeName: 'Special Leave for Women',
+                leaveCategory: 'statutory',
+                statutoryCode: 'SPECIAL_LEAVE_WOMEN',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 60,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'Female Employees Only',
+                requireApproval: true,
+                requireDocument: true,
+                allowNegativeBalance: false,
+                advanceFilingDays: 3,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 60,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'hr',
+                leaveExpiryRule: 'never',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: true,
+                allowLeaveOnHoliday: true,
+                minServiceMonths: 6,
+                requiresLegalQualification: true,
+                requiresHrValidation: true,
+                canOrgOverride: true,
+                isSystemProtected: true
+            },
+            sick: {
+                leaveTypeName: 'Sick Leave',
+                leaveCategory: 'company',
+                statutoryCode: 'NONE',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 15,
+                accrualType: 'monthly',
+                carryOverType: 'max',
+                carryOverMaxDays: 5,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: false,
+                allowNegativeBalance: false,
+                advanceFilingDays: 0,
+                allowRetroactiveFiling: true,
+                maxConsecutiveDays: 15,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'supervisor',
+                leaveExpiryRule: 'fiscal_year_end',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 0,
+                requiresLegalQualification: false,
+                requiresHrValidation: false,
+                canOrgOverride: true,
+                isSystemProtected: false
+            },
+            vacation: {
+                leaveTypeName: 'Vacation Leave',
+                leaveCategory: 'company',
+                statutoryCode: 'NONE',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 15,
+                accrualType: 'monthly',
+                carryOverType: 'max',
+                carryOverMaxDays: 5,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: false,
+                allowNegativeBalance: false,
+                advanceFilingDays: 2,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 10,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'supervisor',
+                leaveExpiryRule: 'fiscal_year_end',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 0,
+                requiresLegalQualification: false,
+                requiresHrValidation: false,
+                canOrgOverride: true,
+                isSystemProtected: false
+            },
+            emergency: {
+                leaveTypeName: 'Emergency Leave',
+                leaveCategory: 'company',
+                statutoryCode: 'NONE',
+                compensationSource: 'company_paid',
+                paidStatus: 'paid',
+                defaultDaysPerYear: 3,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: false,
+                allowNegativeBalance: false,
+                advanceFilingDays: 0,
+                allowRetroactiveFiling: true,
+                maxConsecutiveDays: 3,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'approval',
+                approverRole: 'supervisor',
+                leaveExpiryRule: 'fiscal_year_end',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 0,
+                requiresLegalQualification: false,
+                requiresHrValidation: false,
+                canOrgOverride: true,
+                isSystemProtected: false
+            },
+            unpaid: {
+                leaveTypeName: 'Unpaid Leave',
+                leaveCategory: 'unpaid_admin',
+                statutoryCode: 'NONE',
+                compensationSource: 'unpaid',
+                paidStatus: 'unpaid',
+                defaultDaysPerYear: 0,
+                accrualType: 'lump',
+                carryOverType: 'none',
+                carryOverMaxDays: null,
+                appliesTo: 'All Employees',
+                requireApproval: true,
+                requireDocument: false,
+                allowNegativeBalance: false,
+                advanceFilingDays: 1,
+                allowRetroactiveFiling: false,
+                maxConsecutiveDays: 30,
+                filingUnit: 'full_day',
+                deductBalanceOn: 'leave_date',
+                approverRole: 'manager',
+                leaveExpiryRule: 'never',
+                leaveExpiryCustomMonths: null,
+                allowLeaveOnRestDay: false,
+                allowLeaveOnHoliday: false,
+                minServiceMonths: 0,
+                requiresLegalQualification: false,
+                requiresHrValidation: false,
+                canOrgOverride: true,
+                isSystemProtected: false
+            }
+        };
+
+        function templateToRecord(key, idOverride = null) {
+            const t = phLeaveTemplates[key];
+            const newId = idOverride ?? nextDemoId--;
+            return {
+                leaveTypeID: newId,
+                leaveTypeName: t.leaveTypeName,
+                defaultDaysPerYear: t.defaultDaysPerYear,
+                isPaid: t.paidStatus === 'paid',
+                isActive: true,
+                accrualType: accrualEnumMap[t.accrualType] || 1,
+                carryOverType: carryOverEnumMap[t.carryOverType] || 1,
+                carryOverMaxDays: t.carryOverMaxDays,
+                appliesTo: appliesToEnumMap[t.appliesTo] || 1,
+                requireApproval: t.requireApproval,
+                requireDocument: t.requireDocument,
+                allowNegativeBalance: t.allowNegativeBalance,
+
+                advanceFilingDays: t.advanceFilingDays,
+                allowRetroactiveFiling: t.allowRetroactiveFiling,
+                maxConsecutiveDays: t.maxConsecutiveDays,
+                filingUnit: filingUnitEnumMap[t.filingUnit] || 1,
+                deductBalanceOn: deductionTimingEnumMap[t.deductBalanceOn] || 1,
+                approverRole: approverRoleEnumMap[t.approverRole] || 1,
+                leaveExpiryRule: expiryRuleEnumMap[t.leaveExpiryRule] || 1,
+                leaveExpiryCustomMonths: t.leaveExpiryCustomMonths,
+                allowLeaveOnRestDay: t.allowLeaveOnRestDay,
+                allowLeaveOnHoliday: t.allowLeaveOnHoliday,
+
+                leaveCategory: leaveCategoryEnumMap[t.leaveCategory] || 2,
+                statutoryCode: statutoryCodeEnumMap[t.statutoryCode] || 0,
+                compensationSource: compensationSourceEnumMap[t.compensationSource] || 1,
+                paidStatus: paidStatusEnumMap[t.paidStatus] || 1,
+                minServiceMonths: t.minServiceMonths,
+                requiresLegalQualification: t.requiresLegalQualification,
+                requiresHrValidation: t.requiresHrValidation,
+                canOrgOverride: t.canOrgOverride,
+                isSystemProtected: t.isSystemProtected
+            };
+        }
+
+        function getDefaultDemoTemplates() {
+            return [
+                templateToRecord('sil', -1),
+                templateToRecord('maternity', -2),
+                templateToRecord('paternity', -3),
+                templateToRecord('solo_parent', -4),
+                templateToRecord('vawc', -5),
+                templateToRecord('special_women', -6),
+                templateToRecord('sick', -7),
+                templateToRecord('vacation', -8),
+                templateToRecord('emergency', -9),
+                templateToRecord('unpaid', -10)
+            ];
+        }
+
+        function inferTypeKeyFromName(name) {
+            const lower = (name || '').toLowerCase();
+            if (lower.includes('service incentive')) return 'sil';
+            if (lower.includes('maternity')) return 'maternity';
+            if (lower.includes('paternity')) return 'paternity';
+            if (lower.includes('solo')) return 'solo_parent';
+            if (lower.includes('vawc')) return 'vawc';
+            if (lower.includes('special leave for women')) return 'special_women';
+            if (lower.includes('sick')) return 'sick';
+            if (lower.includes('vacation')) return 'vacation';
+            if (lower.includes('emergency')) return 'emergency';
+            if (lower.includes('unpaid')) return 'unpaid';
+            return 'custom';
+        }
+
+        function getAppliesToLabel(value) {
+            switch (value) {
+                case 2: return 'Full-Time Only';
+                case 3: return 'Part-Time Only';
+                case 4: return 'Probationary Only';
+                case 5: return 'Regular Only';
+                case 6: return 'Female Employees Only';
+                case 7: return 'Male Employees Only';
+                default: return 'All Employees';
+            }
+        }
+
+        function getCategoryLabel(value) {
+            return value === 1 ? 'Statutory' : value === 3 ? 'Unpaid/Admin' : 'Company';
+        }
+
+        function getCompensationSourceLabel(value) {
+            return value === 2 ? 'Govt Benefit' : value === 3 ? 'Unpaid' : value === 4 ? 'Mixed' : 'Company Paid';
+        }
+
+        function getPaidStatusLabel(value) {
+            return value === 2 ? 'Unpaid' : value === 3 ? 'Conditional' : 'Paid';
+        }
+
+        function getStatutoryCodeLabel(value) {
+            switch (value) {
+                case 1: return 'SIL';
+                case 2: return 'MATERNITY';
+                case 3: return 'PATERNITY';
+                case 4: return 'SOLO_PARENT';
+                case 5: return 'VAWC';
+                case 6: return 'SPECIAL_LEAVE_WOMEN';
+                default: return 'NONE';
+            }
+        }
+
+        function getProtectedInputWrapper(fieldId) {
+            const field = document.getElementById(fieldId);
+            return field?.closest('.protected-input-wrap') || null;
+        }
+
+        function ensureFieldDecorations() {
+            const addLockChip = (fieldId) => {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                let wrapper = field.closest('.protected-input-wrap');
+
+                if (!wrapper) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'protected-input-wrap';
+                    field.parentNode.insertBefore(wrapper, field);
+                    wrapper.appendChild(field);
+                }
+
+                if (!wrapper.querySelector('.lock-chip')) {
+                    const chip = document.createElement('span');
+                    chip.className = 'lock-chip';
+                    chip.innerHTML = `
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12A1.5 1.5 0 0119.5 12v7.5A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5V12A1.5 1.5 0 016 10.5z" />
+                        </svg>
+                        Locked
+                    `;
+                    wrapper.appendChild(chip);
+                }
+            };
+
+            [...protectedDisabledSelectIds, ...protectedReadonlyInputIds].forEach(addLockChip);
+
+            Object.entries(fieldLockNotesMap).forEach(([fieldId, note]) => {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                const parent = field.closest('.protected-input-wrap') || field.parentElement;
+                if (!parent) return;
+
+                let noteEl = parent.parentElement?.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
+                if (!noteEl) {
+                    noteEl = document.createElement('div');
+                    noteEl.className = 'field-lock-note';
+                    noteEl.dataset.for = fieldId;
+                    noteEl.textContent = note;
+                    parent.parentElement?.appendChild(noteEl);
+                }
             });
-            const data = await res.json().catch(() => null);
-            if (!res.ok) {
-                const message = data?.message || 'Failed to save leave settings';
-                console.warn(message);
-                window.showToast?.(message, false);
+
+            protectedToggleIds.forEach((fieldId) => {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                const host = field.closest('label')?.parentElement;
+                if (!host) return;
+
+                let noteEl = host.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
+                if (!noteEl) {
+                    noteEl = document.createElement('div');
+                    noteEl.className = 'field-lock-note';
+                    noteEl.dataset.for = fieldId;
+                    noteEl.textContent = fieldLockNotesMap[fieldId] || 'Protected field';
+                    noteEl.style.marginTop = '0.25rem';
+                    host.appendChild(noteEl);
+                }
+            });
+        }
+
+        function syncPaidFromCompensation() {
+            const compensation = document.getElementById('leaveCompensationSource')?.value;
+            const paidStatus = document.getElementById('leavePaidStatus');
+            if (!paidStatus || paidStatus.disabled) return;
+
+            if (compensation === 'unpaid') {
+                paidStatus.value = 'unpaid';
+            } else if (compensation === 'mixed') {
+                paidStatus.value = 'conditional';
+            } else {
+                paidStatus.value = 'paid';
+            }
+        }
+
+        function applyProtectedMode(isProtected) {
+            const protectedBanner = document.getElementById('leaveProtectedBanner');
+            const protectedBadge = document.getElementById('leaveProtectedBadge');
+            const lockedBadge = document.getElementById('leaveLockedBadge');
+            const subtitle = document.getElementById('leaveModalSubtitle');
+            const legalIdentityBox = document.getElementById('leaveLockedLegalIdentity');
+
+            protectedBanner?.classList.toggle('hidden', !isProtected);
+            protectedBadge?.classList.toggle('hidden', !isProtected);
+            lockedBadge?.classList.toggle('hidden', !isProtected);
+            legalIdentityBox?.classList.toggle('hidden', !isProtected);
+
+            if (subtitle) {
+                subtitle.textContent = isProtected
+                    ? 'Protected statutory template with editable workflow settings.'
+                    : 'Configure leave rules for your organization.';
+            }
+
+            protectedDisabledSelectIds.forEach((fieldId) => {
+                const field = document.getElementById(fieldId);
+                const wrapper = getProtectedInputWrapper(fieldId);
+                const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
+                if (!field) return;
+
+                field.disabled = !!isProtected;
+                field.classList.toggle('protected-field', !!isProtected);
+                wrapper?.classList.toggle('is-locked', !!isProtected);
+                note?.classList.toggle('is-visible', !!isProtected);
+            });
+
+            protectedReadonlyInputIds.forEach((fieldId) => {
+                const field = document.getElementById(fieldId);
+                const wrapper = getProtectedInputWrapper(fieldId);
+                const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
+                if (!field) return;
+
+                field.readOnly = !!isProtected;
+                field.classList.toggle('protected-field', !!isProtected);
+                wrapper?.classList.toggle('is-locked', !!isProtected);
+                note?.classList.toggle('is-visible', !!isProtected);
+            });
+
+            protectedToggleIds.forEach((fieldId) => {
+                const field = document.getElementById(fieldId);
+                const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
+                if (!field) return;
+
+                field.disabled = !!isProtected;
+                note?.classList.toggle('is-visible', !!isProtected);
+
+                const host = field.closest('label')?.parentElement;
+                host?.classList.toggle('opacity-80', !!isProtected);
+            });
+        }
+
+        function closeAllLeaveFlagsDropdowns(exceptId = null) {
+            document.querySelectorAll('[id^="leaveFlagsDropdown-"]').forEach(el => {
+                if (exceptId && el.id === exceptId) return;
+                el.classList.add('hidden');
+            });
+        }
+
+        function toggleLeaveFlagsDropdown(event, leaveTypeId) {
+            event.stopPropagation();
+            const dropdownId = `leaveFlagsDropdown-${leaveTypeId}`;
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+
+            const willOpen = dropdown.classList.contains('hidden');
+            closeAllLeaveFlagsDropdowns(willOpen ? dropdownId : null);
+            dropdown.classList.toggle('hidden', !willOpen);
+        }
+
+        function openLeaveModal() {
+            resetLeaveModal();
+            const m = document.getElementById('leaveModal');
+            if (!m) return;
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeLeaveModal() {
+            const m = document.getElementById('leaveModal');
+            if (!m) return;
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function applyTemplateToForm(templateKey) {
+            const t = phLeaveTemplates[templateKey];
+            if (!t) return;
+
+            document.getElementById('customNameField')?.classList.toggle('hidden', templateKey !== 'custom');
+
+            if (templateKey === 'custom') {
+                document.getElementById('leaveCategory').value = 'company';
+                document.getElementById('leaveCompensationSource').value = 'company_paid';
+                document.getElementById('leavePaidStatus').value = 'paid';
+                document.getElementById('leaveStatutoryCode').value = 'NONE';
+                document.getElementById('leaveAllowance').value = 1;
+                document.getElementById('leaveAccrual').value = 'lump';
+                document.getElementById('leaveMinServiceMonths').value = 0;
+                document.getElementById('leaveAppliesTo').value = 'All Employees';
+                document.getElementById('flagLegalQualification').checked = false;
+                document.getElementById('flagHrValidation').checked = false;
+                document.getElementById('flagCanOrgOverride').checked = true;
+                document.getElementById('flagSystemProtected').checked = false;
+                applyProtectedMode(false);
                 return;
             }
 
-            const persisted = data?.persisted !== false;
-            const toastMessage = data?.message
-                || (persisted ? 'Leave settings updated.' : 'Leave settings saved locally and will sync once reconnected.');
-            window.showToast?.(toastMessage, persisted);
-        } catch (err) {
-            console.warn('Failed to save leave settings', err);
-            window.showToast?.('Unable to save leave settings.', false);
+            document.getElementById('leaveCategory').value = t.leaveCategory;
+            document.getElementById('leaveCompensationSource').value = t.compensationSource;
+            document.getElementById('leavePaidStatus').value = t.paidStatus;
+            document.getElementById('leaveStatutoryCode').value = t.statutoryCode;
+            document.getElementById('leaveAllowance').value = t.defaultDaysPerYear;
+            document.getElementById('leaveAccrual').value = t.accrualType;
+            document.getElementById('leaveMinServiceMonths').value = t.minServiceMonths;
+            document.getElementById('leaveAppliesTo').value = t.appliesTo;
+
+            if (t.carryOverType === 'max') {
+                document.querySelector('input[name="carry_over"][value="max"]').checked = true;
+                toggleCarryOverInput(true);
+                document.getElementById('carryOverMaxDaysInput').value = t.carryOverMaxDays ?? 5;
+            } else {
+                document.querySelector('input[name="carry_over"][value="none"]').checked = true;
+                toggleCarryOverInput(false);
+                document.getElementById('carryOverMaxDaysInput').value = 5;
+            }
+
+            document.getElementById('leaveAdvanceFiling').value = t.advanceFilingDays;
+            document.getElementById('flagRetroactive').checked = t.allowRetroactiveFiling;
+            document.getElementById('leaveMaxConsecutive').value = t.maxConsecutiveDays;
+            document.getElementById('leaveFilingUnit').value = t.filingUnit;
+            document.getElementById('leaveDeductionTiming').value = t.deductBalanceOn;
+            document.getElementById('leaveExpiryRule').value = t.leaveExpiryRule;
+            document.getElementById('leaveExpiryCustomMonths').value = t.leaveExpiryCustomMonths ?? 12;
+            toggleLeaveExpiryCustomMonths(t.leaveExpiryRule === 'custom_months');
+            document.getElementById('flagAllowRestDay').checked = t.allowLeaveOnRestDay;
+            document.getElementById('flagAllowHoliday').checked = t.allowLeaveOnHoliday;
+
+            document.getElementById('flagLegalQualification').checked = t.requiresLegalQualification;
+            document.getElementById('flagHrValidation').checked = t.requiresHrValidation;
+            document.getElementById('flagCanOrgOverride').checked = t.canOrgOverride;
+            document.getElementById('flagSystemProtected').checked = t.isSystemProtected;
+
+            document.getElementById('flagApproval').checked = t.requireApproval;
+            document.getElementById('leaveApproverRole').value = t.approverRole;
+            document.getElementById('approverRoleContainer').classList.toggle('hidden', !t.requireApproval);
+            document.getElementById('flagDoc').checked = t.requireDocument;
+            document.getElementById('flagNegative').checked = t.allowNegativeBalance;
+
+            applyProtectedMode(!!t.isSystemProtected);
         }
-    }
 
-    function resetLeaveModal() {
-        currentEditLeaveTypeId = null;
-        document.getElementById('leaveModalTitle').textContent = 'New Leave Type';
-        document.getElementById('leaveModalSaveText').textContent = 'Save Leave Type';
-        document.getElementById('leaveTypeSelect').value = 'sick';
-        document.getElementById('customLeaveName').value = '';
-        document.getElementById('customNameField').classList.add('hidden');
-        document.getElementById('leaveAllowance').value = 15;
-        document.getElementById('leaveAccrual').value = 'lump';
-        document.querySelector('input[name="carry_over"][value="none"]').checked = true;
-        toggleCarryOverInput(false);
-        document.querySelector('#carryOverInput input').value = 5;
-        document.getElementById('leaveAppliesTo').value = 'All Employees';
-        document.getElementById('flagApproval').checked = true;
-        document.getElementById('flagDoc').checked = false;
-        document.getElementById('flagNegative').checked = false;
-        setLeaveModalSaving(false);
-    }
+        function onLeaveTypeChange(sel) {
+            const value = sel.value;
+            document.getElementById('customNameField')?.classList.toggle('hidden', value !== 'custom');
+            applyTemplateToForm(value);
+        }
 
-    function openEditLeaveType(id) {
-        const item = leaveTypeStore.get(id);
-        if (!item) return;
+        function toggleCarryOverInput(show) {
+            document.getElementById('carryOverInput')?.classList.toggle('hidden', !show);
+        }
 
-        currentEditLeaveTypeId = id;
-        document.getElementById('leaveModalTitle').textContent = 'Edit Leave Type';
-        document.getElementById('leaveModalSaveText').textContent = 'Update Leave Type';
+        function toggleLeaveExpiryCustomMonths(show) {
+            document.getElementById('leaveExpiryCustomMonthsWrap')?.classList.toggle('hidden', !show);
+        }
 
-        const nameLower = (item.leaveTypeName || '').toLowerCase();
-        const presetKey = nameLower.includes('sick') ? 'sick'
-            : nameLower.includes('vacation') ? 'vacation'
-            : nameLower.includes('emergency') ? 'emergency'
-            : nameLower.includes('unpaid') ? 'unpaid'
-            : 'custom';
+        async function loadLeaveTypes() {
+            replaceLeaveTypes([]);
 
-        document.getElementById('leaveTypeSelect').value = presetKey;
-        if (presetKey === 'custom') {
-            document.getElementById('customNameField').classList.remove('hidden');
-            document.getElementById('customLeaveName').value = item.leaveTypeName || '';
-        } else {
-            document.getElementById('customNameField').classList.add('hidden');
+            try {
+                const res = await apiFetch('/api/leave-types');
+                if (!res.ok) {
+                    usingDemoTemplates = true;
+                    replaceLeaveTypes(getDefaultDemoTemplates());
+                    return;
+                }
+
+                const items = await res.json();
+                const activeItems = Array.isArray(items) ? items.filter(item => item.isActive) : [];
+                usingDemoTemplates = activeItems.length === 0;
+
+                if (usingDemoTemplates) {
+                    replaceLeaveTypes(getDefaultDemoTemplates());
+                    return;
+                }
+
+                const hydratedItems = activeItems.map(item => {
+                    if (typeof item.leaveCategory === 'undefined') {
+                        const inferredKey = inferTypeKeyFromName(item.leaveTypeName);
+                        const template = phLeaveTemplates[inferredKey];
+                        if (template) {
+                            item.leaveCategory = leaveCategoryEnumMap[template.leaveCategory] || 2;
+                            item.statutoryCode = statutoryCodeEnumMap[template.statutoryCode] || 0;
+                            item.compensationSource = compensationSourceEnumMap[template.compensationSource] || 1;
+                            item.paidStatus = paidStatusEnumMap[template.paidStatus] || 1;
+                            item.minServiceMonths = template.minServiceMonths || 0;
+                            item.requiresLegalQualification = template.requiresLegalQualification || false;
+                            item.requiresHrValidation = template.requiresHrValidation || false;
+                            item.canOrgOverride = template.canOrgOverride ?? true;
+                            item.isSystemProtected = template.isSystemProtected || false;
+                        }
+                    }
+                    return item;
+                });
+
+                const displayItems = [...hydratedItems];
+                const existingNames = new Set(hydratedItems.map(x => (x.leaveTypeName || '').trim().toLowerCase()));
+                ['sil', 'maternity', 'paternity', 'solo_parent', 'vawc', 'special_women'].forEach((key, idx) => {
+                    const template = phLeaveTemplates[key];
+                    if (!existingNames.has(template.leaveTypeName.toLowerCase())) {
+                        displayItems.push(templateToRecord(key, -200 - idx));
+                    }
+                });
+
+                replaceLeaveTypes(displayItems);
+            } catch (err) {
+                usingDemoTemplates = true;
+                replaceLeaveTypes(getDefaultDemoTemplates());
+            }
+        }
+
+        async function loadLeaveSettings() {
+            try {
+                const res = await apiFetch('/api/org-leave-settings/current');
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const fiscalSelect = document.getElementById('leaveFiscalYearStart');
+                const resetSelect = document.getElementById('leaveResetRule');
+                const proratedToggle = document.getElementById('leaveProrated');
+
+                if (fiscalSelect) {
+                    const fiscalLabel = data.fiscalYearStart === 1 ? 'January 1'
+                        : data.fiscalYearStart === 2 ? 'April 1'
+                        : data.fiscalYearStart === 3 ? 'July 1'
+                        : 'Employee Hire Date';
+                    fiscalSelect.value = fiscalLabel;
+                }
+
+                if (resetSelect) {
+                    const resetLabel = data.balanceResetRule === 1 ? 'Reset on Fiscal Year Start'
+                        : data.balanceResetRule === 2 ? 'Reset on Employee Anniversary'
+                        : 'No Reset (Cumulative)';
+                    resetSelect.value = resetLabel;
+                }
+
+                if (proratedToggle) {
+                    proratedToggle.checked = !!data.proratedForNewHires;
+                }
+            } catch (err) {
+                console.warn('Failed to load leave settings', err);
+            }
+        }
+
+        function createLeaveTypeRow(item) {
+            const row = document.createElement('tr');
+            row.dataset.leaveTypeId = item.leaveTypeID;
+            row.className = 'leave-row group transition-colors hover:bg-emerald-50/40 dark:hover:bg-emerald-900/10';
+
+            const typeKey = inferTypeKeyFromName(item.leaveTypeName);
+            const typeColor = leaveTypeColors[typeKey] || leaveTypeColors.custom;
+            const accrual = item.accrualType === 1 ? 'Lump Sum'
+                : item.accrualType === 2 ? 'Monthly'
+                : 'Per Period';
+            const carrySummary = item.carryOverType === 2
+                ? `Max ${item.carryOverMaxDays ?? 0} days`
+                : 'No carry over';
+            const paidLabel = getPaidStatusLabel(item.paidStatus);
+            const serviceLabel = item.minServiceMonths > 0 ? `${item.minServiceMonths} mos minimum service` : 'No minimum service';
+            const filingUnitLabel = item.filingUnit === 2 ? 'Half Day' : item.filingUnit === 3 ? 'Hourly' : 'Full Day';
+            const deductionLabel = item.deductBalanceOn === 2 ? 'On leave date' : 'On approval';
+            const categoryLabel = getCategoryLabel(item.leaveCategory);
+            const compensationLabel = getCompensationSourceLabel(item.compensationSource);
+            const appliesToLabel = getAppliesToLabel(item.appliesTo);
+            const statutoryCodeLabel = getStatutoryCodeLabel(item.statutoryCode);
+
+            const flagEntries = [];
+            const pushFlag = (condition, label, classes) => {
+                if (!condition) return;
+                flagEntries.push({
+                    label,
+                    badge: `<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${classes}">${label}</span>`
+                });
+            };
+
+            pushFlag(item.leaveCategory === 1, 'Statutory', 'bg-purple-50 text-purple-700 ring-purple-500/20 dark:bg-purple-900/20 dark:text-purple-300');
+            pushFlag(item.isSystemProtected, 'Protected', 'bg-slate-100 text-slate-700 ring-slate-400/30 dark:bg-slate-700 dark:text-slate-200');
+            pushFlag(item.requireApproval, 'Needs Approval', 'bg-amber-50 text-amber-700 ring-amber-500/20 dark:bg-amber-900/20 dark:text-amber-300');
+            pushFlag(item.requireDocument, 'Needs Document', 'bg-blue-50 text-blue-700 ring-blue-500/20 dark:bg-blue-900/20 dark:text-blue-300');
+            pushFlag(item.allowNegativeBalance, 'Allow Negative', 'bg-gray-100 text-gray-700 ring-gray-400/30 dark:bg-gray-700 dark:text-gray-200');
+            pushFlag(item.allowRetroactiveFiling, 'Retro Filing', 'bg-violet-50 text-violet-700 ring-violet-500/20 dark:bg-violet-900/20 dark:text-violet-300');
+            pushFlag(item.allowLeaveOnHoliday, 'Holiday OK', 'bg-red-50 text-red-700 ring-red-500/20 dark:bg-red-900/20 dark:text-red-300');
+            pushFlag(item.allowLeaveOnRestDay, 'Rest Day OK', 'bg-teal-50 text-teal-700 ring-teal-500/20 dark:bg-teal-900/20 dark:text-teal-300');
+            pushFlag(item.requiresLegalQualification, 'Legal Req', 'bg-pink-50 text-pink-700 ring-pink-500/20 dark:bg-pink-900/20 dark:text-pink-300');
+            pushFlag(item.requiresHrValidation, 'HR Validate', 'bg-cyan-50 text-cyan-700 ring-cyan-500/20 dark:bg-cyan-900/20 dark:text-cyan-300');
+
+            const visibleFlagCount = 2;
+            const visibleFlags = flagEntries.slice(0, visibleFlagCount);
+            const hiddenFlags = flagEntries.slice(visibleFlagCount);
+            const hiddenFlagsHtml = hiddenFlags.length
+                ? `
+                    <div class="relative inline-block">
+                        <button type="button"
+                                class="leave-flag-trigger inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 ring-1 ring-slate-400/30 dark:bg-slate-700 dark:text-slate-200"
+                                onclick="toggleLeaveFlagsDropdown(event, ${item.leaveTypeID})">
+                            +${hiddenFlags.length}
+                        </button>
+                        <div id="leaveFlagsDropdown-${item.leaveTypeID}" class="leave-flags-dropdown hidden">
+                            <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Hidden Flags</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${hiddenFlags.map(f => f.badge).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `
+                : '';
+
+            const flagsHtml = `
+                <div class="flex flex-wrap items-start gap-1.5">
+                    ${visibleFlags.map(f => f.badge).join('')}
+                    ${hiddenFlagsHtml}
+                </div>
+            `;
+
+            const trashSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />';
+            const editSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />';
+            const lockSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-1.5 0h12A1.5 1.5 0 0119.5 12v7.5A1.5 1.5 0 0118 21H6a1.5 1.5 0 01-1.5-1.5V12A1.5 1.5 0 016 10.5z" />';
+
+            row.innerHTML = `
+                <td class="w-[26%] px-5 py-4 align-top">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${typeColor}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="truncate text-sm font-semibold text-gray-900 dark:text-white">${item.leaveTypeName}</div>
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">${appliesToLabel}</div>
+                            <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">${statutoryCodeLabel !== 'NONE' ? statutoryCodeLabel : 'No statutory code'}</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="w-[18%] px-5 py-4 align-top">
+                    <div class="space-y-2">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${categoryLabel}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Leave Category</div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${compensationLabel}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Compensation Source</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="w-[22%] px-5 py-4 align-top">
+                    <div class="space-y-2">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${item.defaultDaysPerYear} days / year</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">${paidLabel}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${accrual}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">${serviceLabel}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${carrySummary}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Carry Over</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="w-[18%] px-5 py-4 align-top">
+                    <div class="space-y-2">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${filingUnitLabel}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Filing Unit</div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-white">${deductionLabel}</div>
+                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Balance Deduction</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="w-[10%] px-5 py-4 align-top">
+                    ${flagsHtml}
+                </td>
+
+                <td class="w-[6%] px-5 py-4 align-top text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="openEditLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${editSvg}</svg>
+                        </button>
+                        ${item.isSystemProtected
+                            ? `<button type="button" class="cursor-not-allowed rounded-lg p-1.5 text-gray-300 dark:text-gray-600" title="Protected leave template">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${lockSvg}</svg>
+                               </button>`
+                            : `<button onclick="deleteLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${trashSvg}</svg>
+                               </button>`
+                        }
+                    </div>
+                </td>
+            `;
+
+            return row;
+        }
+
+        function renderLeavePoliciesTable() {
+            const tbody = document.getElementById('leavePoliciesBody');
+            if (!tbody) return;
+
+            const perPage = leaveRowsPerPage || leaveRowsOptions[0];
+            const total = leaveTypeList.length;
+            const totalPages = total === 0 ? 1 : Math.ceil(total / perPage);
+
+            if (total === 0) {
+                leaveCurrentPage = 1;
+            } else if (leaveCurrentPage > totalPages) {
+                leaveCurrentPage = totalPages;
+            } else if (leaveCurrentPage < 1) {
+                leaveCurrentPage = 1;
+            }
+
+            const startIndex = total === 0 ? 0 : (leaveCurrentPage - 1) * perPage;
+            const pageItems = total === 0 ? [] : leaveTypeList.slice(startIndex, startIndex + perPage);
+
+            tbody.innerHTML = '';
+            if (pageItems.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="6" class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No leave types configured yet. Click "Add Leave Type" to begin.</td>`;
+                tbody.appendChild(emptyRow);
+            } else {
+                pageItems.forEach(item => tbody.appendChild(createLeaveTypeRow(item)));
+            }
+
+            const rangeEl = document.getElementById('leavePaginationRange');
+            if (rangeEl) {
+                rangeEl.textContent = pageItems.length === 0
+                    ? '0'
+                    : `${startIndex + 1}-${startIndex + pageItems.length}`;
+            }
+
+            const totalEl = document.getElementById('leavePaginationTotal');
+            if (totalEl) totalEl.textContent = total;
+
+            const select = document.getElementById('leaveRowsPerPage');
+            if (select && select.value !== String(perPage)) {
+                select.value = String(perPage);
+            }
+
+            const badge = document.getElementById('leaveRowsPerPageBadge');
+            if (badge) badge.textContent = String(perPage);
+
+            renderLeavePaginationNumbers(totalPages);
+        }
+
+        function renderLeavePaginationNumbers(totalPages) {
+            const container = document.getElementById('leavePaginationNumbers');
+            const pages = Math.max(1, totalPages);
+
+            if (container) {
+                container.innerHTML = '';
+                for (let i = 1; i <= pages; i++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = i === leaveCurrentPage
+                        ? 'h-9 min-w-[38px] rounded-md border border-emerald-200 bg-emerald-50 px-3 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-200'
+                        : 'h-9 min-w-[38px] rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800';
+                    btn.textContent = i;
+                    btn.addEventListener('click', () => {
+                        if (leaveCurrentPage === i) return;
+                        leaveCurrentPage = i;
+                        renderLeavePoliciesTable();
+                    });
+                    container.appendChild(btn);
+                }
+            }
+
+            const prevBtn = document.getElementById('leavePaginationPrev');
+            if (prevBtn) {
+                prevBtn.disabled = leaveCurrentPage <= 1 || leaveTypeList.length === 0;
+                prevBtn.classList.toggle('opacity-40', prevBtn.disabled);
+            }
+
+            const nextBtn = document.getElementById('leavePaginationNext');
+            if (nextBtn) {
+                nextBtn.disabled = leaveCurrentPage >= pages || leaveTypeList.length === 0;
+                nextBtn.classList.toggle('opacity-40', nextBtn.disabled);
+            }
+        }
+
+        function replaceLeaveTypes(items) {
+            leaveTypeStore.clear();
+            leaveTypeList = [];
+            (items || []).forEach(item => {
+                if (!item) return;
+                leaveTypeStore.set(item.leaveTypeID, item);
+                leaveTypeList.push(item);
+            });
+            leaveCurrentPage = 1;
+            renderLeavePoliciesTable();
+        }
+
+        function upsertLeaveTypeRecord(item, shouldRender = true) {
+            if (!item) return;
+            leaveTypeStore.set(item.leaveTypeID, item);
+            const idStr = String(item.leaveTypeID);
+            const idx = leaveTypeList.findIndex(entry => String(entry.leaveTypeID) === idStr);
+            if (idx >= 0) {
+                leaveTypeList[idx] = item;
+            } else {
+                leaveTypeList.push(item);
+            }
+            if (shouldRender) renderLeavePoliciesTable();
+        }
+
+        function removeLeaveTypeRecord(id, shouldRender = true) {
+            const idStr = String(id);
+            leaveTypeStore.delete(id);
+            const idx = leaveTypeList.findIndex(entry => String(entry.leaveTypeID) === idStr);
+            if (idx >= 0) leaveTypeList.splice(idx, 1);
+            const pages = Math.max(1, Math.ceil((leaveTypeList.length || 0) / (leaveRowsPerPage || 1)));
+            if (leaveCurrentPage > pages) leaveCurrentPage = pages;
+            if (shouldRender) renderLeavePoliciesTable();
+        }
+
+        function bindLeaveTableControls() {
+            const rowsSelect = document.getElementById('leaveRowsPerPage');
+            if (rowsSelect && rowsSelect.dataset.bound !== 'true') {
+                rowsSelect.dataset.bound = 'true';
+                rowsSelect.addEventListener('change', (e) => {
+                    const value = parseInt(e.target.value, 10);
+                    if (!leaveRowsOptions.includes(value)) return;
+                    leaveRowsPerPage = value;
+                    leaveCurrentPage = 1;
+                    renderLeavePoliciesTable();
+                });
+            }
+
+            const prevBtn = document.getElementById('leavePaginationPrev');
+            if (prevBtn && prevBtn.dataset.bound !== 'true') {
+                prevBtn.dataset.bound = 'true';
+                prevBtn.addEventListener('click', () => {
+                    if (leaveCurrentPage > 1) {
+                        leaveCurrentPage -= 1;
+                        renderLeavePoliciesTable();
+                    }
+                });
+            }
+
+            const nextBtn = document.getElementById('leavePaginationNext');
+            if (nextBtn && nextBtn.dataset.bound !== 'true') {
+                nextBtn.dataset.bound = 'true';
+                nextBtn.addEventListener('click', () => {
+                    const pages = Math.max(1, Math.ceil((leaveTypeList.length || 0) / (leaveRowsPerPage || 1)));
+                    if (leaveCurrentPage < pages) {
+                        leaveCurrentPage += 1;
+                        renderLeavePoliciesTable();
+                    }
+                });
+            }
+
+            const rowsBtn = document.getElementById('leaveRowsPerPageBtn');
+            const rowsMenu = document.getElementById('leaveRowsPerPageMenu');
+
+            if (rowsBtn && rowsBtn.dataset.bound !== 'true') {
+                rowsBtn.dataset.bound = 'true';
+                rowsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (!rowsMenu) return;
+                    rowsMenu.classList.toggle('hidden');
+                    const isOpen = !rowsMenu.classList.contains('hidden');
+                    rowsBtn.setAttribute('aria-expanded', String(isOpen));
+                });
+            }
+
+            if (rowsMenu && rowsMenu.dataset.bound !== 'true') {
+                rowsMenu.dataset.bound = 'true';
+                rowsMenu.addEventListener('click', (e) => {
+                    const option = e.target.closest('button.leave-rows-option');
+                    if (!option) return;
+                    const value = parseInt(option.dataset.value || option.value, 10);
+                    if (!leaveRowsOptions.includes(value)) return;
+                    leaveRowsPerPage = value;
+                    leaveCurrentPage = 1;
+                    const select = document.getElementById('leaveRowsPerPage');
+                    if (select) select.value = String(value);
+                    rowsMenu.classList.add('hidden');
+                    rowsBtn?.setAttribute('aria-expanded', 'false');
+                    renderLeavePoliciesTable();
+                });
+            }
+
+            if (!document.body.dataset.leaveRowsMenuListener) {
+                document.body.dataset.leaveRowsMenuListener = 'true';
+                document.addEventListener('click', (e) => {
+                    const menu = document.getElementById('leaveRowsPerPageMenu');
+                    const btn = document.getElementById('leaveRowsPerPageBtn');
+                    if (!menu || !btn) return;
+                    if (menu.classList.contains('hidden')) return;
+                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                        menu.classList.add('hidden');
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        }
+
+        async function deleteLeaveType(id) {
+            const item = leaveTypeStore.get(id);
+            if (item?.isSystemProtected) {
+                window.showToast?.('Protected leave templates cannot be deleted in this UI flow.', false);
+                return;
+            }
+
+            if (String(id).startsWith('-') || usingDemoTemplates) {
+                removeLeaveTypeRecord(id);
+                window.showToast?.('Leave type removed from demo UI.', true);
+                return;
+            }
+
+            try {
+                const res = await apiFetch(`/api/leave-types/${id}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    console.warn('Failed to delete leave type');
+                    return;
+                }
+
+                removeLeaveTypeRecord(id);
+            } catch (err) {
+                console.warn('Failed to delete leave type', err);
+            }
+        }
+
+        function setLeaveModalSaving(isSaving) {
+            const btn = document.getElementById('leaveModalSaveBtn');
+            const spinner = document.getElementById('leaveModalSaveSpinner');
+            const icon = document.getElementById('leaveModalSaveIcon');
+            const text = document.getElementById('leaveModalSaveText');
+            if (!btn || !spinner || !icon || !text) return;
+
+            if (isSaving) {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                spinner.classList.remove('hidden');
+                icon.classList.add('hidden');
+                text.textContent = currentEditLeaveTypeId ? 'Updating...' : 'Saving...';
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                spinner.classList.add('hidden');
+                icon.classList.remove('hidden');
+                text.textContent = currentEditLeaveTypeId ? 'Update Leave Type' : 'Save Leave Type';
+            }
+        }
+
+        function buildPayloadFromForm(existing = null) {
+            const typeSelect = document.getElementById('leaveTypeSelect');
+            const categorySelect = document.getElementById('leaveCategory');
+            const compensationSelect = document.getElementById('leaveCompensationSource');
+            const paidStatusSelect = document.getElementById('leavePaidStatus');
+            const systemProtectedToggle = document.getElementById('flagSystemProtected');
+
+            const typeVal = typeSelect?.value || 'sick';
+            const typeName = typeVal === 'custom'
+                ? (document.getElementById('customLeaveName')?.value.trim() || 'Custom Leave')
+                : (leaveTypeLabels[typeVal] || 'Leave');
+
+            const allowance = document.getElementById('leaveAllowance')?.value || 0;
+            const accrualVal = document.getElementById('leaveAccrual')?.value || 'lump';
+            const carryNone = document.querySelector('input[name="carry_over"]:checked')?.value === 'none';
+            const carryMax = carryNone ? null : (document.getElementById('carryOverMaxDaysInput')?.value || 0);
+
+            const needApproval = !!document.getElementById('flagApproval')?.checked;
+            const needDoc = !!document.getElementById('flagDoc')?.checked;
+            const allowNegative = !!document.getElementById('flagNegative')?.checked;
+
+            const appliesToLabel = document.getElementById('leaveAppliesTo')?.value || 'All Employees';
+            const leaveCategory = categorySelect?.value || 'company';
+            const compensationSource = compensationSelect?.value || 'company_paid';
+            const paidStatus = paidStatusSelect?.value || 'paid';
+            const statutoryCode = document.getElementById('leaveStatutoryCode')?.value || 'NONE';
+
+            const advanceFilingDays = Number(document.getElementById('leaveAdvanceFiling')?.value || 0);
+            const allowRetroactiveFiling = !!document.getElementById('flagRetroactive')?.checked;
+            const maxConsecutiveDays = Number(document.getElementById('leaveMaxConsecutive')?.value || 0);
+            const filingUnit = document.getElementById('leaveFilingUnit')?.value || 'full_day';
+            const deductionTiming = document.getElementById('leaveDeductionTiming')?.value || 'approval';
+            const approverRole = document.getElementById('leaveApproverRole')?.value || 'supervisor';
+            const expiryRule = document.getElementById('leaveExpiryRule')?.value || 'never';
+            const expiryCustomMonths = Number(document.getElementById('leaveExpiryCustomMonths')?.value || 0);
+            const allowLeaveOnRestDay = !!document.getElementById('flagAllowRestDay')?.checked;
+            const allowLeaveOnHoliday = !!document.getElementById('flagAllowHoliday')?.checked;
+
+            const minServiceMonths = Number(document.getElementById('leaveMinServiceMonths')?.value || 0);
+            const requiresLegalQualification = !!document.getElementById('flagLegalQualification')?.checked;
+            const requiresHrValidation = !!document.getElementById('flagHrValidation')?.checked;
+            const canOrgOverride = !!document.getElementById('flagCanOrgOverride')?.checked;
+            const isSystemProtected = !!systemProtectedToggle?.checked;
+
+            return {
+                leaveTypeName: typeName,
+                defaultDaysPerYear: Number(allowance || 0),
+                isPaid: paidStatus === 'paid',
+                isActive: existing ? existing.isActive : true,
+                accrualType: accrualEnumMap[accrualVal] || 1,
+                carryOverType: carryOverEnumMap[carryNone ? 'none' : 'max'],
+                carryOverMaxDays: carryNone ? null : Number(carryMax || 0),
+                appliesTo: appliesToEnumMap[appliesToLabel] || 1,
+                requireApproval: needApproval,
+                requireDocument: needDoc,
+                allowNegativeBalance: allowNegative,
+
+                advanceFilingDays: advanceFilingDays,
+                allowRetroactiveFiling: allowRetroactiveFiling,
+                maxConsecutiveDays: maxConsecutiveDays,
+                filingUnit: filingUnitEnumMap[filingUnit] || 1,
+                deductBalanceOn: deductionTimingEnumMap[deductionTiming] || 1,
+                approverRole: needApproval ? (approverRoleEnumMap[approverRole] || 1) : 4,
+                leaveExpiryRule: expiryRuleEnumMap[expiryRule] || 1,
+                leaveExpiryCustomMonths: expiryRule === 'custom_months' ? expiryCustomMonths : null,
+                allowLeaveOnRestDay: allowLeaveOnRestDay,
+                allowLeaveOnHoliday: allowLeaveOnHoliday,
+
+                leaveCategory: leaveCategoryEnumMap[leaveCategory] || 2,
+                statutoryCode: statutoryCodeEnumMap[statutoryCode] || 0,
+                compensationSource: compensationSourceEnumMap[compensationSource] || 1,
+                paidStatus: paidStatusEnumMap[paidStatus] || 1,
+                minServiceMonths: minServiceMonths,
+                requiresLegalQualification: requiresLegalQualification,
+                requiresHrValidation: requiresHrValidation,
+                canOrgOverride: canOrgOverride,
+                isSystemProtected: isSystemProtected
+            };
+        }
+
+        async function saveLeavePolicy() {
+            if (isSavingLeaveType) return;
+
+            isSavingLeaveType = true;
+            setLeaveModalSaving(true);
+
+            const existing = currentEditLeaveTypeId ? leaveTypeStore.get(currentEditLeaveTypeId) : null;
+            const payload = buildPayloadFromForm(existing);
+
+            const isDemoMode = usingDemoTemplates || !apiBase || String(currentEditLeaveTypeId || '').startsWith('-');
+
+            if (isDemoMode) {
+                const record = {
+                    ...(existing || {}),
+                    ...payload,
+                    leaveTypeID: currentEditLeaveTypeId || nextDemoId--
+                };
+
+                upsertLeaveTypeRecord(record);
+                closeLeaveModal();
+                isSavingLeaveType = false;
+                setLeaveModalSaving(false);
+                window.showToast?.(currentEditLeaveTypeId ? 'Leave type updated in demo UI.' : 'Leave type added to demo UI.', true);
+                return;
+            }
+
+            const url = currentEditLeaveTypeId ? `/api/leave-types/${currentEditLeaveTypeId}` : '/api/leave-types';
+            const method = currentEditLeaveTypeId ? 'PUT' : 'POST';
+
+            try {
+                const res = await apiFetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    console.warn('Failed to save leave type');
+                    return;
+                }
+
+                const created = await res.json();
+                upsertLeaveTypeRecord(created);
+                closeLeaveModal();
+            } catch (err) {
+                console.error('Failed to save leave type', err);
+            } finally {
+                isSavingLeaveType = false;
+                setLeaveModalSaving(false);
+            }
+        }
+
+        async function saveLeaveSettings() {
+            const fiscalLabel = document.getElementById('leaveFiscalYearStart')?.value || 'January 1';
+            const resetLabel = document.getElementById('leaveResetRule')?.value || 'Reset on Fiscal Year Start';
+            const prorated = document.getElementById('leaveProrated')?.checked ?? true;
+
+            const payload = {
+                fiscalYearStart: fiscalYearEnumMap[fiscalLabel] || 1,
+                balanceResetRule: resetRuleEnumMap[resetLabel] || 1,
+                proratedForNewHires: prorated
+            };
+
+            if (usingDemoTemplates || !apiBase) {
+                window.showToast?.('General leave settings saved in demo UI.', true);
+                return;
+            }
+
+            try {
+                const res = await apiFetch('/api/org-leave-settings/current', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json().catch(() => null);
+                if (!res.ok) {
+                    const message = data?.message || 'Failed to save leave settings';
+                    window.showToast?.(message, false);
+                    return;
+                }
+
+                const persisted = data?.persisted !== false;
+                const toastMessage = data?.message
+                    || (persisted ? 'Leave settings updated.' : 'Leave settings saved locally and will sync once reconnected.');
+                window.showToast?.(toastMessage, persisted);
+            } catch (err) {
+                window.showToast?.('Unable to save leave settings.', false);
+            }
+        }
+
+        function resetLeaveModal() {
+            currentEditLeaveTypeId = null;
+
+            document.getElementById('leaveModalTitle').textContent = 'New Leave Type';
+            document.getElementById('leaveModalSaveText').textContent = 'Save Leave Type';
+
+            document.getElementById('leaveTypeSelect').value = 'sil';
             document.getElementById('customLeaveName').value = '';
-        }
+            document.getElementById('customNameField').classList.add('hidden');
 
-        document.getElementById('leaveAllowance').value = item.defaultDaysPerYear ?? 0;
-        document.getElementById('leaveAccrual').value = item.accrualType === 2 ? 'monthly' : item.accrualType === 3 ? 'perperiod' : 'lump';
-
-        if (item.carryOverType === 2) {
-            document.querySelector('input[name="carry_over"][value="max"]').checked = true;
-            toggleCarryOverInput(true);
-            document.querySelector('#carryOverInput input').value = item.carryOverMaxDays ?? 0;
-        } else {
             document.querySelector('input[name="carry_over"][value="none"]').checked = true;
             toggleCarryOverInput(false);
-            document.querySelector('#carryOverInput input').value = 5;
+            document.getElementById('carryOverMaxDaysInput').value = 5;
+
+            document.getElementById('leaveAdvanceFiling').value = 0;
+            document.getElementById('flagRetroactive').checked = false;
+            document.getElementById('leaveMaxConsecutive').value = 0;
+            document.getElementById('leaveFilingUnit').value = 'full_day';
+            document.getElementById('leaveDeductionTiming').value = 'approval';
+
+            document.getElementById('leaveExpiryRule').value = 'never';
+            document.getElementById('leaveExpiryCustomMonths').value = 12;
+            toggleLeaveExpiryCustomMonths(false);
+
+            document.getElementById('flagAllowRestDay').checked = false;
+            document.getElementById('flagAllowHoliday').checked = false;
+
+            document.getElementById('flagApproval').checked = true;
+            document.getElementById('leaveApproverRole').value = 'supervisor';
+            document.getElementById('approverRoleContainer').classList.remove('hidden');
+
+            document.getElementById('flagDoc').checked = false;
+            document.getElementById('flagNegative').checked = false;
+
+            document.getElementById('flagLegalQualification').checked = false;
+            document.getElementById('flagHrValidation').checked = false;
+            document.getElementById('flagCanOrgOverride').checked = true;
+            document.getElementById('flagSystemProtected').checked = false;
+
+            applyTemplateToForm('sil');
+            setLeaveModalSaving(false);
         }
 
-        const appliesLabel = item.appliesTo === 2 ? 'Full-Time Only'
-            : item.appliesTo === 3 ? 'Part-Time Only'
-            : item.appliesTo === 4 ? 'Probationary Only'
-            : item.appliesTo === 5 ? 'Regular Only'
-            : 'All Employees';
-        document.getElementById('leaveAppliesTo').value = appliesLabel;
+        function openEditLeaveType(id) {
+            const item = leaveTypeStore.get(id);
+            if (!item) return;
 
-        document.getElementById('flagApproval').checked = !!item.requireApproval;
-        document.getElementById('flagDoc').checked = !!item.requireDocument;
-        document.getElementById('flagNegative').checked = !!item.allowNegativeBalance;
-        setLeaveModalSaving(false);
+            currentEditLeaveTypeId = id;
+            document.getElementById('leaveModalTitle').textContent = 'Edit Leave Type';
+            document.getElementById('leaveModalSaveText').textContent = 'Update Leave Type';
 
-        const m = document.getElementById('leaveModal');
-        m.classList.remove('hidden');
-        m.classList.add('flex');
-    }
+            const presetKey = inferTypeKeyFromName(item.leaveTypeName);
+            document.getElementById('leaveTypeSelect').value = presetKey === 'custom' ? 'custom' : presetKey;
 
-    function attachLeaveModalDismiss() {
-        const modal = document.getElementById('leaveModal');
-        if (!modal || modal.dataset.leaveModalBound === 'true') return;
-        modal.dataset.leaveModalBound = 'true';
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) closeLeaveModal();
-        });
-    }
+            if (presetKey === 'custom') {
+                document.getElementById('customNameField').classList.remove('hidden');
+                document.getElementById('customLeaveName').value = item.leaveTypeName || '';
+            } else {
+                document.getElementById('customNameField').classList.add('hidden');
+                document.getElementById('customLeaveName').value = '';
+            }
 
-    function init() {
-        currentEditLeaveTypeId = null;
-        isSavingLeaveType = false;
-        leaveTypeStore.clear();
-        refreshApiContext();
-        attachLeaveModalDismiss();
-        loadLeaveTypes();
-        loadLeaveSettings();
-    }
+            document.getElementById('leaveCategory').value = item.leaveCategory === 1 ? 'statutory' : item.leaveCategory === 3 ? 'unpaid_admin' : 'company';
+            document.getElementById('leaveCompensationSource').value =
+                item.compensationSource === 2 ? 'government_benefit'
+                : item.compensationSource === 3 ? 'unpaid'
+                : item.compensationSource === 4 ? 'mixed'
+                : 'company_paid';
 
-    window.openLeaveModal = openLeaveModal;
-    window.closeLeaveModal = closeLeaveModal;
-    window.onLeaveTypeChange = onLeaveTypeChange;
-    window.toggleCarryOverInput = toggleCarryOverInput;
-    window.saveLeavePolicy = saveLeavePolicy;
-    window.saveLeaveSettings = saveLeaveSettings;
-    window.deleteLeaveType = deleteLeaveType;
-    window.openEditLeaveType = openEditLeaveType;
-    return { init };
-})();
+            document.getElementById('leavePaidStatus').value =
+                item.paidStatus === 2 ? 'unpaid'
+                : item.paidStatus === 3 ? 'conditional'
+                : 'paid';
 
-window.SubchronOrgTabLeave.init();
+            document.getElementById('leaveStatutoryCode').value = getStatutoryCodeLabel(item.statutoryCode);
+            document.getElementById('leaveAllowance').value = item.defaultDaysPerYear ?? 0;
+            document.getElementById('leaveAccrual').value = item.accrualType === 2 ? 'monthly' : item.accrualType === 3 ? 'perperiod' : 'lump';
+            document.getElementById('leaveMinServiceMonths').value = item.minServiceMonths ?? 0;
+
+            if (item.carryOverType === 2) {
+                document.querySelector('input[name="carry_over"][value="max"]').checked = true;
+                toggleCarryOverInput(true);
+                document.getElementById('carryOverMaxDaysInput').value = item.carryOverMaxDays ?? 0;
+            } else {
+                document.querySelector('input[name="carry_over"][value="none"]').checked = true;
+                toggleCarryOverInput(false);
+                document.getElementById('carryOverMaxDaysInput').value = 5;
+            }
+
+            document.getElementById('leaveAppliesTo').value = getAppliesToLabel(item.appliesTo);
+            document.getElementById('leaveAdvanceFiling').value = item.advanceFilingDays ?? 0;
+            document.getElementById('flagRetroactive').checked = !!item.allowRetroactiveFiling;
+            document.getElementById('leaveMaxConsecutive').value = item.maxConsecutiveDays ?? 0;
+
+            document.getElementById('leaveFilingUnit').value =
+                item.filingUnit === 2 ? 'half_day'
+                : item.filingUnit === 3 ? 'hourly'
+                : 'full_day';
+
+            document.getElementById('leaveDeductionTiming').value = item.deductBalanceOn === 2 ? 'leave_date' : 'approval';
+
+            document.getElementById('leaveExpiryRule').value =
+                item.leaveExpiryRule === 2 ? 'fiscal_year_end'
+                : item.leaveExpiryRule === 3 ? 'custom_months'
+                : 'never';
+
+            document.getElementById('leaveExpiryCustomMonths').value = item.leaveExpiryCustomMonths ?? 12;
+            toggleLeaveExpiryCustomMonths(document.getElementById('leaveExpiryRule').value === 'custom_months');
+
+            document.getElementById('flagAllowRestDay').checked = !!item.allowLeaveOnRestDay;
+            document.getElementById('flagAllowHoliday').checked = !!item.allowLeaveOnHoliday;
+
+            document.getElementById('flagLegalQualification').checked = !!item.requiresLegalQualification;
+            document.getElementById('flagHrValidation').checked = !!item.requiresHrValidation;
+            document.getElementById('flagCanOrgOverride').checked = item.canOrgOverride !== false;
+            document.getElementById('flagSystemProtected').checked = !!item.isSystemProtected;
+
+            document.getElementById('flagApproval').checked = !!item.requireApproval;
+            document.getElementById('flagDoc').checked = !!item.requireDocument;
+            document.getElementById('flagNegative').checked = !!item.allowNegativeBalance;
+
+            document.getElementById('leaveApproverRole').value =
+                item.approverRole === 2 ? 'manager'
+                : item.approverRole === 3 ? 'hr'
+                : item.approverRole === 4 ? 'auto'
+                : 'supervisor';
+
+            document.getElementById('approverRoleContainer').classList.toggle('hidden', !item.requireApproval);
+            applyProtectedMode(!!item.isSystemProtected);
+            setLeaveModalSaving(false);
+
+            const m = document.getElementById('leaveModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function attachLeaveModalDismiss() {
+            const modal = document.getElementById('leaveModal');
+            if (!modal || modal.dataset.leaveModalBound === 'true') return;
+
+            modal.dataset.leaveModalBound = 'true';
+            modal.addEventListener('click', function (e) {
+                if (e.target === this) closeLeaveModal();
+            });
+        }
+
+        function bindLeaveEvents() {
+            const approvalToggle = document.getElementById('flagApproval');
+            if (approvalToggle && approvalToggle.dataset.bound !== 'true') {
+                approvalToggle.dataset.bound = 'true';
+                approvalToggle.addEventListener('change', (e) => {
+                    document.getElementById('approverRoleContainer')?.classList.toggle('hidden', !e.target.checked);
+                });
+            }
+
+            const compensationSelect = document.getElementById('leaveCompensationSource');
+            if (compensationSelect && compensationSelect.dataset.bound !== 'true') {
+                compensationSelect.dataset.bound = 'true';
+                compensationSelect.addEventListener('change', syncPaidFromCompensation);
+            }
+
+            if (!document.body.dataset.leaveFlagsBound) {
+                document.body.dataset.leaveFlagsBound = 'true';
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.leave-flag-trigger') && !e.target.closest('.leave-flags-dropdown')) {
+                        closeAllLeaveFlagsDropdowns();
+                    }
+                });
+            }
+        }
+
+        function init() {
+            currentEditLeaveTypeId = null;
+            isSavingLeaveType = false;
+            leaveTypeStore.clear();
+             leaveTypeList = [];
+             leaveCurrentPage = 1;
+            refreshApiContext();
+            ensureFieldDecorations();
+            attachLeaveModalDismiss();
+            bindLeaveEvents();
+            bindLeaveTableControls();
+            loadLeaveTypes();
+            loadLeaveSettings();
+        }
+
+        window.openLeaveModal = openLeaveModal;
+        window.closeLeaveModal = closeLeaveModal;
+        window.onLeaveTypeChange = onLeaveTypeChange;
+        window.toggleCarryOverInput = toggleCarryOverInput;
+        window.toggleLeaveExpiryCustomMonths = toggleLeaveExpiryCustomMonths;
+        window.syncPaidFromCompensation = syncPaidFromCompensation;
+        window.toggleLeaveFlagsDropdown = toggleLeaveFlagsDropdown;
+        window.saveLeavePolicy = saveLeavePolicy;
+        window.saveLeaveSettings = saveLeaveSettings;
+        window.deleteLeaveType = deleteLeaveType;
+        window.openEditLeaveType = openEditLeaveType;
+
+        return { init };
+    })();
+
+    window.SubchronOrgTabLeave.init();
 </script>

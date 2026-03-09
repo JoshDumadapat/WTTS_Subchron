@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between border-b border-slate-300 px-8 py-5 dark:border-gray-700">
         <div>
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Payroll Configuration</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define earnings rules and deductions. No hardcoding — build exactly what your organisation needs.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Define earnings rules, allowances, tax, and deductions. No hardcoding — build exactly what your organisation needs.</p>
         </div>
     </div>
 
@@ -15,14 +15,14 @@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Financial Basis</h3>
-                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Base currency, pay frequency, and daily hours.</p>
+                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Base currency, pay frequency, daily hours, cutoff range, and attendance lock rules.</p>
                 </div>
                 <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-3">
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Currency</label>
                         <div class="relative">
                             <select id="pay-currency" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                <option value="PHP">PHP (&#8369;)</option>
+                                <option value="PHP" selected>PHP (&#8369;)</option>
                                 <option value="USD">USD ($)</option>
                                 <option value="SGD">SGD (S$)</option>
                                 <option value="EUR">EUR (&#8364;)</option>
@@ -36,6 +36,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Pay Cycle</label>
                         <div class="relative">
@@ -50,6 +51,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Hours Per Day</label>
                         <div class="flex items-center gap-2">
@@ -58,15 +60,77 @@
                             <span class="whitespace-nowrap text-xs text-gray-400">hrs / day</span>
                         </div>
                     </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff Start Day</label>
+                        <input id="pay-cutoff-start-day" type="number" min="1" max="31" value="1"
+                               class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff End Day</label>
+                        <input id="pay-cutoff-end-day" type="number" min="1" max="31" value="15"
+                               class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                    </div>
+
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Lock Attendance After Cutoff</label>
+                        <div class="relative">
+                            <select id="pay-lock-attendance-after-cutoff" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="true">Yes</option>
+                                <option value="false" selected>No</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            @* ── Earnings Rules (Pay Components Engine) ───────────────────── *@
+            @* ── Compensation Basis ───────────────────────────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compensation Basis</h3>
+                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define the standard unit for employee compensation.</p>
+                </div>
+                <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compensation Basis</label>
+                        <div class="relative">
+                            <select id="compensation-basis" onchange="toggleCustomCompensationFields()" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="Monthly" selected>Monthly</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Hourly">Hourly</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="custom-compensation-fields" class="hidden sm:grid sm:grid-cols-2 sm:gap-5 sm:col-span-2">
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Unit Label</label>
+                            <input id="custom-unit-label" type="text" placeholder="e.g. Project, Task"
+                                   class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Work Hours Per Unit</label>
+                            <input id="custom-work-hours" type="number" min="0" placeholder="e.g. 160"
+                                   class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Earnings Rules ───────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div>
                         <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Earnings Rules</h3>
-                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define how extra pay applies (OT, holiday, rest day). No hardcoding — e.g. OT 1.25x, Night Diff 10%, Holiday 2x, Rest Day 1.3x.</p>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define how extra pay applies (OT, holiday, rest day, night diff, special premiums).</p>
                     </div>
                     <button type="button" onclick="openEarningRuleModal()" class="btn-primary gap-1.5">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -79,28 +143,89 @@
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Applies To</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Day Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Scope</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Rate</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Taxable</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Benefit Base</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Approval</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Effective From</th>
                                 <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="earningsRulesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
                             <tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
-                                <td colspan="7" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one (e.g. OT 1.25x, Night Diff 10%, Holiday 2x).</td>
+                                <td colspan="10" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            @* ── Deductions (Global, not country-specific) ─────────────────── *@
+            @* ── Allowances ───────────────────────────────────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowances</h3>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Configure tenant-specific allowances such as meal, transport, rice, communication, or hazard allowances.</p>
+                    </div>
+                    <button type="button" onclick="openAllowanceModal()" class="btn-primary gap-1.5">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Allowance
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
+                        <thead class="bg-slate-100 dark:bg-gray-700/40">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowance Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Amount</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Taxable</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Attendance Dependent</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Prorate Partial Period</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Effective From</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Active</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allowancesRulesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
+                            <tr class="allowances-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
+                                <td colspan="9" class="px-5 py-8">No allowances yet. Click <strong>Add Allowance</strong> to create one.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @* ── Tax Toggle ───────────────────────────────────────────────── *@
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Tax</h3>
+                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Enable or disable tax processing for this organization.</p>
+                </div>
+                <div class="p-6">
+                    <div class="max-w-sm">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Apply Tax</label>
+                        <div class="relative">
+                            <select id="pay-apply-tax" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="true" selected>Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Deductions ──────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div>
                         <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Deductions</h3>
-                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Tax, SSS, pension, insurance — Fixed, Percentage, or Formula-based. Employer/employee share, auto-compute or manual.</p>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Tax, SSS, pension, insurance, loans, company deductions — fixed, percentage, or formula-based.</p>
                     </div>
                     <button type="button" onclick="openDeductionModal()" class="btn-primary gap-1.5">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -112,17 +237,22 @@
                         <thead class="bg-slate-100 dark:bg-gray-700/40">
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Category</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compute Based On</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Amount / Formula</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Employer</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Employee</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Max Amount</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Effective From</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Active</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compute</th>
                                 <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="deductionsRulesBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
                             <tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500">
-                                <td colspan="7" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one (e.g. Tax, SSS, Pension, Insurance).</td>
+                                <td colspan="12" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -135,29 +265,62 @@
 
 @* ─── EARNING RULE MODAL ─── *@
 <div id="earningRuleModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+    <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
         <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
             <h3 id="earningRuleModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Earning Rule</h3>
             <button type="button" onclick="closeEarningRuleModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
-        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-4">
+
+        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
             <input type="hidden" id="earningRuleId" value="" />
+
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
                 <input type="text" id="earningRuleName" placeholder="e.g. OT 1.25x, Night Diff 10%" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
-                <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                    <option value="Regular">Regular</option>
-                    <option value="OT" selected>OT</option>
-                    <option value="Holiday">Holiday</option>
-                    <option value="RestDay">Rest Day</option>
-                    <option value="NightDiff">Night Diff</option>
-                    <option value="Custom">Custom</option>
-                </select>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
+                    <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Regular">Regular</option>
+                        <option value="OT" selected>OT</option>
+                        <option value="Holiday">Holiday</option>
+                        <option value="RestDay">Rest Day</option>
+                        <option value="NightDiff">Night Diff</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies On Day Type</label>
+                    <select id="earningRuleDayType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Any" selected>Any</option>
+                        <option value="RegularDay">Regular Day</option>
+                        <option value="RestDay">Rest Day</option>
+                        <option value="SpecialHoliday">Special Holiday</option>
+                        <option value="RegularHoliday">Regular Holiday</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope</label>
+                    <select id="earningRuleScope" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="AllEmployees" selected>All Employees</option>
+                        <option value="Department">Department</option>
+                        <option value="Role">Role</option>
+                        <option value="Site">Site</option>
+                        <option value="EmploymentType">Employment Type</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Effective From</label>
+                    <input type="date" id="earningRuleEffectiveFrom" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Type</label>
                     <select id="earningRuleRateType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
@@ -166,26 +329,29 @@
                         <option value="Fixed">Fixed Amount</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Value</label>
                     <input type="number" id="earningRuleRateValue" min="0" step="0.01" value="1.25" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                 </div>
             </div>
+
             <div class="flex flex-wrap gap-4">
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="earningRuleTaxable" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Taxable?</span>
                 </label>
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="earningRuleBenefitBase" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Include in benefit base?</span>
                 </label>
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="earningRuleRequiresApproval" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Requires approval?</span>
                 </label>
             </div>
         </div>
+
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeEarningRuleModal()" class="btn-secondary">Cancel</button>
             <button type="button" onclick="saveEarningRule()" class="btn-primary gap-1.5">Save Earning Rule</button>
@@ -193,51 +359,164 @@
     </div>
 </div>
 
+@* ─── ALLOWANCE MODAL ─── *@
+<div id="allowanceModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+            <h3 id="allowanceModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Allowance</h3>
+            <button type="button" onclick="closeAllowanceModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        </div>
+
+        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
+            <input type="hidden" id="allowanceRuleId" value="" />
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Name <span class="text-red-500">*</span></label>
+                <input type="text" id="allowanceRuleName" placeholder="e.g. Rice Allowance, Meal Allowance, Transport Allowance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Type</label>
+                    <select id="allowanceRuleType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="FixedPerPayroll" selected>Fixed per Payroll</option>
+                        <option value="FixedPerDay">Fixed per Day</option>
+                        <option value="FixedPerAttendanceDay">Fixed per Attendance Day</option>
+                        <option value="FixedPerHour">Fixed per Hour</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
+                    <input type="number" id="allowanceRuleAmount" min="0" step="0.01" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Effective From</label>
+                    <input type="date" id="allowanceRuleEffectiveFrom" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Active</label>
+                    <select id="allowanceRuleActive" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="true" selected>Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4">
+                <label class="inline-flex cursor-pointer items-center gap-2">
+                    <input type="checkbox" id="allowanceRuleTaxable" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Taxable?</span>
+                </label>
+                <label class="inline-flex cursor-pointer items-center gap-2">
+                    <input type="checkbox" id="allowanceRuleAttendanceDependent" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Attendance dependent?</span>
+                </label>
+                <label class="inline-flex cursor-pointer items-center gap-2">
+                    <input type="checkbox" id="allowanceRuleProratePartialPeriod" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Prorate if partial period?</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <button type="button" onclick="closeAllowanceModal()" class="btn-secondary">Cancel</button>
+            <button type="button" onclick="saveAllowanceRule()" class="btn-primary gap-1.5">Save Allowance</button>
+        </div>
+    </div>
+</div>
+
 @* ─── DEDUCTION MODAL ─── *@
 <div id="deductionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
+    <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:bg-gray-800">
         <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
             <h3 id="deductionModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Add Deduction</h3>
             <button type="button" onclick="closeDeductionModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
-        <div class="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-4">
+
+        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
             <input type="hidden" id="deductionRuleId" value="" />
+
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
-                <input type="text" id="deductionRuleName" placeholder="e.g. Tax, SSS, Pension, Insurance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                <input type="text" id="deductionRuleName" placeholder="e.g. Tax, SSS, PhilHealth, Loan, Cash Advance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
-            <div>
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type</label>
-                <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                    <option value="Fixed" selected>Fixed</option>
-                    <option value="Percentage">Percentage</option>
-                    <option value="Formula">Formula-based</option>
-                </select>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Deduction Category</label>
+                    <select id="deductionRuleCategory" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Statutory" selected>Statutory</option>
+                        <option value="Company">Company</option>
+                        <option value="Loan">Loan</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type</label>
+                    <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Fixed" selected>Fixed</option>
+                        <option value="Percentage">Percentage</option>
+                        <option value="Formula">Formula-based</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compute Based On</label>
+                    <select id="deductionRuleComputeBasedOn" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="BasicPay" selected>Basic Pay</option>
+                        <option value="GrossPay">Gross Pay</option>
+                        <option value="TaxablePay">Taxable Pay</option>
+                        <option value="FixedAmount">Fixed Amount</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Effective From</label>
+                    <input type="date" id="deductionRuleEffectiveFrom" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
             </div>
+
             <div id="deductionAmountWrap">
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
                 <input type="number" id="deductionRuleAmount" min="0" step="0.01" placeholder="Fixed amount or %" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
+
             <div id="deductionFormulaWrap" class="hidden">
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Formula expression</label>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Formula Expression</label>
                 <input type="text" id="deductionRuleFormula" placeholder="e.g. progressive_tax(gross)" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Maximum Deduction Amount</label>
+                <input type="number" id="deductionRuleMaxAmount" min="0" step="0.01" placeholder="Optional ceiling / cap" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+
             <div class="flex flex-wrap gap-4">
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="deductionEmployerShare" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Employer share?</span>
                 </label>
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="deductionEmployeeShare" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Employee share?</span>
                 </label>
-                <label class="inline-flex items-center gap-2 cursor-pointer">
+                <label class="inline-flex cursor-pointer items-center gap-2">
                     <input type="checkbox" id="deductionAutoCompute" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Auto-compute?</span>
                 </label>
+                <label class="inline-flex cursor-pointer items-center gap-2">
+                    <input type="checkbox" id="deductionRuleActive" checked class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Active?</span>
+                </label>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">If Off: manual entry per pay period.</p>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400">If Auto-compute is off, this deduction can be entered manually per pay period.</p>
         </div>
+
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeDeductionModal()" class="btn-secondary">Cancel</button>
             <button type="button" onclick="saveDeductionRule()" class="btn-primary gap-1.5">Save Deduction</button>
@@ -246,206 +525,510 @@
 </div>
 
 <script>
-(function () {
-    var orgId = window.__orgIdForPay || 0;
-    function getOrgId() {
-        if (orgId) return orgId;
-        var m = document.cookie.match(/orgId=(\d+)/);
-        if (m) return parseInt(m[1], 10);
-        return 0;
-    }
+    (function () {
+        var orgId = window.__orgIdForPay || 0;
 
-    var _earningsList = [];
-    var _deductionsList = [];
-
-    function openEarningRuleModal(editId) {
-        document.getElementById('earningRuleModalTitle').textContent = editId ? 'Edit Earning Rule' : 'Add Earning Rule';
-        document.getElementById('earningRuleId').value = editId || '';
-        if (editId && _earningsList.length) {
-            var r = _earningsList.find(function (x) { return x.earningRuleID === editId; });
-            if (r) {
-                document.getElementById('earningRuleName').value = r.name || '';
-                document.getElementById('earningRuleAppliesTo').value = r.appliesTo || 'OT';
-                document.getElementById('earningRuleRateType').value = r.rateType || 'Multiplier';
-                document.getElementById('earningRuleRateValue').value = r.rateValue != null ? r.rateValue : '1.25';
-                document.getElementById('earningRuleTaxable').checked = !!r.isTaxable;
-                document.getElementById('earningRuleBenefitBase').checked = !!r.includeInBenefitBase;
-                document.getElementById('earningRuleRequiresApproval').checked = !!r.requiresApproval;
-            }
-        } else {
-            document.getElementById('earningRuleName').value = '';
-            document.getElementById('earningRuleAppliesTo').value = 'OT';
-            document.getElementById('earningRuleRateType').value = 'Multiplier';
-            document.getElementById('earningRuleRateValue').value = '1.25';
-            document.getElementById('earningRuleTaxable').checked = true;
-            document.getElementById('earningRuleBenefitBase').checked = false;
-            document.getElementById('earningRuleRequiresApproval').checked = false;
+        function getOrgId() {
+            if (orgId) return orgId;
+            var m = document.cookie.match(/orgId=(\d+)/);
+            if (m) return parseInt(m[1], 10);
+            return 0;
         }
-        document.getElementById('earningRuleModal').classList.remove('hidden');
-        document.getElementById('earningRuleModal').classList.add('flex');
-    }
-    function closeEarningRuleModal() {
-        document.getElementById('earningRuleModal').classList.add('hidden');
-        document.getElementById('earningRuleModal').classList.remove('flex');
-    }
-    window.openEarningRuleModal = openEarningRuleModal;
-    window.closeEarningRuleModal = closeEarningRuleModal;
 
-    function openDeductionModal(editId) {
-        document.getElementById('deductionModalTitle').textContent = editId ? 'Edit Deduction' : 'Add Deduction';
-        document.getElementById('deductionRuleId').value = editId || '';
-        if (editId && _deductionsList.length) {
-            var r = _deductionsList.find(function (x) { return x.deductionRuleID === editId; });
-            if (r) {
-                document.getElementById('deductionRuleName').value = r.name || '';
-                document.getElementById('deductionRuleType').value = r.deductionType || 'Fixed';
-                document.getElementById('deductionRuleAmount').value = r.amount != null ? r.amount : '';
-                document.getElementById('deductionRuleFormula').value = r.formulaExpression || '';
-                document.getElementById('deductionEmployerShare').checked = !!r.hasEmployerShare;
-                document.getElementById('deductionEmployeeShare').checked = !!r.hasEmployeeShare;
-                document.getElementById('deductionAutoCompute').checked = !!r.autoCompute;
-            }
-        } else {
-            document.getElementById('deductionRuleName').value = '';
-            document.getElementById('deductionRuleType').value = 'Fixed';
-            document.getElementById('deductionRuleAmount').value = '';
-            document.getElementById('deductionRuleFormula').value = '';
-            document.getElementById('deductionEmployerShare').checked = false;
-            document.getElementById('deductionEmployeeShare').checked = true;
-            document.getElementById('deductionAutoCompute').checked = true;
+        var _earningsList = [];
+        var _deductionsList = [];
+        var _allowancesList = [];
+
+        function safeText(value) {
+            return value == null || value === '' ? '—' : value;
         }
-        toggleDeductionAmountVsFormula();
-        document.getElementById('deductionModal').classList.remove('hidden');
-        document.getElementById('deductionModal').classList.add('flex');
-    }
-    function closeDeductionModal() {
-        document.getElementById('deductionModal').classList.add('hidden');
-        document.getElementById('deductionModal').classList.remove('flex');
-    }
-    window.openDeductionModal = openDeductionModal;
-    window.closeDeductionModal = closeDeductionModal;
-    window.toggleDeductionAmountVsFormula = function () {
-        var t = document.getElementById('deductionRuleType').value;
-        document.getElementById('deductionAmountWrap').classList.toggle('hidden', t === 'Formula');
-        document.getElementById('deductionFormulaWrap').classList.toggle('hidden', t !== 'Formula');
-    };
 
-    function saveEarningRule() {
-        var id = document.getElementById('earningRuleId').value;
-        var name = (document.getElementById('earningRuleName').value || '').trim();
-        if (!name) { document.getElementById('earningRuleName').focus(); return; }
-        var payload = {
-            name: name,
-            appliesTo: document.getElementById('earningRuleAppliesTo').value,
-            rateType: document.getElementById('earningRuleRateType').value,
-            rateValue: parseFloat(document.getElementById('earningRuleRateValue').value) || 1,
-            isTaxable: document.getElementById('earningRuleTaxable').checked,
-            includeInBenefitBase: document.getElementById('earningRuleBenefitBase').checked,
-            requiresApproval: document.getElementById('earningRuleRequiresApproval').checked
+        function boolText(value) {
+            return value ? 'Yes' : 'No';
+        }
+
+        function openEarningRuleModal(editId) {
+            document.getElementById('earningRuleModalTitle').textContent = editId ? 'Edit Earning Rule' : 'Add Earning Rule';
+            document.getElementById('earningRuleId').value = editId || '';
+
+            if (editId && _earningsList.length) {
+                var r = _earningsList.find(function (x) { return x.earningRuleID === editId; });
+                if (r) {
+                    document.getElementById('earningRuleName').value = r.name || '';
+                    document.getElementById('earningRuleAppliesTo').value = r.appliesTo || 'OT';
+                    document.getElementById('earningRuleDayType').value = r.dayType || 'Any';
+                    document.getElementById('earningRuleScope').value = r.scope || 'AllEmployees';
+                    document.getElementById('earningRuleEffectiveFrom').value = r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '';
+                    document.getElementById('earningRuleRateType').value = r.rateType || 'Multiplier';
+                    document.getElementById('earningRuleRateValue').value = r.rateValue != null ? r.rateValue : '1.25';
+                    document.getElementById('earningRuleTaxable').checked = !!r.isTaxable;
+                    document.getElementById('earningRuleBenefitBase').checked = !!r.includeInBenefitBase;
+                    document.getElementById('earningRuleRequiresApproval').checked = !!r.requiresApproval;
+                }
+            } else {
+                document.getElementById('earningRuleName').value = '';
+                document.getElementById('earningRuleAppliesTo').value = 'OT';
+                document.getElementById('earningRuleDayType').value = 'Any';
+                document.getElementById('earningRuleScope').value = 'AllEmployees';
+                document.getElementById('earningRuleEffectiveFrom').value = '';
+                document.getElementById('earningRuleRateType').value = 'Multiplier';
+                document.getElementById('earningRuleRateValue').value = '1.25';
+                document.getElementById('earningRuleTaxable').checked = true;
+                document.getElementById('earningRuleBenefitBase').checked = false;
+                document.getElementById('earningRuleRequiresApproval').checked = false;
+            }
+
+            document.getElementById('earningRuleModal').classList.remove('hidden');
+            document.getElementById('earningRuleModal').classList.add('flex');
+        }
+
+        function closeEarningRuleModal() {
+            document.getElementById('earningRuleModal').classList.add('hidden');
+            document.getElementById('earningRuleModal').classList.remove('flex');
+        }
+
+        function openAllowanceModal(editId) {
+            document.getElementById('allowanceModalTitle').textContent = editId ? 'Edit Allowance' : 'Add Allowance';
+            document.getElementById('allowanceRuleId').value = editId || '';
+
+            if (editId && _allowancesList.length) {
+                var r = _allowancesList.find(function (x) { return x.allowanceRuleID === editId; });
+                if (r) {
+                    document.getElementById('allowanceRuleName').value = r.name || '';
+                    document.getElementById('allowanceRuleType').value = r.allowanceType || 'FixedPerPayroll';
+                    document.getElementById('allowanceRuleAmount').value = r.amount != null ? r.amount : 0;
+                    document.getElementById('allowanceRuleTaxable').checked = !!r.isTaxable;
+                    document.getElementById('allowanceRuleAttendanceDependent').checked = !!r.attendanceDependent;
+                    document.getElementById('allowanceRuleProratePartialPeriod').checked = !!r.prorateIfPartialPeriod;
+                    document.getElementById('allowanceRuleEffectiveFrom').value = r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '';
+                    document.getElementById('allowanceRuleActive').value = String(!!r.isActive);
+                }
+            } else {
+                document.getElementById('allowanceRuleName').value = '';
+                document.getElementById('allowanceRuleType').value = 'FixedPerPayroll';
+                document.getElementById('allowanceRuleAmount').value = '0';
+                document.getElementById('allowanceRuleTaxable').checked = false;
+                document.getElementById('allowanceRuleAttendanceDependent').checked = false;
+                document.getElementById('allowanceRuleProratePartialPeriod').checked = false;
+                document.getElementById('allowanceRuleEffectiveFrom').value = '';
+                document.getElementById('allowanceRuleActive').value = 'true';
+            }
+
+            document.getElementById('allowanceModal').classList.remove('hidden');
+            document.getElementById('allowanceModal').classList.add('flex');
+        }
+
+        function closeAllowanceModal() {
+            document.getElementById('allowanceModal').classList.add('hidden');
+            document.getElementById('allowanceModal').classList.remove('flex');
+        }
+
+        function openDeductionModal(editId) {
+            document.getElementById('deductionModalTitle').textContent = editId ? 'Edit Deduction' : 'Add Deduction';
+            document.getElementById('deductionRuleId').value = editId || '';
+
+            if (editId && _deductionsList.length) {
+                var r = _deductionsList.find(function (x) { return x.deductionRuleID === editId; });
+                if (r) {
+                    document.getElementById('deductionRuleName').value = r.name || '';
+                    document.getElementById('deductionRuleCategory').value = r.category || 'Statutory';
+                    document.getElementById('deductionRuleType').value = r.deductionType || 'Fixed';
+                    document.getElementById('deductionRuleComputeBasedOn').value = r.computeBasedOn || 'BasicPay';
+                    document.getElementById('deductionRuleAmount').value = r.amount != null ? r.amount : '';
+                    document.getElementById('deductionRuleFormula').value = r.formulaExpression || '';
+                    document.getElementById('deductionRuleEffectiveFrom').value = r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '';
+                    document.getElementById('deductionRuleMaxAmount').value = r.maxDeductionAmount != null ? r.maxDeductionAmount : '';
+                    document.getElementById('deductionEmployerShare').checked = !!r.hasEmployerShare;
+                    document.getElementById('deductionEmployeeShare').checked = !!r.hasEmployeeShare;
+                    document.getElementById('deductionAutoCompute').checked = !!r.autoCompute;
+                    document.getElementById('deductionRuleActive').checked = r.isActive !== false;
+                }
+            } else {
+                document.getElementById('deductionRuleName').value = '';
+                document.getElementById('deductionRuleCategory').value = 'Statutory';
+                document.getElementById('deductionRuleType').value = 'Fixed';
+                document.getElementById('deductionRuleComputeBasedOn').value = 'BasicPay';
+                document.getElementById('deductionRuleAmount').value = '';
+                document.getElementById('deductionRuleFormula').value = '';
+                document.getElementById('deductionRuleEffectiveFrom').value = '';
+                document.getElementById('deductionRuleMaxAmount').value = '';
+                document.getElementById('deductionEmployerShare').checked = false;
+                document.getElementById('deductionEmployeeShare').checked = true;
+                document.getElementById('deductionAutoCompute').checked = true;
+                document.getElementById('deductionRuleActive').checked = true;
+            }
+
+            toggleDeductionAmountVsFormula();
+            document.getElementById('deductionModal').classList.remove('hidden');
+            document.getElementById('deductionModal').classList.add('flex');
+        }
+
+        function closeDeductionModal() {
+            document.getElementById('deductionModal').classList.add('hidden');
+            document.getElementById('deductionModal').classList.remove('flex');
+        }
+
+        window.openEarningRuleModal = openEarningRuleModal;
+        window.closeEarningRuleModal = closeEarningRuleModal;
+        window.openAllowanceModal = openAllowanceModal;
+        window.closeAllowanceModal = closeAllowanceModal;
+        window.openDeductionModal = openDeductionModal;
+        window.closeDeductionModal = closeDeductionModal;
+
+        window.toggleDeductionAmountVsFormula = function () {
+            var t = document.getElementById('deductionRuleType').value;
+            document.getElementById('deductionAmountWrap').classList.toggle('hidden', t === 'Formula');
+            document.getElementById('deductionFormulaWrap').classList.toggle('hidden', t !== 'Formula');
         };
-        var oid = getOrgId();
-        if (!oid) { console.warn('No orgId for pay components'); closeEarningRuleModal(); return; }
-        var url = '/api/organizations/' + oid + '/pay-components/earnings';
-        var method = 'POST';
-        if (id) { url += '/' + id; method = 'PUT'; }
-        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+
+        function saveEarningRule() {
+            var id = document.getElementById('earningRuleId').value;
+            var name = (document.getElementById('earningRuleName').value || '').trim();
+            if (!name) {
+                document.getElementById('earningRuleName').focus();
+                return;
+            }
+
+            var payload = {
+                name: name,
+                appliesTo: document.getElementById('earningRuleAppliesTo').value,
+                dayType: document.getElementById('earningRuleDayType').value,
+                scope: document.getElementById('earningRuleScope').value,
+                effectiveFrom: document.getElementById('earningRuleEffectiveFrom').value || null,
+                rateType: document.getElementById('earningRuleRateType').value,
+                rateValue: parseFloat(document.getElementById('earningRuleRateValue').value) || 1,
+                isTaxable: document.getElementById('earningRuleTaxable').checked,
+                includeInBenefitBase: document.getElementById('earningRuleBenefitBase').checked,
+                requiresApproval: document.getElementById('earningRuleRequiresApproval').checked
+            };
+
+            var oid = getOrgId();
+            if (!oid) {
+                console.warn('No orgId for pay components');
+                closeEarningRuleModal();
+                return;
+            }
+
+            var url = '/api/organizations/' + oid + '/pay-components/earnings';
+            var method = 'POST';
+            if (id) {
+                url += '/' + id;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (data.ok !== false) { closeEarningRuleModal(); loadEarnings(); }
+                if (data.ok !== false) {
+                    closeEarningRuleModal();
+                    loadEarnings();
+                }
             })
             .catch(function () { });
-    }
-    function saveDeductionRule() {
-        var id = document.getElementById('deductionRuleId').value;
-        var name = (document.getElementById('deductionRuleName').value || '').trim();
-        if (!name) { document.getElementById('deductionRuleName').focus(); return; }
-        var t = document.getElementById('deductionRuleType').value;
-        var payload = {
-            name: name,
-            deductionType: t,
-            amount: t === 'Formula' ? null : (parseFloat(document.getElementById('deductionRuleAmount').value) || null),
-            formulaExpression: t === 'Formula' ? (document.getElementById('deductionRuleFormula').value || '').trim() : null,
-            hasEmployerShare: document.getElementById('deductionEmployerShare').checked,
-            hasEmployeeShare: document.getElementById('deductionEmployeeShare').checked,
-            autoCompute: document.getElementById('deductionAutoCompute').checked
-        };
-        var oid = getOrgId();
-        if (!oid) { console.warn('No orgId'); closeDeductionModal(); return; }
-        var url = '/api/organizations/' + oid + '/pay-components/deductions';
-        var method = 'POST';
-        if (id) { url += '/' + id; method = 'PUT'; }
-        fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        }
+
+        function saveAllowanceRule() {
+            var id = document.getElementById('allowanceRuleId').value;
+            var name = (document.getElementById('allowanceRuleName').value || '').trim();
+            if (!name) {
+                document.getElementById('allowanceRuleName').focus();
+                return;
+            }
+
+            var payload = {
+                name: name,
+                allowanceType: document.getElementById('allowanceRuleType').value,
+                amount: parseFloat(document.getElementById('allowanceRuleAmount').value) || 0,
+                isTaxable: document.getElementById('allowanceRuleTaxable').checked,
+                attendanceDependent: document.getElementById('allowanceRuleAttendanceDependent').checked,
+                prorateIfPartialPeriod: document.getElementById('allowanceRuleProratePartialPeriod').checked,
+                effectiveFrom: document.getElementById('allowanceRuleEffectiveFrom').value || null,
+                isActive: document.getElementById('allowanceRuleActive').value === 'true'
+            };
+
+            var oid = getOrgId();
+            if (!oid) {
+                console.warn('No orgId for allowances');
+                closeAllowanceModal();
+                return;
+            }
+
+            var url = '/api/organizations/' + oid + '/pay-components/allowances';
+            var method = 'POST';
+            if (id) {
+                url += '/' + id;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (data.ok !== false) { closeDeductionModal(); loadDeductions(); }
-            })
-            .catch(function () { });
-    }
-    window.saveEarningRule = saveEarningRule;
-    window.saveDeductionRule = saveDeductionRule;
-
-    function loadEarnings() {
-        var oid = getOrgId();
-        if (!oid) return;
-        fetch('/api/organizations/' + oid + '/pay-components/earnings', { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (list) {
-                _earningsList = Array.isArray(list) ? list : [];
-                var tbody = document.getElementById('earningsRulesBody');
-                tbody.querySelectorAll('.earnings-row').forEach(function (el) { el.remove(); });
-                var ph = tbody.querySelector('.earnings-placeholder');
-                if (ph) ph.remove();
-                if (!_earningsList.length) {
-                    tbody.innerHTML = '<tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="7" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one.</td></tr>';
-                    return;
+                if (data.ok !== false) {
+                    closeAllowanceModal();
+                    loadAllowances();
                 }
-                _earningsList.forEach(function (r) {
-                    var rateText = r.rateType === 'Multiplier' ? (r.rateValue + 'x') : (r.rateType === 'Percentage' ? (r.rateValue + '%') : r.rateValue);
-                    var tr = document.createElement('tr');
-                    tr.className = 'earnings-row';
-                    tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + (r.name || '') + '</td><td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + (r.appliesTo || '') + '</td><td class="px-5 py-3 text-xs">' + rateText + '</td><td class="px-5 py-3">' + (r.isTaxable ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.includeInBenefitBase ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.requiresApproval ? 'Yes' : 'No') + '</td><td class="px-5 py-3 text-right"><button type="button" onclick="window.editEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button><button type="button" onclick="window.deleteEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button></td>';
-                    tbody.appendChild(tr);
-                });
             })
             .catch(function () { });
-    }
-    function loadDeductions() {
-        var oid = getOrgId();
-        if (!oid) return;
-        fetch('/api/organizations/' + oid + '/pay-components/deductions', { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (list) {
-                _deductionsList = Array.isArray(list) ? list : [];
-                var tbody = document.getElementById('deductionsRulesBody');
-                tbody.querySelectorAll('.deductions-row').forEach(function (el) { el.remove(); });
-                var ph = tbody.querySelector('.deductions-placeholder');
-                if (ph) ph.remove();
-                if (!_deductionsList.length) {
-                    tbody.innerHTML = '<tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="7" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one.</td></tr>';
-                    return;
-                }
-                _deductionsList.forEach(function (r) {
-                    var amountText = r.deductionType === 'Formula' ? (r.formulaExpression || '—') : (r.amount != null ? r.amount : '—');
-                    var tr = document.createElement('tr');
-                    tr.className = 'deductions-row';
-                    tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + (r.name || '') + '</td><td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + (r.deductionType || '') + '</td><td class="px-5 py-3 text-xs">' + amountText + '</td><td class="px-5 py-3">' + (r.hasEmployerShare ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.hasEmployeeShare ? 'Yes' : 'No') + '</td><td class="px-5 py-3">' + (r.autoCompute ? 'Auto' : 'Manual') + '</td><td class="px-5 py-3 text-right"><button type="button" onclick="window.editDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button><button type="button" onclick="window.deleteDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button></td>';
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(function () { });
-    }
-    window.editEarningRule = function (id) { openEarningRuleModal(id); };
-    window.editDeductionRule = function (id) { openDeductionModal(id); };
-    window.deleteEarningRule = function (id) { if (confirm('Remove this earning rule?')) { fetch('/api/organizations/' + getOrgId() + '/pay-components/earnings/' + id, { method: 'DELETE' }).then(function () { loadEarnings(); }); } };
-    window.deleteDeductionRule = function (id) { if (confirm('Remove this deduction?')) { fetch('/api/organizations/' + getOrgId() + '/pay-components/deductions/' + id, { method: 'DELETE' }).then(function () { loadDeductions(); }); } };
-
-    document.addEventListener('DOMContentLoaded', function () {
-        if (document.getElementById('tab-pay')) {
-            loadEarnings();
-            loadDeductions();
         }
-    });
-    document.getElementById('earningRuleModal')?.addEventListener('click', function (e) { if (e.target === this) closeEarningRuleModal(); });
-    document.getElementById('deductionModal')?.addEventListener('click', function (e) { if (e.target === this) closeDeductionModal(); });
-})();
+
+        function saveDeductionRule() {
+            var id = document.getElementById('deductionRuleId').value;
+            var name = (document.getElementById('deductionRuleName').value || '').trim();
+            if (!name) {
+                document.getElementById('deductionRuleName').focus();
+                return;
+            }
+
+            var t = document.getElementById('deductionRuleType').value;
+            var payload = {
+                name: name,
+                category: document.getElementById('deductionRuleCategory').value,
+                deductionType: t,
+                computeBasedOn: document.getElementById('deductionRuleComputeBasedOn').value,
+                amount: t === 'Formula' ? null : (parseFloat(document.getElementById('deductionRuleAmount').value) || null),
+                formulaExpression: t === 'Formula' ? (document.getElementById('deductionRuleFormula').value || '').trim() : null,
+                effectiveFrom: document.getElementById('deductionRuleEffectiveFrom').value || null,
+                maxDeductionAmount: parseFloat(document.getElementById('deductionRuleMaxAmount').value) || null,
+                hasEmployerShare: document.getElementById('deductionEmployerShare').checked,
+                hasEmployeeShare: document.getElementById('deductionEmployeeShare').checked,
+                autoCompute: document.getElementById('deductionAutoCompute').checked,
+                isActive: document.getElementById('deductionRuleActive').checked
+            };
+
+            var oid = getOrgId();
+            if (!oid) {
+                console.warn('No orgId');
+                closeDeductionModal();
+                return;
+            }
+
+            var url = '/api/organizations/' + oid + '/pay-components/deductions';
+            var method = 'POST';
+            if (id) {
+                url += '/' + id;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok !== false) {
+                    closeDeductionModal();
+                    loadDeductions();
+                }
+            })
+            .catch(function () { });
+        }
+
+        window.saveEarningRule = saveEarningRule;
+        window.saveAllowanceRule = saveAllowanceRule;
+        window.saveDeductionRule = saveDeductionRule;
+
+        function loadEarnings() {
+            var oid = getOrgId();
+            if (!oid) return;
+
+            fetch('/api/organizations/' + oid + '/pay-components/earnings', { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (list) {
+                    _earningsList = Array.isArray(list) ? list : [];
+                    var tbody = document.getElementById('earningsRulesBody');
+                    tbody.querySelectorAll('.earnings-row').forEach(function (el) { el.remove(); });
+
+                    var ph = tbody.querySelector('.earnings-placeholder');
+                    if (ph) ph.remove();
+
+                    if (!_earningsList.length) {
+                        tbody.innerHTML = '<tr class="earnings-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="10" class="px-5 py-8">No earning rules yet. Click <strong>Add Earning Rule</strong> to create one.</td></tr>';
+                        return;
+                    }
+
+                    _earningsList.forEach(function (r) {
+                        var rateText = r.rateType === 'Multiplier'
+                            ? (r.rateValue + 'x')
+                            : (r.rateType === 'Percentage' ? (r.rateValue + '%') : r.rateValue);
+
+                        var tr = document.createElement('tr');
+                        tr.className = 'earnings-row';
+                        tr.innerHTML =
+                            '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + safeText(r.name) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.appliesTo) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.dayType) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.scope) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + safeText(rateText) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.isTaxable) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.includeInBenefitBase) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.requiresApproval) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
+                            '<td class="px-5 py-3 text-right">' +
+                                '<button type="button" onclick="window.editEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
+                                '<button type="button" onclick="window.deleteEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
+                            '</td>';
+
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(function () { });
+        }
+
+        function loadAllowances() {
+            var oid = getOrgId();
+            if (!oid) return;
+
+            fetch('/api/organizations/' + oid + '/pay-components/allowances', { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (list) {
+                    _allowancesList = Array.isArray(list) ? list : [];
+                    var tbody = document.getElementById('allowancesRulesBody');
+                    tbody.querySelectorAll('.allowances-row').forEach(function (el) { el.remove(); });
+
+                    var ph = tbody.querySelector('.allowances-placeholder');
+                    if (ph) ph.remove();
+
+                    if (!_allowancesList.length) {
+                        tbody.innerHTML = '<tr class="allowances-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="9" class="px-5 py-8">No allowances yet. Click <strong>Add Allowance</strong> to create one.</td></tr>';
+                        return;
+                    }
+
+                    _allowancesList.forEach(function (r) {
+                        var tr = document.createElement('tr');
+                        tr.className = 'allowances-row';
+                        tr.innerHTML =
+                            '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + safeText(r.name) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.allowanceType) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + safeText(r.amount) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.isTaxable) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.attendanceDependent) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.prorateIfPartialPeriod) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.isActive !== false) + '</td>' +
+                            '<td class="px-5 py-3 text-right">' +
+                                '<button type="button" onclick="window.editAllowanceRule(' + r.allowanceRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
+                                '<button type="button" onclick="window.deleteAllowanceRule(' + r.allowanceRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
+                            '</td>';
+
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(function () { });
+        }
+
+        function loadDeductions() {
+            var oid = getOrgId();
+            if (!oid) return;
+
+            fetch('/api/organizations/' + oid + '/pay-components/deductions', { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (list) {
+                    _deductionsList = Array.isArray(list) ? list : [];
+                    var tbody = document.getElementById('deductionsRulesBody');
+                    tbody.querySelectorAll('.deductions-row').forEach(function (el) { el.remove(); });
+
+                    var ph = tbody.querySelector('.deductions-placeholder');
+                    if (ph) ph.remove();
+
+                    if (!_deductionsList.length) {
+                        tbody.innerHTML = '<tr class="deductions-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="12" class="px-5 py-8">No deductions yet. Click <strong>Add Deduction</strong> to create one.</td></tr>';
+                        return;
+                    }
+
+                    _deductionsList.forEach(function (r) {
+                        var amountText = r.deductionType === 'Formula'
+                            ? (r.formulaExpression || '—')
+                            : (r.amount != null ? r.amount : '—');
+
+                        var tr = document.createElement('tr');
+                        tr.className = 'deductions-row';
+                        tr.innerHTML =
+                            '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + safeText(r.name) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.category) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.deductionType) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.computeBasedOn) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + safeText(amountText) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.hasEmployerShare) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.hasEmployeeShare) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + safeText(r.maxDeductionAmount) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + boolText(r.isActive !== false) + '</td>' +
+                            '<td class="px-5 py-3 text-xs">' + (r.autoCompute ? 'Auto' : 'Manual') + '</td>' +
+                            '<td class="px-5 py-3 text-right">' +
+                                '<button type="button" onclick="window.editDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
+                                '<button type="button" onclick="window.deleteDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
+                            '</td>';
+
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(function () { });
+        }
+
+        window.editEarningRule = function (id) { openEarningRuleModal(id); };
+        window.editAllowanceRule = function (id) { openAllowanceModal(id); };
+        window.editDeductionRule = function (id) { openDeductionModal(id); };
+
+        window.deleteEarningRule = function (id) {
+            if (confirm('Remove this earning rule?')) {
+                fetch('/api/organizations/' + getOrgId() + '/pay-components/earnings/' + id, { method: 'DELETE' })
+                    .then(function () { loadEarnings(); });
+            }
+        };
+
+        window.deleteAllowanceRule = function (id) {
+            if (confirm('Remove this allowance?')) {
+                fetch('/api/organizations/' + getOrgId() + '/pay-components/allowances/' + id, { method: 'DELETE' })
+                    .then(function () { loadAllowances(); });
+            }
+        };
+
+        window.deleteDeductionRule = function (id) {
+            if (confirm('Remove this deduction?')) {
+                fetch('/api/organizations/' + getOrgId() + '/pay-components/deductions/' + id, { method: 'DELETE' })
+                    .then(function () { loadDeductions(); });
+            }
+        };
+
+        window.toggleCustomCompensationFields = function () {
+            var basis = document.getElementById('compensation-basis').value;
+            var customFields = document.getElementById('custom-compensation-fields');
+            customFields.classList.toggle('hidden', basis !== 'Custom');
+
+            if (basis !== 'Custom') {
+                customFields.classList.remove('sm:grid', 'sm:grid-cols-2', 'sm:gap-5', 'sm:col-span-2');
+            } else {
+                customFields.classList.add('sm:grid', 'sm:grid-cols-2', 'sm:gap-5', 'sm:col-span-2');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (document.getElementById('tab-pay')) {
+                loadEarnings();
+                loadAllowances();
+                loadDeductions();
+            }
+        });
+
+        document.getElementById('earningRuleModal')?.addEventListener('click', function (e) {
+            if (e.target === this) closeEarningRuleModal();
+        });
+
+        document.getElementById('allowanceModal')?.addEventListener('click', function (e) {
+            if (e.target === this) closeAllowanceModal();
+        });
+
+        document.getElementById('deductionModal')?.addEventListener('click', function (e) {
+            if (e.target === this) closeDeductionModal();
+        });
+    })();
 </script>

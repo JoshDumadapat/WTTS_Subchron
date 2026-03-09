@@ -92,7 +92,7 @@ public class EmployeesController : ControllerBase
                 WorkState = e.WorkState,
                 EmploymentType = e.EmploymentType,
                 DateHired = e.DateHired,
-                Age = e.Age,
+                BirthDate = e.BirthDate,
                 Gender = e.Gender,
                 Phone = e.Phone,
                 AddressLine1 = e.AddressLine1,
@@ -228,8 +228,15 @@ public class EmployeesController : ControllerBase
             return BadRequest(new { ok = false, message = "First name is required." });
         if (string.IsNullOrWhiteSpace(r.LastName))
             return BadRequest(new { ok = false, message = "Last name is required." });
-        if (r.Age.HasValue && (r.Age.Value <= 18 || r.Age.Value > 70))
-            return BadRequest(new { ok = false, message = "Age must be between 19 and 70." });
+        DateTime? normalizedBirthDate = null;
+        if (r.BirthDate.HasValue)
+        {
+            var birthDate = r.BirthDate.Value.Date;
+            var (ok, error) = ValidateBirthDate(birthDate);
+            if (!ok)
+                return BadRequest(new { ok = false, message = error ?? "Birthdate is invalid." });
+            normalizedBirthDate = birthDate;
+        }
 
         var role = string.IsNullOrWhiteSpace(r.Role) ? "Employee" : r.Role.Trim();
         var empNumber = string.IsNullOrWhiteSpace(r.EmpNumber) ? null : r.EmpNumber.Trim();
@@ -270,7 +277,7 @@ public class EmployeesController : ControllerBase
             FirstName = r.FirstName.Trim(),
             LastName = r.LastName.Trim(),
             MiddleName = string.IsNullOrWhiteSpace(r.MiddleName) ? null : r.MiddleName.Trim(),
-            Age = r.Age,
+            BirthDate = normalizedBirthDate,
             Gender = string.IsNullOrWhiteSpace(r.Gender) ? null : r.Gender.Trim(),
             Role = role,
             WorkState = string.IsNullOrWhiteSpace(r.WorkState) ? "Active" : r.WorkState.Trim(),
@@ -374,12 +381,13 @@ public class EmployeesController : ControllerBase
 
         if (req?.FirstName != null) { var s = req.FirstName.Trim(); if (s.Length > 0) emp.FirstName = s.Length > 80 ? s[..80] : s; }
         if (req?.LastName != null) { var s = req.LastName.Trim(); if (s.Length > 0) emp.LastName = s.Length > 80 ? s[..80] : s; }
-        if (req?.Age != null)
+        if (req?.BirthDate.HasValue == true)
         {
-            var newAge = req.Age.Value;
-            if (newAge <= 18 || newAge > 70)
-                return BadRequest(new { ok = false, message = "Age must be between 19 and 70." });
-            emp.Age = newAge;
+            var birthDate = req.BirthDate.Value.Date;
+            var (ok, error) = ValidateBirthDate(birthDate);
+            if (!ok)
+                return BadRequest(new { ok = false, message = error ?? "Birthdate is invalid." });
+            emp.BirthDate = birthDate;
         }
         if (req?.Gender != null) emp.Gender = string.IsNullOrWhiteSpace(req.Gender) ? null : req.Gender.Trim().Length > 20 ? req.Gender.Trim()[..20] : req.Gender.Trim();
         if (req?.MiddleName != null) emp.MiddleName = string.IsNullOrWhiteSpace(req.MiddleName) ? null : (req.MiddleName.Trim().Length > 80 ? req.MiddleName.Trim()[..80] : req.MiddleName.Trim());
@@ -570,6 +578,30 @@ public class EmployeesController : ControllerBase
         return digits.Length > 11 ? digits.Substring(digits.Length - 11, 11) : (digits.Length >= 10 ? digits : null);
     }
 
+    private static (bool ok, string? error) ValidateBirthDate(DateTime? birthDate)
+    {
+        if (!birthDate.HasValue)
+            return (true, null);
+
+        var date = birthDate.Value.Date;
+        if (date > DateTime.UtcNow.Date)
+            return (false, "Birthdate cannot be in the future.");
+
+        var age = CalculateAge(date, DateTime.UtcNow.Date);
+        if (age < 19 || age > 70)
+            return (false, "Birthdate must make employee between 19 and 70 years old.");
+
+        return (true, null);
+    }
+
+    private static int CalculateAge(DateTime birthDate, DateTime asOf)
+    {
+        var age = asOf.Year - birthDate.Year;
+        if (birthDate.Date > asOf.AddYears(-age))
+            age--;
+        return age;
+    }
+
     // Employee management - map role names to employee-number prefixes.
     private static string GetRolePrefix(string role)
     {
@@ -650,7 +682,7 @@ public class EmployeesController : ControllerBase
             FirstName = e.FirstName,
             LastName = e.LastName,
             MiddleName = e.MiddleName,
-            Age = e.Age,
+            BirthDate = e.BirthDate,
             Gender = e.Gender,
             Role = e.Role,
             WorkState = e.WorkState,
@@ -691,7 +723,7 @@ public class EmployeeDto
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
     public string? MiddleName { get; set; }
-    public int? Age { get; set; }
+    public DateTime? BirthDate { get; set; }
     public string? Gender { get; set; }
     public string Role { get; set; } = "";
     public string WorkState { get; set; } = "";
@@ -728,7 +760,7 @@ public class EmployeeCreateRequest
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
     public string? MiddleName { get; set; }
-    public int? Age { get; set; }
+    public DateTime? BirthDate { get; set; }
     public string? Gender { get; set; }
     public string? Role { get; set; }
     public string? WorkState { get; set; }
@@ -755,7 +787,7 @@ public class EmployeeUpdateRequest
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? MiddleName { get; set; }
-    public int? Age { get; set; }
+    public DateTime? BirthDate { get; set; }
     public string? Gender { get; set; }
     public string? Role { get; set; }
     public string? WorkState { get; set; }

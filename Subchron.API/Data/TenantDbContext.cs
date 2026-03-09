@@ -35,7 +35,7 @@ public class TenantDbContext : DbContext
             e.Property(x => x.LastName).HasMaxLength(80).IsRequired();
             e.Property(x => x.FirstName).HasMaxLength(80).IsRequired();
             e.Property(x => x.MiddleName).HasMaxLength(80);
-            e.Property(x => x.Age);
+            e.Property(x => x.BirthDate).HasColumnType("date");
             e.Property(x => x.Gender).HasMaxLength(20);
             e.Property(x => x.Role).HasMaxLength(40).IsRequired();
             e.Property(x => x.WorkState).HasMaxLength(40).IsRequired();

@@ -53,20 +53,33 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label for="addAge" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
-                    <input type="number" name="age" id="addAge" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="19" max="70" />
-                    <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addAge"></span>
-                </div>
-                <div>
-                    <label for="addGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
-                    <select name="gender" id="addGender" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
-                        <option value="">— Select —</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-binary">Non-binary</option>
-                        <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
+                <div class="md:col-span-2">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label for="addBirthDate" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Birthdate</label>
+                            <div class="relative max-w-sm">
+                                <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                                </div>
+                                <input type="date" name="birthDate" id="addBirthDate" class="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-900 focus:border-subgreen-500 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+                            </div>
+                            <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addBirthDate"></span>
+                        </div>
+                        <div>
+                            <label for="addBirthDateAgeDisplay" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                            <input type="text" id="addBirthDateAgeDisplay" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300" value="—" readonly tabindex="-1" placeholder="—" />
+                        </div>
+                        <div>
+                            <label for="addGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                            <select name="gender" id="addGender" class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                                <option value="">Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Non-binary">Non-binary</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -500,6 +513,50 @@
         });
     }
 
+    function parseDateOnly(value) {
+        if (!value || typeof value !== 'string') return null;
+        var parts;
+        if (value.includes('/')) {
+            parts = value.split('/');
+            if (parts.length !== 3) return null;
+            var month = parseInt(parts[0], 10) - 1;
+            var day = parseInt(parts[1], 10);
+            var year = parseInt(parts[2], 10);
+            if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+            var date = new Date(year, month, day);
+            if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+            return date;
+        } else {
+            parts = value.split('-');
+            if (parts.length !== 3) return null;
+            var year = parseInt(parts[0], 10);
+            var month = parseInt(parts[1], 10) - 1;
+            var day = parseInt(parts[2], 10);
+            if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+            var date = new Date(year, month, day);
+            if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+            return date;
+        }
+    }
+
+    function calculateAgeFromDate(value) {
+        var date = parseDateOnly(value);
+        if (!date) return null;
+        var today = new Date();
+        var age = today.getFullYear() - date.getFullYear();
+        var beforeBirthday = today.getMonth() < date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() < date.getDate());
+        if (beforeBirthday) age--;
+        return age;
+    }
+
+    function updateBirthDateAgeDisplay(inputId, displayId) {
+        var input = document.getElementById(inputId);
+        var display = document.getElementById(displayId);
+        if (!input || !display) return;
+        var age = calculateAgeFromDate(input.value);
+        display.value = age != null ? age + ' yrs' : '—';
+    }
+
     function setUniqueError(fieldId, message) {
         showError(fieldId, message);
         var el = document.querySelector('.field-error[data-for="' + fieldId + '"]');
@@ -544,6 +601,17 @@
         });
     }
 
+    var addBirthDate = document.getElementById('addBirthDate');
+    if (addBirthDate) {
+        addBirthDate.addEventListener('input', function () {
+            updateBirthDateAgeDisplay('addBirthDate', 'addBirthDateAgeDisplay');
+        });
+        addBirthDate.addEventListener('change', function () {
+            updateBirthDateAgeDisplay('addBirthDate', 'addBirthDateAgeDisplay');
+        });
+        updateBirthDateAgeDisplay('addBirthDate', 'addBirthDateAgeDisplay');
+    }
+
     var addRole = document.getElementById('addRole');
     var addEmpNumber = document.getElementById('addEmpNumber');
     var nextEmpNumberAbortController = null;
@@ -585,7 +653,7 @@
     wireFieldClearOnInput('addCountry', 'input');
     wireFieldClearOnInput('addContactEmail', 'input');
     wireFieldClearOnInput('addDefaultPassword', 'input');
-    wireFieldClearOnInput('addAge', 'input');
+    wireFieldClearOnInput('addBirthDate', 'input');
     wireFieldClearOnInput('addRole', 'change');
     wireFieldClearOnInput('addEmploymentType', 'change');
     wireFieldClearOnInput('profilePicInput', 'change');
@@ -724,7 +792,7 @@
         var roleInput = document.getElementById('addRole');
         var empNumberInput = document.getElementById('addEmpNumber');
         var employmentInput = document.getElementById('addEmploymentType');
-        var ageInput = document.getElementById('addAge');
+        var birthDateInput = document.getElementById('addBirthDate');
         var signatureInput = document.getElementById('signatureInput');
         var profilePicInput = document.getElementById('profilePicInput');
 
@@ -734,10 +802,23 @@
         if (!lastNameInput.value.trim()) {
             showError('addLastName', 'Last name is required.'); valid = false; validationMessages.push('Last name is required.');
         }
-        if (ageInput && ageInput.value.trim() !== '') {
-            var ageNum = parseInt(ageInput.value, 10);
-            if (isNaN(ageNum) || ageNum <= 18 || ageNum > 70) {
-                showError('addAge', 'Age must be between 19 and 70.'); valid = false; validationMessages.push('Age must be between 19 and 70.');
+        if (birthDateInput && birthDateInput.value.trim() !== '') {
+            var birthDateVal = birthDateInput.value.trim();
+            var parsedBirthDate = parseDateOnly(birthDateVal);
+            if (!parsedBirthDate) {
+                showError('addBirthDate', 'Enter a valid birthdate.'); valid = false; validationMessages.push('Enter a valid birthdate.');
+            } else {
+                var today = new Date();
+                parsedBirthDate.setHours(0, 0, 0, 0);
+                var todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                if (parsedBirthDate > todayOnly) {
+                    showError('addBirthDate', 'Birthdate cannot be in the future.'); valid = false; validationMessages.push('Birthdate cannot be in the future.');
+                } else {
+                    var ageYears = calculateAgeFromDate(birthDateVal);
+                    if (ageYears == null || ageYears < 19 || ageYears > 70) {
+                        showError('addBirthDate', 'Birthdate must make employee between 19 and 70 years old.'); valid = false; validationMessages.push('Birthdate must make employee between 19 and 70 years old.');
+                    }
+                }
             }
         }
         if (!addressInput.value.trim()) {
@@ -821,6 +902,7 @@
         setTimeout(function () {
             if (submitBtn) submitBtn.disabled = true;
         }, 0);
+        
         form.submit();
     }
 

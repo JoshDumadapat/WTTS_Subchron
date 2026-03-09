@@ -101,7 +101,7 @@ public class AddModel : PageModel
 
     public async Task<IActionResult> OnPostCreateAsync(
         string firstName, string lastName, string? middleName,
-        int? age, string? gender,
+        DateTime? birthDate, string? gender,
         string? empNumber, int? departmentID, DateTime? dateHired,
         string? phone, string addressLine1, string? addressLine2,
         string city, string? stateProvince, string? postalCode, string country,
@@ -139,12 +139,27 @@ public class AddModel : PageModel
             TempData["ToastSuccess"] = false;
             return Page();
         }
-        if (age.HasValue && (age.Value <= 18 || age.Value > 70))
+        DateTime? normalizedBirthDate = null;
+        if (birthDate.HasValue)
         {
-            TempData["ToastMessage"] = "Age must be between 19 and 70.";
-            TempData["ToastSuccess"] = false;
-            await LoadDepartmentsAsync();
-            return Page();
+            var bd = birthDate.Value.Date;
+            if (bd > DateTime.Today)
+            {
+                TempData["ToastMessage"] = "Birthdate cannot be in the future.";
+                TempData["ToastSuccess"] = false;
+                return Page();
+            }
+
+            var ageYears = CalculateAge(bd, DateTime.Today);
+            if (ageYears < 19 || ageYears > 70)
+            {
+                TempData["ToastMessage"] = "Birthdate must make employee between 19 and 70 years old.";
+                TempData["ToastSuccess"] = false;
+                await LoadDepartmentsAsync();
+                return Page();
+            }
+
+            normalizedBirthDate = bd;
         }
         if (string.IsNullOrWhiteSpace(role)) role = "Employee";
         if (string.IsNullOrWhiteSpace(employmentType)) employmentType = "Regular";
@@ -190,7 +205,7 @@ public class AddModel : PageModel
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
             MiddleName = string.IsNullOrWhiteSpace(middleName) ? null : middleName.Trim(),
-            Age = age,
+            BirthDate = normalizedBirthDate,
             Gender = string.IsNullOrWhiteSpace(gender) ? null : gender.Trim(),
             Role = role.Trim(),
             WorkState = "Active",
@@ -334,6 +349,14 @@ public class AddModel : PageModel
         TempData["ToastMessage"] = "Employee created successfully.";
         TempData["ToastSuccess"] = true;
         return RedirectToPage("/App/Employee/EmployeeManagement", new { showId = empId });
+    }
+
+    private static int CalculateAge(DateTime birthDate, DateTime asOf)
+    {
+        var age = asOf.Year - birthDate.Year;
+        if (birthDate.Date > asOf.AddYears(-age))
+            age--;
+        return age;
     }
 
     // Employee Management - fetching data API functions

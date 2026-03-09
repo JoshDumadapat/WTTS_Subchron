@@ -1,0 +1,978 @@
+@* ─── HOLIDAY CONFIGURATION TAB ─── *@
+<div id="tab-holiday" class="tab-content hidden h-full flex-col">
+
+    <div class="flex items-center justify-between border-b border-slate-300 px-8 py-5 dark:border-gray-700">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Holiday Calendar</h2>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-8">
+        <div class="space-y-8">
+
+            @* ─── CALENDAR PANEL ─── *@
+            <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-100 shadow-md dark:border-gray-700 dark:bg-gray-800">
+
+                @* Top toolbar *@
+                <div class="flex flex-col gap-4 border-b border-slate-300 bg-slate-200 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/40">
+                    <div class="flex items-center justify-between">
+                        <h3 id="holidayCalendarTitle" class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">January 2026</h3>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-end gap-3">
+                        <div class="inline-flex items-center overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                            <button type="button" onclick="window.SubchronOrgTabHoliday.goToPreviousMonth()" class="inline-flex h-11 w-11 items-center justify-center text-gray-500 transition hover:bg-slate-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white" title="Previous Month">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            <button type="button" onclick="window.SubchronOrgTabHoliday.goToToday()" class="border-x border-slate-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-slate-100 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
+                                Today
+                            </button>
+
+                            <button type="button" onclick="window.SubchronOrgTabHoliday.goToNextMonth()" class="inline-flex h-11 w-11 items-center justify-center text-gray-500 transition hover:bg-slate-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white" title="Next Month">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="relative min-w-[140px]">
+                            <label for="holidayYearSelect" class="sr-only">Year</label>
+                            <select id="holidayYearSelect" class="block h-11 w-full appearance-none rounded-xl border border-slate-300 bg-slate-50 py-2.5 pr-10 pl-4 text-sm font-medium text-gray-700 shadow-sm ring-0 transition focus:border-emerald-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="relative min-w-[160px]">
+                            <label for="holidayTypeFilter" class="sr-only">Filter by Type</label>
+                            <select id="holidayTypeFilter" class="block h-11 w-full appearance-none rounded-xl border border-slate-300 bg-slate-50 py-2.5 pr-10 pl-4 text-sm font-medium text-gray-700 shadow-sm ring-0 transition focus:border-emerald-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="all">All Types</option>
+                                <option value="RegularHoliday">Regular Holiday</option>
+                                <option value="SpecialHoliday">Special Holiday</option>
+                                <option value="CompanyHoliday">Company Holiday</option>
+                                <option value="LocalHoliday">Local Holiday</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="window.SubchronOrgTabHoliday.syncHolidayYear()" class="btn-secondary gap-1.5">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356m-1.636 13.288A9 9 0 015.106 5.106L3 7.212m0 0V3.22m0 3.992h4.992" />
+                            </svg>
+                            Sync Holidays
+                        </button>
+
+                        <button type="button" onclick="window.SubchronOrgTabHoliday.openHolidayModal(null)" class="btn-primary gap-1.5">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Add Holiday
+                        </button>
+                    </div>
+                </div>
+
+                @* Legend *@
+                <div class="border-b border-slate-300 bg-slate-50 px-6 py-3 dark:border-gray-700 dark:bg-gray-900/20">
+                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <div class="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                            <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                            Regular Holiday
+                        </div>
+                        <div class="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                            <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+                            Special Holiday
+                        </div>
+                        <div class="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                            <span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span>
+                            Company Holiday
+                        </div>
+                        <div class="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                            <span class="h-2.5 w-2.5 rounded-full bg-violet-500"></span>
+                            Local Holiday
+                        </div>
+                    </div>
+                </div>
+
+                @* Calendar *@
+                <div class="overflow-x-auto bg-slate-200 dark:bg-[#08152f]">
+                    <div class="min-w-[800px] w-full">
+                        <div class="grid grid-cols-7 border-b border-slate-300 dark:border-slate-700/60">
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Mon</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Tue</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Wed</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Thu</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Fri</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Sat</div>
+                            <div class="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-100">Sun</div>
+                        </div>
+
+                        <div id="holidayCalendarGrid" class="grid grid-cols-7"></div>
+                    </div>
+                </div>
+            </div>
+
+            @* ─── HOLIDAY TABLE ─── *@
+            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-100 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Holiday Day Rules</h3>
+                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Configured holiday dates for the selected year.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
+                        <thead class="bg-slate-200 dark:bg-gray-700/40">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Date</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Holiday Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Attendance</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Payroll</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
+                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holidayRulesTableBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* ─── HOLIDAY MODAL ─── *@
+<div id="holidayModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
+            <div>
+                <h3 id="holidayModalTitle" class="text-base font-bold text-gray-900 dark:text-white">Configure Holiday Day</h3>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Set how attendance and payroll should treat this day.</p>
+            </div>
+            <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="max-h-[72vh] space-y-5 overflow-y-auto px-6 py-5">
+            <input type="hidden" id="holidayRecordId" value="" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Name</label>
+                    <input type="text" id="holidayName" placeholder="e.g. Independence Day"
+                           class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Date</label>
+                    <input type="date" id="holidayDate"
+                           class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Type</label>
+                    <div class="relative">
+                        <select id="holidayType"
+                                class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="RegularHoliday">Regular Holiday</option>
+                            <option value="SpecialHoliday">Special Holiday</option>
+                            <option value="CompanyHoliday">Company Holiday</option>
+                            <option value="LocalHoliday">Local Holiday</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Status</label>
+                    <div class="relative">
+                        <select id="holidayActive"
+                                class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-300 dark:border-gray-700">
+                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Attendance Behavior</h4>
+                </div>
+
+                <div class="space-y-0 divide-y divide-slate-300 dark:divide-gray-700">
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Include in Attendance</span>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Attendance engine should recognize this as a holiday day.</p>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="holidayIncludeAttendance" checked class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Mark as Non-Working Day</span>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Employees are considered not scheduled by default unless they are assigned to work.</p>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="holidayNonWorkingDay" checked class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Work on This Day</span>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Employees can still clock in and be treated as working on a holiday.</p>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="holidayAllowWork" checked class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-300 dark:border-gray-700">
+                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Payroll Behavior</h4>
+                </div>
+
+                <div class="space-y-0 divide-y divide-slate-300 dark:divide-gray-700">
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Include in Payroll</span>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Payroll engine should use this holiday classification for computations.</p>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="holidayIncludePayroll" checked class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800 dark:text-white">Use Holiday Pay Rules</span>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Payroll should apply configured holiday rates from the Payroll tab.</p>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="holidayUsePayRules" checked class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30 dark:bg-gray-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Notes</label>
+                <textarea id="holidayNotes" rows="3" placeholder="Optional internal notes for this holiday day..."
+                          class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600"></textarea>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+            <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayModal()" class="btn-secondary">Cancel</button>
+            <button type="button" onclick="window.SubchronOrgTabHoliday.saveHolidayRule()" class="btn-primary gap-1.5">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Save Holiday Rule
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    #holidayCalendarGrid .holiday-day-cell {
+        min-height: 94px;
+        border-right: 1px solid #cbd5e1;
+        border-bottom: 1px solid #cbd5e1;
+        background: #f1f5f9;
+        cursor: pointer;
+        transition: background-color 0.18s ease, transform 0.18s ease;
+        padding: 8px 10px;
+    }
+
+        #holidayCalendarGrid .holiday-day-cell:hover {
+            background: #e2e8f0;
+        }
+
+        #holidayCalendarGrid .holiday-day-cell.is-outside {
+            background: #e5e7eb;
+        }
+
+        #holidayCalendarGrid .holiday-day-cell.is-today {
+            box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.9);
+        }
+
+        #holidayCalendarGrid .holiday-day-cell .holiday-day-number {
+            color: #1e293b;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        #holidayCalendarGrid .holiday-day-cell.is-outside .holiday-day-number {
+            color: #94a3b8;
+        }
+
+    .holiday-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        max-width: 100%;
+        border-radius: 9999px;
+        padding: 0.18rem 0.5rem;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+    }
+
+    .holiday-type-regular {
+        background: rgba(239, 68, 68, 0.18);
+        color: rgb(185, 28, 28);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.28);
+    }
+
+    .holiday-type-special {
+        background: rgba(245, 158, 11, 0.18);
+        color: rgb(180, 83, 9);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.28);
+    }
+
+    .holiday-type-company {
+        background: rgba(59, 130, 246, 0.18);
+        color: rgb(29, 78, 216);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.28);
+    }
+
+    .holiday-type-local {
+        background: rgba(139, 92, 246, 0.18);
+        color: rgb(109, 40, 217);
+        box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.28);
+    }
+
+    .holiday-type-dot {
+        display: inline-block;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 9999px;
+        flex-shrink: 0;
+    }
+
+    .holiday-type-dot-regular {
+        background: #ef4444;
+    }
+
+    .holiday-type-dot-special {
+        background: #f59e0b;
+    }
+
+    .holiday-type-dot-company {
+        background: #3b82f6;
+    }
+
+    .holiday-type-dot-local {
+        background: #8b5cf6;
+    }
+
+    .holiday-scrollbar-hidden {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .holiday-scrollbar-hidden::-webkit-scrollbar {
+            display: none;
+        }
+
+    .dark #holidayCalendarGrid .holiday-day-cell {
+        border-right: 1px solid rgba(71, 85, 105, 0.35);
+        border-bottom: 1px solid rgba(71, 85, 105, 0.35);
+        background: #07142d;
+    }
+
+        .dark #holidayCalendarGrid .holiday-day-cell:hover {
+            background: #0d1d3f;
+        }
+
+        .dark #holidayCalendarGrid .holiday-day-cell.is-outside {
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        .dark #holidayCalendarGrid .holiday-day-cell .holiday-day-number {
+            color: rgba(226, 232, 240, 0.95);
+        }
+
+        .dark #holidayCalendarGrid .holiday-day-cell.is-outside .holiday-day-number {
+            color: rgba(148, 163, 184, 0.6);
+        }
+
+    .dark .holiday-type-regular {
+        background: rgba(239, 68, 68, 0.18);
+        color: rgb(254, 202, 202);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.28);
+    }
+
+    .dark .holiday-type-special {
+        background: rgba(245, 158, 11, 0.18);
+        color: rgb(253, 230, 138);
+        box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.28);
+    }
+
+    .dark .holiday-type-company {
+        background: rgba(59, 130, 246, 0.18);
+        color: rgb(191, 219, 254);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.28);
+    }
+
+    .dark .holiday-type-local {
+        background: rgba(139, 92, 246, 0.18);
+        color: rgb(221, 214, 254);
+        box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.28);
+    }
+</style>
+
+<script>
+    window.SubchronOrgTabHoliday = window.SubchronOrgTabHoliday || (() => {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        let currentDate = new Date();
+        let selectedYear = currentDate.getFullYear();
+        let selectedMonth = currentDate.getMonth();
+        let selectedHolidayType = 'all';
+        let editingHolidayId = null;
+
+        const holidayStore = new Map();
+
+        function seedHolidayData() {
+            const demo = [
+                {
+                    id: 1,
+                    date: `${selectedYear}-01-01`,
+                    name: 'New Year\'s Day',
+                    type: 'RegularHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: 'Auto-synced PH holiday'
+                },
+                {
+                    id: 2,
+                    date: `${selectedYear}-04-09`,
+                    name: 'Araw ng Kagitingan',
+                    type: 'RegularHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: ''
+                },
+                {
+                    id: 3,
+                    date: `${selectedYear}-06-12`,
+                    name: 'Independence Day',
+                    type: 'RegularHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: ''
+                },
+                {
+                    id: 4,
+                    date: `${selectedYear}-08-21`,
+                    name: 'Ninoy Aquino Day',
+                    type: 'SpecialHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: ''
+                },
+                {
+                    id: 5,
+                    date: `${selectedYear}-11-01`,
+                    name: 'All Saints\' Day',
+                    type: 'SpecialHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: ''
+                },
+                {
+                    id: 6,
+                    date: `${selectedYear}-12-25`,
+                    name: 'Christmas Day',
+                    type: 'RegularHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: ''
+                },
+                {
+                    id: 7,
+                    date: `${selectedYear}-08-10`,
+                    name: 'Company Foundation Day',
+                    type: 'CompanyHoliday',
+                    isActive: true,
+                    includeAttendance: true,
+                    nonWorkingDay: true,
+                    allowWork: true,
+                    includePayroll: true,
+                    usePayRules: true,
+                    notes: 'Manual company holiday'
+                }
+            ];
+
+            holidayStore.clear();
+            demo.forEach(item => holidayStore.set(item.id, item));
+        }
+
+        function fillYearOptions() {
+            const select = document.getElementById('holidayYearSelect');
+            if (!select) return;
+
+            select.innerHTML = '';
+
+            const current = new Date().getFullYear();
+            for (let y = current - 10; y <= current + 10; y++) {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                if (y === selectedYear) option.selected = true;
+                select.appendChild(option);
+            }
+
+            if (select.dataset.bound !== 'true') {
+                select.dataset.bound = 'true';
+                select.addEventListener('change', function () {
+                    selectedYear = parseInt(this.value, 10);
+                    currentDate = new Date(selectedYear, selectedMonth, 1);
+                    seedHolidayData();
+                    renderHolidayCalendar();
+                    renderHolidayTable();
+                });
+            }
+        }
+
+        function bindHolidayTypeFilter() {
+            const filter = document.getElementById('holidayTypeFilter');
+            if (!filter || filter.dataset.bound === 'true') return;
+
+            filter.dataset.bound = 'true';
+            filter.addEventListener('change', function () {
+                selectedHolidayType = this.value;
+                renderHolidayCalendar();
+                renderHolidayTable();
+            });
+        }
+
+        function getTypeLabel(type) {
+            switch (type) {
+                case 'RegularHoliday': return 'Regular Holiday';
+                case 'SpecialHoliday': return 'Special Holiday';
+                case 'CompanyHoliday': return 'Company Holiday';
+                case 'LocalHoliday': return 'Local Holiday';
+                default: return 'Holiday';
+            }
+        }
+
+        function getTypeClass(type) {
+            switch (type) {
+                case 'RegularHoliday': return 'holiday-type-regular';
+                case 'SpecialHoliday': return 'holiday-type-special';
+                case 'CompanyHoliday': return 'holiday-type-company';
+                case 'LocalHoliday': return 'holiday-type-local';
+                default: return 'holiday-type-company';
+            }
+        }
+
+        function getTypeDotClass(type) {
+            switch (type) {
+                case 'RegularHoliday': return 'holiday-type-dot-regular';
+                case 'SpecialHoliday': return 'holiday-type-dot-special';
+                case 'CompanyHoliday': return 'holiday-type-dot-company';
+                case 'LocalHoliday': return 'holiday-type-dot-local';
+                default: return 'holiday-type-dot-company';
+            }
+        }
+
+        function getAllHolidaysByDate(dateString) {
+            return Array.from(holidayStore.values()).filter(x => x.date === dateString);
+        }
+
+        function getHolidayByDate(dateString) {
+            return Array.from(holidayStore.values()).filter(x => {
+                if (x.date !== dateString) return false;
+                if (selectedHolidayType === 'all') return true;
+                return x.type === selectedHolidayType;
+            });
+        }
+
+        function formatDate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function formatDateDisplay(dateString) {
+            const d = new Date(dateString + 'T00:00:00');
+            return `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+        }
+
+        function renderHolidayCalendar() {
+            const title = document.getElementById('holidayCalendarTitle');
+            const grid = document.getElementById('holidayCalendarGrid');
+            if (!title || !grid) return;
+
+            title.textContent = `${monthNames[selectedMonth]} ${selectedYear}`;
+            grid.innerHTML = '';
+
+            const firstDayOfMonth = new Date(selectedYear, selectedMonth, 1);
+            const mondayBasedStart = (firstDayOfMonth.getDay() + 6) % 7;
+            const startDate = new Date(firstDayOfMonth);
+            startDate.setDate(firstDayOfMonth.getDate() - mondayBasedStart);
+
+            const todayString = formatDate(new Date());
+
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+
+                const dateString = formatDate(cellDate);
+                const isCurrentMonth = cellDate.getMonth() === selectedMonth;
+                const isToday = dateString === todayString;
+                const holidays = getHolidayByDate(dateString);
+                const allHolidays = getAllHolidaysByDate(dateString);
+
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = [
+                    'holiday-day-cell flex flex-col items-start text-left',
+                    !isCurrentMonth ? 'is-outside' : '',
+                    isToday ? 'is-today' : ''
+                ].join(' ').trim();
+
+                let holidayContent = '';
+
+                holidays.slice(0, 2).forEach(h => {
+                    holidayContent += `
+                        <div class="mt-1.5 w-full">
+                            <div class="holiday-chip ${getTypeClass(h.type)}">${getTypeLabel(h.type)}</div>
+                            <div class="mt-1 line-clamp-2 text-[12px] font-semibold leading-4 text-slate-800 dark:text-white">${h.name}</div>
+                        </div>
+                    `;
+                });
+
+                if (selectedHolidayType === 'all' && allHolidays.length > 2) {
+                    holidayContent += `<div class="mt-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-300">+${allHolidays.length - 2} more</div>`;
+                }
+
+                if (selectedHolidayType !== 'all' && holidays.length > 2) {
+                    holidayContent += `<div class="mt-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-300">+${holidays.length - 2} more</div>`;
+                }
+
+                cell.innerHTML = `
+                    <div class="holiday-day-number">${cellDate.getDate()}</div>
+                    <div class="mt-1.5 w-full">
+                        ${holidayContent}
+                    </div>
+                `;
+
+                cell.addEventListener('click', function () {
+                    if (holidays.length > 0) {
+                        openHolidayModal(holidays[0].id);
+                    } else {
+                        openHolidayModal(null, dateString);
+                    }
+                });
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function renderHolidayTable() {
+            const tbody = document.getElementById('holidayRulesTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            const rows = Array.from(holidayStore.values())
+                .filter(x => new Date(x.date + 'T00:00:00').getFullYear() === selectedYear)
+                .filter(x => selectedHolidayType === 'all' || x.type === selectedHolidayType)
+                .sort((a, b) => a.date.localeCompare(b.date));
+
+            if (!rows.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                            No holiday rules found for this year.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rows.forEach(item => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td class="px-5 py-4 text-sm text-gray-700 dark:text-gray-200">${formatDateDisplay(item.date)}</td>
+                    <td class="px-5 py-4 text-sm font-semibold text-gray-900 dark:text-white">${item.name}</td>
+                    <td class="px-5 py-4">
+                        <div class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                            <span class="holiday-type-dot ${getTypeDotClass(item.type)}"></span>
+                            <span>${getTypeLabel(item.type)}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
+                        ${item.includeAttendance ? 'Included' : 'Ignored'}
+                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                            ${item.nonWorkingDay ? 'Non-working day' : 'Normal working day'}
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
+                        ${item.includePayroll ? 'Included' : 'Ignored'}
+                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                            ${item.usePayRules ? 'Uses holiday pay rules' : 'No holiday pay rule'}
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-xs">
+                        <span class="${item.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'} font-semibold">
+                            ${item.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-right">
+                        <button type="button" onclick="window.SubchronOrgTabHoliday.openHolidayModal(${item.id})" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            Edit
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function resetHolidayModal(prefillDate = null) {
+            editingHolidayId = null;
+            document.getElementById('holidayRecordId').value = '';
+            document.getElementById('holidayModalTitle').textContent = 'Configure Holiday Day';
+            document.getElementById('holidayName').value = '';
+            document.getElementById('holidayDate').value = prefillDate || '';
+            document.getElementById('holidayType').value = 'RegularHoliday';
+            document.getElementById('holidayActive').value = 'true';
+            document.getElementById('holidayIncludeAttendance').checked = true;
+            document.getElementById('holidayNonWorkingDay').checked = true;
+            document.getElementById('holidayAllowWork').checked = true;
+            document.getElementById('holidayIncludePayroll').checked = true;
+            document.getElementById('holidayUsePayRules').checked = true;
+            document.getElementById('holidayNotes').value = '';
+        }
+
+        function openHolidayModal(id = null, prefillDate = null) {
+            const modal = document.getElementById('holidayModal');
+            if (!modal) return;
+
+            if (id == null) {
+                resetHolidayModal(prefillDate);
+            } else {
+                const item = holidayStore.get(id);
+                if (!item) return;
+
+                editingHolidayId = id;
+                document.getElementById('holidayRecordId').value = item.id;
+                document.getElementById('holidayModalTitle').textContent = 'Edit Holiday Day Rule';
+                document.getElementById('holidayName').value = item.name || '';
+                document.getElementById('holidayDate').value = item.date || '';
+                document.getElementById('holidayType').value = item.type || 'RegularHoliday';
+                document.getElementById('holidayActive').value = String(!!item.isActive);
+                document.getElementById('holidayIncludeAttendance').checked = !!item.includeAttendance;
+                document.getElementById('holidayNonWorkingDay').checked = !!item.nonWorkingDay;
+                document.getElementById('holidayAllowWork').checked = !!item.allowWork;
+                document.getElementById('holidayIncludePayroll').checked = !!item.includePayroll;
+                document.getElementById('holidayUsePayRules').checked = !!item.usePayRules;
+                document.getElementById('holidayNotes').value = item.notes || '';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHolidayModal() {
+            const modal = document.getElementById('holidayModal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveHolidayRule() {
+            const id = document.getElementById('holidayRecordId').value;
+            const payload = {
+                id: id ? Number(id) : Date.now(),
+                name: (document.getElementById('holidayName').value || '').trim(),
+                date: document.getElementById('holidayDate').value,
+                type: document.getElementById('holidayType').value,
+                isActive: document.getElementById('holidayActive').value === 'true',
+                includeAttendance: document.getElementById('holidayIncludeAttendance').checked,
+                nonWorkingDay: document.getElementById('holidayNonWorkingDay').checked,
+                allowWork: document.getElementById('holidayAllowWork').checked,
+                includePayroll: document.getElementById('holidayIncludePayroll').checked,
+                usePayRules: document.getElementById('holidayUsePayRules').checked,
+                notes: document.getElementById('holidayNotes').value || ''
+            };
+
+            if (!payload.name || !payload.date) return;
+
+            holidayStore.set(payload.id, payload);
+            closeHolidayModal();
+            renderHolidayCalendar();
+            renderHolidayTable();
+        }
+
+        function goToPreviousMonth() {
+            if (selectedMonth === 0) {
+                selectedMonth = 11;
+                selectedYear -= 1;
+            } else {
+                selectedMonth -= 1;
+            }
+            currentDate = new Date(selectedYear, selectedMonth, 1);
+            updateYearSelect();
+            renderHolidayCalendar();
+            renderHolidayTable();
+        }
+
+        function goToNextMonth() {
+            if (selectedMonth === 11) {
+                selectedMonth = 0;
+                selectedYear += 1;
+            } else {
+                selectedMonth += 1;
+            }
+            currentDate = new Date(selectedYear, selectedMonth, 1);
+            updateYearSelect();
+            renderHolidayCalendar();
+            renderHolidayTable();
+        }
+
+        function goToToday() {
+            const now = new Date();
+            selectedYear = now.getFullYear();
+            selectedMonth = now.getMonth();
+            currentDate = new Date(selectedYear, selectedMonth, 1);
+            updateYearSelect();
+            renderHolidayCalendar();
+            renderHolidayTable();
+        }
+
+        function updateYearSelect() {
+            fillYearOptions();
+            const select = document.getElementById('holidayYearSelect');
+            if (select) {
+                select.value = String(selectedYear);
+            }
+        }
+
+        function syncHolidayYear() {
+            seedHolidayData();
+            renderHolidayCalendar();
+            renderHolidayTable();
+            window.showToast?.(`Holidays synced for ${selectedYear}.`, true);
+        }
+
+        function bindModalDismiss() {
+            const modal = document.getElementById('holidayModal');
+            if (!modal || modal.dataset.bound === 'true') return;
+
+            modal.dataset.bound = 'true';
+            modal.addEventListener('click', function (e) {
+                if (e.target === this) closeHolidayModal();
+            });
+        }
+
+        function init() {
+            const now = new Date();
+            selectedYear = now.getFullYear();
+            selectedMonth = now.getMonth();
+            currentDate = new Date(selectedYear, selectedMonth, 1);
+
+            fillYearOptions();
+            bindHolidayTypeFilter();
+            updateYearSelect();
+            seedHolidayData();
+            bindModalDismiss();
+            renderHolidayCalendar();
+            renderHolidayTable();
+        }
+
+        return {
+            init,
+            openHolidayModal,
+            closeHolidayModal,
+            saveHolidayRule,
+            goToPreviousMonth,
+            goToNextMonth,
+            goToToday,
+            syncHolidayYear
+        };
+    })();
+
+    window.SubchronOrgTabHoliday.init();
+</script>

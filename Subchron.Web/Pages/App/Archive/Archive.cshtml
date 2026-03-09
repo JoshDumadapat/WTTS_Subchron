@@ -14,51 +14,61 @@
         </div>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
-        <!-- Stats: match employee layout -->
-        <div class="grid grid-cols-2 divide-y divide-slate-300 border-b border-slate-300 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700 dark:border-slate-700">
-            <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
-                <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total archived</p>
-                <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-900 dark:text-white" id="archiveStatTotal">@Model.ArchivedEmployees.Count</p>
+    <div class="mb-5 rounded-2xl border border-slate-300 bg-slate-100/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
+            <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="h-5 w-5 text-gray-400 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </span>
+                <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search by name or email..." />
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                    <option value="">All reasons</option>
+                    <option value="Resignation">Resignation</option>
+                    <option value="End of Contract">End of Contract</option>
+                    <option value="Redundancy">Redundancy</option>
+                    <option value="Other">Other</option>
+                </select>
+                <select id="archiveFilterStatus" class="h-10 rounded-xl border border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                    <option value="">All status</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+                <button type="button" id="archiveResetFilters" class="h-10 rounded-xl border border-slate-300 bg-slate-50 px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reset
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Filters: match employee style -->
-        <div class="p-5">
-            <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
-                <div class="relative flex-1">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </span>
-                    <input type="text" id="archiveSearch" class="h-10 w-full rounded-xl border border-slate-300 bg-white pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Search by name or email..." />
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <select id="archiveFilterReason" class="h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                        <option value="">All reasons</option>
-                        <option value="Resignation">Resignation</option>
-                        <option value="End of Contract">End of Contract</option>
-                        <option value="Redundancy">Redundancy</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <button type="button" id="archiveResetFilters" class="h-10 rounded-xl border border-slate-300 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
-                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Reset
-                    </button>
-                </div>
-            </div>
+    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-md dark:border-slate-700 dark:bg-slate-800">
+        <div class="w-full border-b border-slate-300 bg-slate-100/80 px-5 py-3 text-right dark:border-slate-700 dark:bg-slate-800/70">
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total archived</p>
+            <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-white" id="archiveStatTotal">@Model.ArchivedEmployees.Count</p>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full min-w-[1100px] text-left">
+                <colgroup>
+                    <col class="w-[24%]" />
+                    <col class="w-[12%]" />
+                    <col class="w-[12%]" />
+                    <col class="w-[21%]" />
+                    <col class="w-[9%]" />
+                    <col class="w-[8%]" />
+                    <col class="w-[14%]" />
+                </colgroup>
                 <thead>
-                    <tr class="border-y border-slate-300 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                    <tr class="border-y border-slate-300 bg-slate-200/70 dark:border-slate-700 dark:bg-slate-800/50">
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Team Member</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Role</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Department</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">Role</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">Department</th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Archived date</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">Archived date</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">Status</th>
                         <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
                     </tr>
                 </thead>
@@ -82,32 +92,36 @@
                         var ec = ecDisplay(emp.EmergencyContactName, emp.EmergencyContactPhone, emp.EmergencyContactRelation);
                         var archivedDate = emp.ArchivedAt?.ToString("MMM dd, yyyy") ?? "—";
                         var dateHiredStr = emp.DateHired?.ToString("MMM dd, yyyy") ?? "—";
-                        var ageStr = emp.Age.HasValue ? emp.Age.Value.ToString() : "—";
+                        var birthDateIso = emp.BirthDate?.ToString("yyyy-MM-dd") ?? "";
                         var genderStr = string.IsNullOrWhiteSpace(emp.Gender) ? "—" : emp.Gender;
-                        <tr class="archive-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-emp-id="@emp.EmpID" data-name="@name" data-emp-number="@(emp.EmpNumber ?? "—")" data-email="@(emp.Email ?? "")" data-role="@emp.Role" data-department="@(emp.DepartmentName ?? "—")" data-reason="@(emp.ArchivedReason ?? "—")" data-status="Archived" data-archived-date="@archivedDate" data-address="@address" data-phone="@(emp.Phone ?? "—")" data-age="@ageStr" data-gender="@genderStr" data-date-hired="@dateHiredStr" data-ec-name="@(emp.EmergencyContactName ?? "—")" data-ec-phone="@(emp.EmergencyContactPhone ?? "—")" data-ec-relation="@(emp.EmergencyContactRelation ?? "—")">
+                        <tr class="archive-row hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-emp-id="@emp.EmpID" data-name="@name" data-emp-number="@(emp.EmpNumber ?? "—")" data-email="@(emp.Email ?? "")" data-role="@emp.Role" data-department="@(emp.DepartmentName ?? "—")" data-reason="@(emp.ArchivedReason ?? "—")" data-status="Inactive" data-archived-date="@archivedDate" data-address="@address" data-phone="@(emp.Phone ?? "—")" data-birthdate="@birthDateIso" data-gender="@genderStr" data-date-hired="@dateHiredStr" data-ec-name="@(emp.EmergencyContactName ?? "—")" data-ec-phone="@(emp.EmergencyContactPhone ?? "—")" data-ec-relation="@(emp.EmergencyContactRelation ?? "—")" data-avatar-url="@(emp.AvatarUrl ?? emp.IdPictureUrl ?? "")" data-signature-url="@(emp.SignatureUrl ?? "")" data-address-line1="@(emp.AddressLine1 ?? "")" data-address-line2="@(emp.AddressLine2 ?? "")" data-city="@(emp.City ?? "")" data-state-province="@(emp.StateProvince ?? "")" data-postal-code="@(emp.PostalCode ?? "")" data-country="@(emp.Country ?? "")" data-work-state="@(emp.WorkState ?? "Inactive")" data-employment-type="@(emp.EmploymentType ?? "—")" data-base-salary="@(emp.BaseSalary?.ToString() ?? "")">
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-400">@(string.IsNullOrWhiteSpace(initial) ? "—" : initial)</div>
+                                    @if (!string.IsNullOrWhiteSpace(emp.AvatarUrl) || !string.IsNullOrWhiteSpace(emp.IdPictureUrl))
+                                    {
+                                        <img src="@(string.IsNullOrWhiteSpace(emp.AvatarUrl) ? emp.IdPictureUrl : emp.AvatarUrl)" alt="" class="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-600" />
+                                    }
+                                    else
+                                    {
+                                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-400">@(string.IsNullOrWhiteSpace(initial) ? "—" : initial)</div>
+                                    }
                                     <div>
                                         <div class="text-sm font-medium text-slate-900 dark:text-white">@name</div>
                                         <div class="text-xs text-slate-500 dark:text-slate-400">@emp.EmpNumber</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@emp.Role</td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.DepartmentName ?? "—")</td>
-                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">@(emp.ArchivedReason ?? "—")</td>
-                            <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">@archivedDate</td>
-                            <td class="px-5 py-3 text-right">
-                                <div class="flex justify-end gap-1 flex-wrap">
-                                    <a asp-page="/App/Employee/EmployeeManagement" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                                        Back to Employee
-                                    </a>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">@emp.Role</td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">@(emp.DepartmentName ?? "—")</td>
+                            <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 break-words">@(emp.ArchivedReason ?? "—")</td>
+                            <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">@archivedDate</td>
+                            <td class="px-5 py-3 whitespace-nowrap"><span class="inline-flex items-center rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">Inactive</span></td>
+                            <td class="px-5 py-3 text-right whitespace-nowrap">
+                                <div class="flex flex-nowrap justify-end gap-2 whitespace-nowrap">
                                     <button type="button" onclick="openArchiveViewModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View
                                     </button>
-                                    <button type="button" onclick="openRestoreModal(this)" class="btn-primary px-2 py-1 text-xs gap-1">
+                                    <button type="button" onclick="openRestoreModal(this)" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 transition-all hover:bg-subgreen-200 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-800/50">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>Restore
                                     </button>
                                 </div>
@@ -115,7 +129,7 @@
                         </tr>
                     }
                     <tr id="archiveEmpty" class="hidden">
-                        <td colspan="6" class="px-5 py-12 text-center">
+                        <td colspan="7" class="px-5 py-12 text-center">
                             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
                                 <svg class="h-7 w-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                             </div>
@@ -129,14 +143,14 @@
         </div>
 
         <!-- Pagination: match employee style -->
-        <div class="flex flex-col gap-4 border-t border-slate-300 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 border-t border-slate-300 bg-slate-100/70 px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Showing <span class="font-semibold text-slate-900 dark:text-white" id="archivePaginationShowing">0</span> of <span id="archivePaginationTotal" class="font-semibold text-slate-900 dark:text-white">0</span>
                 </span>
                 <div class="flex items-center gap-2">
                     <span class="hidden text-xs font-medium uppercase text-slate-500 dark:text-slate-500 sm:inline">Rows</span>
-                    <select id="archiveRowsPerPage" class="hidden h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
+                    <select id="archiveRowsPerPage" class="hidden h-9 rounded-lg border border-slate-300 bg-slate-50 px-2 text-sm font-medium text-slate-600 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 sm:inline-block">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="20">20</option>
@@ -146,14 +160,14 @@
             </div>
             <div class="flex items-center justify-center gap-0 sm:justify-end">
                 <nav class="isolate inline-flex -space-x-px rounded-lg shadow-md" aria-label="Pagination">
-                    <button type="button" id="archivePaginationPrev" class="inline-flex items-center rounded-l-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    <button type="button" id="archivePaginationPrev" class="inline-flex items-center rounded-l-lg border border-slate-300 bg-slate-50 px-2 py-2 text-gray-500 hover:bg-slate-100 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                         <span class="sr-only">Previous</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
                     </button>
                     <div id="archivePaginationNumbers" class="inline-flex -space-x-px text-sm"></div>
-                    <button type="button" id="archivePaginationNext" class="inline-flex items-center rounded-r-lg border border-slate-300 bg-white px-2 py-2 text-gray-500 hover:bg-gray-50 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    <button type="button" id="archivePaginationNext" class="inline-flex items-center rounded-r-lg border border-slate-300 bg-slate-50 px-2 py-2 text-gray-500 hover:bg-slate-100 focus:z-20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                         <span class="sr-only">Next</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -164,66 +178,101 @@
         </div>
     </div>
 
-    <!-- View archived employee modal -->
-    <div id="archiveViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="flex min-h-screen items-center justify-center p-4">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeArchiveViewModal()"></div>
-            <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                <div class="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Archived employee information</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View only. Use Restore to bring back to active directory.</p>
+    <!-- View archived employee drawer -->
+    <div id="archiveViewDrawerRoot" class="fixed inset-0 z-[220] hidden" aria-hidden="true">
+        <div id="archiveViewDrawerBackdrop" class="absolute inset-0 bg-slate-900/60 opacity-0 backdrop-blur-sm transition-opacity duration-300" onclick="closeArchiveViewModal()"></div>
+        <aside id="archiveViewDrawerPanel" class="absolute inset-y-0 right-0 w-full max-w-xl translate-x-full overflow-y-auto bg-slate-200/70 shadow-2xl transition-transform duration-300 dark:bg-slate-900" role="dialog" aria-modal="true" aria-label="Archived employee details">
+            <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-300 bg-slate-200/90 px-5 py-4 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Employee details</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">View-only information drawer</p>
                 </div>
-                <div class="p-6 space-y-6">
-                    <section>
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Employee information</h4>
-                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div><dt class="text-xs text-slate-500">Full name</dt><dd id="archiveViewName" class="text-sm font-medium text-slate-900 dark:text-white">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Employee ID</dt><dd id="archiveViewEmpNumber" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Email</dt><dd id="archiveViewEmail" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Age</dt><dd id="archiveViewAge" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Gender</dt><dd id="archiveViewGender" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Date hired</dt><dd id="archiveViewDateHired" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Role</dt><dd id="archiveViewRole" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Department</dt><dd id="archiveViewDepartment" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Archive reason</dt><dd id="archiveViewReason" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Archived date</dt><dd id="archiveViewArchivedDate" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                        </dl>
-                    </section>
-                    <section>
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
-                        <p id="archiveViewAddress" class="text-sm text-slate-700 dark:text-slate-300">—</p>
-                    </section>
-                    <section>
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
-                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div><dt class="text-xs text-slate-500">Phone</dt><dd id="archiveViewPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                        </dl>
-                    </section>
-                    <section>
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
-                        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div><dt class="text-xs text-slate-500">Name</dt><dd id="archiveViewEcName" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Phone</dt><dd id="archiveViewEcPhone" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                            <div><dt class="text-xs text-slate-500">Relation</dt><dd id="archiveViewEcRelation" class="text-sm text-slate-700 dark:text-slate-300">—</dd></div>
-                        </dl>
-                    </section>
-                </div>
-                <div class="border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-                    <button type="button" onclick="closeArchiveViewModal()" class="btn-secondary">Close</button>
-                </div>
+                <button type="button" onclick="closeArchiveViewModal()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300" aria-label="Close details">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </div>
-        </div>
+
+            <div class="space-y-5 p-5 pb-8">
+                <section class="px-1 pt-1">
+                    <div class="flex flex-col items-center text-center">
+                        <img id="archiveViewAvatar" src="" alt="" class="h-28 w-28 rounded-full border-2 border-slate-300 object-cover shadow-md dark:border-slate-600" />
+                        <div id="archiveViewAvatarFallback" class="hidden flex h-28 w-28 items-center justify-center rounded-full border-2 border-slate-300 bg-slate-100 text-xl font-semibold text-slate-600 shadow-md dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">—</div>
+                        <p id="archiveViewName" class="mt-4 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">—</p>
+                        <p id="archiveViewEmpNumber" class="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">—</p>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Personal information</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</p><p id="archiveViewEmail" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</p><p id="archiveViewPhone" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Birthdate</p><p class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100"><span id="archiveViewBirthDate">—</span> <span id="archiveViewBirthDateAge" class="text-xs font-normal text-slate-500 dark:text-slate-400">Age: —</span></p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gender</p><p id="archiveViewGender" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Employment information</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Role</p><p id="archiveViewRole" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</p><p id="archiveViewDepartment" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Work state</p><p id="archiveViewWorkState" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Employment type</p><p id="archiveViewEmploymentType" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Date hired</p><p id="archiveViewDateHired" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Base salary</p><p id="archiveViewBaseSalary" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Archive information</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Reason</p><p id="archiveViewReason" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Archived date</p><p id="archiveViewArchivedDate" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="sm:col-span-2"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Address line 1</p><p id="archiveViewAddressLine1" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div class="sm:col-span-2"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Address line 2</p><p id="archiveViewAddressLine2" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">City</p><p id="archiveViewCity" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">State / Province</p><p id="archiveViewStateProvince" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Postal code</p><p id="archiveViewPostalCode" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Country</p><p id="archiveViewCountry" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Name</p><p id="archiveViewEcName" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</p><p id="archiveViewEcPhone" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                        <div><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Relation</p><p id="archiveViewEcRelation" class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">—</p></div>
+                    </div>
+                </section>
+
+                <section class="rounded-2xl border border-slate-300 bg-slate-50 p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <h4 class="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Signature</h4>
+                    <div class="h-28 overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-700/40">
+                        <img id="archiveViewSignature" src="" alt="Employee signature" class="h-full w-full object-fill" />
+                        <p id="archiveViewSignatureEmpty" class="hidden h-full grid place-items-center text-center text-sm text-slate-500 dark:text-slate-400">No signature uploaded.</p>
+                    </div>
+                </section>
+            </div>
+        </aside>
     </div>
 
     <!-- Restore modal: employee info + optional reason -->
     <div id="restoreModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeRestoreModal()"></div>
-            <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div class="relative max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                 <form id="restoreForm" method="post" asp-page-handler="Restore" asp-antiforgery="true" data-turbo="false">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" id="restoreEmpId" value="" />
-                    <div class="sticky top-0 z-10 border-b border-slate-100 bg-subgreen-50/80 px-6 py-4 dark:border-slate-800 dark:bg-subgreen-900/20">
+                    <div class="sticky top-0 z-10 rounded-t-2xl border-b border-slate-100 bg-subgreen-50/80 px-6 py-4 dark:border-slate-800 dark:bg-subgreen-900/20">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Restore employee</h3>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">This will move the employee back to the active directory. A reason for restore is required.</p>
                     </div>
@@ -274,6 +323,36 @@
             var statTotal = document.getElementById('archiveStatTotal');
             var currentPage = 1;
 
+            function parseDateOnly(value) {
+                if (!value || typeof value !== 'string') return null;
+                var parts = value.split('-');
+                if (parts.length !== 3) return null;
+                var year = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var day = parseInt(parts[2], 10);
+                if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+                var date = new Date(year, month, day);
+                if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+                return date;
+            }
+
+            function formatBirthDateLabel(value) {
+                var date = parseDateOnly(value);
+                if (!date) return '—';
+                return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            function calculateAge(value) {
+                var date = parseDateOnly(value);
+                if (!date) return null;
+                var today = new Date();
+                var age = today.getFullYear() - date.getFullYear();
+                if (today.getMonth() < date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() < date.getDate())) {
+                    age--;
+                }
+                return age;
+            }
+
             function getVisible() {
                 var q = (search && search.value || '').toLowerCase();
                 var reason = (filterReason && filterReason.value || '').toLowerCase();
@@ -304,14 +383,15 @@
                 var totalEl = document.getElementById('archivePaginationTotal');
                 if (showEl) showEl.textContent = showing;
                 if (totalEl) totalEl.textContent = visible.length;
-                if (statTotal) statTotal.textContent = visible.length;
                 var container = document.getElementById('archivePaginationNumbers');
                 if (container) {
                     container.innerHTML = '';
                     for (var i = 1; i <= totalPages; i++) {
                         var btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'h-8 min-w-[32px] rounded-lg border px-2 text-xs font-semibold ' + (i === currentPage ? 'border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-800 dark:bg-subgreen-900/20 dark:text-subgreen-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800');
+                        btn.className = (i === currentPage)
+                            ? 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-subgreen-200 bg-subgreen-50 text-subgreen-700 dark:border-subgreen-900/40 dark:bg-subgreen-900/20 dark:text-subgreen-300'
+                            : 'h-9 min-w-[40px] rounded-md border px-3 text-sm font-semibold border-slate-300 bg-slate-50 text-gray-600 hover:bg-slate-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800';
                         btn.textContent = i;
                         (function (p) { btn.addEventListener('click', function () { currentPage = p; render(); }); })(i);
                         container.appendChild(btn);
@@ -324,30 +404,177 @@
                 }
             }
 
+            var archiveViewCloseTimer = null;
+
+            function setView(elId, val) {
+                var el = document.getElementById(elId);
+                if (el) el.textContent = (val != null && val !== '') ? val : '—';
+            }
+
+            function formatDate(value) {
+                if (!value) return '—';
+                var d = new Date(value);
+                if (isNaN(d.getTime())) return '—';
+                return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            function formatMoney(value) {
+                if (value == null || value === '') return '—';
+                var n = Number(value);
+                if (isNaN(n)) return String(value);
+                return n.toLocaleString('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            function setArchiveAvatar(name, avatarUrl) {
+                var avatar = document.getElementById('archiveViewAvatar');
+                var fallback = document.getElementById('archiveViewAvatarFallback');
+                if (!avatar || !fallback) return;
+                var parts = (name || '').trim().split(/\s+/).filter(Boolean);
+                var initials = parts.length ? ((parts[0][0] || '') + (parts.length > 1 ? (parts[parts.length - 1][0] || '') : '')).toUpperCase() : '—';
+                fallback.textContent = initials || '—';
+                if (avatarUrl) {
+                    avatar.src = avatarUrl;
+                    avatar.classList.remove('hidden');
+                    fallback.classList.add('hidden');
+                    avatar.onerror = function () { avatar.classList.add('hidden'); fallback.classList.remove('hidden'); };
+                } else {
+                    avatar.src = '';
+                    avatar.classList.add('hidden');
+                    fallback.classList.remove('hidden');
+                }
+            }
+
+            function setArchiveSignature(signatureUrl) {
+                var sig = document.getElementById('archiveViewSignature');
+                var empty = document.getElementById('archiveViewSignatureEmpty');
+                if (!sig || !empty) return;
+                if (signatureUrl) {
+                    sig.src = signatureUrl;
+                    sig.classList.remove('hidden');
+                    empty.classList.add('hidden');
+                    sig.onerror = function () { sig.classList.add('hidden'); empty.classList.remove('hidden'); };
+                } else {
+                    sig.src = '';
+                    sig.classList.add('hidden');
+                    empty.classList.remove('hidden');
+                }
+            }
+
+            function setArchiveViewFromData(data) {
+                var fullName = [data.FirstName || data.firstName || '', data.MiddleName || data.middleName || '', data.LastName || data.lastName || ''].filter(Boolean).join(' ') || data.name || '—';
+                var birthIso = (data.BirthDate || data.birthDate || '').toString().substring(0, 10);
+                var ageYears = calculateAge(birthIso);
+
+                setView('archiveViewName', fullName);
+                setView('archiveViewEmpNumber', data.EmpNumber || data.empNumber);
+                setView('archiveViewEmail', data.Email || data.email);
+                setView('archiveViewBirthDate', formatBirthDateLabel(birthIso));
+                setView('archiveViewBirthDateAge', 'Age: ' + (ageYears != null ? ageYears : '—'));
+                setView('archiveViewGender', data.Gender || data.gender);
+                setView('archiveViewDateHired', formatDate(data.DateHired || data.dateHired));
+                setView('archiveViewRole', data.Role || data.role);
+                setView('archiveViewDepartment', data.DepartmentName || data.departmentName);
+                setView('archiveViewWorkState', data.WorkState || data.workState || 'Inactive');
+                setView('archiveViewEmploymentType', data.EmploymentType || data.employmentType);
+                setView('archiveViewBaseSalary', formatMoney(data.BaseSalary != null ? data.BaseSalary : data.baseSalary));
+                setView('archiveViewReason', data.ArchivedReason || data.archivedReason || data.reason);
+                setView('archiveViewArchivedDate', formatDate(data.ArchivedAt || data.archivedAt || data.archivedDate));
+                setView('archiveViewAddressLine1', data.AddressLine1 || data.addressLine1);
+                setView('archiveViewAddressLine2', data.AddressLine2 || data.addressLine2);
+                setView('archiveViewCity', data.City || data.city);
+                setView('archiveViewStateProvince', data.StateProvince || data.stateProvince);
+                setView('archiveViewPostalCode', data.PostalCode || data.postalCode);
+                setView('archiveViewCountry', data.Country || data.country);
+                setView('archiveViewPhone', data.Phone || data.phone);
+                setView('archiveViewEcName', data.EmergencyContactName || data.emergencyContactName);
+                setView('archiveViewEcPhone', data.EmergencyContactPhone || data.emergencyContactPhone);
+                setView('archiveViewEcRelation', data.EmergencyContactRelation || data.emergencyContactRelation);
+
+                setArchiveAvatar(fullName, data.AvatarUrl || data.avatarUrl || data.IdPictureUrl || data.idPictureUrl || '');
+                setArchiveSignature(data.SignatureUrl || data.signatureUrl || '');
+            }
+
             function openArchiveViewModal(btn) {
                 var row = btn.closest('tr');
                 if (!row) return;
-                document.getElementById('archiveViewName').textContent = row.getAttribute('data-name') || '—';
-                document.getElementById('archiveViewEmpNumber').textContent = row.getAttribute('data-emp-number') || '—';
-                document.getElementById('archiveViewEmail').textContent = row.getAttribute('data-email') || '—';
-                document.getElementById('archiveViewAge').textContent = row.getAttribute('data-age') || '—';
-                document.getElementById('archiveViewGender').textContent = row.getAttribute('data-gender') || '—';
-                document.getElementById('archiveViewDateHired').textContent = row.getAttribute('data-date-hired') || '—';
-                document.getElementById('archiveViewRole').textContent = row.getAttribute('data-role') || '—';
-                document.getElementById('archiveViewDepartment').textContent = row.getAttribute('data-department') || '—';
-                document.getElementById('archiveViewReason').textContent = row.getAttribute('data-reason') || '—';
-                document.getElementById('archiveViewArchivedDate').textContent = row.getAttribute('data-archived-date') || '—';
-                document.getElementById('archiveViewAddress').textContent = row.getAttribute('data-address') || '—';
-                document.getElementById('archiveViewPhone').textContent = row.getAttribute('data-phone') || '—';
-                document.getElementById('archiveViewEcName').textContent = row.getAttribute('data-ec-name') || '—';
-                document.getElementById('archiveViewEcPhone').textContent = row.getAttribute('data-ec-phone') || '—';
-                document.getElementById('archiveViewEcRelation').textContent = row.getAttribute('data-ec-relation') || '—';
-                document.getElementById('archiveViewModal').classList.remove('hidden');
+                var empId = row.getAttribute('data-emp-id');
+                if (!empId) return;
+
+                var root = document.getElementById('archiveViewDrawerRoot');
+                var panel = document.getElementById('archiveViewDrawerPanel');
+                var backdrop = document.getElementById('archiveViewDrawerBackdrop');
+                if (!root || !panel || !backdrop) return;
+
+                if (archiveViewCloseTimer) {
+                    clearTimeout(archiveViewCloseTimer);
+                    archiveViewCloseTimer = null;
+                }
+
+                root.classList.remove('hidden');
+                root.setAttribute('aria-hidden', 'false');
                 document.body.classList.add('overflow-hidden');
+                requestAnimationFrame(function () {
+                    panel.classList.remove('translate-x-full');
+                    backdrop.classList.remove('opacity-0');
+                });
+
+                setView('archiveViewName', row.getAttribute('data-name'));
+                setView('archiveViewEmpNumber', row.getAttribute('data-emp-number'));
+                setArchiveAvatar(row.getAttribute('data-name') || '', row.getAttribute('data-avatar-url') || '');
+                setArchiveSignature(row.getAttribute('data-signature-url') || '');
+
+                fetch('/App/Archive/Archive?handler=Employee&id=' + encodeURIComponent(empId), { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (e) {
+                        if (e && Object.keys(e).length) {
+                            setArchiveViewFromData(e);
+                            return;
+                        }
+                        setArchiveViewFromData({
+                            name: row.getAttribute('data-name') || '—',
+                            empNumber: row.getAttribute('data-emp-number') || '—',
+                            email: row.getAttribute('data-email') || '—',
+                            role: row.getAttribute('data-role') || '—',
+                            departmentName: row.getAttribute('data-department') || '—',
+                            archivedReason: row.getAttribute('data-reason') || '—',
+                            archivedDate: row.getAttribute('data-archived-date') || '—',
+                            workState: row.getAttribute('data-work-state') || 'Inactive',
+                            employmentType: row.getAttribute('data-employment-type') || '—',
+                            baseSalary: row.getAttribute('data-base-salary') || '',
+                            birthDate: row.getAttribute('data-birthdate') || '',
+                            gender: row.getAttribute('data-gender') || '—',
+                            dateHired: row.getAttribute('data-date-hired') || '',
+                            phone: row.getAttribute('data-phone') || '—',
+                            addressLine1: row.getAttribute('data-address-line1') || '',
+                            addressLine2: row.getAttribute('data-address-line2') || '',
+                            city: row.getAttribute('data-city') || '',
+                            stateProvince: row.getAttribute('data-state-province') || '',
+                            postalCode: row.getAttribute('data-postal-code') || '',
+                            country: row.getAttribute('data-country') || '',
+                            emergencyContactName: row.getAttribute('data-ec-name') || '—',
+                            emergencyContactPhone: row.getAttribute('data-ec-phone') || '—',
+                            emergencyContactRelation: row.getAttribute('data-ec-relation') || '—',
+                            avatarUrl: row.getAttribute('data-avatar-url') || '',
+                            signatureUrl: row.getAttribute('data-signature-url') || ''
+                        });
+                    })
+                    .catch(function () {
+                        setView('archiveViewName', 'Failed to load.');
+                    });
             }
+
             function closeArchiveViewModal() {
-                document.getElementById('archiveViewModal').classList.add('hidden');
+                var root = document.getElementById('archiveViewDrawerRoot');
+                var panel = document.getElementById('archiveViewDrawerPanel');
+                var backdrop = document.getElementById('archiveViewDrawerBackdrop');
+                if (!root || !panel || !backdrop) return;
+                panel.classList.add('translate-x-full');
+                backdrop.classList.add('opacity-0');
+                root.setAttribute('aria-hidden', 'true');
                 document.body.classList.remove('overflow-hidden');
+                archiveViewCloseTimer = setTimeout(function () {
+                    root.classList.add('hidden');
+                }, 300);
             }
             function openRestoreModal(btn) {
                 var row = btn.closest('tr');

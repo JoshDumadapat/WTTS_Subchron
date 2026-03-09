@@ -203,6 +203,155 @@
                 </div>
             </section>
 
+            <!-- SECTION 4: CLOCK-IN WINDOW -->
+            <section>
+                <div class="mb-2">
+                    <label class="mb-1 block text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-400">Clock-in Window</label>
+                    <p class="mb-4 text-xs text-gray-400 dark:text-gray-500">This controls when a log is considered valid.</p>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+
+                    <div class="flex items-start justify-between px-5 py-4">
+                        <div class="flex-1 pr-8">
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Earliest Clock-In Before Shift</span>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">How early an employee can clock in before their shift starts.</p>
+                            <div class="mt-3">
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="earliestClockIn" min="0" step="1"
+                                           class="w-24 rounded-lg border-0 px-3 py-1.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600"
+                                           placeholder="60">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">mins before shift</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start justify-between px-5 py-4 border-t border-slate-300 dark:border-gray-700">
+                        <div class="flex-1 pr-8">
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Latest Clock-In Before Marking Late</span>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Grace period after shift start before being marked as late.</p>
+                            <div class="mt-3">
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="latestClockIn" min="0" step="1"
+                                           class="w-24 rounded-lg border-0 px-3 py-1.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600"
+                                           placeholder="15">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">mins after shift start</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 5: MISSING PUNCH HANDLING -->
+            <section>
+                <div class="mb-2">
+                    <label class="mb-1 block text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-400">Missing Punch Handling</label>
+                    <p class="mb-4 text-xs text-gray-400 dark:text-gray-500">This handles incomplete logs.</p>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+
+                    <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Allow Incomplete Logs</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="allowIncompleteLogsToggle" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-300 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-400 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                        dark:bg-gray-600 dark:border-gray-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Auto-Flag Missing Clock-In/Clock-Out</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="autoFlagMissingToggle" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-300 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-400 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                        dark:bg-gray-600 dark:border-gray-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-start justify-between px-5 py-4">
+                        <div class="flex-1 pr-8">
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Default Action for Incomplete Log</span>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">What to do with logs that are incomplete.</p>
+                            <div class="mt-3">
+                                <select id="defaultActionIncompleteLog"
+                                        class="block w-full rounded-lg border-0 bg-white py-2.5 pl-4 pr-10 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-700">
+                                    <option value="IGNORE">Ignore until corrected</option>
+                                    <option value="EXCEPTION">Mark as exception</option>
+                                    <option value="CORRECTION">Auto-create correction requirement</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 6: ATTENDANCE CLASSIFICATION BASIS -->
+            <section>
+                <div class="mb-2">
+                    <label class="mb-1 block text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-400">Attendance Classification Basis</label>
+                    <p class="mb-4 text-xs text-gray-400 dark:text-gray-500">This tells the system how to classify logs after capture.</p>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+
+                    <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Use Grace Period for Late</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="useGracePeriodToggle" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-300 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-400 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                        dark:bg-gray-600 dark:border-gray-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between border-b border-slate-300 px-5 py-4 dark:border-gray-700">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Mark Undertime Based on Scheduled End</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="markUndertimeToggle" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-300 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-400 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                        dark:bg-gray-600 dark:border-gray-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between px-5 py-4">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-800 dark:text-white">Auto-Absent If No Valid Log for Shift</span>
+                        </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" id="autoAbsentToggle" class="peer sr-only">
+                            <div class="h-6 w-11 rounded-full bg-gray-300 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-400 after:bg-white after:transition-all after:content-['']
+                                        peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white
+                                        peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500/30
+                                        dark:bg-gray-600 dark:border-gray-500"></div>
+                        </label>
+                    </div>
+
+                </div>
+            </section>
+
+
+
+
             <!-- DEFAULT SHIFT TEMPLATE -->
             <section class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="px-5 py-4">

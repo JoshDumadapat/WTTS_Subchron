@@ -6,6 +6,15 @@
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
     var e = Model.Employee;
     var dateHired = e?.DateHired?.ToString("yyyy-MM-dd") ?? "";
+    var birthDate = e?.BirthDate?.ToString("yyyy-MM-dd") ?? "";
+    int? birthDateAge = null;
+    if (e?.BirthDate.HasValue == true)
+    {
+        var today = DateTime.Today;
+        var ageYears = today.Year - e.BirthDate.Value.Year;
+        if (e.BirthDate.Value.Date > today.AddYears(-ageYears)) ageYears--;
+        birthDateAge = ageYears;
+    }
     var hasLoginAccount = e?.UserID.HasValue == true;
     var loginEmail = e?.Email ?? string.Empty;
     string Option(string value, string text, string? current)
@@ -57,19 +66,32 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label for="editAge" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
-                    <input type="number" name="age" id="editAge" value="@e.Age" class="input-field h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. 28" min="1" max="120" />
-                </div>
-                <div>
-                    <label for="editGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
-                    <select name="gender" id="editGender" class="h-11 w-full rounded-xl border border-slate-200 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
-                        @Html.Raw(Option("", "— Select —", null))
-                        @Html.Raw(Option("Male", "Male", e.Gender))
-                        @Html.Raw(Option("Female", "Female", e.Gender))
-                        @Html.Raw(Option("Non-binary", "Non-binary", e.Gender))
-                        @Html.Raw(Option("Prefer not to say", "Prefer not to say", e.Gender))
-                    </select>
+                <div class="md:col-span-2">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label for="editBirthDate" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Birthdate</label>
+                            <div class="relative max-w-sm">
+                                <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                                    <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
+                                </div>
+                                <input type="date" name="birthDate" id="editBirthDate" value="@birthDate" class="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:border-subgreen-500 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="editBirthDateAgeDisplay" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                            <input type="text" id="editBirthDateAgeDisplay" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300" value="@(birthDateAge.HasValue ? $"{birthDateAge} yrs" : "—")" readonly tabindex="-1" placeholder="—" />
+                        </div>
+                        <div>
+                            <label for="editGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                            <select name="gender" id="editGender" class="block w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                                @Html.Raw(Option("", "Gender", null))
+                                @Html.Raw(Option("Male", "Male", e.Gender))
+                                @Html.Raw(Option("Female", "Female", e.Gender))
+                                @Html.Raw(Option("Non-binary", "Non-binary", e.Gender))
+                                @Html.Raw(Option("Prefer not to say", "Prefer not to say", e.Gender))
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -342,5 +364,56 @@
         document.addEventListener('click', function (e) {
             if (!e.target.closest('.address-autocomplete')) clearSuggestions();
         });
+    })();
+</script>
+<script>
+    (function () {
+        var birthInput = document.getElementById('editBirthDate');
+        var ageDisplay = document.getElementById('editBirthDateAgeDisplay');
+        if (!birthInput || !ageDisplay) return;
+
+        function parseDateOnly(value) {
+            if (!value || typeof value !== 'string') return null;
+            var parts;
+            if (value.includes('/')) {
+                parts = value.split('/');
+                if (parts.length !== 3) return null;
+                var month = parseInt(parts[0], 10) - 1;
+                var day = parseInt(parts[1], 10);
+                var year = parseInt(parts[2], 10);
+                if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+                var date = new Date(year, month, day);
+                if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+                return date;
+            } else {
+                parts = value.split('-');
+                if (parts.length !== 3) return null;
+                var year = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var day = parseInt(parts[2], 10);
+                if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+                var date = new Date(year, month, day);
+                if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+                return date;
+            }
+        }
+
+        function updateAge() {
+            var parsed = parseDateOnly(birthInput.value);
+            if (!parsed) {
+                ageDisplay.value = '—';
+                return;
+            }
+            var today = new Date();
+            var age = today.getFullYear() - parsed.getFullYear();
+            if (today.getMonth() < parsed.getMonth() || (today.getMonth() === parsed.getMonth() && today.getDate() < parsed.getDate())) {
+                age--;
+            }
+            ageDisplay.value = (isNaN(age) ? '—' : age + ' yrs');
+        }
+
+        birthInput.addEventListener('input', updateAge);
+        birthInput.addEventListener('change', updateAge);
+        updateAge();
     })();
 </script>
