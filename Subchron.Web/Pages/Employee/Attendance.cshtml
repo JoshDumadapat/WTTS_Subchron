@@ -7,88 +7,113 @@
     var biometricsEnabled = true;
 }
 
-<div class="mx-auto w-full max-w-2xl space-y-6">
+<div class="mx-auto w-full max-w-3xl space-y-4 px-3 sm:px-4 sm:space-y-6">
     @if (biometricsEnabled)
     {
         <!-- Biometric Clock In/Out Section -->
-        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 class="mb-2 text-lg font-semibold text-slate-900 dark:text-white">Biometric Clock In/Out</h2>
-            <p class="mb-6 text-sm text-slate-600 dark:text-slate-400">Place your finger on the biometric scanner and verify to record your time.</p>
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-1 text-base sm:mb-2 sm:text-lg font-semibold text-slate-900 dark:text-white">Biometric Clock In/Out</h2>
+            <p class="mb-4 sm:mb-6 text-xs sm:text-sm text-slate-600 dark:text-slate-400">Place your finger on the biometric scanner and verify to record your time.</p>
             
             <!-- Status Display -->
-            <div id="statusDisplay" class="mb-6 hidden rounded-lg border-2 border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
-                <div class="flex items-center gap-3">
-                    <div id="statusIcon" class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-200 dark:bg-blue-900/50">
-                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div id="statusDisplay" class="mb-4 hidden rounded-lg border-2 border-blue-200 bg-blue-50 p-3 sm:p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div id="statusIcon" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-200 dark:bg-blue-900/50 sm:h-12 sm:w-12">
+                        <svg class="h-5 w-5 text-blue-600 dark:text-blue-400 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <div>
-                        <p id="statusText" class="text-sm font-semibold text-blue-900 dark:text-blue-100">Initializing scanner...</p>
+                    <div class="min-w-0 flex-1">
+                        <p id="statusText" class="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-100">Initializing scanner...</p>
                         <p id="statusSubtext" class="text-xs text-blue-700 dark:text-blue-300"></p>
                     </div>
                 </div>
             </div>
 
             <!-- Biometric Sensor Simulation -->
-            <div class="mb-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-slate-600 dark:bg-slate-900/50">
-                <div id="sensorDisplay" class="space-y-4">
-                    <div id="fingerprint" class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-400 bg-white dark:bg-slate-800">
-                        <svg class="h-10 w-10 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+            <div class="mb-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center dark:border-slate-600 dark:bg-slate-900/50 sm:mb-6 sm:p-8">
+                <div id="sensorDisplay" class="space-y-3 sm:space-y-4">
+                    <!-- Enhanced Biometric Fingerprint Scanner -->
+                    <div class="mx-auto flex h-24 w-24 flex-col items-center justify-center rounded-3xl border-4 border-slate-400 bg-gradient-to-br from-slate-100 to-slate-50 shadow-lg transition-all dark:border-slate-500 dark:from-slate-700 dark:to-slate-800 sm:h-32 sm:w-32">
+                        <!-- Fingerprint SVG -->
+                        <svg class="h-12 w-12 text-slate-500 dark:text-slate-400 sm:h-16 sm:w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <!-- Outer ridge -->
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8z" fill="currentColor" opacity="0.3"/>
+                            <!-- Fingerprint ridges -->
+                            <path d="M12 5c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7m0 2c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5"/>
+                            <path d="M12 6c-1 0-1.73.58-2 1.4M12 18c1 0 1.73-.58 2-1.4"/>
+                            <path d="M8 12c-.58-.3-1-.9-1-1.6m0 3.2c.58.3 1 .9 1 1.6M16 12c.58-.3 1-.9 1-1.6m0 3.2c-.58.3-1 .9-1 1.6"/>
                         </svg>
+                        <p class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-400 sm:mt-2 sm:text-sm">Scanner Ready</p>
                     </div>
-                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Place your finger on sensor</p>
+                    
+                    <p class="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">Place your finger on sensor</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Waiting for biometric input...</p>
                 </div>
-                <div id="scanningAnimation" class="hidden space-y-4">
-                    <div class="mx-auto space-y-2">
-                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-60"></div>
+
+                <!-- Scanning Animation -->
+                <div id="scanningAnimation" class="hidden space-y-3 sm:space-y-4">
+                    <!-- Enhanced Scanning Fingerprint -->
+                    <div class="mx-auto flex h-24 w-24 flex-col items-center justify-center rounded-3xl border-4 border-blue-400 bg-gradient-to-br from-blue-100 to-blue-50 shadow-lg transition-all dark:border-blue-500 dark:from-blue-900/40 dark:to-blue-900/20 sm:h-32 sm:w-32">
+                        <svg class="h-12 w-12 animate-pulse text-blue-500 dark:text-blue-400 sm:h-16 sm:w-16" viewBox="0 0 24 24" fill="currentColor">
+                            <!-- Scanning animation fingerprint -->
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8z" opacity="0.3"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6m0 2c2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4 1.79-4 4-4"/>
+                        </svg>
+                        <p class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400 sm:mt-2 sm:text-sm">Scanning...</p>
                     </div>
-                    <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Scanning fingerprint...</p>
+
+                    <!-- Scanning bars -->
+                    <div class="mx-auto space-y-1 sm:space-y-2">
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-500 to-transparent sm:w-20"></div>
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-60 sm:w-20"></div>
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-300 to-transparent opacity-30 sm:w-20"></div>
+                    </div>
+                    <p class="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">Scanning fingerprint...</p>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="space-y-3">
-                <button type="button" id="btnTimeIn" class="w-full rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-4 text-lg font-bold text-emerald-800 transition-all hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 dark:hover:bg-emerald-900/50">
+            <!-- Action Buttons - Stack on mobile, side by side on larger screens -->
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+                <button type="button" id="btnTimeIn" class="w-full rounded-lg border-2 border-emerald-200 bg-emerald-50 px-3 py-3 text-base font-bold text-emerald-800 transition-all hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 dark:hover:bg-emerald-900/50 sm:rounded-xl sm:px-4 sm:py-4 sm:text-lg">
                     <div class="flex items-center justify-center gap-2">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <!-- Time In Icon -->
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v5l4.25 2.5.75-1.23-4.5-2.67z"/>
                         </svg>
-                        Time In
+                        <span>Time In</span>
                     </div>
                 </button>
-                <button type="button" id="btnTimeOut" class="w-full rounded-xl border-2 border-orange-200 bg-orange-50 px-4 py-4 text-lg font-bold text-orange-800 transition-all hover:border-orange-400 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-200 dark:hover:bg-orange-900/50">
+                <button type="button" id="btnTimeOut" class="w-full rounded-lg border-2 border-orange-200 bg-orange-50 px-3 py-3 text-base font-bold text-orange-800 transition-all hover:border-orange-400 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-200 dark:hover:bg-orange-900/50 sm:rounded-xl sm:px-4 sm:py-4 sm:text-lg">
                     <div class="flex items-center justify-center gap-2">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        <!-- Time Out Icon -->
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
                         </svg>
-                        Time Out
+                        <span>Time Out</span>
                     </div>
                 </button>
             </div>
 
             <!-- Success Message -->
-            <p id="attendanceMessage" class="mt-4 hidden rounded-xl bg-emerald-100 p-3 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"></p>
+            <p id="attendanceMessage" class="mt-3 hidden rounded-lg bg-emerald-100 p-2 text-xs font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 sm:mt-4 sm:p-3 sm:text-sm"></p>
         </section>
 
         <!-- Today's Timeline -->
-        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Today's Timeline</h2>
-            <div id="timelineContainer" class="space-y-4">
-                <div class="flex gap-4">
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-3 text-base sm:mb-4 sm:text-lg font-semibold text-slate-900 dark:text-white">Today's Timeline</h2>
+            <div id="timelineContainer" class="space-y-3 sm:space-y-4">
+                <div class="flex gap-3 sm:gap-4">
                     <div class="flex flex-col items-center">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-900/50">
-                            <svg class="h-5 w-5 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-900/50 sm:h-10 sm:w-10">
+                            <svg class="h-4 w-4 text-slate-400 dark:text-slate-500 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
                             </svg>
                         </div>
-                        <div class="mt-2 h-8 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+                        <div class="mt-2 h-8 w-0.5 bg-slate-200 dark:bg-slate-700 sm:h-12"></div>
                     </div>
-                    <div class="pb-4">
-                        <p class="text-sm font-medium text-slate-900 dark:text-white">No clock in yet</p>
+                    <div class="pb-2 sm:pb-4">
+                        <p class="text-xs sm:text-sm font-medium text-slate-900 dark:text-white">No clock in yet</p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Waiting for your first biometric scan</p>
                     </div>
                 </div>
@@ -97,18 +122,18 @@
     }
     else
     {
-        <div class="rounded-2xl border border-slate-200 bg-amber-50/50 p-6 dark:border-slate-700 dark:bg-amber-900/20">
-            <div class="flex items-start gap-4">
-                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-200 dark:bg-amber-900/50">
-                    <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="rounded-lg border border-slate-200 bg-amber-50/50 p-4 dark:border-slate-700 dark:bg-amber-900/20 sm:rounded-2xl sm:p-6">
+            <div class="flex gap-3 sm:gap-4">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-amber-200 dark:bg-amber-900/50 sm:h-12 sm:w-12">
+                    <svg class="h-5 w-5 text-amber-600 dark:text-amber-400 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01" />
                     </svg>
                 </div>
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">Biometric attendance not enabled</p>
-                    <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Your organization hasn't enabled biometric attendance yet. Use your QR code at a kiosk to record time instead.</p>
-                    <a href="/Employee/MyQr" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs sm:text-sm font-semibold text-amber-800 dark:text-amber-200">Biometric attendance not enabled</p>
+                    <p class="mt-1 text-xs sm:text-sm text-amber-700 dark:text-amber-300">Your organization hasn't enabled biometric attendance yet. Use your QR code at a kiosk to record time instead.</p>
+                    <a href="/Employee/MyQr" class="mt-2 inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:mt-3 sm:px-4 sm:py-2 sm:text-sm">
+                        <svg class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Show My QR Code
