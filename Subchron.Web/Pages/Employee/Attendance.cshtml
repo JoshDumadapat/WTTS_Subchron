@@ -7,28 +7,114 @@
     var biometricsEnabled = false;
 }
 
-<div class="mx-auto max-w-md">
+<div class="mx-auto w-full max-w-2xl space-y-6">
     @if (biometricsEnabled)
     {
-        <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Tap below and verify with your device biometrics to record time.</p>
-        <div class="space-y-4">
-            <button type="button" id="btnTimeIn" class="w-full rounded-2xl border-2 border-subgreen-200 bg-subgreen-50 py-6 text-lg font-bold text-subgreen-800 transition-all hover:border-subgreen-400 hover:bg-subgreen-100 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-200 dark:hover:bg-subgreen-900/50">
-                Time In
-            </button>
-            <button type="button" id="btnTimeOut" class="w-full rounded-2xl border-2 border-amber-200 bg-amber-50 py-6 text-lg font-bold text-amber-800 transition-all hover:border-amber-400 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200 dark:hover:bg-amber-900/50">
-                Time Out
-            </button>
-        </div>
-        <p id="attendanceMessage" class="mt-4 hidden rounded-xl bg-subgreen-100 p-3 text-sm text-subgreen-800 dark:bg-subgreen-900/40 dark:text-subgreen-200"></p>
+        <!-- Biometric Clock In/Out Section -->
+        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-2 text-lg font-semibold text-slate-900 dark:text-white">Biometric Clock In/Out</h2>
+            <p class="mb-6 text-sm text-slate-600 dark:text-slate-400">Place your finger on the biometric scanner and verify to record your time.</p>
+            
+            <!-- Status Display -->
+            <div id="statusDisplay" class="mb-6 hidden rounded-lg border-2 border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
+                <div class="flex items-center gap-3">
+                    <div id="statusIcon" class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-200 dark:bg-blue-900/50">
+                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p id="statusText" class="text-sm font-semibold text-blue-900 dark:text-blue-100">Initializing scanner...</p>
+                        <p id="statusSubtext" class="text-xs text-blue-700 dark:text-blue-300"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biometric Sensor Simulation -->
+            <div class="mb-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-slate-600 dark:bg-slate-900/50">
+                <div id="sensorDisplay" class="space-y-4">
+                    <div id="fingerprint" class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-2 border-slate-400 bg-white dark:bg-slate-800">
+                        <svg class="h-10 w-10 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Place your finger on sensor</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Waiting for biometric input...</p>
+                </div>
+                <div id="scanningAnimation" class="hidden space-y-4">
+                    <div class="mx-auto space-y-2">
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                        <div class="h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-60"></div>
+                    </div>
+                    <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Scanning fingerprint...</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button type="button" id="btnTimeIn" class="w-full rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-4 text-lg font-bold text-emerald-800 transition-all hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 dark:hover:bg-emerald-900/50">
+                    <div class="flex items-center justify-center gap-2">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Time In
+                    </div>
+                </button>
+                <button type="button" id="btnTimeOut" class="w-full rounded-xl border-2 border-orange-200 bg-orange-50 px-4 py-4 text-lg font-bold text-orange-800 transition-all hover:border-orange-400 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-200 dark:hover:bg-orange-900/50">
+                    <div class="flex items-center justify-center gap-2">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Time Out
+                    </div>
+                </button>
+            </div>
+
+            <!-- Success Message -->
+            <p id="attendanceMessage" class="mt-4 hidden rounded-xl bg-emerald-100 p-3 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"></p>
+        </section>
+
+        <!-- Today's Timeline -->
+        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Today's Timeline</h2>
+            <div id="timelineContainer" class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-900/50">
+                            <svg class="h-5 w-5 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                            </svg>
+                        </div>
+                        <div class="mt-2 h-8 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+                    </div>
+                    <div class="pb-4">
+                        <p class="text-sm font-medium text-slate-900 dark:text-white">No clock in yet</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Waiting for your first biometric scan</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     }
     else
     {
-        <div class="rounded-2xl border border-slate-200 bg-amber-50/50 p-4 dark:border-slate-700 dark:bg-amber-900/20">
-            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">Biometrics not enabled</p>
-            <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Use your QR code at a kiosk to record time in or out.</p>
-            <a href="/Employee/MyQr" class="mt-3 inline-flex items-center gap-2 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
-                Show My QR
-            </a>
+        <div class="rounded-2xl border border-slate-200 bg-amber-50/50 p-6 dark:border-slate-700 dark:bg-amber-900/20">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-200 dark:bg-amber-900/50">
+                    <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">Biometric attendance not enabled</p>
+                    <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Your organization hasn't enabled biometric attendance yet. Use your QR code at a kiosk to record time instead.</p>
+                    <a href="/Employee/MyQr" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Show My QR Code
+                    </a>
+                </div>
+            </div>
         </div>
     }
 </div>
@@ -36,25 +122,147 @@
 @section Scripts {
 <script>
 (function () {
-    var btnIn = document.getElementById('btnTimeIn');
-    var btnOut = document.getElementById('btnTimeOut');
-    var msg = document.getElementById('attendanceMessage');
-    function showMsg(text) {
-        if (!msg) return;
-        msg.textContent = text;
-        msg.classList.remove('hidden');
+    const btnTimeIn = document.getElementById('btnTimeIn');
+    const btnTimeOut = document.getElementById('btnTimeOut');
+    const attendanceMessage = document.getElementById('attendanceMessage');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const statusText = document.getElementById('statusText');
+    const statusSubtext = document.getElementById('statusSubtext');
+    const statusIcon = document.getElementById('statusIcon');
+    const sensorDisplay = document.getElementById('sensorDisplay');
+    const scanningAnimation = document.getElementById('scanningAnimation');
+    const timelineContainer = document.getElementById('timelineContainer');
+    
+    let isProcessing = false;
+    let clockedInTime = null;
+
+    function formatTime(date) {
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
-    function doBiometricThenSubmit(action) {
-        if (typeof PublicKeyCredential !== 'undefined') {
-            alert('Biometric verification would run here. Then submit ' + action + '. (No backend.)');
-            showMsg(action + ' recorded successfully.');
-        } else {
-            alert('Simulating biometric prompt… ' + action + ' submitted. (No backend.)');
-            showMsg(action + ' recorded successfully.');
+
+    function showStatus(message, subtext, iconType = 'processing') {
+        statusDisplay.classList.remove('hidden');
+        statusText.textContent = message;
+        statusSubtext.textContent = subtext || '';
+        
+        // Update status icon
+        if (iconType === 'processing') {
+            statusIcon.className = 'flex h-12 w-12 items-center justify-center rounded-full bg-blue-200 dark:bg-blue-900/50';
+            statusIcon.innerHTML = '<svg class="h-6 w-6 animate-spin text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        } else if (iconType === 'success') {
+            statusIcon.className = 'flex h-12 w-12 items-center justify-center rounded-full bg-emerald-200 dark:bg-emerald-900/50';
+            statusIcon.innerHTML = '<svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+        } else if (iconType === 'error') {
+            statusIcon.className = 'flex h-12 w-12 items-center justify-center rounded-full bg-red-200 dark:bg-red-900/50';
+            statusIcon.innerHTML = '<svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
         }
     }
-    if (btnIn) btnIn.addEventListener('click', function () { doBiometricThenSubmit('Time In'); });
-    if (btnOut) btnOut.addEventListener('click', function () { doBiometricThenSubmit('Time Out'); });
+
+    function showMessage(text, isSuccess = true) {
+        if (!attendanceMessage) return;
+        attendanceMessage.textContent = text;
+        attendanceMessage.className = isSuccess 
+            ? 'mt-4 rounded-xl bg-emerald-100 p-3 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'
+            : 'mt-4 rounded-xl bg-red-100 p-3 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-200';
+    }
+
+    function addTimelineEntry(action, time) {
+        const timelineEntry = document.createElement('div');
+        const isClockOut = action === 'Time Out';
+        const bgColor = isClockOut ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30';
+        const textColor = isClockOut ? 'text-orange-900 dark:text-orange-100' : 'text-emerald-900 dark:text-emerald-100';
+        const borderColor = isClockOut ? 'border-orange-300 dark:border-orange-700' : 'border-emerald-300 dark:border-emerald-700';
+        const iconColor = isClockOut ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400';
+
+        timelineEntry.className = 'flex gap-4';
+        timelineEntry.innerHTML = `
+            <div class="flex flex-col items-center">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 ${borderColor} ${bgColor}">
+                    <svg class="h-5 w-5 ${iconColor}" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                    </svg>
+                </div>
+                <div class="mt-2 h-8 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            <div class="pb-4">
+                <p class="text-sm font-semibold ${textColor}">${action} - ${time}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${isClockOut ? 'Biometric verified' : 'Biometric verified'}</p>
+            </div>
+        `;
+        
+        // Replace first entry if it's the placeholder
+        if (timelineContainer.children[0].querySelector('.text-slate-400')) {
+            timelineContainer.innerHTML = '';
+        }
+        
+        timelineContainer.appendChild(timelineEntry);
+    }
+
+    async function simulateBiometricClocking(action) {
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        btnTimeIn.disabled = true;
+        btnTimeOut.disabled = true;
+
+        try {
+            // Step 1: Show initializing
+            showStatus('Initializing biometric scanner...', 'Waiting for device...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 2: Show scanning animation
+            sensorDisplay.classList.add('hidden');
+            scanningAnimation.classList.remove('hidden');
+            showStatus('Place your finger on the scanner', 'Scanning in progress...', 'processing');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Step 3: Show verification in progress
+            showStatus('Verifying fingerprint...', 'Matching with stored data...');
+            scanningAnimation.classList.add('hidden');
+            sensorDisplay.classList.remove('hidden');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Step 4: Success
+            const currentTime = new Date();
+            const formattedTime = formatTime(currentTime);
+            
+            showStatus(`${action} recorded successfully!`, `Time: ${formattedTime}`, 'success');
+            showMessage(`${action} successfully recorded at ${formattedTime}`, true);
+            
+            // Add to timeline
+            addTimelineEntry(action, formattedTime);
+            
+            if (action === 'Time In') {
+                clockedInTime = currentTime;
+            }
+
+            // Hide status after 3 seconds
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            statusDisplay.classList.add('hidden');
+
+        } catch (error) {
+            showStatus('Biometric verification failed', 'Please try again', 'error');
+            showMessage(`${action} failed. Please try again.`, false);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            statusDisplay.classList.add('hidden');
+        } finally {
+            isProcessing = false;
+            btnTimeIn.disabled = false;
+            btnTimeOut.disabled = false;
+        }
+    }
+
+    if (btnTimeIn) {
+        btnTimeIn.addEventListener('click', function () {
+            simulateBiometricClocking('Time In');
+        });
+    }
+
+    if (btnTimeOut) {
+        btnTimeOut.addEventListener('click', function () {
+            simulateBiometricClocking('Time Out');
+        });
+    }
 })();
 </script>
 }
