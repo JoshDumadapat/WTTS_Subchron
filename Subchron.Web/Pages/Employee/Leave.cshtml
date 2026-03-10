@@ -8,7 +8,7 @@
 
 <div class="mx-auto w-full max-w-6xl space-y-6">
     <!-- Header -->
-    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Leave</h1>
@@ -32,7 +32,7 @@
 
     <!-- Balance -->
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Service Incentive Leave</p>
             <div class="mt-2 flex items-end gap-2">
                 <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">3</h2>
@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Request</p>
             <div class="mt-2 flex items-end gap-2">
                 <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">1</h2>
@@ -50,8 +50,8 @@
     </section>
 
     <!-- Tabs -->
-    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="border-b border-slate-200 px-4 dark:border-slate-800 sm:px-6">
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="border-b border-slate-200 px-4 dark:border-slate-700 sm:px-6">
             <div class="flex gap-6 overflow-x-auto">
                 <button type="button"
                         id="tabNewLeave"
@@ -182,11 +182,11 @@
             </div>
 
             <!-- Desktop -->
-            <div class="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 md:block">
+            <div class="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 md:block">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-left text-sm">
                         <thead>
-                            <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60">
+                            <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50">
                                 <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Type</th>
                                 <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Dates</th>
                                 <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Days</th>
@@ -194,7 +194,7 @@
                                 <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="leaveTableBody" class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                        <tbody id="leaveTableBody" class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-800">
                             <tr class="leave-row"
                                 data-status="Pending"
                                 data-type="Service Incentive Leave"
@@ -238,7 +238,7 @@
 
             <!-- Mobile -->
             <div id="leaveMobileCards" class="space-y-3 md:hidden">
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Pending"
                          data-type="Service Incentive Leave"
                          data-year="2025">
@@ -252,7 +252,7 @@
                     <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">5 day(s) • Submitted Feb 18, 2025</p>
                 </article>
 
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Approved"
                          data-type="Sick leave"
                          data-year="2025">
@@ -266,7 +266,7 @@
                     <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">1 day • Submitted Feb 11, 2025</p>
                 </article>
 
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Rejected"
                          data-type="Personal"
                          data-year="2025">
