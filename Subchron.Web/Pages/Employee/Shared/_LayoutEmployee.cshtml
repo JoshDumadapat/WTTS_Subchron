@@ -30,9 +30,34 @@
         .dark .nav-indicator { background: #22c55e; }
         .nav-item.active .nav-indicator { opacity: 1; }
         .profile-dropdown.open #profileDropdownMenu { display: block; }
+        .toggle-wrap { position: absolute; right: -17px; top: 50px; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 9999px; background: #f8fafc; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08); border: 1px solid rgba(226, 232, 240, 0.9); z-index: 25; }
+        .dark .toggle-wrap { background: #0f172a; border-color: rgba(51, 65, 85, 0.9); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
+        .toggle-btn { width: 26px; height: 26px; background: #16a34a; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0; transition: background 0.2s ease; }
+        .toggle-btn:hover { background: #15803d; }
+        .dark .toggle-btn { background: #22c55e; }
+        .dark .toggle-btn:hover { background: #16a34a; }
+        #sidebarToggle svg { transition: transform 0.25s ease; }
+        .sidebar-collapsed #sidebarToggle svg { transform: rotate(180deg); }
+        .sidebar-collapsed #sidebar { width: 82px !important; }
+        .sidebar-collapsed .sidebar-label, .sidebar-collapsed .company-name { opacity: 0; width: 0; overflow: hidden; pointer-events: none; }
+        .sidebar-collapsed .profile-header { justify-content: center; gap: 0; }
+        .sidebar-label, .company-name { white-space: nowrap; flex: 1 1 auto; min-width: 0; }
         @@media (max-width: 767px) {
             #sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px !important; transform: translateX(-110%); transition: transform 0.25s; z-index: 20; }
             .sidebar-mobile-open #sidebar { transform: translateX(0); }
+            .sidebar-collapsed #sidebar { width: 260px !important; }
+            .sidebar-collapsed .sidebar-label, .sidebar-collapsed .company-name { opacity: 1; width: auto; pointer-events: auto; }
+            .toggle-wrap { right: -17px; top: 50px; transform: translateY(-50%); }
+            .layout-header { margin: 12px !important; padding: 12px 16px !important; }
+            .layout-header h1 { font-size: 0.95rem !important; font-weight: 600; }
+            .layout-header #mobileSidebarOpen { padding: 0.375rem !important; }
+            .layout-header #mobileSidebarOpen svg { height: 1.25rem !important; width: 1.25rem !important; }
+            .layout-header #themeToggle { width: 32px !important; height: 32px !important; }
+            .layout-header #themeToggle svg { height: 1.125rem !important; width: 1.125rem !important; }
+            .layout-header #profileDropdownTrigger { padding: 0.375rem 0.5rem !important; gap: 0.375rem !important; }
+            .layout-header #profileDropdownTrigger img { height: 2rem !important; width: 2rem !important; }
+            .layout-header #profileDropdownTrigger span { font-size: 0.75rem !important; }
+            .layout-header #profileDropdownTrigger svg { height: 0.875rem !important; width: 0.875rem !important; }
         }
     </style>
 </head>
@@ -45,94 +70,136 @@
     <div id="sidebarOverlay" class="fixed inset-0 z-10 hidden bg-slate-900/40 backdrop-blur-[1px] md:hidden" aria-hidden="true"></div>
 
     <div class="flex h-screen overflow-hidden">
-        <aside id="sidebar" class="relative z-20 flex flex-col border-r border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800" style="width: 80px;">
-            <div class="flex h-[100px] items-center justify-center px-2">
-                <div class="profile-header flex items-center justify-center overflow-hidden">
-                    <div class="logo-box h-10 w-10 flex-shrink-0 overflow-hidden rounded-none bg-transparent">
+        <aside id="sidebar" class="relative z-20 flex flex-col border-r border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800" style="width: 260px;">
+            <div class="flex h-[100px] items-center px-6 relative">
+                <div class="profile-header flex items-center gap-3 overflow-hidden">
+                    <div class="logo-box h-12 w-12 flex-shrink-0 overflow-hidden rounded-none bg-transparent">
                         <img src="~/images/logo/logo.png" alt="Logo" class="block h-full w-full object-cover" />
                     </div>
+                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">Employee Portal</span>
+                </div>
+                <div class="toggle-wrap" aria-hidden="false">
+                    <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Sidebar toggle / close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             <hr class="border-slate-200 dark:border-slate-700" />
-            <nav class="mt-6 flex-1 space-y-[6px] overflow-y-auto px-3 py-4">
-                <a href="/Employee/Dashboard" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Dashboard">
+            <nav class="mt-6 flex-1 space-y-[6px] overflow-y-auto px-4 py-4">
+                <a href="/Employee/Dashboard" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Dashboard</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/MyQr" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="My QR">
+                <a href="/Employee/MyQr" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">My QR</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/Attendance" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Time In / Out">
+                <a href="/Employee/Attendance" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Time In / Out</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/Overtime" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Overtime">
+                <a href="/Employee/Overtime" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Overtime</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/Leave" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Leave">
+                <a href="/Employee/Leave" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Leave</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/MyAttendance" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Attendance & Schedule">
+                <a href="/Employee/MyAttendance" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Attendance & Schedule</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/PayHistory" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Pay History">
+                <a href="/Employee/PayHistory" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Pay History</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
-                <a href="/Employee/Settings" class="nav-item group flex items-center justify-center rounded-lg px-3 py-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-700" title="Settings">
+                <a href="/Employee/Settings" class="nav-item group flex items-center gap-3 rounded-lg px-3 py-3 transition-all">
                     <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span class="sidebar-label font-medium whitespace-nowrap">Settings</span>
                     <span class="nav-indicator" aria-hidden="true"></span>
                 </a>
             </nav>
         </aside>
 
         <main class="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
-            <header class="layout-header bg-white shadow-sm dark:bg-slate-800" style="margin: 12px; border-radius: 12px; padding: 10px 14px;">
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 min-w-0 flex-1">
-                        <button id="mobileSidebarOpen" type="button" class="flex-shrink-0 rounded-lg p-1 text-slate-600 hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-700" aria-label="Open menu">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <header class="layout-header bg-white shadow-sm dark:bg-slate-800" style="margin: 20px; border-radius: 18px; padding: 16px 24px;">
+                <div class="flex items-center justify-between min-w-0">
+                    <div class="flex items-center gap-3 min-w-0 flex-shrink">
+                        <button id="mobileSidebarOpen" type="button" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden dark:text-slate-300 dark:hover:bg-slate-700 flex-shrink-0" aria-label="Open menu">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Page</p>
-                            <h1 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">@ViewData["PageTitle"]</h1>
-                        </div>
+                        <h1 class="text-lg font-bold text-slate-900 dark:text-white truncate">@ViewData["PageTitle"]</h1>
                     </div>
-                    <div class="flex items-center gap-1 flex-shrink-0">
-                        <button id="themeToggle" type="button" class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition" style="display: flex; align-items: center; justify-content: center;">
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <button id="themeToggle" type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 flex-shrink-0" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
                             <span id="themeIcon"></span>
                         </button>
-                        <div id="profileDropdown" class="profile-dropdown relative">
-                            <button type="button" id="profileDropdownTrigger" class="flex items-center gap-1 rounded-lg px-1 py-1 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700 transition" aria-expanded="false" aria-haspopup="true">
-                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=209030&color=fff&bold=true" alt="" class="h-7 w-7 rounded-full border border-slate-200 object-cover dark:border-slate-600 flex-shrink-0" />
-                                <svg class="h-3 w-3 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        <div id="profileDropdown" class="profile-dropdown relative flex-shrink-0">
+                            <button type="button" id="profileDropdownTrigger" class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700 flex-shrink-0" aria-expanded="false" aria-haspopup="true">
+                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=209030&color=fff&bold=true" alt="" class="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-600 flex-shrink-0" />
+                                <span class="max-w-[140px] truncate text-sm font-medium hidden sm:inline">@displayName</span>
+                                <svg class="h-4 w-4 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                             </button>
-                            <div id="profileDropdownMenu" class="absolute right-0 top-full z-30 mt-1 hidden w-44 sm:w-52 rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-                                <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Employee</p>
-                                    <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">@displayName</p>
-                                </div>
-                                <a href="/Employee/Settings" class="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700 transition">
-                                    <svg class="h-4 w-4 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <div id="profileDropdownMenu" class="absolute right-0 top-full z-30 mt-2 hidden w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                                <a href="/Employee/Settings" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700">
+                                    <svg class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.370 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.350 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                     Settings
                                 </a>
                                 @if (canAccessBackoffice)
                                 {
-                                <a href="/App/Dashboard" class="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700 transition">
-                                    <svg class="h-4 w-4 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                <a href="/App/Dashboard" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700">
+                                    <svg class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                                     Back to Admin
                                 </a>
                                 }
                                 <hr class="my-1 border-slate-200 dark:border-slate-700" />
-                                <button type="button" id="logoutBtn" class="flex w-full items-center gap-2 px-4 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition">
-                                    <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                <button type="button" id="logoutBtn" class="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+                                    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                                     Logout
                                 </button>
-                            </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 z-[9999] hidden items-center justify-center">
+        <div id="logoutBackdrop"
+             class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40"
+             aria-hidden="true"></div>
+
+        <!-- Dialog -->
+        <div role="dialog" aria-modal="true" aria-labelledby="logoutTitle"
+             class="relative mx-4 w-full max-w-md rounded-xl bg-white shadow-2xl dark:bg-slate-800">
+            <div class="p-6">
+                <h3 id="logoutTitle" class="text-lg font-semibold text-slate-900 dark:text-white">
+                    Confirm logout
+                </h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    Are you sure you want to log out?
+                </p>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button id="cancelLogout" type="button"
+                            class="rounded-md bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
+                        Cancel
+                    </button>
+
+                    <button id="confirmLogout" type="button"
+                            class="rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
                         </div>
                     </div>
                 </div>
@@ -140,42 +207,10 @@
             <div class="p-6 pt-2">
                 @RenderBody()
             </div>
-         </main>
-     </div>
- 
-+    <!-- Logout Confirmation Modal -->
-+    <div id="logoutModal" class="fixed inset-0 z-[9999] hidden items-center justify-center">
-+        <div id="logoutBackdrop"
-+             class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40"
-+             aria-hidden="true"></div>
-+
-+        <!-- Dialog -->
-+        <div role="dialog" aria-modal="true" aria-labelledby="logoutTitle"
-+             class="relative mx-4 w-full max-w-md rounded-xl bg-white shadow-2xl dark:bg-slate-800">
-+            <div class="p-6">
-+                <h3 id="logoutTitle" class="text-lg font-semibold text-slate-900 dark:text-white">
-+                    Confirm logout
-+                </h3>
-+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-+                    Are you sure you want to log out?
-+                </p>
-+
-+                <div class="mt-6 flex justify-end gap-3">
-+                    <button id="cancelLogout" type="button"
-+                            class="rounded-md bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
-+                        Cancel
-+                    </button>
-+
-+                    <button id="confirmLogout" type="button"
-+                            class="rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700">
-+                        Logout
-+                    </button>
-+                </div>
-+            </div>
-+        </div>
-+    </div>
-+
-     <script src="~/js/site.js" asp-append-version="true"></script>
+        </main>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script>
         (function () {
@@ -196,10 +231,27 @@
             mobileOpen && mobileOpen.addEventListener("click", openSidebar);
             overlay && overlay.addEventListener("click", closeSidebar);
 
+            // Sidebar toggle button functionality
+            var sidebarToggle = document.getElementById("sidebarToggle");
+            sidebarToggle?.addEventListener("click", () => {
+                const isMobile = window.matchMedia("(max-width: 767px)").matches;
+                if (isMobile) return closeSidebar();
+
+                html?.classList.toggle("sidebar-collapsed");
+            });
+
             var path = window.location.pathname || "";
             document.querySelectorAll("#sidebar a.nav-item").forEach(function (a) {
                 var href = a.getAttribute("href") || "";
                 if (href && (path === href || (href.length > 1 && path.startsWith(href)))) { a.classList.add("active"); } else { a.classList.remove("active"); }
+                
+                // Close sidebar on mobile when clicking a nav link
+                a.addEventListener("click", function() {
+                    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+                    if (isMobile) {
+                        closeSidebar();
+                    }
+                });
             });
 
             var profileDropdown = document.getElementById("profileDropdown");
