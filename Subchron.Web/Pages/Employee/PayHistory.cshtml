@@ -6,7 +6,7 @@
     Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
 }
 
-<div class="mx-auto max-w-7xl space-y-6">
+<div class="w-full px-3 sm:px-4 space-y-4 sm:space-y-6">
     <!-- Summary Cards -->
     <section>
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
@@ -56,7 +56,7 @@
 
     <!-- Filters and Actions Section -->
     <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-start">
             <!-- Filters -->
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <!-- Month Filter -->
@@ -94,12 +94,6 @@
                     </select>
                 </div>
             </div>
-
-            <!-- Cash Advance Button -->
-            <button id="cashAdvanceBtn" type="button" class="flex items-center justify-center gap-2 rounded-lg bg-subgreen-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-subgreen-600 dark:bg-subgreen-500 dark:hover:bg-subgreen-600">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Cash Advance
-            </button>
         </div>
     </section>
 
@@ -292,77 +286,6 @@
     </div>
 </div>
 
-<!-- Cash Advance Modal -->
-<div id="cashAdvanceModal" class="fixed inset-0 z-[9999] hidden items-center justify-center">
-    <div id="cashAdvanceBackdrop" class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40" aria-hidden="true"></div>
-
-    <div role="dialog" aria-modal="true" aria-labelledby="cashAdvanceTitle" class="relative mx-4 w-full max-w-md rounded-xl bg-white shadow-2xl dark:bg-slate-800">
-        <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-            <div class="flex items-center justify-between">
-                <h2 id="cashAdvanceTitle" class="text-lg font-semibold text-slate-900 dark:text-white">Request Cash Advance</h2>
-                <button type="button" onclick="closeCashAdvanceModal()" class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-        </div>
-
-        <form id="cashAdvanceForm" class="space-y-4 p-6">
-            <!-- Amount Input -->
-            <div>
-                <label for="advanceAmount" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Amount to Advance</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400">₱</span>
-                    <input type="number" id="advanceAmount" name="amount" placeholder="0.00" min="0" step="0.01"
-                           class="w-full rounded-lg border border-slate-300 bg-white pl-7 pr-4 py-2 text-sm text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400" />
-                </div>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Available Balance: ₱5,000.00</p>
-            </div>
-
-            <!-- Purpose Input -->
-            <div>
-                <label for="advancePurpose" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Purpose</label>
-                <select id="advancePurpose" name="purpose"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
-                    <option value="">Select purpose</option>
-                    <option value="emergency">Emergency</option>
-                    <option value="medical">Medical</option>
-                    <option value="personal">Personal</option>
-                    <option value="loan">Loan Payment</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-
-            <!-- Reason Input -->
-            <div>
-                <label for="advanceReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Reason (Optional)</label>
-                <textarea id="advanceReason" name="reason" rows="3" placeholder="Please provide details about your request..."
-                          class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400"></textarea>
-            </div>
-
-            <!-- Deduction Schedule -->
-            <div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-700/50">
-                <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">Deduction Schedule</p>
-                <div class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                    <p>• Amount: ₱<span id="scheduleAmount">0.00</span></p>
-                    <p>• Monthly Deduction: ₱<span id="scheduleMonthly">0.00</span></p>
-                    <p>• Number of Months: <span id="scheduleMonths">3</span></p>
-                </div>
-            </div>
-        </form>
-
-        <!-- Modal Footer -->
-        <div class="border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-900/50 flex items-center justify-end gap-3">
-            <button type="button" onclick="closeCashAdvanceModal()" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
-                Cancel
-            </button>
-            <button type="button" onclick="submitCashAdvance()" class="flex items-center gap-2 rounded-lg bg-subgreen-500 px-4 py-2 text-sm font-medium text-white hover:bg-subgreen-600">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Submit Request
-            </button>
-        </div>
-    </div>
-</div>
-
 <script>
     // Payslip Modal Functions
     function openPayslipModal(period) {
@@ -396,72 +319,5 @@
         payslipModal.addEventListener('click', (e) => {
             if (e.target === payslipModal) closePayslipModal();
         });
-    }
-
-    // Cash Advance Modal Functions
-    function openCashAdvanceModal() {
-        const modal = document.getElementById('cashAdvanceModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.getElementById('advanceAmount')?.focus();
-            document.addEventListener('keydown', onCashAdvanceKeyDown);
-        }
-    }
-
-    function closeCashAdvanceModal() {
-        const modal = document.getElementById('cashAdvanceModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.getElementById('cashAdvanceForm')?.reset();
-            document.removeEventListener('keydown', onCashAdvanceKeyDown);
-        }
-    }
-
-    function onCashAdvanceKeyDown(e) {
-        if (e.key === 'Escape') closeCashAdvanceModal();
-    }
-
-    const cashAdvanceBackdrop = document.getElementById('cashAdvanceBackdrop');
-    const cashAdvanceModal = document.getElementById('cashAdvanceModal');
-    if (cashAdvanceBackdrop && cashAdvanceModal) {
-        cashAdvanceBackdrop.addEventListener('click', closeCashAdvanceModal);
-        cashAdvanceModal.addEventListener('click', (e) => {
-            if (e.target === cashAdvanceModal) closeCashAdvanceModal();
-        });
-    }
-
-    const cashAdvanceBtn = document.getElementById('cashAdvanceBtn');
-    if (cashAdvanceBtn) {
-        cashAdvanceBtn.addEventListener('click', openCashAdvanceModal);
-    }
-
-    // Cash Advance Amount Calculation
-    const advanceAmountInput = document.getElementById('advanceAmount');
-    if (advanceAmountInput) {
-        advanceAmountInput.addEventListener('input', () => {
-            const amount = parseFloat(advanceAmountInput.value) || 0;
-            const monthlyDeduction = (amount / 3).toFixed(2);
-            document.getElementById('scheduleAmount').textContent = amount.toFixed(2);
-            document.getElementById('scheduleMonthly').textContent = monthlyDeduction;
-        });
-    }
-
-    // Submit Cash Advance
-    function submitCashAdvance() {
-        const amount = document.getElementById('advanceAmount').value;
-        const purpose = document.getElementById('advancePurpose').value;
-        const reason = document.getElementById('advanceReason').value;
-
-        if (!amount || !purpose) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        // TODO: Submit to API
-        console.log('Cash Advance Request:', { amount, purpose, reason });
-        alert('Cash advance request submitted successfully!');
-        closeCashAdvanceModal();
     }
 </script>
