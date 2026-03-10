@@ -13,44 +13,46 @@
         <button type="button" id="tabMyRequests" class="emp-tab border-b-2 border-transparent px-2 py-3 text-xs font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 sm:px-0 sm:pb-2 sm:text-sm">My Requests</button>
     </div>
 
+    <!-- New Request Panel -->
     <div id="panelNewRequest" class="space-y-4 sm:space-y-6">
         <div>
             <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Submit an overtime request for manager approval.</p>
         </div>
-        <form id="otForm" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl sm:p-6">
+        <form id="otForm" class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
             <!-- Date Field -->
             <div class="mb-4 sm:mb-5">
                 <label for="otDate" class="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">Date</label>
-                <input type="date" id="otDate" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:px-4 sm:py-2.5 sm:text-base" />
+                <input type="date" id="otDate" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:py-2 sm:text-sm" />
             </div>
 
             <!-- Time Fields -->
             <div class="mb-4 grid grid-cols-2 gap-3 sm:mb-5 sm:gap-4">
                 <div>
                     <label for="otStart" class="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">Start time</label>
-                    <input type="time" id="otStart" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:px-4 sm:py-2.5 sm:text-base" />
+                    <input type="time" id="otStart" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:py-2 sm:text-sm" />
                 </div>
                 <div>
                     <label for="otEnd" class="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">End time</label>
-                    <input type="time" id="otEnd" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:px-4 sm:py-2.5 sm:text-base" />
+                    <input type="time" id="otEnd" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:py-2 sm:text-sm" />
                 </div>
             </div>
 
             <!-- Reason Field -->
             <div class="mb-4 sm:mb-5">
                 <label for="otReason" class="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">Reason</label>
-                <textarea id="otReason" rows="3" required placeholder="e.g. Project deadline, deployment support" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500 sm:px-4 sm:py-2.5 sm:text-base"></textarea>
+                <textarea id="otReason" rows="3" required placeholder="e.g. Project deadline, deployment support" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500 sm:text-sm"></textarea>
             </div>
 
             <!-- Validation Message -->
             <p id="otValidationMsg" class="mb-4 hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300 sm:mb-5 sm:px-4 sm:py-3 sm:text-sm"></p>
 
             <!-- Submit Button -->
-            <button type="submit" class="w-full rounded-lg bg-subgreen-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:rounded-xl sm:py-2.5 sm:text-base">Submit Request</button>
+            <button type="submit" class="w-full rounded-lg bg-subgreen-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:text-sm">Submit Request</button>
         </form>
     </div>
 
-    <div id="panelMyRequests" class="hidden space-y-4 sm:space-y-6">
+    <!-- My Requests Panel -->
+    <div id="panelMyRequests" class="hidden space-y-3 sm:space-y-4">
         <div>
             <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">View and track your overtime requests.</p>
         </div>
@@ -97,100 +99,27 @@
         <!-- Mobile Card View -->
         <div id="otMobileView" class="space-y-2 sm:hidden">
             <!-- Card items will be inserted here by JavaScript -->
-            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Pending">
-                <div class="space-y-2">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 22</p>
-                            <p class="text-xs font-semibold text-slate-900 dark:text-white">18:00 – 21:00</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-medium text-slate-600 dark:text-slate-400">3.0 hrs</span>
-                        <span class="text-slate-500 dark:text-slate-400">Deadline</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Approved">
-                <div class="space-y-2">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 20</p>
-                            <p class="text-xs font-semibold text-slate-900 dark:text-white">19:00 – 22:00</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-medium text-slate-600 dark:text-slate-400">3.0 hrs</span>
-                        <span class="text-slate-500 dark:text-slate-400">Deploy</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Rejected">
-                <div class="space-y-2">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 18</p>
-                            <p class="text-xs font-semibold text-slate-900 dark:text-white">17:00 – 19:00</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-medium text-slate-600 dark:text-slate-400">2.0 hrs</span>
-                        <span class="text-slate-500 dark:text-slate-400">Inventory</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Desktop Table View -->
-        <div class="hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:block">
+        <div id="otTableWrapper" class="hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:block">
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Date</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Time</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Hours</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Reason</th>
-                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                            <th class="px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:px-4">Date</th>
+                            <th class="px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:px-4">Time</th>
+                            <th class="px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:px-4">Hours</th>
+                            <th class="px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:px-4">Reason</th>
+                            <th class="px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:px-4">Status</th>
                         </tr>
                     </thead>
                     <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Pending">
-                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 22, 2025</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">3.0</td>
-                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Project deadline</td>
-                            <td class="px-4 py-2.5">
-                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                            </td>
-                        </tr>
-                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Approved">
-                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 20, 2025</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">3.0</td>
-                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Deployment support</td>
-                            <td class="px-4 py-2.5">
-                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                            </td>
-                        </tr>
-                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Rejected">
-                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 18, 2025</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">17:00 – 19:00</td>
-                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">2.0</td>
-                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Inventory</td>
-                            <td class="px-4 py-2.5">
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                            </td>
-                        </tr>
+                        <!-- Rows will be inserted here by JavaScript -->
                     </tbody>
                 </table>
             </div>
-            <div id="otTableEmpty" class="hidden px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">No overtime requests matching your filters.</div>
+            <div id="otTableEmpty" class="hidden px-3 py-8 text-center text-xs text-slate-500 dark:text-slate-400 sm:px-4">No overtime requests matching your filters.</div>
         </div>
 
         <!-- Pagination Controls -->
@@ -200,152 +129,6 @@
                 <span id="pageInfo" class="text-xs font-medium text-slate-600 dark:text-slate-400">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
             </div>
             <button id="btnNextPage" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">Next →</button>
-        </div>
-    </div>
-
-        <!-- Mobile Card View -->
-        <div id="otMobileView" class="space-y-3 sm:hidden">
-            <!-- Card items will be inserted here by JavaScript -->
-            <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <div class="space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Date</p>
-                            <p class="text-sm font-semibold text-slate-900 dark:text-white">Feb 22, 2025</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Time</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">18:00 – 21:00</p>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hours</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">3.0</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Reason</p>
-                        <p class="text-sm text-slate-700 dark:text-slate-300">Project deadline</p>
-                    </div>
-                    <div class="border-t border-slate-100 pt-3 dark:border-slate-700">
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Submitted</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-400">Feb 21, 2025</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <div class="space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Date</p>
-                            <p class="text-sm font-semibold text-slate-900 dark:text-white">Feb 20, 2025</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-1 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Time</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">19:00 – 22:00</p>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hours</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">3.0</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Reason</p>
-                        <p class="text-sm text-slate-700 dark:text-slate-300">Deployment support</p>
-                    </div>
-                    <div class="border-t border-slate-100 pt-3 dark:border-slate-700">
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Submitted</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-400">Feb 19, 2025</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <div class="space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Date</p>
-                            <p class="text-sm font-semibold text-slate-900 dark:text-white">Feb 18, 2025</p>
-                        </div>
-                        <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Time</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">17:00 – 19:00</p>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hours</p>
-                            <p class="font-mono text-sm font-semibold text-slate-900 dark:text-white">2.0</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Reason</p>
-                        <p class="text-sm text-slate-700 dark:text-slate-300">Inventory</p>
-                    </div>
-                    <div class="border-t border-slate-100 pt-3 dark:border-slate-700">
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Submitted</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-400">Feb 17, 2025</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Desktop Table View -->
-        <div class="hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:block">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Hours</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Reason</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Submitted</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                        <tr>
-                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 22, 2025</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">3.0</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Project deadline</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 21, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 20, 2025</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">3.0</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Deployment support</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 19, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">Feb 18, 2025</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">17:00 – 19:00</td>
-                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-400">2.0</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Inventory</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 17, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="otTableEmpty" class="hidden px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No overtime requests yet. Submit one from the New Request tab.</div>
         </div>
     </div>
 </div>
@@ -378,6 +161,8 @@
     var totalPagesSpan = document.getElementById('totalPages');
     var otMobileView = document.getElementById('otMobileView');
     var otTableBody = document.getElementById('otTableBody');
+    var otTableWrapper = document.getElementById('otTableWrapper');
+    var otTableEmpty = document.getElementById('otTableEmpty');
 
     // Pagination state
     var currentPage = 1;
@@ -454,13 +239,13 @@
         renderTableRows(paginatedItems);
 
         if (paginatedItems.length === 0) {
-            otTableBody.parentElement.classList.add('hidden');
+            otTableWrapper.classList.add('hidden');
             otMobileView.classList.add('hidden');
-            document.getElementById('otTableEmpty').classList.remove('hidden');
+            otTableEmpty.classList.remove('hidden');
         } else {
-            otTableBody.parentElement.classList.remove('hidden');
+            otTableWrapper.classList.remove('hidden');
             otMobileView.classList.remove('hidden');
-            document.getElementById('otTableEmpty').classList.add('hidden');
+            otTableEmpty.classList.add('hidden');
         }
     }
 
@@ -472,7 +257,7 @@
                             'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300';
             
             var card = document.createElement('div');
-            card.className = 'ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+            card.className = 'rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800';
             card.setAttribute('data-status', item.status);
             card.innerHTML = '<div class="space-y-2"><div class="flex items-start justify-between"><div><p class="text-xs font-medium text-slate-500 dark:text-slate-400">' + item.date.split(',')[0] + '</p><p class="text-xs font-semibold text-slate-900 dark:text-white">' + item.time + '</p></div><span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + item.status + '</span></div><div class="flex items-center justify-between text-xs"><span class="font-medium text-slate-600 dark:text-slate-400">' + item.hours + ' hrs</span><span class="text-slate-500 dark:text-slate-400 truncate">' + item.reason + '</span></div></div>';
             otMobileView.appendChild(card);
@@ -487,13 +272,13 @@
                             'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300';
             
             var row = document.createElement('tr');
-            row.className = 'ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors';
+            row.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors';
             row.setAttribute('data-status', item.status);
-            row.innerHTML = '<td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">' + item.date + '</td>' +
-                          '<td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">' + item.time + '</td>' +
-                          '<td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">' + item.hours + '</td>' +
-                          '<td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">' + item.reason + '</td>' +
-                          '<td class="px-4 py-2.5"><span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + item.status + '</span></td>';
+            row.innerHTML = '<td class="px-3 py-2.5 text-xs text-slate-900 dark:text-slate-100 sm:px-4">' + item.date + '</td>' +
+                          '<td class="px-3 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400 sm:px-4">' + item.time + '</td>' +
+                          '<td class="px-3 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400 sm:px-4">' + item.hours + '</td>' +
+                          '<td class="px-3 py-2.5 text-xs text-slate-600 dark:text-slate-400 sm:px-4">' + item.reason + '</td>' +
+                          '<td class="px-3 py-2.5 sm:px-4"><span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + item.status + '</span></td>';
             otTableBody.appendChild(row);
         });
     }
