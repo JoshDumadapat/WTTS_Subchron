@@ -32,41 +32,6 @@
         <p id="biometricsStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Status: Disabled</p>
     </div>
 
-    <!-- Notifications Section -->
-    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
-        <div class="flex items-start gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 flex-shrink-0">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Notifications</h3>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Control how you receive updates.</p>
-            </div>
-        </div>
-        <div class="mt-4 space-y-3">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Attendance Reminders</span>
-                <button type="button" id="toggleAttendanceReminder" role="switch" aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-subgreen-600 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-subgreen-500 dark:focus:ring-offset-slate-800">
-                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Payroll Alerts</span>
-                <button type="button" id="togglePayrollAlerts" role="switch" aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-subgreen-600 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-subgreen-500 dark:focus:ring-offset-slate-800">
-                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Overtime Approvals</span>
-                <button type="button" id="toggleOvertimeAlerts" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600 dark:focus:ring-offset-slate-800">
-                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Account Security Section -->
     <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
         <div class="flex items-start gap-2">
@@ -123,7 +88,180 @@
     </div>
 </div>
 
+<!-- Biometrics Registration Modal -->
+<div id="biometricsModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4">
+    <div id="biometricsBackdrop" class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40" aria-hidden="true"></div>
+
+    <div role="dialog" aria-modal="true" aria-labelledby="biometricsTitle" class="relative w-full max-w-md rounded-lg bg-white shadow-2xl dark:bg-slate-800 sm:rounded-xl">
+        <!-- Header -->
+        <div class="border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-6 sm:py-4">
+            <div class="flex items-center justify-between">
+                <h2 id="biometricsTitle" class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Register Biometrics</h2>
+                <button type="button" onclick="closeBiometricsModal()" class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4 space-y-4 sm:p-6 sm:space-y-6">
+            <!-- Fingerprint Scanner Illustration -->
+            <div class="flex justify-center">
+                <div class="relative h-32 w-32 sm:h-40 sm:w-40">
+                    <div id="fingerprintScanner" class="absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
+                        <svg class="h-16 w-16 text-slate-400 dark:text-slate-500 sm:h-20 sm:w-20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 3a5 5 0 110 10 5 5 0 010-10z"/>
+                        </svg>
+                    </div>
+                    <div id="scanningPulse" class="absolute inset-0 rounded-2xl border-2 border-subgreen-400 opacity-0"></div>
+                </div>
+            </div>
+
+            <!-- Status Text -->
+            <div id="registrationStatus" class="text-center">
+                <p class="text-sm font-semibold text-slate-900 dark:text-white">Place your finger on scanner</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">We're capturing your fingerprint</p>
+            </div>
+
+            <!-- Progress Indicators -->
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <div id="scan1" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
+                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 1 - Ready</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div id="scan2" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
+                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 2 - Pending</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div id="scan3" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
+                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 3 - Pending</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="h-1 bg-slate-200 rounded-full overflow-hidden dark:bg-slate-700">
+                <div id="progressBar" class="h-full bg-subgreen-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <!-- Info Message -->
+            <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <p class="text-xs text-blue-800 dark:text-blue-200">Make sure your finger is clean and dry. Press firmly on the scanner for each scan.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50 sm:px-6 sm:py-4 flex items-center justify-end gap-2 sm:gap-3">
+            <button type="button" onclick="closeBiometricsModal()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
+                Cancel
+            </button>
+            <button type="button" id="completeBiometricsBtn" onclick="completeBiometricsRegistration()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-subgreen-500 hover:bg-subgreen-600 dark:bg-subgreen-600 dark:hover:bg-subgreen-500" disabled>
+                Complete
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+<script>
+    // Biometrics Modal Functions
+    function openBiometricsModal() {
+        const modal = document.getElementById('biometricsModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            simulateBiometricScanning();
+        }
+    }
+
+    function closeBiometricsModal() {
+        const modal = document.getElementById('biometricsModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    function simulateBiometricScanning() {
+        const progressBar = document.getElementById('progressBar');
+        const scan1 = document.getElementById('scan1');
+        const scan2 = document.getElementById('scan2');
+        const scan3 = document.getElementById('scan3');
+        const scanningPulse = document.getElementById('scanningPulse');
+        const statusText = document.getElementById('registrationStatus');
+        const completeBtn = document.getElementById('completeBiometricsBtn');
+        const fingerprintScanner = document.getElementById('fingerprintScanner');
+
+        let scanCount = 0;
+        const totalScans = 3;
+
+        function startScan() {
+            if (scanCount >= totalScans) {
+                completeScanning();
+                return;
+            }
+
+            scanCount++;
+            
+            // Update status
+            const currentScanElement = document.getElementById(`scan${scanCount}`);
+            if (currentScanElement) {
+                currentScanElement.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+                currentScanElement.classList.add('bg-subgreen-400');
+            }
+
+            statusText.innerHTML = `<p class="text-sm font-semibold text-slate-900 dark:text-white">Scan ${scanCount} of 3</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Place your finger again...</p>`;
+
+            // Animate scanning pulse
+            scanningPulse.classList.remove('opacity-0');
+            scanningPulse.classList.add('opacity-100', 'animate-pulse');
+
+            // Update progress bar
+            const progress = (scanCount / totalScans) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Simulate scanning delay
+            setTimeout(() => {
+                scanningPulse.classList.remove('opacity-100', 'animate-pulse');
+                scanningPulse.classList.add('opacity-0');
+
+                if (scanCount < totalScans) {
+                    setTimeout(startScan, 1000);
+                } else {
+                    completeScanning();
+                }
+            }, 2000);
+        }
+
+        function completeScanning() {
+            progressBar.style.width = '100%';
+            statusText.innerHTML = `<p class="text-sm font-semibold text-subgreen-600 dark:text-subgreen-400">✓ Registration Complete!</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Your biometrics have been successfully registered.</p>`;
+            
+            const scan3 = document.getElementById('scan3');
+            if (scan3) {
+                scan3.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+                scan3.classList.add('bg-subgreen-400');
+            }
+
+            completeBtn.disabled = false;
+            completeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        // Start the first scan immediately
+        startScan();
+    }
+
+    function completeBiometricsRegistration() {
+        alert('Biometrics registration saved! (UI demo only)');
+        closeBiometricsModal();
+    }
+
+    const biometricsBackdrop = document.getElementById('biometricsBackdrop');
+    const biometricsModal = document.getElementById('biometricsModal');
+    if (biometricsBackdrop && biometricsModal) {
+        biometricsBackdrop.addEventListener('click', closeBiometricsModal);
+    }
+
 <script>
 (function () {
     // Helper function to toggle switch
@@ -154,25 +292,16 @@
         return { setState };
     }
 
-    // Biometrics toggle with verification
+    // Biometrics toggle with registration modal
     const biometricsStatus = document.getElementById('biometricsStatus');
     const biometricsToggle = createToggleHandler('toggleBiometrics', function (enabled) {
         if (enabled) {
-            if (typeof PublicKeyCredential !== 'undefined') {
-                alert('OS biometric prompt would appear here to verify. (Demo: no backend.)');
-            } else {
-                alert('Biometric verification would run here. (Demo: no backend.)');
-            }
+            openBiometricsModal();
         }
         if (biometricsStatus) {
             biometricsStatus.textContent = 'Status: ' + (enabled ? 'Enabled' : 'Disabled');
         }
     });
-
-    // Simple toggles for notifications
-    createToggleHandler('toggleAttendanceReminder');
-    createToggleHandler('togglePayrollAlerts');
-    createToggleHandler('toggleOvertimeAlerts');
 
     // Theme selector
     const themeSelect = document.getElementById('themeSelect');
@@ -193,5 +322,6 @@
     }
 })();
 </script>
+
 }
 
