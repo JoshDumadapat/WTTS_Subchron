@@ -86,16 +86,6 @@
             </div>
         </div>
 
-        <!-- Rows Per Page Selector -->
-        <div class="flex items-center justify-between sm:justify-end">
-            <label for="rowsPerPage" class="text-xs font-medium text-slate-600 dark:text-slate-400">Rows:</label>
-            <select id="rowsPerPage" class="ml-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
-                <option value="3">3</option>
-                <option value="5" selected>5</option>
-                <option value="10">10</option>
-            </select>
-        </div>
-
         <!-- Mobile Card View -->
         <div id="otMobileView" class="space-y-2 sm:hidden">
             <!-- Card items will be inserted here by JavaScript -->
@@ -123,12 +113,17 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div id="paginationControls" class="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-4">
-            <button id="btnPrevPage" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">← Previous</button>
+        <div id="paginationControls" class="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:gap-4 sm:p-4">
             <div class="flex items-center gap-1 sm:gap-2">
-                <span id="pageInfo" class="text-xs font-medium text-slate-600 dark:text-slate-400">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                <button id="btnPrevPage" type="button" class="rounded-lg border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">&lt;</button>
+                <span id="pageInfo" class="min-w-max text-xs font-medium text-slate-600 dark:text-slate-400"><span id="currentPage">1</span>/<span id="totalPages">1</span></span>
+                <button id="btnNextPage" type="button" class="rounded-lg border border-slate-300 bg-slate-100 px-2 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">&gt;</button>
             </div>
-            <button id="btnNextPage" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">Next →</button>
+            <select id="rowsPerPage" class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+            </select>
         </div>
     </div>
 </div>
