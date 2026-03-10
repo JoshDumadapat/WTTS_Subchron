@@ -12,152 +12,157 @@
         <button type="button" id="tabSchedule" class="emp-tab border-b-2 border-transparent pb-2 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 sm:text-sm">My Schedule</button>
     </div>
 
-    <div id="panelRecord" class="space-y-3 sm:space-y-4">
-        <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your time in/out history. Use Time In / Out or QR at kiosk to record attendance.</p>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
-            <label class="flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-400 sm:flex-row sm:items-center sm:gap-2">
-                <span class="text-xs sm:text-sm">From</span>
-                <input type="date" id="recordFrom" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm" />
-            </label>
-            <label class="flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-400 sm:flex-row sm:items-center sm:gap-2">
-                <span class="text-xs sm:text-sm">To</span>
-                <input type="date" id="recordTo" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm" />
-            </label>
-            <button type="button" id="recordFilterBtn" class="w-full rounded-lg bg-subgreen-600 px-4 py-2 text-xs font-medium text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:w-auto sm:text-sm">Apply</button>
-        </div>
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs sm:text-sm">
-                     <thead>
-                         <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Date</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Time in</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Time out</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Hours</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Status</th>
-                         </tr>
-                     </thead>
-                    <tbody id="attendanceTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                         <tr>
-                             <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 21, 2025</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:02</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">17:35</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">9.6</td>
-                             <td class="px-3 py-2.5 sm:px-5 sm:py-3">
-                                 <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (2 min)</span>
-                             </td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 20, 2025</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">07:58</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">17:30</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">9.5</td>
-                             <td class="px-3 py-2.5 sm:px-5 sm:py-3">
-                                 <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
-                             </td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 19, 2025</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">17:00</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">9.0</td>
-                             <td class="px-3 py-2.5 sm:px-5 sm:py-3">
-                                 <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
-                             </td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 18, 2025</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                             <td class="px-3 py-2.5 sm:px-5 sm:py-3">
-                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">Absent</span>
-                             </td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 17, 2025</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:15</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">17:45</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">9.5</td>
-                             <td class="px-3 py-2.5 sm:px-5 sm:py-3">
-                                 <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (15 min)</span>
-                             </td>
-                         </tr>
-                     </tbody>
-                 </table>
+     <div id="panelRecord" class="space-y-3 sm:space-y-4">
+         <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your time in/out history. Use Time In / Out or QR at kiosk to record attendance.</p>
+         <div class="flex flex-col gap-2 sm:items-end sm:gap-3">
+             <div class="flex gap-2 sm:gap-3">
+                 <input type="date" id="recordFrom" class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" placeholder="From" />
+                 <input type="date" id="recordTo" class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" placeholder="To" />
+                 <button type="button" id="recordFilterBtn" class="rounded-lg bg-subgreen-600 px-3 py-2 text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400" title="Apply filter">
+                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                     </svg>
+                 </button>
+                 <button type="button" id="recordClearBtn" class="rounded-lg bg-slate-200 px-3 py-2 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600" title="Clear filters">
+                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                     </svg>
+                 </button>
              </div>
          </div>
-     </div>
-
-     <div id="panelSchedule" class="hidden space-y-3 sm:space-y-4">
-         <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your assigned shift schedule. Contact HR if you need changes.</p>
-         <div class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl">
-             <div class="border-b border-slate-100 px-3 py-3 dark:border-slate-700 sm:px-5 sm:py-4">
-                 <h3 class="text-xs font-semibold text-slate-800 dark:text-slate-200 sm:text-sm">Regular schedule</h3>
-                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Mon – Fri (unless on leave or holiday)</p>
-             </div>
+         <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl">
              <div class="overflow-x-auto">
                  <table class="w-full text-left text-xs sm:text-sm">
-                     <thead>
-                         <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Day</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Shift</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Time</th>
-                             <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Notes</th>
-                         </tr>
-                     </thead>
-                     <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Monday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Regular</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">1 hr break</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Tuesday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Regular</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">1 hr break</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Wednesday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Regular</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">1 hr break</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Thursday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Regular</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">1 hr break</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Friday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Regular</td>
-                             <td class="px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">1 hr break</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Saturday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Rest day</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                         </tr>
-                         <tr>
-                             <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Sunday</td>
-                             <td class="px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:px-5 sm:py-3">Rest day</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                             <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
-                         </tr>
-                     </tbody>
-                 </table>
-             </div>
-         </div>
-         <div class="rounded-lg border border-sky-200 bg-sky-50/50 p-3 dark:border-sky-800 dark:bg-sky-900/20 sm:rounded-2xl sm:p-4">
-             <p class="text-xs font-medium text-sky-800 dark:text-sky-200 sm:text-sm">Need a different shift?</p>
-             <p class="mt-0.5 text-xs text-sky-700 dark:text-sky-300 sm:mt-1 sm:text-sm">Contact your supervisor or HR to request schedule changes.</p>
-         </div>
+                      <thead>
+                          <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                              <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Date</th>
+                              <th class="hidden px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:table-cell sm:px-5 sm:py-3">Time in</th>
+                              <th class="hidden px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:table-cell sm:px-5 sm:py-3">Time out</th>
+                              <th class="hidden px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:table-cell sm:px-5 sm:py-3">Hours</th>
+                              <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Status</th>
+                          </tr>
+                      </thead>
+                     <tbody id="attendanceTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                          <tr>
+                              <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 21, 2025</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">08:02</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">17:35</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">9.6</td>
+                              <td class="px-3 py-2.5 sm:px-5 sm:py-3">
+                                  <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (2m)</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 20, 2025</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">07:58</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">17:30</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">9.5</td>
+                              <td class="px-3 py-2.5 sm:px-5 sm:py-3">
+                                  <span class="inline-flex items-center whitespace-nowrap rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 19, 2025</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">08:00</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">17:00</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">9.0</td>
+                              <td class="px-3 py-2.5 sm:px-5 sm:py-3">
+                                  <span class="inline-flex items-center whitespace-nowrap rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Present</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 18, 2025</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">—</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">—</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">—</td>
+                              <td class="px-3 py-2.5 sm:px-5 sm:py-3">
+                                  <span class="inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">Absent</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td class="px-3 py-2.5 text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Feb 17, 2025</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">08:15</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">17:45</td>
+                              <td class="hidden px-3 py-2.5 tabular-nums text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">9.5</td>
+                              <td class="px-3 py-2.5 sm:px-5 sm:py-3">
+                                  <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Late (15m)</span>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
      </div>
+
+      <div id="panelSchedule" class="hidden space-y-3 sm:space-y-4">
+          <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your assigned shift schedule. Contact HR if you need changes.</p>
+          <div class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl">
+              <div class="border-b border-slate-100 px-3 py-3 dark:border-slate-700 sm:px-5 sm:py-4">
+                  <h3 class="text-xs font-semibold text-slate-800 dark:text-slate-200 sm:text-sm">Regular schedule</h3>
+                  <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Mon – Fri (unless on leave or holiday)</p>
+              </div>
+              <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs sm:text-sm">
+                      <thead>
+                          <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                              <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Day</th>
+                              <th class="hidden px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:table-cell sm:px-5 sm:py-3">Shift</th>
+                              <th class="px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:px-5 sm:py-3">Time</th>
+                              <th class="hidden px-3 py-2.5 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 sm:table-cell sm:px-5 sm:py-3">Notes</th>
+                          </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Monday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Regular</td>
+                              <td class="px-3 py-2.5 tabular-nums font-medium text-subgreen-600 dark:text-subgreen-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">1 hr break</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Tuesday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Regular</td>
+                              <td class="px-3 py-2.5 tabular-nums font-medium text-subgreen-600 dark:text-subgreen-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">1 hr break</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Wednesday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Regular</td>
+                              <td class="px-3 py-2.5 tabular-nums font-medium text-subgreen-600 dark:text-subgreen-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">1 hr break</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Thursday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Regular</td>
+                              <td class="px-3 py-2.5 tabular-nums font-medium text-subgreen-600 dark:text-subgreen-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">1 hr break</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Friday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Regular</td>
+                              <td class="px-3 py-2.5 tabular-nums font-medium text-subgreen-600 dark:text-subgreen-400 sm:px-5 sm:py-3">08:00 – 17:00</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">1 hr break</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Saturday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Rest day</td>
+                              <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">—</td>
+                          </tr>
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                              <td class="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 sm:px-5 sm:py-3">Sunday</td>
+                              <td class="hidden px-3 py-2.5 text-slate-600 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">Rest day</td>
+                              <td class="px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:px-5 sm:py-3">—</td>
+                              <td class="hidden px-3 py-2.5 text-slate-500 dark:text-slate-400 sm:table-cell sm:px-5 sm:py-3">—</td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+          <div class="rounded-lg border border-sky-200 bg-sky-50/50 p-3 dark:border-sky-800 dark:bg-sky-900/20 sm:rounded-2xl sm:p-4">
+              <p class="text-xs font-medium text-sky-800 dark:text-sky-200 sm:text-sm">Need a different shift?</p>
+              <p class="mt-0.5 text-xs text-sky-700 dark:text-sky-300 sm:mt-1 sm:text-sm">Contact your supervisor or HR to request schedule changes.</p>
+          </div>
+      </div>
  </div>
 
 @section Scripts {
@@ -170,6 +175,7 @@
     var recordFrom = document.getElementById('recordFrom');
     var recordTo = document.getElementById('recordTo');
     var recordFilterBtn = document.getElementById('recordFilterBtn');
+    var recordClearBtn = document.getElementById('recordClearBtn');
 
     function setActiveTab(active) {
         var isRecord = active === 'record';
@@ -202,6 +208,13 @@
             var from = recordFrom.value;
             var to = recordTo.value;
             if (from && to) alert('Filter would apply: ' + from + ' to ' + to + '. (UI only – no backend.)');
+        }
+    });
+    recordClearBtn && recordClearBtn.addEventListener('click', function () {
+        if (recordFrom && recordTo) {
+            recordFrom.value = '';
+            recordTo.value = '';
+            alert('Filters cleared. (UI only – no backend.)');
         }
     });
 })();
