@@ -8,9 +8,9 @@
 
 <div class="w-full px-3 sm:px-4">
     <!-- Tab Navigation -->
-    <div class="mb-4 flex gap-0 border-b border-slate-200 dark:border-slate-700 sm:mb-6">
-        <button type="button" id="tabNewRequest" class="emp-tab flex-1 border-b-2 border-subgreen-600 px-3 py-3 text-center text-xs font-semibold text-subgreen-600 transition-colors dark:border-subgreen-400 dark:text-subgreen-400 sm:flex-none sm:px-0 sm:pb-2 sm:text-sm">New Request</button>
-        <button type="button" id="tabMyRequests" class="emp-tab flex-1 border-b-2 border-transparent px-3 py-3 text-center text-xs font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 sm:flex-none sm:px-0 sm:pb-2 sm:text-sm">My Requests</button>
+    <div class="mb-4 flex gap-3 border-b border-slate-200 dark:border-slate-700 sm:mb-6 sm:gap-6">
+        <button type="button" id="tabNewRequest" class="emp-tab border-b-2 border-subgreen-600 px-2 py-3 text-xs font-semibold text-subgreen-600 transition-colors dark:border-subgreen-400 dark:text-subgreen-400 sm:px-0 sm:pb-2 sm:text-sm">New Request</button>
+        <button type="button" id="tabMyRequests" class="emp-tab border-b-2 border-transparent px-2 py-3 text-xs font-semibold text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 sm:px-0 sm:pb-2 sm:text-sm">My Requests</button>
     </div>
 
     <div id="panelNewRequest" class="space-y-4 sm:space-y-6">
@@ -54,6 +54,154 @@
         <div>
             <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">View and track your overtime requests.</p>
         </div>
+
+        <!-- Filters Section -->
+        <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-4">
+            <div class="space-y-3 sm:space-y-0">
+                <!-- Quick Status Filters -->
+                <div class="flex flex-wrap gap-2 sm:mb-4">
+                    <button type="button" class="quickFilter px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors" data-status="">All</button>
+                    <button type="button" class="quickFilter px-3 py-1.5 text-xs font-medium rounded-lg border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-900/20 dark:text-amber-300" data-status="Pending">Pending</button>
+                    <button type="button" class="quickFilter px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors" data-status="Approved">Approved</button>
+                    <button type="button" class="quickFilter px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors" data-status="Rejected">Rejected</button>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+                    <div class="sm:flex-1">
+                        <label for="filterDateFrom" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">From Date</label>
+                        <input type="date" id="filterDateFrom" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                    </div>
+                    <div class="sm:flex-1">
+                        <label for="filterDateTo" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">To Date</label>
+                        <input type="date" id="filterDateTo" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                    </div>
+                    <div class="flex gap-2 items-end">
+                        <button type="button" id="btnApplyFilter" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-subgreen-600 text-white text-xs font-medium hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 transition-colors">Filter</button>
+                        <button type="button" id="btnClearFilter" class="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rows Per Page Selector -->
+        <div class="flex items-center justify-between sm:justify-end">
+            <label for="rowsPerPage" class="text-xs font-medium text-slate-600 dark:text-slate-400">Rows:</label>
+            <select id="rowsPerPage" class="ml-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div id="otMobileView" class="space-y-2 sm:hidden">
+            <!-- Card items will be inserted here by JavaScript -->
+            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Pending">
+                <div class="space-y-2">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 22</p>
+                            <p class="text-xs font-semibold text-slate-900 dark:text-white">18:00 – 21:00</p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-medium text-slate-600 dark:text-slate-400">3.0 hrs</span>
+                        <span class="text-slate-500 dark:text-slate-400">Deadline</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Approved">
+                <div class="space-y-2">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 20</p>
+                            <p class="text-xs font-semibold text-slate-900 dark:text-white">19:00 – 22:00</p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-medium text-slate-600 dark:text-slate-400">3.0 hrs</span>
+                        <span class="text-slate-500 dark:text-slate-400">Deploy</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800" data-status="Rejected">
+                <div class="space-y-2">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Feb 18</p>
+                            <p class="text-xs font-semibold text-slate-900 dark:text-white">17:00 – 19:00</p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-medium text-slate-600 dark:text-slate-400">2.0 hrs</span>
+                        <span class="text-slate-500 dark:text-slate-400">Inventory</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:block">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Date</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Time</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Hours</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Reason</th>
+                            <th class="px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Pending">
+                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 22, 2025</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">3.0</td>
+                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Project deadline</td>
+                            <td class="px-4 py-2.5">
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
+                            </td>
+                        </tr>
+                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Approved">
+                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 20, 2025</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">3.0</td>
+                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Deployment support</td>
+                            <td class="px-4 py-2.5">
+                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
+                            </td>
+                        </tr>
+                        <tr class="ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" data-status="Rejected">
+                            <td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">Feb 18, 2025</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">17:00 – 19:00</td>
+                            <td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">2.0</td>
+                            <td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">Inventory</td>
+                            <td class="px-4 py-2.5">
+                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="otTableEmpty" class="hidden px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">No overtime requests matching your filters.</div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationControls" class="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-4">
+            <button id="btnPrevPage" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">← Previous</button>
+            <div class="flex items-center gap-1 sm:gap-2">
+                <span id="pageInfo" class="text-xs font-medium text-slate-600 dark:text-slate-400">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+            </div>
+            <button id="btnNextPage" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">Next →</button>
+        </div>
+    </div>
 
         <!-- Mobile Card View -->
         <div id="otMobileView" class="space-y-3 sm:hidden">
@@ -205,6 +353,7 @@
 @section Scripts {
 <script>
 (function () {
+    // Tab Elements
     var tabNew = document.getElementById('tabNewRequest');
     var tabMy = document.getElementById('tabMyRequests');
     var panelNew = document.getElementById('panelNewRequest');
@@ -215,7 +364,36 @@
     var otEnd = document.getElementById('otEnd');
     var otReason = document.getElementById('otReason');
     var otValidationMsg = document.getElementById('otValidationMsg');
+
+    // Filter & Pagination Elements
+    var filterDateFrom = document.getElementById('filterDateFrom');
+    var filterDateTo = document.getElementById('filterDateTo');
+    var btnApplyFilter = document.getElementById('btnApplyFilter');
+    var btnClearFilter = document.getElementById('btnClearFilter');
+    var rowsPerPageSelect = document.getElementById('rowsPerPage');
+    var quickFilterButtons = document.querySelectorAll('.quickFilter');
+    var btnPrevPage = document.getElementById('btnPrevPage');
+    var btnNextPage = document.getElementById('btnNextPage');
+    var currentPageSpan = document.getElementById('currentPage');
+    var totalPagesSpan = document.getElementById('totalPages');
+    var otMobileView = document.getElementById('otMobileView');
     var otTableBody = document.getElementById('otTableBody');
+
+    // Pagination state
+    var currentPage = 1;
+    var rowsPerPage = 5;
+    var currentFilter = { status: '', dateFrom: '', dateTo: '' };
+
+    // Sample data - in real app would come from server
+    var allRequests = [
+        { date: 'Feb 22, 2025', time: '18:00 – 21:00', hours: '3.0', reason: 'Project deadline', status: 'Pending' },
+        { date: 'Feb 20, 2025', time: '19:00 – 22:00', hours: '3.0', reason: 'Deployment support', status: 'Approved' },
+        { date: 'Feb 18, 2025', time: '17:00 – 19:00', hours: '2.0', reason: 'Inventory', status: 'Rejected' },
+        { date: 'Feb 15, 2025', time: '16:00 – 19:00', hours: '3.0', reason: 'System maintenance', status: 'Approved' },
+        { date: 'Feb 12, 2025', time: '18:00 – 20:00', hours: '2.0', reason: 'Report generation', status: 'Pending' },
+        { date: 'Feb 10, 2025', time: '17:00 – 19:30', hours: '2.5', reason: 'Client meeting', status: 'Approved' },
+        { date: 'Feb 08, 2025', time: '19:00 – 21:00', hours: '2.0', reason: 'Data backup', status: 'Rejected' },
+    ];
 
     function setActiveTab(active) {
         var isNew = active === 'new';
@@ -244,10 +422,141 @@
         return parts.length >= 2 ? parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) : 0;
     }
 
-    tabNew && tabNew.addEventListener('click', function () { setActiveTab('new'); });
-    tabMy && tabMy.addEventListener('click', function () { setActiveTab('my'); });
+    // Filter Logic
+    function getFilteredRequests() {
+        return allRequests.filter(function(req) {
+            if (currentFilter.status && req.status !== currentFilter.status) {
+                return false;
+            }
+            // Add date filtering if needed
+            return true;
+        });
+    }
 
-    otForm && otForm.addEventListener('submit', function (e) {
+    function updatePagination() {
+        var filtered = getFilteredRequests();
+        var totalItems = filtered.length;
+        var totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+        
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        currentPageSpan.textContent = currentPage;
+        totalPagesSpan.textContent = totalPages;
+        btnPrevPage.disabled = currentPage === 1;
+        btnNextPage.disabled = currentPage === totalPages;
+
+        var startIdx = (currentPage - 1) * rowsPerPage;
+        var endIdx = startIdx + rowsPerPage;
+        var paginatedItems = filtered.slice(startIdx, endIdx);
+
+        renderMobileCards(paginatedItems);
+        renderTableRows(paginatedItems);
+
+        if (paginatedItems.length === 0) {
+            otTableBody.parentElement.classList.add('hidden');
+            otMobileView.classList.add('hidden');
+            document.getElementById('otTableEmpty').classList.remove('hidden');
+        } else {
+            otTableBody.parentElement.classList.remove('hidden');
+            otMobileView.classList.remove('hidden');
+            document.getElementById('otTableEmpty').classList.add('hidden');
+        }
+    }
+
+    function renderMobileCards(items) {
+        otMobileView.innerHTML = '';
+        items.forEach(function(item) {
+            var statusClass = item.status === 'Pending' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                            item.status === 'Approved' ? 'bg-subgreen-50 text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300' :
+                            'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+            
+            var card = document.createElement('div');
+            card.className = 'ot-card-item rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800';
+            card.setAttribute('data-status', item.status);
+            card.innerHTML = '<div class="space-y-2"><div class="flex items-start justify-between"><div><p class="text-xs font-medium text-slate-500 dark:text-slate-400">' + item.date.split(',')[0] + '</p><p class="text-xs font-semibold text-slate-900 dark:text-white">' + item.time + '</p></div><span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + item.status + '</span></div><div class="flex items-center justify-between text-xs"><span class="font-medium text-slate-600 dark:text-slate-400">' + item.hours + ' hrs</span><span class="text-slate-500 dark:text-slate-400 truncate">' + item.reason + '</span></div></div>';
+            otMobileView.appendChild(card);
+        });
+    }
+
+    function renderTableRows(items) {
+        otTableBody.innerHTML = '';
+        items.forEach(function(item) {
+            var statusClass = item.status === 'Pending' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                            item.status === 'Approved' ? 'bg-subgreen-50 text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300' :
+                            'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+            
+            var row = document.createElement('tr');
+            row.className = 'ot-table-item hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors';
+            row.setAttribute('data-status', item.status);
+            row.innerHTML = '<td class="px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100">' + item.date + '</td>' +
+                          '<td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">' + item.time + '</td>' +
+                          '<td class="px-4 py-2.5 text-xs font-mono text-slate-600 dark:text-slate-400">' + item.hours + '</td>' +
+                          '<td class="px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">' + item.reason + '</td>' +
+                          '<td class="px-4 py-2.5"><span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ' + statusClass + '">' + item.status + '</span></td>';
+            otTableBody.appendChild(row);
+        });
+    }
+
+    // Event Listeners
+    tabNew && tabNew.addEventListener('click', function() { setActiveTab('new'); });
+    tabMy && tabMy.addEventListener('click', function() { setActiveTab('my'); });
+
+    // Quick Filter Buttons
+    quickFilterButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            quickFilterButtons.forEach(function(b) { b.classList.remove('bg-amber-50', 'border-amber-200', 'text-amber-700', 'dark:bg-amber-900/20', 'dark:border-amber-900/30', 'dark:text-amber-300'); });
+            btn.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-700', 'dark:bg-amber-900/20', 'dark:border-amber-900/30', 'dark:text-amber-300');
+            currentFilter.status = btn.getAttribute('data-status') || '';
+            currentPage = 1;
+            updatePagination();
+        });
+    });
+
+    // Apply Filter Button
+    btnApplyFilter && btnApplyFilter.addEventListener('click', function() {
+        currentFilter.dateFrom = filterDateFrom.value;
+        currentFilter.dateTo = filterDateTo.value;
+        currentPage = 1;
+        updatePagination();
+    });
+
+    // Clear Filter Button
+    btnClearFilter && btnClearFilter.addEventListener('click', function() {
+        filterDateFrom.value = '';
+        filterDateTo.value = '';
+        currentFilter = { status: '', dateFrom: '', dateTo: '' };
+        quickFilterButtons[0].click(); // Click "All" button
+        currentPage = 1;
+        updatePagination();
+    });
+
+    // Rows Per Page Change
+    rowsPerPageSelect && rowsPerPageSelect.addEventListener('change', function() {
+        rowsPerPage = parseInt(this.value);
+        currentPage = 1;
+        updatePagination();
+    });
+
+    // Pagination Buttons
+    btnPrevPage && btnPrevPage.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePagination();
+        }
+    });
+
+    btnNextPage && btnNextPage.addEventListener('click', function() {
+        var filtered = getFilteredRequests();
+        var totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePagination();
+        }
+    });
+
+    // Form Submission
+    otForm && otForm.addEventListener('submit', function(e) {
         e.preventDefault();
         showValidation('');
         var dateVal = otDate && otDate.value;
@@ -274,7 +583,11 @@
         showValidation('');
         setActiveTab('my');
         otForm.reset();
+        updatePagination();
     });
+
+    // Initialize
+    updatePagination();
 })();
 </script>
 }
