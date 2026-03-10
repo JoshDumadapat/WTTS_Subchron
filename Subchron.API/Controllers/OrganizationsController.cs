@@ -49,22 +49,10 @@ public class OrganizationsController : ControllerBase
         if (settings is null)
             return NotFound(new { ok = false, message = "Organization settings not found." });
 
-        settings.Timezone = req.Timezone;
-        settings.Currency = req.Currency;
-        settings.AttendanceMode = req.AttendanceMode;
-
-        settings.AllowManualEntry = req.AllowManualEntry;
-        settings.RequireGeo = req.RequireGeo;
-        settings.EnforceGeofence = req.EnforceGeofence;
-
-        settings.DefaultGraceMinutes = req.DefaultGraceMinutes;
-        settings.RoundRule = req.RoundRule;
-
-        settings.OTEnabled = req.OTEnabled;
-        settings.OTThresholdHours = req.OTThresholdHours;
-        settings.OTApprovalRequired = req.OTApprovalRequired;
-        settings.OTMaxHoursPerDay = req.OTMaxHoursPerDay;
-
+        settings.Timezone = req.Timezone?.Trim() ?? settings.Timezone;
+        settings.Currency = req.Currency?.Trim() ?? settings.Currency;
+        settings.AttendanceMode = string.IsNullOrWhiteSpace(req.AttendanceMode) ? settings.AttendanceMode : req.AttendanceMode.Trim();
+        settings.DefaultShiftTemplateCode = string.IsNullOrWhiteSpace(req.DefaultShiftTemplateCode) ? null : req.DefaultShiftTemplateCode.Trim();
         settings.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();

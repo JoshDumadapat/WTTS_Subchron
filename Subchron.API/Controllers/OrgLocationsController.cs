@@ -177,8 +177,8 @@ public class OrgLocationsController : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(trimmedReason))
                 return BadRequest(new { ok = false, message = "Provide a reason before deactivating a site." });
-            if (trimmedReason.Length > 200)
-                trimmedReason = trimmedReason[..200];
+            if (trimmedReason.Length > 60)
+                trimmedReason = trimmedReason[..60];
             location.IsActive = false;
             location.DeactivationReason = trimmedReason;
         }

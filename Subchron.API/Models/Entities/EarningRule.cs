@@ -19,6 +19,28 @@ public class EarningRule
     /// </summary>
     public string AppliesTo { get; set; } = "OT";
 
+    /// <summary>Further restriction for day types (RegularDay, RestDay, SpecialHoliday, RegularHoliday, Any).</summary>
+    public string DayType { get; set; } = "Any";
+
+    /// <summary>Special combos for PH holidays: Standard, RegularRestDay, SpecialRestDay, DoubleHoliday, SpecialWorking.</summary>
+    public string HolidayCombo { get; set; } = "Standard";
+
+    /// <summary>Rest-day handling override: FollowAttendance | ForcePremium | IgnorePremium.</summary>
+    public string RestDayHandling { get; set; } = "FollowAttendance";
+
+    /// <summary>Scope: AllEmployees | Department | Role | Site | EmploymentType.</summary>
+    public string Scope { get; set; } = "AllEmployees";
+
+    /// <summary>JSON array of tags representing LGUs/programs or custom filters.</summary>
+    public string ScopeTagsJson { get; set; } = "[]";
+
+    /// <summary>Date when this rule becomes active.</summary>
+    public DateTime? EffectiveFrom { get; set; }
+        = null;
+
+    public DateTime? EffectiveTo { get; set; }
+        = null;
+
     /// <summary>
     /// How the rate is expressed.
     /// Values: Multiplier | Percentage | Fixed
@@ -36,6 +58,8 @@ public class EarningRule
     public bool IsTaxable { get; set; } = true;
     public bool IncludeInBenefitBase { get; set; } = false;
     public bool RequiresApproval { get; set; } = false;
+
+    public string Notes { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }

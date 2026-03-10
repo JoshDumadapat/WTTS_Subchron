@@ -1,0 +1,108 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Subchron.API.Data;
+using Subchron.API.Models.Entities;
+using Subchron.API.Models.Organizations;
+
+namespace Subchron.API.Controllers;
+
+[ApiController]
+[Authorize]
+[Route("api/orgconfig/pay")]
+public class OrgPayConfigController : ControllerBase
+{
+    private readonly TenantDbContext _tenantDb;
+
+    public OrgPayConfigController(TenantDbContext tenantDb)
+    {
+        _tenantDb = tenantDb;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<OrgPayConfigResponse>> GetAsync(CancellationToken ct)
+    {
+        var orgId = GetOrgId();
+        if (!orgId.HasValue) return Forbid();
+
+        var entity = await _tenantDb.OrgPayConfigs.AsNoTracking().FirstOrDefaultAsync(x => x.OrgID == orgId.Value, ct);
+        if (entity == null)
+        {
+            entity = new OrgPayConfig { OrgID = orgId.Value, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+            _tenantDb.OrgPayConfigs.Add(entity);
+            await _tenantDb.SaveChangesAsync(ct);
+        }
+
+        return Ok(MapToResponse(entity));
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpsertAsync([FromBody] OrgPayConfigRequest request, CancellationToken ct)
+    {
+        var orgId = GetOrgId();
+        if (!orgId.HasValue) return Forbid();
+
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var entity = await _tenantDb.OrgPayConfigs.FirstOrDefaultAsync(x => x.OrgID == orgId.Value, ct);
+        if (entity == null)
+        {
+            entity = new OrgPayConfig { OrgID = orgId.Value, CreatedAt = DateTime.UtcNow };
+            _tenantDb.OrgPayConfigs.Add(entity);
+        }
+
+        entity.Currency = request.Currency;
+        entity.PayCycle = request.PayCycle;
+        entity.HoursPerDay = request.HoursPerDay;
+        entity.CutoffWindowsJson = request.CutoffWindowsJson ?? "[]";
+        entity.LockAttendanceAfterCutoff = request.LockAttendanceAfterCutoff;
+        entity.ThirteenthMonthBasis = request.ThirteenthMonthBasis;
+        entity.ThirteenthMonthNotes = request.ThirteenthMonthNotes ?? string.Empty;
+        entity.EnableBIR = request.EnableBIR;
+        entity.BIRPeriod = request.BIRPeriod;
+        entity.BIRTableVersion = request.BIRTableVersion;
+        entity.EnableSSS = request.EnableSSS;
+        entity.SSSEmployerPercent = request.SSSEmployerPercent;
+        entity.EnablePhilHealth = request.EnablePhilHealth;
+        entity.PhilHealthRate = request.PhilHealthRate;
+        entity.EnablePagIbig = request.EnablePagIbig;
+        entity.PagIbigRate = request.PagIbigRate;
+        entity.EnableIncomeTax = request.EnableIncomeTax;
+        entity.ProrateNewHires = request.ProrateNewHires;
+        entity.ApplyTaxThreshold = request.ApplyTaxThreshold;
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        await _tenantDb.SaveChangesAsync(ct);
+        return Ok(new { ok = true });
+    }
+
+    private static OrgPayConfigResponse MapToResponse(OrgPayConfig entity) => new()
+    {
+        Currency = entity.Currency,
+        PayCycle = entity.PayCycle,
+        HoursPerDay = entity.HoursPerDay,
+        CutoffWindowsJson = entity.CutoffWindowsJson,
+        LockAttendanceAfterCutoff = entity.LockAttendanceAfterCutoff,
+        ThirteenthMonthBasis = entity.ThirteenthMonthBasis,
+        ThirteenthMonthNotes = entity.ThirteenthMonthNotes,
+        EnableBIR = entity.EnableBIR,
+        BIRPeriod = entity.BIRPeriod,
+        BIRTableVersion = entity.BIRTableVersion,
+        EnableSSS = entity.EnableSSS,
+        SSSEmployerPercent = entity.SSSEmployerPercent,
+        EnablePhilHealth = entity.EnablePhilHealth,
+        PhilHealthRate = entity.PhilHealthRate,
+        EnablePagIbig = entity.EnablePagIbig,
+        PagIbigRate = entity.PagIbigRate,
+        EnableIncomeTax = entity.EnableIncomeTax,
+        ProrateNewHires = entity.ProrateNewHires,
+        ApplyTaxThreshold = entity.ApplyTaxThreshold
+    };
+
+    private int? GetOrgId()
+    {
+        var claim = User.FindFirstValue("orgId");
+        return int.TryParse(claim, out var id) ? id : null;
+    }
+}

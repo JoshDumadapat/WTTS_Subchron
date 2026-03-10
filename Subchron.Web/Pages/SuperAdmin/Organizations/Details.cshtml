@@ -80,37 +80,14 @@
             <div class="flex justify-between">
 <dt class="text-sm text-slate-600 dark:text-slate-400">Attendance Mode</dt>
     <dd class="text-sm font-medium text-slate-900 dark:text-white">@Model.Settings.AttendanceMode</dd>
-           </div>
-       </dl>
-     </div>
-              
-       <!-- Attendance Settings -->
-      <div>
-     <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-4">Attendance Rules</h3>
-   <dl class="space-y-3">
-           <div class="flex justify-between">
-           <dt class="text-sm text-slate-600 dark:text-slate-400">Manual Entry</dt>
-       <dd class="text-sm">
-       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium @(Model.Settings.AllowManualEntry ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300")">
-  @(Model.Settings.AllowManualEntry ? "Enabled" : "Disabled")
-        </span>
-   </dd>
-     </div>
-         <div class="flex justify-between">
-               <dt class="text-sm text-slate-600 dark:text-slate-400">Geo Location</dt>
-          <dd class="text-sm">
-         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium @(Model.Settings.RequireGeo ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300" : "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300")">
-        @(Model.Settings.RequireGeo ? "Required" : "Optional")
-           </span>
-        </dd>
-       </div>
-     <div class="flex justify-between">
-             <dt class="text-sm text-slate-600 dark:text-slate-400">Grace Period</dt>
-   <dd class="text-sm font-medium text-slate-900 dark:text-white">@Model.Settings.DefaultGraceMinutes minutes</dd>
-       </div>
-                </dl>
-    </div>
-         </div>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-sm text-slate-600 dark:text-slate-400">Default Template</dt>
+              <dd class="text-sm font-medium text-slate-900 dark:text-white">@(!string.IsNullOrWhiteSpace(Model.Settings.DefaultShiftTemplateCode) ? Model.Settings.DefaultShiftTemplateCode : "Not configured")</dd>
+            </div>
+        </dl>
+      </div>
+            </div>
             </div>
 
      <!-- Current Subscription -->

@@ -69,6 +69,13 @@ public class ArchiveModel : PageModel
             await LoadArchivedAsync();
             return RedirectToPage();
         }
+        if (reason.Trim().Length > 60)
+        {
+            TempData["ToastMessage"] = "Reason for restore must be 60 characters or fewer.";
+            TempData["ToastSuccess"] = false;
+            await LoadArchivedAsync();
+            return RedirectToPage();
+        }
         try
         {
             var client = _http.CreateClient("Subchron.API");

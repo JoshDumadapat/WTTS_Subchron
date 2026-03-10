@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +15,14 @@ namespace Subchron.API.Controllers;
 public class OrgLeaveSettingsController : ControllerBase
 {
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
     private readonly IAuditService _audit;
     private readonly ILogger<OrgLeaveSettingsController> _logger;
-    private static readonly ConcurrentDictionary<int, OrgLeaveSettingsResponse> CachedResponses = new();
 
-    public OrgLeaveSettingsController(SubchronDbContext db, IAuditService audit, ILogger<OrgLeaveSettingsController> logger)
+    public OrgLeaveSettingsController(SubchronDbContext db, TenantDbContext tenantDb, IAuditService audit, ILogger<OrgLeaveSettingsController> logger)
     {
         _db = db;
+        _tenantDb = tenantDb;
         _audit = audit;
         _logger = logger;
     }
@@ -59,25 +59,29 @@ public class OrgLeaveSettingsController : ControllerBase
 
     private async Task<ActionResult<OrgLeaveSettingsResponse>> GetSettingsInternalAsync(int orgId, CancellationToken ct)
     {
-        try
-        {
-            var settings = await _db.OrganizationSettings.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.OrgID == orgId, ct);
+        var settings = await _db.OrganizationSettings.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.OrgID == orgId, ct);
 
-            if (settings == null)
-                return NotFound(new { ok = false, message = "Organization settings not found." });
+        if (settings == null)
+            return NotFound(new { ok = false, message = "Organization settings not found." });
 
-            var mapped = Map(settings);
-            CachedResponses[orgId] = mapped;
-            return Ok(mapped);
-        }
-        catch (Exception ex)
+        var config = await _tenantDb.OrgLeaveConfigs.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.OrgID == orgId, ct);
+
+        if (config == null)
         {
-            _logger.LogError(ex, "Failed to load leave settings for org {OrgId}. Using fallback defaults.", orgId);
-            if (CachedResponses.TryGetValue(orgId, out var cached))
-                return Ok(cached);
-            return Ok(BuildFallbackResponse(orgId));
+            config = new OrgLeaveConfig { OrgID = orgId };
+            _tenantDb.OrgLeaveConfigs.Add(config);
+            await _tenantDb.SaveChangesAsync(ct);
         }
+
+        return Ok(new OrgLeaveSettingsResponse
+        {
+            OrgId = orgId,
+            FiscalYearStart = config.FiscalYearStart,
+            BalanceResetRule = config.BalanceResetRule,
+            ProratedForNewHires = config.ProratedForNewHires
+        });
     }
 
     private async Task<IActionResult> UpdateSettingsInternalAsync(int orgId, OrgLeaveSettingsUpdateRequest req, CancellationToken ct)
@@ -85,21 +89,35 @@ public class OrgLeaveSettingsController : ControllerBase
         if (req == null)
             return BadRequest(new { ok = false, message = "Invalid payload." });
 
+        if (!Enum.IsDefined(typeof(LeaveFiscalYearStart), req.FiscalYearStart))
+            return BadRequest(new { ok = false, message = "Invalid fiscal year start value." });
+        if (!Enum.IsDefined(typeof(LeaveBalanceResetRule), req.BalanceResetRule))
+            return BadRequest(new { ok = false, message = "Invalid balance reset rule value." });
+        if (req.FiscalYearStart == LeaveFiscalYearStart.EmployeeHireDate && req.BalanceResetRule == LeaveBalanceResetRule.FiscalYearStart)
+            return BadRequest(new { ok = false, message = "Fiscal year start reset cannot be used when fiscal year mode is Employee Hire Date." });
+
         try
         {
             var settings = await _db.OrganizationSettings.FirstOrDefaultAsync(x => x.OrgID == orgId, ct);
             if (settings == null)
                 return NotFound(new { ok = false, message = "Organization settings not found." });
 
-            settings.LeaveFiscalYearStart = req.FiscalYearStart;
-            settings.LeaveBalanceResetRule = req.BalanceResetRule;
-            settings.LeaveProratedForNewHires = req.ProratedForNewHires;
+            var config = await _tenantDb.OrgLeaveConfigs.FirstOrDefaultAsync(x => x.OrgID == orgId, ct);
+            if (config == null)
+            {
+                config = new OrgLeaveConfig { OrgID = orgId };
+                _tenantDb.OrgLeaveConfigs.Add(config);
+            }
+
+            config.FiscalYearStart = req.FiscalYearStart;
+            config.BalanceResetRule = req.BalanceResetRule;
+            config.ProratedForNewHires = req.ProratedForNewHires;
+            config.UpdatedAt = DateTime.UtcNow;
+
             settings.UpdatedAt = DateTime.UtcNow;
 
+            await _tenantDb.SaveChangesAsync(ct);
             await _db.SaveChangesAsync(ct);
-
-            var mapped = Map(settings);
-            CachedResponses[orgId] = mapped;
 
             var userId = GetUserId();
             if (IsSuperAdmin())
@@ -112,38 +130,9 @@ public class OrgLeaveSettingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to update leave settings for org {OrgId}. Using in-memory cache.", orgId);
-            var fallback = FromRequest(orgId, req);
-            CachedResponses[orgId] = fallback;
-            return Ok(new { ok = true, persisted = false, message = "Leave settings saved locally and will re-sync once the database is reachable." });
+            return StatusCode(StatusCodes.Status500InternalServerError, new { ok = false, message = "Unable to update leave settings right now." });
         }
     }
-
-    private static OrgLeaveSettingsResponse Map(OrganizationSettings settings)
-        => new()
-        {
-            OrgId = settings.OrgID,
-            FiscalYearStart = settings.LeaveFiscalYearStart,
-            BalanceResetRule = settings.LeaveBalanceResetRule,
-            ProratedForNewHires = settings.LeaveProratedForNewHires
-        };
-
-    private static OrgLeaveSettingsResponse BuildFallbackResponse(int orgId)
-        => new()
-        {
-            OrgId = orgId,
-            FiscalYearStart = LeaveFiscalYearStart.January1,
-            BalanceResetRule = LeaveBalanceResetRule.FiscalYearStart,
-            ProratedForNewHires = true
-        };
-
-    private static OrgLeaveSettingsResponse FromRequest(int orgId, OrgLeaveSettingsUpdateRequest req)
-        => new()
-        {
-            OrgId = orgId,
-            FiscalYearStart = req.FiscalYearStart,
-            BalanceResetRule = req.BalanceResetRule,
-            ProratedForNewHires = req.ProratedForNewHires
-        };
 
     private int? GetUserOrgId()
     {

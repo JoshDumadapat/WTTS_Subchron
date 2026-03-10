@@ -87,7 +87,7 @@
         </div>
     }
 
-    <div class="mb-6 rounded-2xl border border-slate-300 bg-slate-100/80 p-5 dark:border-slate-700 dark:bg-slate-800">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-700/70 dark:bg-slate-800/70">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
             <div class="relative w-full lg:flex-1">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -96,18 +96,18 @@
                     </svg>
                 </span>
                 <input type="text" id="deptSearch"
-                       class="h-10 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 text-sm text-slate-800 placeholder-slate-500 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400"
+                       class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 text-sm text-slate-800 placeholder-slate-500 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
                        placeholder="Search departments..." />
             </div>
             <div class="flex w-full items-center gap-3 lg:w-auto lg:justify-end">
                 <select id="deptFilterStatus"
-                        class="h-10 flex-1 rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        class="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     <option value="">All status</option>
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
                 </select>
                 <button type="button" id="deptResetFilters"
-                        class="h-10 flex-1 rounded-xl border border-slate-300 bg-slate-50 px-4 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center justify-center gap-2">
+                        class="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-500 inline-flex items-center justify-center gap-2">
                     <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     Reset
                 </button>
@@ -115,9 +115,9 @@
         </div>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-md dark:border-slate-700 dark:bg-slate-800">
-        <div class="grid border-b border-slate-300 lg:grid-cols-4 dark:border-slate-700">
-            <div class="flex items-center justify-between border-r border-slate-300 p-4 last:border-r-0 dark:border-slate-700 lg:col-span-4">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-700/70 dark:bg-slate-800">
+        <div class="grid border-b border-slate-200 lg:grid-cols-4 dark:border-slate-700/70">
+            <div class="flex items-center justify-between border-r border-slate-200 p-4 last:border-r-0 dark:border-slate-700/70 lg:col-span-4">
 
                 <!-- Label LEFT -->
                 <p class="text-xs font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -134,17 +134,20 @@
 
         <!-- Table (Responsive scroll) -->
         <div class="overflow-x-auto no-scrollbar">
-            <table class="w-full min-w-[900px] text-left">
+            <table class="w-full min-w-[1120px] text-left">
                 <thead>
-                    <tr class="border-y border-slate-300 bg-slate-200/70 dark:border-slate-700 dark:bg-slate-800/50">
+                    <tr class="border-y border-slate-200 bg-slate-100/70 dark:border-slate-700/70 dark:bg-slate-800/50">
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
                             Department Name
                         </th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                            Employees
+                            Site
+                        </th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            Shift
                         </th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                            Description / Reason
+                            Description
                         </th>
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
                             Created
@@ -159,9 +162,9 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-300 dark:divide-slate-700 text-sm" id="deptTableBody">
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700/70 text-sm" id="deptTableBody">
                     <tr id="deptEmptyPlaceholder" class="empty-placeholder hidden" aria-live="polite">
-                        <td colspan="6" class="px-5 py-16 text-center">
+                        <td colspan="7" class="px-5 py-16 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No departments yet</p>
@@ -174,7 +177,7 @@
         </div>
 
         <!-- Pagination (Employee-style) -->
-        <div class="flex flex-col gap-4 border-t border-slate-300 bg-slate-50 px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 border-t border-slate-200 bg-slate-50/80 px-5 py-4 dark:border-slate-700/70 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
 
             <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -253,6 +256,30 @@
                                       dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400" />
                             <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptName"></span>
                         </div>
+
+                        <div>
+                            <label for="deptDefaultShift" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Default shift</label>
+                            <select id="deptDefaultShift" name="defaultShiftTemplateCode"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                <option value="">— None —</option>
+                                @foreach (var s in Model.ShiftOptions)
+                                {
+                                    <option value="@s.Code">@s.DisplayLabel</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="deptDefaultLocation" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Default site location</label>
+                            <select id="deptDefaultLocation" name="defaultLocationId"
+                                    class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                <option value="">— None —</option>
+                                @foreach (var l in Model.LocationOptions)
+                                {
+                                    <option value="@l.LocationId">@l.LocationName</option>
+                                }
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-6 dark:border-slate-800 sm:flex-row-reverse sm:items-center">
@@ -276,13 +303,23 @@
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDeptStatusModal()"></div>
 
             <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-slate-100 px-6 py-5 dark:border-gray-700">
-                    <h3 id="deptStatusModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">
-                        Deactivate Department
-                    </h3>
-                    <p id="deptStatusModalSubtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        Provide a reason for deactivating (required). Stored in description for audit.
-                    </p>
+                <div class="border-b border-slate-200 px-6 py-4 dark:border-gray-700">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                            <svg class="h-4 w-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007v.008H12v-.008z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 18.75h15a1.5 1.5 0 001.299-2.25l-7.5-12.99a1.5 1.5 0 00-2.598 0l-7.5 12.99A1.5 1.5 0 004.5 18.75z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 id="deptStatusModalTitle" class="text-lg font-semibold text-slate-800 dark:text-white">
+                                Deactivate Department
+                            </h3>
+                            <p id="deptStatusModalSubtitle" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                                Provide a reason for deactivating (required). Stored in description for audit.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="deptStatusForm" method="post" asp-page-handler="SetStatus"
@@ -299,21 +336,22 @@
                             Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span>
                         </label>
 
-                        <textarea id="deptStatusReason" name="reason" maxlength="200" rows="3"
+                        <textarea id="deptStatusReason" name="reason" maxlength="60" rows="3"
                                   placeholder="e.g. Restructuring; department merged with Operations."
-                                  class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-500
+                                  class="w-full rounded-xl border border-white bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-500 ring-1 ring-inset ring-slate-200
                                      focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20
-                                     dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"></textarea>
+                                     dark:border-white/20 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:ring-gray-700"></textarea>
 
                         <p class="mt-1 text-xs text-slate-600 dark:text-slate-400" id="deptStatusReasonHint">
-                            Stored in description. Max 200 characters.
+                            Stored in description. Max 60 characters.
                         </p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right"><span id="deptStatusReasonCount">0/60</span></p>
                         <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="deptStatusReason"></span>
                     </div>
 
                     <div class="mt-6 flex flex-col gap-3 sm:flex-row-reverse sm:items-center">
                         <button type="submit" id="deptStatusConfirmBtn"
-                                class="btn-primary dept-status-confirm-btn w-full sm:w-auto gap-2 disabled:pointer-events-none disabled:opacity-70">
+                                class="dept-status-confirm-btn inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 sm:w-auto disabled:pointer-events-none disabled:opacity-70 bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400">
                             Confirm
                         </button>
 
@@ -383,13 +421,29 @@
                     : 'bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 text-rose-800 dark:text-rose-200 text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[4.75rem] justify-center';
                 var createdAt = formatDate(d.createdAt || d.CreatedAt);
                 var empCount = d.employeeCount != null ? d.employeeCount : (d.EmployeeCount != null ? d.EmployeeCount : 0);
+                var defaultShift = d.defaultShiftTemplateCode || d.DefaultShiftTemplateCode || '';
+                var defaultLocationId = d.defaultLocationId != null ? d.defaultLocationId : (d.DefaultLocationId != null ? d.DefaultLocationId : '');
+                var shiftSelect = document.getElementById('deptDefaultShift');
+                var locationSelect = document.getElementById('deptDefaultLocation');
+                var shiftText = '—';
+                var locationText = '—';
+                if (shiftSelect && defaultShift) {
+                    var shiftOpt = shiftSelect.querySelector('option[value="' + defaultShift.replace(/"/g, '\\"') + '"]');
+                    if (shiftOpt && shiftOpt.textContent) shiftText = shiftOpt.textContent;
+                }
+                if (locationSelect && defaultLocationId !== '' && defaultLocationId != null) {
+                    var locationOpt = locationSelect.querySelector('option[value="' + String(defaultLocationId).replace(/"/g, '\\"') + '"]');
+                    if (locationOpt && locationOpt.textContent) locationText = locationOpt.textContent;
+                }
                 var nameEsc = name.replace(/'/g, "\\'");
                 var tr = document.createElement('tr');
                 tr.className = 'dept-row group transition-all hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10';
                 tr.setAttribute('data-status', status);
                 tr.setAttribute('data-dept-id', depId);
                 tr.setAttribute('data-name', name);
-                tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">' + esc(name) + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + empCount + '</td><td class="max-w-[140px] sm:max-w-[200px] md:max-w-[260px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(desc) + '">' + (desc ? esc(desc) : '—') + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(createdAt) + '</td><td class="px-5 py-3 whitespace-nowrap"><div class="relative inline-block"><button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center border ' + badgeClass + '">' + status + '</button></div></td><td class="px-5 py-3 text-right sticky right-0 bg-slate-50 dark:bg-slate-800 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.04)]"><button type="button" onclick="openDeptEditModal(' + depId + ', \'' + nameEsc + '\')" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 transition-all hover:bg-amber-200 dark:hover:bg-amber-900/50 border-0" title="Edit"><svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg><span>Edit</span></button></td>';
+                tr.setAttribute('data-default-shift', defaultShift);
+                tr.setAttribute('data-default-location', defaultLocationId);
+                tr.innerHTML = '<td class="px-5 py-3 text-sm font-medium text-slate-800 dark:text-white">' + esc(name) + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(locationText) + '</td><td class="max-w-[220px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(shiftText) + '">' + esc(shiftText) + '</td><td class="max-w-[220px] truncate px-5 py-3 text-sm text-slate-600 dark:text-slate-400" title="' + esc(desc) + '">' + (desc ? esc(desc) : '—') + '</td><td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">' + esc(createdAt) + '</td><td class="px-5 py-3 whitespace-nowrap"><div class="relative inline-block"><button type="button" onclick="openDeptStatusModalFromBadge(this)" class="dept-status-badge inline-flex cursor-pointer items-center border ' + badgeClass + '">' + status + '</button></div></td><td class="px-5 py-3 text-right sticky right-0 bg-slate-50 dark:bg-slate-800 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.04)]"><button type="button" onclick="openDeptEditModal(' + depId + ', \'' + nameEsc + '\')" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 transition-all hover:bg-amber-200 dark:hover:bg-amber-900/50 border-0" title="Edit"><svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg><span>Edit</span></button></td>';
                 return tr;
             }
 
@@ -436,8 +490,19 @@
                 var title = document.getElementById('deptModalTitle');
                 var form = document.getElementById('deptForm');
                 var nameInput = document.getElementById('deptName');
+                var defaultShiftInput = document.getElementById('deptDefaultShift');
+                var defaultLocationInput = document.getElementById('deptDefaultLocation');
                 var idInput = document.getElementById('deptEditId');
                 var submitBtn = document.getElementById('deptSubmitBtn');
+                var editShift = '';
+                var editLocation = '';
+                if (editId != null) {
+                    var row = document.querySelector('tr[data-dept-id="' + editId + '"]');
+                    if (row) {
+                        editShift = row.getAttribute('data-default-shift') || '';
+                        editLocation = row.getAttribute('data-default-location') || '';
+                    }
+                }
                 if (editId != null && editName != null) {
                     title.textContent = 'Edit Department';
                     form.setAttribute('action', '?handler=Update');
@@ -447,6 +512,8 @@
                     submitBtn.name = 'handler';
                     submitBtn.value = 'Update';
                     submitBtn.textContent = 'Update Department';
+                    if (defaultShiftInput) defaultShiftInput.value = editShift;
+                    if (defaultLocationInput) defaultLocationInput.value = editLocation;
                 } else {
                     title.textContent = 'Add Department';
                     form.setAttribute('action', '?handler=Create');
@@ -456,6 +523,8 @@
                     submitBtn.name = 'handler';
                     submitBtn.value = 'Create';
                     submitBtn.textContent = 'Save Department';
+                    if (defaultShiftInput) defaultShiftInput.value = '';
+                    if (defaultLocationInput) defaultLocationInput.value = '';
                 }
                 document.querySelector('.field-error[data-for="deptName"]').classList.add('hidden');
                 nameInput.classList.remove('border-red-500');
@@ -567,8 +636,16 @@
             var statusIdInput = document.getElementById('deptStatusId');
             var statusIsActiveInput = document.getElementById('deptStatusIsActive');
             var statusReasonInput = document.getElementById('deptStatusReason');
+            var statusReasonCounter = document.getElementById('deptStatusReasonCount');
             var statusModalTitle = document.getElementById('deptStatusModalTitle');
             var statusModalSubtitle = document.getElementById('deptStatusModalSubtitle');
+
+            function updateDeptStatusReasonCounter() {
+                if (!statusReasonInput || !statusReasonCounter) return;
+                statusReasonCounter.textContent = statusReasonInput.value.length + '/60';
+            }
+
+            statusReasonInput?.addEventListener('input', updateDeptStatusReasonCounter);
 
             function openDeptStatusModal(depId, isActive) {
                 statusIdInput.value = depId;
@@ -586,7 +663,12 @@
                     var hint = document.getElementById('deptStatusReasonHint');
                     if (reqSpan) reqSpan.style.display = 'none';
                     if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-slate-500 text-xs">(optional)</span>';
-                    if (hint) hint.textContent = 'Stored in description. Max 200 characters. Leave blank to clear.';
+                    if (hint) hint.textContent = 'Stored in description. Max 60 characters. Leave blank to clear.';
+                    if (statusConfirmBtn) {
+                        statusConfirmBtn.textContent = 'Activate Department';
+                        statusConfirmBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
+                        statusConfirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400');
+                    }
                 } else {
                     statusModalSubtitle.textContent = 'Provide a reason for deactivating (required). This will be stored in the description for audit.';
                     statusReasonInput.setAttribute('required', 'required');
@@ -595,11 +677,16 @@
                     var hint = document.getElementById('deptStatusReasonHint');
                     if (reqSpan) reqSpan.style.display = '';
                     if (reasonLabel) reasonLabel.innerHTML = 'Reason <span class="text-red-500" id="deptStatusReasonRequired">*</span>';
-                    if (hint) hint.textContent = 'Stored in description for audit. Max 200 characters.';
+                    if (hint) hint.textContent = 'Stored in description for audit. Max 60 characters.';
+                    if (statusConfirmBtn) {
+                        statusConfirmBtn.textContent = 'Deactivate Department';
+                        statusConfirmBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400');
+                        statusConfirmBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
+                    }
                 }
                 var err = document.querySelector('.field-error[data-for="deptStatusReason"]');
                 if (err) err.classList.add('hidden');
-                statusReasonInput.classList.remove('border-red-500');
+                updateDeptStatusReasonCounter();
                 statusModal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
             }
@@ -620,23 +707,24 @@
                     e.preventDefault();
                     err.textContent = 'Reason is required when deactivating.';
                     err.classList.remove('hidden');
-                    statusReasonInput.classList.add('border-red-500');
+                    statusReasonInput.focus();
                     return;
                 }
-                if (reason.length > 200) {
+                if (reason.length > 60) {
                     e.preventDefault();
-                    err.textContent = 'Reason must be 200 characters or less.';
+                    err.textContent = 'Reason must be 60 characters or less.';
                     err.classList.remove('hidden');
-                    statusReasonInput.classList.add('border-red-500');
+                    statusReasonInput.focus();
                     return;
                 }
                 if (err) err.classList.add('hidden');
-                statusReasonInput.classList.remove('border-red-500');
                 if (statusConfirmBtn && !statusConfirmBtn.disabled) {
                     statusConfirmBtn.disabled = true;
                     statusConfirmBtn.innerHTML = confirmingHtml;
                 }
             });
+
+            updateDeptStatusReasonCounter();
 
             function openDeptStatusModalFromBadge(btn) {
                 var row = btn.closest('tr');

@@ -130,6 +130,20 @@ namespace Subchron.API.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("Statutory");
+
+                    b.Property<string>("ComputeBasedOn")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("BasicPay");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -139,6 +153,9 @@ namespace Subchron.API.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("EffectiveFrom")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal?>("EmployeeSharePercent")
                         .HasColumnType("decimal(6,4)");
@@ -165,13 +182,28 @@ namespace Subchron.API.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<decimal?>("MaxDeductionAmount")
+                        .HasColumnType("decimal(12,2)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("");
+
                     b.Property<int>("OrgID")
                         .HasColumnType("int");
+
+                    b.Property<string>("ScopeTagsJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("[]");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -268,6 +300,26 @@ namespace Subchron.API.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("SYSUTCDATETIME()");
 
+                    b.Property<string>("DayType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("Any");
+
+                    b.Property<DateTime?>("EffectiveFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HolidayCombo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("Standard");
+
                     b.Property<bool>("IncludeInBenefitBase")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -288,6 +340,12 @@ namespace Subchron.API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("");
+
                     b.Property<int>("OrgID")
                         .HasColumnType("int");
 
@@ -303,6 +361,26 @@ namespace Subchron.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<string>("RestDayHandling")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("FollowAttendance");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("AllEmployees");
+
+                    b.Property<string>("ScopeTagsJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("[]");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -346,6 +424,81 @@ namespace Subchron.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmailVerificationCodes", (string)null);
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.OrgAllowanceRule", b =>
+                {
+                    b.Property<int>("OrgAllowanceRuleID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrgAllowanceRuleID"));
+
+                    b.Property<string>("AllowanceType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<bool>("AttendanceDependent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("ComplianceNotes")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("EffectiveFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsTaxable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("OrgID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ProrateIfPartialPeriod")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ScopeTagsJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("[]");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("OrgAllowanceRuleID");
+
+                    b.HasIndex("OrgID");
+
+                    b.ToTable("OrgAllowanceRules", (string)null);
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.Organization", b =>
@@ -490,22 +643,10 @@ namespace Subchron.API.Migrations
                     b.Property<int>("OrgID")
                         .HasColumnType("int");
 
-                    b.Property<bool>("AllowManualEntry")
-                        .HasColumnType("bit");
-
                     b.Property<string>("AttendanceMode")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("AttendanceOvertimeSettingsJson")
-                        .HasColumnType("NVARCHAR(MAX)");
-
-                    b.Property<bool>("AutoClockOutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("AutoClockOutMaxHours")
-                        .HasColumnType("decimal(5,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -517,61 +658,9 @@ namespace Subchron.API.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<int>("DefaultGraceMinutes")
-                        .HasColumnType("int");
-
                     b.Property<string>("DefaultShiftTemplateCode")
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
-
-                    b.Property<bool>("EnforceGeofence")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LeaveBalanceResetRule")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LeaveFiscalYearStart")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("LeaveProratedForNewHires")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("NightDifferentialSettingsJson")
-                        .HasColumnType("NVARCHAR(MAX)");
-
-                    b.Property<bool>("OTApprovalRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("OTEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("OTMaxHoursPerDay")
-                        .HasColumnType("decimal(6,2)");
-
-                    b.Property<decimal>("OTThresholdHours")
-                        .HasColumnType("decimal(6,2)");
-
-                    b.Property<string>("OvertimeSettingsJson")
-                        .HasColumnType("NVARCHAR(MAX)");
-
-                    b.Property<bool>("PreventDoubleClockIn")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequireGeo")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RestrictByIp")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("RoundRule")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ShiftTemplatesJson")
-                        .HasColumnType("NVARCHAR(MAX)");
 
                     b.Property<string>("Timezone")
                         .IsRequired()
@@ -582,9 +671,6 @@ namespace Subchron.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<decimal?>("WeeklyOtThresholdHours")
-                        .HasColumnType("decimal(6,2)");
 
                     b.HasKey("OrgID");
 
@@ -1026,6 +1112,17 @@ namespace Subchron.API.Migrations
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.EarningRule", b =>
+                {
+                    b.HasOne("Subchron.API.Models.Entities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrgID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.OrgAllowanceRule", b =>
                 {
                     b.HasOne("Subchron.API.Models.Entities.Organization", "Organization")
                         .WithMany()

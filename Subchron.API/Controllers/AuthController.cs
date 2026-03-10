@@ -1343,8 +1343,7 @@ public class AuthController : ControllerBase
                     OrgID = org.OrgID,
                     Timezone = "Asia/Manila",
                     Currency = "PHP",
-                    AttendanceMode = mode,
-                    RoundRule = "None"
+                    AttendanceMode = mode
                 });
                 _db.OrganizationProfiles.Add(new OrganizationProfile
                 {
@@ -1518,8 +1517,7 @@ public class AuthController : ControllerBase
                     OrgID = org.OrgID,
                     Timezone = "Asia/Manila",
                     Currency = "PHP",
-                    AttendanceMode = mode,
-                    RoundRule = "None"
+                    AttendanceMode = mode
                 });
                 var startDate = DateTime.UtcNow.Date;
                 var isTrialPlan = planName.Equals("Standard", StringComparison.OrdinalIgnoreCase);

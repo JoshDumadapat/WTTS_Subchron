@@ -69,11 +69,13 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"
 builder.Services.Configure<PayMongoSettings>(builder.Configuration.GetSection("PayMongo"));
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.Configure<LocationIqSettings>(builder.Configuration.GetSection("LocationIq"));
+builder.Services.Configure<HolidayApiSettings>(builder.Configuration.GetSection("HolidayApi"));
 
 // Services
 builder.Services.AddHttpClient<RecaptchaService>();
 builder.Services.AddHttpClient<PayMongoService>();
 builder.Services.AddHttpClient<ILocationIqService, LocationIqService>();
+builder.Services.AddHttpClient<IHolidayApiService, HolidayApiService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
@@ -81,6 +83,7 @@ builder.Services.AddScoped<IAttendanceComputationService, AttendanceComputationS
 builder.Services.AddScoped<IOvertimeApprovalWorkflowService, OvertimeApprovalWorkflowService>();
 builder.Services.AddHostedService<PendingPaymentCleanupService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddSingleton<ILegacyOrgSettingsStore, LegacyOrgSettingsStore>();
 
 // CORS (Web -> API)
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();

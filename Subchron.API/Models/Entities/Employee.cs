@@ -12,6 +12,11 @@ public class Employee
 
     public int? DepartmentID { get; set; }
 
+    [MaxLength(60)]
+    public string? AssignedShiftTemplateCode { get; set; }
+
+    public int? AssignedLocationId { get; set; }
+
     [Required, MaxLength(40)]
     public string EmpNumber { get; set; } = null!;
 
@@ -63,6 +68,9 @@ public class Employee
 
     [MaxLength(20)]
     public string? PhoneNormalized { get; set; }
+
+    [MaxLength(256)]
+    public string? Email { get; set; }
 
     [MaxLength(120)]
     public string? EmergencyContactName { get; set; }

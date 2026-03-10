@@ -47,6 +47,7 @@ public static class OrgShiftSettingsValidator
             var workDays = NormalizeWorkDays(template.WorkDays);
             var breaks = NormalizeBreaks(template.Breaks);
             var dayOverrides = NormalizeDayOverrides(template.DayOverrides);
+            var disabledReason = NormalizeDisabledReason(template.DisabledReason, template.IsActive, template.Name);
 
             OrgShiftFixedSettings? fixedSettings = null;
             OrgShiftFlexibleSettings? flexibleSettings = null;
@@ -78,7 +79,8 @@ public static class OrgShiftSettingsValidator
                 Open = openSettings,
                 Breaks = breaks,
                 DayOverrides = dayOverrides,
-                IsActive = template.IsActive
+                IsActive = template.IsActive,
+                DisabledReason = disabledReason
             });
         }
 
@@ -574,6 +576,21 @@ public static class OrgShiftSettingsValidator
     {
         var trimmed = (value ?? string.Empty).Trim();
         return string.IsNullOrWhiteSpace(trimmed) ? fallback : trimmed;
+    }
+
+    private static string? NormalizeDisabledReason(string? value, bool isActive, string templateName)
+    {
+        if (isActive)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ShiftSettingsValidationException($"Provide a reason when disabling shift template '{templateName}'.");
+
+        var reason = value.Trim();
+        if (reason.Length > 60)
+            throw new ShiftSettingsValidationException("Disable reason must be 60 characters or fewer.");
+
+        return reason;
     }
 
     private static decimal ClampDecimal(decimal value, decimal min, decimal max, string error)

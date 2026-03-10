@@ -78,15 +78,7 @@ await Task.Delay(10);
      Timezone = "Asia/Manila",
    Currency = "PHP",
         AttendanceMode = "Biometric",
-       AllowManualEntry = false,
-RequireGeo = true,
-        EnforceGeofence = false,
-    DefaultGraceMinutes = 15,
-  RoundRule = "15 minutes",
- OTEnabled = true,
-      OTThresholdHours = 8,
-        OTApprovalRequired = true,
-          OTMaxHoursPerDay = 12
+        DefaultShiftTemplateCode = "NIGHT"
      };
    }
 
@@ -159,15 +151,7 @@ RequireGeo = true,
    public string Timezone { get; set; } = string.Empty;
         public string Currency { get; set; } = string.Empty;
  public string AttendanceMode { get; set; } = string.Empty;
-    public bool AllowManualEntry { get; set; }
-  public bool RequireGeo { get; set; }
-        public bool EnforceGeofence { get; set; }
-   public int DefaultGraceMinutes { get; set; }
-        public string RoundRule { get; set; } = string.Empty;
-  public bool OTEnabled { get; set; }
-     public int OTThresholdHours { get; set; }
-     public bool OTApprovalRequired { get; set; }
-     public int OTMaxHoursPerDay { get; set; }
+        public string? DefaultShiftTemplateCode { get; set; }
      }
 
     public class SubscriptionDetailViewModel

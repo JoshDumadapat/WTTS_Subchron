@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,19 +13,17 @@ namespace Subchron.API.Controllers;
 [Route("api/org-shift-settings")]
 public class OrgShiftSettingsController : ControllerBase
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-    };
-
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
     private readonly IAuditService _audit;
+    private readonly ILegacyOrgSettingsStore _store;
 
-    public OrgShiftSettingsController(SubchronDbContext db, IAuditService audit)
+    public OrgShiftSettingsController(SubchronDbContext db, TenantDbContext tenantDb, IAuditService audit, ILegacyOrgSettingsStore store)
     {
         _db = db;
+        _tenantDb = tenantDb;
         _audit = audit;
+        _store = store;
     }
 
     [Authorize]
@@ -67,13 +64,24 @@ public class OrgShiftSettingsController : ControllerBase
         if (settings == null)
             return NotFound(new { ok = false, message = "Organization settings not found." });
 
-        var templates = OrgShiftSettingsValidator.NormalizeTemplates(Deserialize<List<OrgShiftTemplateDto>>(settings.ShiftTemplatesJson) ?? new List<OrgShiftTemplateDto>());
-        var overtime = OrgShiftSettingsValidator.NormalizeOvertime(Deserialize<OrgOvertimeSettingsDto>(settings.OvertimeSettingsJson) ?? BuildLegacyOvertime(settings));
-        var nightDifferential = OrgShiftSettingsValidator.NormalizeNightDifferential(Deserialize<OrgNightDifferentialSettingsDto>(settings.NightDifferentialSettingsJson) ?? new OrgNightDifferentialSettingsDto());
+        var templates = await _tenantDb.OrgShiftTemplates
+            .Include(t => t.WorkDays)
+            .Include(t => t.Breaks)
+            .Include(t => t.DayOverrides)
+                .ThenInclude(o => o.WorkWindows)
+            .Where(t => t.OrgID == orgId)
+            .OrderBy(t => t.Name)
+            .ToListAsync(ct);
+
+        var templateDtos = templates.Select(OrgShiftTemplateMapper.ToDto).ToList();
+
+        var snapshot = _store.GetShiftSettings(orgId);
+        var overtime = OrgShiftSettingsValidator.NormalizeOvertime(snapshot.Overtime);
+        var nightDifferential = OrgShiftSettingsValidator.NormalizeNightDifferential(snapshot.NightDifferential);
 
         return Ok(new OrgShiftSettingsResponse
         {
-            Templates = templates,
+            Templates = templateDtos,
             Overtime = overtime,
             NightDifferential = nightDifferential
         });
@@ -103,14 +111,14 @@ public class OrgShiftSettingsController : ControllerBase
             return BadRequest(new { ok = false, message = ex.Message });
         }
 
-        settings.ShiftTemplatesJson = Serialize(normalizedTemplates);
-        settings.OvertimeSettingsJson = Serialize(normalizedOvertime);
-        settings.NightDifferentialSettingsJson = Serialize(normalizedNightDifferential);
-        settings.OTEnabled = normalizedOvertime.Enabled;
-        settings.OTThresholdHours = normalizedOvertime.MinHoursBeforeOvertime;
-        settings.OTApprovalRequired = normalizedOvertime.PreApprovalRequired && !normalizedOvertime.AutoApprove;
-        settings.OTMaxHoursPerDay = normalizedOvertime.MaxHoursPerDay;
-        settings.UpdatedAt = DateTime.UtcNow;
+        await ReplaceTemplatesAsync(orgId, normalizedTemplates, ct);
+
+        _store.SetShiftSettings(orgId, new OrgShiftSettingsSnapshot
+        {
+            Templates = normalizedTemplates,
+            Overtime = normalizedOvertime,
+            NightDifferential = normalizedNightDifferential
+        });
 
         if (!string.IsNullOrWhiteSpace(settings.DefaultShiftTemplateCode))
         {
@@ -118,6 +126,8 @@ public class OrgShiftSettingsController : ControllerBase
             if (!hasMatch)
                 settings.DefaultShiftTemplateCode = null;
         }
+
+        settings.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
 
@@ -130,40 +140,21 @@ public class OrgShiftSettingsController : ControllerBase
         return Ok(new { ok = true, templates = normalizedTemplates.Count });
     }
 
-    private static T? Deserialize<T>(string? json)
+    private async Task ReplaceTemplatesAsync(int orgId, List<OrgShiftTemplateDto> templates, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(json))
-            return default;
-        try
-        {
-            return JsonSerializer.Deserialize<T>(json, JsonOptions);
-        }
-        catch
-        {
-            return default;
-        }
-    }
+        var existing = await _tenantDb.OrgShiftTemplates
+            .Where(t => t.OrgID == orgId)
+            .ToListAsync(ct);
 
-    private static string Serialize<T>(T value)
-        => JsonSerializer.Serialize(value, JsonOptions);
+        _tenantDb.OrgShiftTemplates.RemoveRange(existing);
 
-    private static OrgOvertimeSettingsDto BuildLegacyOvertime(OrganizationSettings settings)
-    {
-        return new OrgOvertimeSettingsDto
+        foreach (var dto in templates)
         {
-            Enabled = settings.OTEnabled,
-            MinHoursBeforeOvertime = settings.OTThresholdHours,
-            PreApprovalRequired = settings.OTApprovalRequired,
-            MaxHoursPerDay = settings.OTMaxHoursPerDay,
-            Basis = "AfterShiftEnd",
-            ApproverRole = "Supervisor",
-            RoundToMinutes = 15,
-            MinimumBlockMinutes = 0,
-            DayTypes = new OrgOvertimeDayTypeRules(),
-            BucketRules = new List<OrgOvertimeBucketRuleDto>(),
-            ScopeRules = new List<OrgOvertimeScopeRuleDto>(),
-            ApprovalSteps = new List<OrgOvertimeApprovalStepDto>()
-        };
+            var entity = OrgShiftTemplateMapper.CreateEntity(orgId, dto);
+            _tenantDb.OrgShiftTemplates.Add(entity);
+        }
+
+        await _tenantDb.SaveChangesAsync(ct);
     }
 
     private int? GetUserOrgId()

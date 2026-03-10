@@ -112,7 +112,7 @@
             </div>
         }
 
-        <div class="mb-6 rounded-2xl border border-slate-300 bg-slate-100/80 p-5 dark:border-slate-700 dark:bg-slate-800">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-700/70 dark:bg-slate-800/70">
             <div class="flex flex-row flex-wrap items-center gap-3 lg:items-center">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -121,13 +121,13 @@
                         </svg>
                     </span>
                     <input type="text" id="searchInput"
-                           class="h-10 w-full rounded-xl border border-slate-300 bg-slate-50 pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                           class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 text-sm focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                            placeholder="Search employees...">
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <select id="filterStatus"
-                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         <option value="">All work state</option>
                         <option value="Active">Active</option>
                         <option value="On Leave">On Leave</option>
@@ -137,7 +137,7 @@
                     </select>
 
                     <select id="filterDepartment"
-                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                            class="hidden sm:inline-block h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         <option value="">All Departments</option>
                         @foreach (var dep in Model.Departments)
                         {
@@ -146,7 +146,7 @@
                     </select>
 
                     <button type="button" id="resetFilters" aria-label="Reset filters"
-                            class="h-10 rounded-xl border border-slate-300 bg-slate-50 px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-400 inline-flex items-center gap-2">
+                            class="h-10 rounded-xl border border-slate-200 bg-white px-3 sm:px-5 text-xs font-medium uppercase tracking-wider text-slate-600 transition-all duration-150 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 hover:scale-105 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-500 inline-flex items-center gap-2">
                         <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -175,23 +175,23 @@
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50 shadow-md dark:border-slate-700 dark:bg-slate-800">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-700/70 dark:bg-slate-800">
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 divide-y divide-slate-300 border-b border-slate-300 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700 dark:border-slate-700">
-                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+            <div class="grid grid-cols-2 divide-y divide-slate-200 border-b border-slate-200 lg:grid-cols-4 lg:divide-y-0 lg:divide-x dark:divide-slate-700/70 dark:border-slate-700/70">
+                <div class="flex flex-col justify-center border-r border-slate-200 p-3 sm:p-4 last:border-r-0 dark:border-slate-700/70">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-900 dark:text-white" id="statTotal">@Model.Employees.Count</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-200 p-3 sm:p-4 last:border-r-0 dark:border-slate-700/70">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Active (WorkState)</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-subgreen-600 dark:text-subgreen-400" id="statActive">@Model.Employees.Count(e => e.WorkState == "Active")</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-200 p-3 sm:p-4 last:border-r-0 dark:border-slate-700/70">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Other (On Leave, etc.)</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-amber-600 dark:text-amber-400" id="statInactive">@Model.Employees.Count(e => e.WorkState != "Active")</p>
                 </div>
-                <div class="flex flex-col justify-center border-r border-slate-300 p-3 sm:p-4 last:border-r-0 dark:border-slate-700">
+                <div class="flex flex-col justify-center border-r border-slate-200 p-3 sm:p-4 last:border-r-0 dark:border-slate-700/70">
                     <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Archived</p>
                     <p class="mt-0.5 text-right text-base sm:text-lg font-semibold text-slate-600 dark:text-slate-400" id="statArchived">—</p>
                 </div>
@@ -200,7 +200,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="border-y border-slate-300 bg-slate-200/70 dark:border-slate-700 dark:bg-slate-800/50">
+                        <tr class="border-y border-slate-200 bg-slate-100/70 dark:border-slate-700/70 dark:bg-slate-800/50">
                             <th class="w-10 px-2 py-3 text-center">
                                 <input type="checkbox" id="selectAllEmployees" aria-label="Select all"
                                        class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
@@ -215,7 +215,7 @@
                         </tr>
                     </thead>
 
-                    <tbody id="employeeTableBody" class="divide-y divide-slate-300 dark:divide-slate-700 text-sm">
+                    <tbody id="employeeTableBody" class="divide-y divide-slate-200 dark:divide-slate-700/70 text-sm">
                         @{
                             string Initials(string? fn, string? ln)
                             {
@@ -363,7 +363,7 @@
             </div>
 
             <!-- Pagination footer -->
-            <div class="flex flex-col gap-4 border-t border-slate-300 bg-slate-100/70 px-5 py-4 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-4 border-t border-slate-200 bg-slate-50/80 px-5 py-4 dark:border-slate-700/70 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
 
                 <div class="flex flex-wrap items-center justify-between gap-4 sm:justify-start">
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -467,9 +467,9 @@
             </div>
 
             <div id="statusModalArchive" class="hidden">
-                <div class="rounded-t-2xl border-b border-rose-200 bg-rose-50/80 px-6 py-5 dark:border-rose-900/40 dark:bg-rose-900/20">
-                    <h3 class="text-lg font-semibold text-rose-900 dark:text-rose-100">Archive employee</h3>
-                    <p class="mt-1 text-sm text-rose-700 dark:text-rose-300">Provide a reason (e.g. Resigned, Terminated). This will be stored and recorded in the audit log.</p>
+                <div class="rounded-t-2xl border-b border-slate-200 bg-white px-6 py-5 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Archive employee</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Provide a reason (e.g. Resigned, Terminated). This will be stored and recorded in the audit log.</p>
                 </div>
 
                 <form id="archiveForm" method="post" asp-page-handler="Archive" data-turbo="false" class="p-6">
@@ -477,9 +477,10 @@
                     <input type="hidden" name="id" id="archiveEmpId" value="" />
 
                     <label for="archiveReasonInput" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Archive reason <span class="text-red-500">*</span></label>
-                    <textarea name="reason" id="archiveReasonInput" required maxlength="200" rows="3"
-                              class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    <textarea name="reason" id="archiveReasonInput" required maxlength="60" rows="3"
+                              class="w-full rounded-xl border border-white bg-white px-4 py-3 text-sm ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-white dark:border-white/20 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
                               placeholder="e.g. Resigned, Terminated, End of contract"></textarea>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 text-right"><span id="archiveReasonCount">0/60</span></p>
 
                     <div class="mt-6 flex flex-row-reverse gap-3">
                         <button type="submit" id="archiveSubmitBtn" class="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-70 disabled:cursor-not-allowed">Archive</button>
@@ -1184,6 +1185,15 @@
         closeStatusPortal();
     });
 
+    function updateArchiveReasonCounter() {
+        var input = document.getElementById('archiveReasonInput');
+        var counter = document.getElementById('archiveReasonCount');
+        if (!input || !counter) return;
+        counter.textContent = input.value.length + '/60';
+    }
+
+    document.getElementById('archiveReasonInput')?.addEventListener('input', updateArchiveReasonCounter);
+
     function openStatusActionModal(mode, empId, row) {
         var modal = document.getElementById('statusActionModal');
         var workStatePanel = document.getElementById('statusModalWorkState');
@@ -1200,6 +1210,7 @@
         } else {
             document.getElementById('archiveEmpId').value = empId;
             document.getElementById('archiveReasonInput').value = '';
+            updateArchiveReasonCounter();
 
             workStatePanel.classList.add('hidden');
             archivePanel.classList.remove('hidden');
@@ -1213,6 +1224,8 @@
         document.getElementById('statusActionModal')?.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
+
+    updateArchiveReasonCounter();
 </script>
 
 <script>

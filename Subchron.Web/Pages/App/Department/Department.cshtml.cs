@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Subchron.Web.Pages.Auth;
@@ -17,13 +18,16 @@ public class DepartmentModel : PageModel
     }
 
     public List<DepartmentItem> Departments { get; set; } = new();
+    public List<ShiftOption> ShiftOptions { get; set; } = new();
+    public List<LocationOption> LocationOptions { get; set; } = new();
     public string? Message { get; set; }
     public string? Error { get; set; }
     public string ApiBaseUrl { get; set; } = "";
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
         ApiBaseUrl = _config["ApiBaseUrl"] ?? "";
+        await LoadDropdownOptionsAsync();
     }
 
     public async Task<IActionResult> OnGetDataAsync()
@@ -64,7 +68,204 @@ public class DepartmentModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostCreateAsync(string? departmentName)
+    private async Task LoadDropdownOptionsAsync()
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrEmpty(token)) return;
+        var baseUrl = GetApiBaseUrl();
+        if (string.IsNullOrEmpty(baseUrl)) return;
+
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            var shiftsTask = FetchShiftOptionsAsync(client, baseUrl);
+            var locationsTask = client.GetFromJsonAsync<List<LocationOption>>(baseUrl + "/api/org-locations/current");
+            await Task.WhenAll(shiftsTask, locationsTask);
+
+            ShiftOptions = shiftsTask.Result;
+
+            LocationOptions = (locationsTask.Result ?? new List<LocationOption>())
+                .Where(l => l.IsActive)
+                .OrderBy(l => l.LocationName)
+                .ToList();
+        }
+        catch
+        {
+            ShiftOptions = new List<ShiftOption>();
+            LocationOptions = new List<LocationOption>();
+        }
+    }
+
+    private static async Task<List<ShiftOption>> FetchShiftOptionsAsync(HttpClient client, string baseUrl)
+    {
+        var resp = await client.GetAsync(baseUrl + "/api/org-shift-templates/current");
+        if (!resp.IsSuccessStatusCode) return new List<ShiftOption>();
+
+        var json = await resp.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(json)) return new List<ShiftOption>();
+
+        using var doc = JsonDocument.Parse(json);
+        JsonElement templatesEl;
+        if (doc.RootElement.ValueKind == JsonValueKind.Array)
+        {
+            templatesEl = doc.RootElement;
+        }
+        else if (doc.RootElement.TryGetProperty("templates", out var t1))
+        {
+            templatesEl = t1;
+        }
+        else if (doc.RootElement.TryGetProperty("Templates", out var t2))
+        {
+            templatesEl = t2;
+        }
+        else
+        {
+            return new List<ShiftOption>();
+        }
+
+        if (templatesEl.ValueKind != JsonValueKind.Array) return new List<ShiftOption>();
+
+        var list = new List<ShiftOption>();
+        foreach (var item in templatesEl.EnumerateArray())
+        {
+            var isActive = item.TryGetProperty("isActive", out var ia1) ? ia1.GetBoolean()
+                : item.TryGetProperty("IsActive", out var ia2) && ia2.GetBoolean();
+            if (!isActive) continue;
+
+            var code = item.TryGetProperty("code", out var c1) ? c1.GetString()
+                : item.TryGetProperty("Code", out var c2) ? c2.GetString() : null;
+            var name = item.TryGetProperty("name", out var n1) ? n1.GetString()
+                : item.TryGetProperty("Name", out var n2) ? n2.GetString() : null;
+            var type = item.TryGetProperty("type", out var ty1) ? ty1.GetString()
+                : item.TryGetProperty("Type", out var ty2) ? ty2.GetString() : "Fixed";
+
+            if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name)) continue;
+
+            var timeSummary = BuildTimeSummary(item, type ?? "Fixed");
+            var requiredHoursSummary = BuildRequiredHoursSummary(item, type ?? "Fixed");
+            list.Add(new ShiftOption
+            {
+                Code = code,
+                Name = name,
+                Type = type ?? "Fixed",
+                TimeSummary = timeSummary,
+                DisplayLabel = $"{name} ({type}) - {timeSummary} | {requiredHoursSummary}",
+                IsActive = true
+            });
+        }
+
+        return list.OrderBy(x => x.Name).ToList();
+    }
+
+    private static string BuildTimeSummary(JsonElement item, string type)
+    {
+        if (type.Equals("Fixed", StringComparison.OrdinalIgnoreCase))
+        {
+            var fixedEl = item.TryGetProperty("fixed", out var f1) ? f1 : item.TryGetProperty("Fixed", out var f2) ? f2 : default;
+            string? start = null;
+            string? end = null;
+            if (fixedEl.ValueKind == JsonValueKind.Object)
+            {
+                start = fixedEl.TryGetProperty("startTime", out var s1) ? s1.GetString() : fixedEl.TryGetProperty("StartTime", out var s2) ? s2.GetString() : null;
+                end = fixedEl.TryGetProperty("endTime", out var e1) ? e1.GetString() : fixedEl.TryGetProperty("EndTime", out var e2) ? e2.GetString() : null;
+            }
+            return $"{(string.IsNullOrWhiteSpace(start) ? "--:--" : start)} - {(string.IsNullOrWhiteSpace(end) ? "--:--" : end)}";
+        }
+
+        if (type.Equals("Flexible", StringComparison.OrdinalIgnoreCase))
+        {
+            var flexEl = item.TryGetProperty("flexible", out var f1) ? f1 : item.TryGetProperty("Flexible", out var f2) ? f2 : default;
+            string? start = null;
+            string? end = null;
+            if (flexEl.ValueKind == JsonValueKind.Object)
+            {
+                start = flexEl.TryGetProperty("earliestStart", out var s1) ? s1.GetString() : flexEl.TryGetProperty("EarliestStart", out var s2) ? s2.GetString() : null;
+                end = flexEl.TryGetProperty("latestEnd", out var e1) ? e1.GetString() : flexEl.TryGetProperty("LatestEnd", out var e2) ? e2.GetString() : null;
+            }
+            return $"{(string.IsNullOrWhiteSpace(start) ? "--:--" : start)} - {(string.IsNullOrWhiteSpace(end) ? "--:--" : end)}";
+        }
+
+        return "No fixed time";
+    }
+
+    private static string BuildRequiredHoursSummary(JsonElement item, string type)
+    {
+        if (type.Equals("Fixed", StringComparison.OrdinalIgnoreCase))
+        {
+            var fixedEl = item.TryGetProperty("fixed", out var f1) ? f1 : item.TryGetProperty("Fixed", out var f2) ? f2 : default;
+            if (fixedEl.ValueKind == JsonValueKind.Object)
+            {
+                if (TryGetDecimal(fixedEl, "requiredHours", "RequiredHours", out var requiredHours))
+                    return $"Required: {requiredHours:0.##} hrs/day";
+
+                var start = fixedEl.TryGetProperty("startTime", out var s1) ? s1.GetString() : fixedEl.TryGetProperty("StartTime", out var s2) ? s2.GetString() : null;
+                var end = fixedEl.TryGetProperty("endTime", out var e1) ? e1.GetString() : fixedEl.TryGetProperty("EndTime", out var e2) ? e2.GetString() : null;
+                var breakMinutes = TryGetInt(fixedEl, "breakMinutes", "BreakMinutes", out var bm) ? bm : 0;
+                var computed = ComputeHoursFromWindow(start, end, breakMinutes);
+                if (computed.HasValue)
+                    return $"Required: {computed.Value:0.##} hrs/day";
+            }
+            return "Required: --";
+        }
+
+        if (type.Equals("Flexible", StringComparison.OrdinalIgnoreCase))
+        {
+            var flexEl = item.TryGetProperty("flexible", out var f1) ? f1 : item.TryGetProperty("Flexible", out var f2) ? f2 : default;
+            if (flexEl.ValueKind == JsonValueKind.Object && TryGetDecimal(flexEl, "requiredDailyHours", "RequiredDailyHours", out var requiredDaily))
+                return $"Required: {requiredDaily:0.##} hrs/day";
+            return "Required: --";
+        }
+
+        var openEl = item.TryGetProperty("open", out var o1) ? o1 : item.TryGetProperty("Open", out var o2) ? o2 : default;
+        if (openEl.ValueKind == JsonValueKind.Object && TryGetDecimal(openEl, "requiredWeeklyHours", "RequiredWeeklyHours", out var requiredWeekly))
+            return $"Required: {requiredWeekly:0.##} hrs/week";
+        return "Required: --";
+    }
+
+    private static bool TryGetDecimal(JsonElement element, string camel, string pascal, out decimal value)
+    {
+        value = 0;
+        if (element.TryGetProperty(camel, out var c)) return TryParseDecimal(c, out value);
+        if (element.TryGetProperty(pascal, out var p)) return TryParseDecimal(p, out value);
+        return false;
+    }
+
+    private static bool TryGetInt(JsonElement element, string camel, string pascal, out int value)
+    {
+        value = 0;
+        if (element.TryGetProperty(camel, out var c)) return TryParseInt(c, out value);
+        if (element.TryGetProperty(pascal, out var p)) return TryParseInt(p, out value);
+        return false;
+    }
+
+    private static bool TryParseDecimal(JsonElement el, out decimal value)
+    {
+        value = 0;
+        if (el.ValueKind == JsonValueKind.Number) return el.TryGetDecimal(out value);
+        if (el.ValueKind == JsonValueKind.String) return decimal.TryParse(el.GetString(), out value);
+        return false;
+    }
+
+    private static bool TryParseInt(JsonElement el, out int value)
+    {
+        value = 0;
+        if (el.ValueKind == JsonValueKind.Number) return el.TryGetInt32(out value);
+        if (el.ValueKind == JsonValueKind.String) return int.TryParse(el.GetString(), out value);
+        return false;
+    }
+
+    private static decimal? ComputeHoursFromWindow(string? start, string? end, int breakMinutes)
+    {
+        if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(end)) return null;
+        if (!TimeSpan.TryParse(start, out var s) || !TimeSpan.TryParse(end, out var e)) return null;
+        var total = (e - s).TotalMinutes;
+        if (total < 0) total += 24 * 60;
+        total -= breakMinutes;
+        if (total < 0) total = 0;
+        return Math.Round((decimal)(total / 60.0), 2);
+    }
+
+    public async Task<IActionResult> OnPostCreateAsync(string? departmentName, string? defaultShiftTemplateCode, int? defaultLocationId)
     {
         if (string.IsNullOrWhiteSpace(departmentName))
             return JsonError("Department name is required.", 400);
@@ -78,7 +279,12 @@ public class DepartmentModel : PageModel
         {
             var client = CreateAuthorizedApiClient(token);
             client.Timeout = TimeSpan.FromSeconds(10);
-            var resp = await client.PostAsJsonAsync(baseUrl + "/api/departments", new { DepartmentName = departmentName.Trim() });
+            var resp = await client.PostAsJsonAsync(baseUrl + "/api/departments", new
+            {
+                DepartmentName = departmentName.Trim(),
+                DefaultShiftTemplateCode = string.IsNullOrWhiteSpace(defaultShiftTemplateCode) ? null : defaultShiftTemplateCode.Trim(),
+                DefaultLocationId = defaultLocationId
+            });
             if (!resp.IsSuccessStatusCode)
             {
                 var message = await TryGetMessageAsync(resp) ?? (resp.StatusCode == System.Net.HttpStatusCode.Conflict
@@ -111,7 +317,7 @@ public class DepartmentModel : PageModel
         return new JsonResult(new { ok = false, message }) { StatusCode = statusCode };
     }
 
-    public async Task<IActionResult> OnPostUpdateAsync(int id, string? departmentName)
+    public async Task<IActionResult> OnPostUpdateAsync(int id, string? departmentName, string? defaultShiftTemplateCode, int? defaultLocationId)
     {
         if (string.IsNullOrWhiteSpace(departmentName))
             return JsonError("Department name is required.", 400);
@@ -125,7 +331,12 @@ public class DepartmentModel : PageModel
         {
             var client = CreateAuthorizedApiClient(token);
             client.Timeout = TimeSpan.FromSeconds(10);
-            var resp = await client.PutAsJsonAsync(baseUrl + $"/api/departments/{id}", new { DepartmentName = departmentName.Trim() });
+            var resp = await client.PutAsJsonAsync(baseUrl + $"/api/departments/{id}", new
+            {
+                DepartmentName = departmentName.Trim(),
+                DefaultShiftTemplateCode = string.IsNullOrWhiteSpace(defaultShiftTemplateCode) ? null : defaultShiftTemplateCode.Trim(),
+                DefaultLocationId = defaultLocationId
+            });
             if (!resp.IsSuccessStatusCode)
             {
                 var message = await TryGetMessageAsync(resp) ?? (resp.StatusCode == System.Net.HttpStatusCode.Conflict
@@ -165,8 +376,16 @@ public class DepartmentModel : PageModel
         }
         try
         {
+            var trimmedReason = (reason ?? string.Empty).Trim();
+            if (trimmedReason.Length > 60)
+            {
+                TempData["ToastMessage"] = "Reason must be 60 characters or fewer.";
+                TempData["ToastSuccess"] = false;
+                return RedirectToPage();
+            }
+
             var client = CreateAuthorizedApiClient(token);
-            var payload = new { IsActive = isActive, Reason = reason?.Trim() ?? "" };
+            var payload = new { IsActive = isActive, Reason = trimmedReason };
             var resp = await client.PatchAsJsonAsync(baseUrl + $"/api/departments/{id}/status", payload);
             if (!resp.IsSuccessStatusCode)
             {
@@ -219,8 +438,27 @@ public class DepartmentModel : PageModel
         public int OrgID { get; set; }
         public string DepartmentName { get; set; } = "";
         public string? Description { get; set; }
+        public string? DefaultShiftTemplateCode { get; set; }
+        public int? DefaultLocationId { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public int EmployeeCount { get; set; }
+    }
+
+    public class ShiftOption
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Type { get; set; } = "Fixed";
+        public string TimeSummary { get; set; } = "--:-- - --:--";
+        public string DisplayLabel { get; set; } = "";
+        public bool IsActive { get; set; }
+    }
+
+    public class LocationOption
+    {
+        public int LocationId { get; set; }
+        public string LocationName { get; set; } = "";
+        public bool IsActive { get; set; }
     }
 }

@@ -18,6 +18,8 @@ public class AddModel : PageModel
     }
 
     public List<DepartmentItem> Departments { get; set; } = new();
+    public List<ShiftTemplateItem> ShiftTemplates { get; set; } = new();
+    public List<LocationItem> Locations { get; set; } = new();
     public string? Error { get; set; }
     public string? ToastMessage { get; set; }
     public bool? ToastSuccess { get; set; }
@@ -36,7 +38,7 @@ public class AddModel : PageModel
 
     public async Task OnGetAsync()
     {
-        await LoadDepartmentsAsync();
+        await LoadFormOptionsAsync();
     }
 
     public async Task<IActionResult> OnGetNextEmpNumberAsync(string? role)
@@ -82,7 +84,7 @@ public class AddModel : PageModel
         }
     }
 
-    private async Task LoadDepartmentsAsync()
+    private async Task LoadFormOptionsAsync()
     {
         var token = GetAccessToken();
         if (string.IsNullOrEmpty(token)) return;
@@ -91,11 +93,20 @@ public class AddModel : PageModel
         try
         {
             var client = CreateAuthorizedApiClient(token);
-            Departments = await FetchDepartmentsAsync(client, baseUrl);
+            var departmentsTask = FetchDepartmentsAsync(client, baseUrl);
+            var shiftsTask = FetchShiftTemplatesAsync(client, baseUrl);
+            var locationsTask = FetchLocationsAsync(client, baseUrl);
+            await Task.WhenAll(departmentsTask, shiftsTask, locationsTask);
+
+            Departments = departmentsTask.Result;
+            ShiftTemplates = shiftsTask.Result;
+            Locations = locationsTask.Result;
         }
         catch
         {
             Departments = new List<DepartmentItem>();
+            ShiftTemplates = new List<ShiftTemplateItem>();
+            Locations = new List<LocationItem>();
         }
     }
 
@@ -103,6 +114,7 @@ public class AddModel : PageModel
         string firstName, string lastName, string? middleName,
         DateTime? birthDate, string? gender,
         string? empNumber, int? departmentID, DateTime? dateHired,
+        string? assignedShiftTemplateCode, int? assignedLocationId,
         string? phone, string addressLine1, string? addressLine2,
         string city, string? stateProvince, string? postalCode, string country,
         string role, string employmentType,
@@ -111,7 +123,7 @@ public class AddModel : PageModel
         string? idPictureUrl, string? signatureUrl,
         IFormFile? profilePicture, IFormFile? signature)
     {
-        await LoadDepartmentsAsync();
+        await LoadFormOptionsAsync();
 
         var token = GetAccessToken();
         if (string.IsNullOrEmpty(token))
@@ -155,7 +167,7 @@ public class AddModel : PageModel
             {
                 TempData["ToastMessage"] = "Birthdate must make employee between 19 and 70 years old.";
                 TempData["ToastSuccess"] = false;
-                await LoadDepartmentsAsync();
+                await LoadFormOptionsAsync();
                 return Page();
             }
 
@@ -201,6 +213,8 @@ public class AddModel : PageModel
         {
             UserID = (int?)null,
             DepartmentID = departmentID,
+            AssignedShiftTemplateCode = string.IsNullOrWhiteSpace(assignedShiftTemplateCode) ? null : assignedShiftTemplateCode.Trim(),
+            AssignedLocationId = assignedLocationId,
             EmpNumber = string.IsNullOrWhiteSpace(empNumber) ? null : empNumber.Trim(),
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
@@ -366,6 +380,169 @@ public class AddModel : PageModel
         return list ?? new List<DepartmentItem>();
     }
 
+    private static async Task<List<ShiftTemplateItem>> FetchShiftTemplatesAsync(HttpClient client, string baseUrl)
+    {
+        var resp = await client.GetAsync(baseUrl + "/api/org-shift-templates/current");
+        if (!resp.IsSuccessStatusCode) return new List<ShiftTemplateItem>();
+
+        var json = await resp.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(json)) return new List<ShiftTemplateItem>();
+
+        using var doc = JsonDocument.Parse(json);
+        JsonElement templatesEl;
+        if (doc.RootElement.ValueKind == JsonValueKind.Array)
+            templatesEl = doc.RootElement;
+        else if (doc.RootElement.TryGetProperty("templates", out var t1))
+            templatesEl = t1;
+        else if (doc.RootElement.TryGetProperty("Templates", out var t2))
+            templatesEl = t2;
+        else
+            return new List<ShiftTemplateItem>();
+
+        if (templatesEl.ValueKind != JsonValueKind.Array) return new List<ShiftTemplateItem>();
+
+        var list = new List<ShiftTemplateItem>();
+        foreach (var item in templatesEl.EnumerateArray())
+        {
+            var isActive = item.TryGetProperty("isActive", out var ia1) ? ia1.GetBoolean()
+                : item.TryGetProperty("IsActive", out var ia2) && ia2.GetBoolean();
+            if (!isActive) continue;
+
+            var code = item.TryGetProperty("code", out var c1) ? c1.GetString() : item.TryGetProperty("Code", out var c2) ? c2.GetString() : null;
+            var name = item.TryGetProperty("name", out var n1) ? n1.GetString() : item.TryGetProperty("Name", out var n2) ? n2.GetString() : null;
+            var type = item.TryGetProperty("type", out var ty1) ? ty1.GetString() : item.TryGetProperty("Type", out var ty2) ? ty2.GetString() : "Fixed";
+            if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name)) continue;
+
+            var time = BuildShiftTimeSummary(item, type ?? "Fixed");
+            var required = BuildRequiredHoursSummary(item, type ?? "Fixed");
+            list.Add(new ShiftTemplateItem
+            {
+                Code = code,
+                Name = name,
+                Type = type ?? "Fixed",
+                TimeSummary = time,
+                DisplayLabel = $"{name} ({type}) - {time} | {required}",
+                IsActive = true
+            });
+        }
+
+        return list.OrderBy(x => x.Name).ToList();
+    }
+
+    private static string BuildShiftTimeSummary(JsonElement item, string type)
+    {
+        if (type.Equals("Fixed", StringComparison.OrdinalIgnoreCase))
+        {
+            var fixedEl = item.TryGetProperty("fixed", out var f1) ? f1 : item.TryGetProperty("Fixed", out var f2) ? f2 : default;
+            string? start = null;
+            string? end = null;
+            if (fixedEl.ValueKind == JsonValueKind.Object)
+            {
+                start = fixedEl.TryGetProperty("startTime", out var s1) ? s1.GetString() : fixedEl.TryGetProperty("StartTime", out var s2) ? s2.GetString() : null;
+                end = fixedEl.TryGetProperty("endTime", out var e1) ? e1.GetString() : fixedEl.TryGetProperty("EndTime", out var e2) ? e2.GetString() : null;
+            }
+            return $"{(string.IsNullOrWhiteSpace(start) ? "--:--" : start)} - {(string.IsNullOrWhiteSpace(end) ? "--:--" : end)}";
+        }
+
+        if (type.Equals("Flexible", StringComparison.OrdinalIgnoreCase))
+        {
+            var flexEl = item.TryGetProperty("flexible", out var f1) ? f1 : item.TryGetProperty("Flexible", out var f2) ? f2 : default;
+            string? start = null;
+            string? end = null;
+            if (flexEl.ValueKind == JsonValueKind.Object)
+            {
+                start = flexEl.TryGetProperty("earliestStart", out var s1) ? s1.GetString() : flexEl.TryGetProperty("EarliestStart", out var s2) ? s2.GetString() : null;
+                end = flexEl.TryGetProperty("latestEnd", out var e1) ? e1.GetString() : flexEl.TryGetProperty("LatestEnd", out var e2) ? e2.GetString() : null;
+            }
+            return $"{(string.IsNullOrWhiteSpace(start) ? "--:--" : start)} - {(string.IsNullOrWhiteSpace(end) ? "--:--" : end)}";
+        }
+
+        return "No fixed time";
+    }
+
+    private static string BuildRequiredHoursSummary(JsonElement item, string type)
+    {
+        if (type.Equals("Fixed", StringComparison.OrdinalIgnoreCase))
+        {
+            var fixedEl = item.TryGetProperty("fixed", out var f1) ? f1 : item.TryGetProperty("Fixed", out var f2) ? f2 : default;
+            if (fixedEl.ValueKind == JsonValueKind.Object)
+            {
+                if (TryGetDecimal(fixedEl, "requiredHours", "RequiredHours", out var requiredHours))
+                    return $"Required: {requiredHours:0.##} hrs/day";
+
+                var start = fixedEl.TryGetProperty("startTime", out var s1) ? s1.GetString() : fixedEl.TryGetProperty("StartTime", out var s2) ? s2.GetString() : null;
+                var end = fixedEl.TryGetProperty("endTime", out var e1) ? e1.GetString() : fixedEl.TryGetProperty("EndTime", out var e2) ? e2.GetString() : null;
+                var breakMinutes = TryGetInt(fixedEl, "breakMinutes", "BreakMinutes", out var bm) ? bm : 0;
+                var computed = ComputeHoursFromWindow(start, end, breakMinutes);
+                if (computed.HasValue)
+                    return $"Required: {computed.Value:0.##} hrs/day";
+            }
+            return "Required: --";
+        }
+
+        if (type.Equals("Flexible", StringComparison.OrdinalIgnoreCase))
+        {
+            var flexEl = item.TryGetProperty("flexible", out var f1) ? f1 : item.TryGetProperty("Flexible", out var f2) ? f2 : default;
+            if (flexEl.ValueKind == JsonValueKind.Object && TryGetDecimal(flexEl, "requiredDailyHours", "RequiredDailyHours", out var requiredDaily))
+                return $"Required: {requiredDaily:0.##} hrs/day";
+            return "Required: --";
+        }
+
+        var openEl = item.TryGetProperty("open", out var o1) ? o1 : item.TryGetProperty("Open", out var o2) ? o2 : default;
+        if (openEl.ValueKind == JsonValueKind.Object && TryGetDecimal(openEl, "requiredWeeklyHours", "RequiredWeeklyHours", out var requiredWeekly))
+            return $"Required: {requiredWeekly:0.##} hrs/week";
+        return "Required: --";
+    }
+
+    private static bool TryGetDecimal(JsonElement element, string camel, string pascal, out decimal value)
+    {
+        value = 0;
+        if (element.TryGetProperty(camel, out var c)) return TryParseDecimal(c, out value);
+        if (element.TryGetProperty(pascal, out var p)) return TryParseDecimal(p, out value);
+        return false;
+    }
+
+    private static bool TryGetInt(JsonElement element, string camel, string pascal, out int value)
+    {
+        value = 0;
+        if (element.TryGetProperty(camel, out var c)) return TryParseInt(c, out value);
+        if (element.TryGetProperty(pascal, out var p)) return TryParseInt(p, out value);
+        return false;
+    }
+
+    private static bool TryParseDecimal(JsonElement el, out decimal value)
+    {
+        value = 0;
+        if (el.ValueKind == JsonValueKind.Number) return el.TryGetDecimal(out value);
+        if (el.ValueKind == JsonValueKind.String) return decimal.TryParse(el.GetString(), out value);
+        return false;
+    }
+
+    private static bool TryParseInt(JsonElement el, out int value)
+    {
+        value = 0;
+        if (el.ValueKind == JsonValueKind.Number) return el.TryGetInt32(out value);
+        if (el.ValueKind == JsonValueKind.String) return int.TryParse(el.GetString(), out value);
+        return false;
+    }
+
+    private static decimal? ComputeHoursFromWindow(string? start, string? end, int breakMinutes)
+    {
+        if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(end)) return null;
+        if (!TimeSpan.TryParse(start, out var s) || !TimeSpan.TryParse(end, out var e)) return null;
+        var total = (e - s).TotalMinutes;
+        if (total < 0) total += 24 * 60;
+        total -= breakMinutes;
+        if (total < 0) total = 0;
+        return Math.Round((decimal)(total / 60.0), 2);
+    }
+
+    private static async Task<List<LocationItem>> FetchLocationsAsync(HttpClient client, string baseUrl)
+    {
+        var list = await client.GetFromJsonAsync<List<LocationItem>>(baseUrl + "/api/org-locations/current");
+        return (list ?? new List<LocationItem>()).Where(x => x.IsActive).OrderBy(x => x.LocationName).ToList();
+    }
+
     // Employee Management - fetching data API functions
     private static async Task<string> FetchNextEmpNumberAsync(HttpClient client, string baseUrl, string? role)
     {
@@ -420,6 +597,25 @@ public class AddModel : PageModel
     {
         public int DepID { get; set; }
         public string DepartmentName { get; set; } = "";
+        public string? DefaultShiftTemplateCode { get; set; }
+        public int? DefaultLocationId { get; set; }
+    }
+
+    public class ShiftTemplateItem
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Type { get; set; } = "Fixed";
+        public string TimeSummary { get; set; } = "--:-- - --:--";
+        public string DisplayLabel { get; set; } = "";
+        public bool IsActive { get; set; }
+    }
+
+    public class LocationItem
+    {
+        public int LocationId { get; set; }
+        public string LocationName { get; set; } = "";
+        public bool IsActive { get; set; }
     }
 
     private class UniqueCheckResponse

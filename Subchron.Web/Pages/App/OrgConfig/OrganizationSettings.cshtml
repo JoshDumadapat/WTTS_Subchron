@@ -140,6 +140,7 @@
             if (tabEl) tabEl.classList.remove('hidden');
             // So the map can reflow when Locations tab is shown (was hidden = wrong size)
             if (tabId === 'tab-locations') tabEl.dispatchEvent(new CustomEvent('org-locations-tab-shown'));
+            if (tabId === 'tab-shifts') tabEl.dispatchEvent(new CustomEvent('org-shifts-tab-shown'));
 
             // Reset scroll position to top when switching tabs
             document.getElementById('org-settings-scroll').scrollTop = 0;

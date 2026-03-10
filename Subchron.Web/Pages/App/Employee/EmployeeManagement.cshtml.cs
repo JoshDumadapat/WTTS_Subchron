@@ -573,6 +573,12 @@ public class EmployeeManagementModel : PageModel
             TempData["ToastSuccess"] = false;
             return RedirectToPage();
         }
+        if (r.Length > 60)
+        {
+            TempData["ToastMessage"] = "Archive reason must be 60 characters or fewer.";
+            TempData["ToastSuccess"] = false;
+            return RedirectToPage();
+        }
         try
         {
             var client = CreateAuthorizedApiClient(token);

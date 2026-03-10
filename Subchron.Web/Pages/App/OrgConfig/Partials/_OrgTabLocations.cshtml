@@ -274,8 +274,10 @@
                                     <label for="action-reason" class="block text-sm font-semibold text-gray-700 dark:text-gray-200">Reason / Remarks</label>
                                     <textarea id="action-reason"
                                                rows="3"
-                                               class="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                                               maxlength="60"
+                                               class="mt-2 block w-full rounded-lg border border-white bg-white px-3 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-slate-200 placeholder:text-gray-400 focus:ring-2 focus:ring-white focus:outline-none sm:text-sm dark:border-white/20 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
                                                placeholder="e.g. Site renovation, relocation..."></textarea>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-right"><span id="action-reason-count">0/60</span></p>
                                 </div>
                             </div>
                         </div>
@@ -1069,6 +1071,7 @@
         const modalIcon = document.getElementById('modal-icon');
         const reasonWrapper = document.getElementById('action-reason-wrapper');
         const reasonInput = document.getElementById('action-reason');
+        const reasonCount = document.getElementById('action-reason-count');
         const modalConfirmBtn = document.getElementById('modal-confirm-btn');
         const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
@@ -1155,6 +1158,11 @@
             reasonWrapper?.classList.toggle('hidden', !show);
         }
 
+        function updateActionReasonCounter() {
+            if (!reasonInput || !reasonCount) return;
+            reasonCount.textContent = `${reasonInput.value.length}/60`;
+        }
+
         function applyModalTheme(isDeactivate) {
             if (!modalIconWrap || !modalIcon || !modalConfirmBtn) return;
             const dangerIconClasses = ['bg-red-100', 'dark:bg-red-900/30'];
@@ -1178,7 +1186,6 @@
             statusModal.classList.toggle('hidden', !show);
             if (!show) {
                 pendingStatusSite = null;
-                reasonInput?.classList.remove('border-red-500');
                 reasonInput?.blur();
             }
         }
@@ -1191,7 +1198,7 @@
             toggleReasonVisibility(isDeactivate);
             if (reasonInput) {
                 reasonInput.value = isDeactivate ? '' : (site.deactivationReason || '');
-                reasonInput.classList.remove('border-red-500');
+                updateActionReasonCounter();
             }
             modalTitleEl.textContent = pendingStatusActive ? 'Reactivate Site' : `Deactivate ${site.locationName}`;
             modalDescEl.textContent = pendingStatusActive
@@ -1211,6 +1218,7 @@
             evt.preventDefault();
             hideStatusModal();
         });
+        reasonInput?.addEventListener('input', updateActionReasonCounter);
 
         function formatCoord(value) {
             const num = Number(value);
@@ -1487,11 +1495,15 @@
             const isDeactivate = !pendingStatusActive;
             let reasonValue = reasonInput?.value?.trim() || '';
             if (isDeactivate && !reasonValue) {
-                reasonInput?.classList.add('border-red-500');
                 reasonInput?.focus();
+                window.showToast?.('Please provide a reason before deactivating this site.', false);
                 return;
             }
-            reasonInput?.classList.remove('border-red-500');
+            if (reasonValue.length > 60) {
+                reasonInput?.focus();
+                window.showToast?.('Reason must be 60 characters or fewer.', false);
+                return;
+            }
             if (!isDeactivate) reasonValue = '';
 
             statusSubmitting = true;
@@ -1617,6 +1629,7 @@
             evt.preventDefault();
             resetFormState();
         });
+        updateActionReasonCounter();
         loadSites();
 
         window.orgLocationsFormApi = {

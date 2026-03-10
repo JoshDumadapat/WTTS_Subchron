@@ -205,7 +205,27 @@
                         <option value="">— Select —</option>
                         @foreach (var d in Model.Departments)
                         {
-                            <option value="@d.DepID">@d.DepartmentName</option>
+                            <option value="@d.DepID" data-default-shift="@d.DefaultShiftTemplateCode" data-default-location="@d.DefaultLocationId">@d.DepartmentName</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="addAssignedShiftTemplateCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Shift assignment</label>
+                    <select name="assignedShiftTemplateCode" id="addAssignedShiftTemplateCode" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">— Use department/org default —</option>
+                        @foreach (var s in Model.ShiftTemplates)
+                        {
+                            <option value="@s.Code">@s.DisplayLabel</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="addAssignedLocationId" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Site location assignment</label>
+                    <select name="assignedLocationId" id="addAssignedLocationId" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">— Use department default —</option>
+                        @foreach (var l in Model.Locations)
+                        {
+                            <option value="@l.LocationId">@l.LocationName</option>
                         }
                     </select>
                 </div>
@@ -611,6 +631,9 @@
 
     var addRole = document.getElementById('addRole');
     var addEmpNumber = document.getElementById('addEmpNumber');
+    var addDepartmentID = document.getElementById('addDepartmentID');
+    var addAssignedShiftTemplateCode = document.getElementById('addAssignedShiftTemplateCode');
+    var addAssignedLocationId = document.getElementById('addAssignedLocationId');
     var nextEmpNumberAbortController = null;
     var empNumberCache = Object.create(null);
     if (addRole && addEmpNumber) {
@@ -902,6 +925,18 @@
         
         form.submit();
     }
+
+    function applyDepartmentDefaults() {
+        if (!addDepartmentID) return;
+        var selected = addDepartmentID.options[addDepartmentID.selectedIndex];
+        if (!selected) return;
+        var defaultShift = selected.getAttribute('data-default-shift') || '';
+        var defaultLocation = selected.getAttribute('data-default-location') || '';
+        if (addAssignedShiftTemplateCode) addAssignedShiftTemplateCode.value = defaultShift;
+        if (addAssignedLocationId) addAssignedLocationId.value = defaultLocation;
+    }
+
+    addDepartmentID?.addEventListener('change', applyDepartmentDefaults);
 
     function scrollToFirstError() {
         var firstError = document.querySelector('.field-error:not(.hidden)');

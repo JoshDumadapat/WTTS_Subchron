@@ -1,174 +1,551 @@
 @page
 @model Subchron.Web.Pages.Employee.LeaveModel
 @{
-    ViewData["Title"] = "Leave Requests";
-    ViewData["PageTitle"] = "Leave Requests";
+    ViewData["Title"] = "Leave";
+    ViewData["PageTitle"] = "Leave";
     Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
 }
 
-<div class="mx-auto max-w-5xl">
-    <div class="mb-6 flex gap-2 border-b border-slate-200 dark:border-slate-700">
-        <button type="button" id="tabNewLeave" class="emp-tab border-b-2 border-subgreen-600 pb-2 text-sm font-semibold text-subgreen-600 dark:border-subgreen-400 dark:text-subgreen-400">New Request</button>
-        <button type="button" id="tabMyLeaves" class="emp-tab border-b-2 border-transparent pb-2 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300">My Leave Requests</button>
-    </div>
+<div class="mx-auto w-full max-w-6xl space-y-6">
+    <!-- Header -->
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Leave</h1>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View balance, file a request, and track status.</p>
+            </div>
 
-    <div id="panelNewLeave" class="space-y-6">
-        <p class="text-sm text-slate-500 dark:text-slate-400">Submit a leave request for manager approval.</p>
-        <form id="leaveForm" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-2">
+            <div class="flex gap-2">
+                <button type="button"
+                        data-tab-target="new"
+                        class="rounded-2xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                    New Request
+                </button>
+                <button type="button"
+                        data-tab-target="requests"
+                        class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                    My Requests
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Balance -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Service Incentive Leave</p>
+            <div class="mt-2 flex items-end gap-2">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">3</h2>
+                <p class="pb-1 text-sm text-slate-500 dark:text-slate-400">of 5 days available</p>
+            </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Request</p>
+            <div class="mt-2 flex items-end gap-2">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">1</h2>
+                <p class="pb-1 text-sm text-slate-500 dark:text-slate-400">awaiting approval</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tabs -->
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="border-b border-slate-200 px-4 dark:border-slate-800 sm:px-6">
+            <div class="flex gap-6 overflow-x-auto">
+                <button type="button"
+                        id="tabNewLeave"
+                        class="emp-tab shrink-0 border-b-2 border-subgreen-600 px-1 py-4 text-sm font-semibold text-subgreen-600 dark:border-subgreen-400 dark:text-subgreen-400">
+                    New Request
+                </button>
+                <button type="button"
+                        id="tabMyLeaves"
+                        class="emp-tab shrink-0 border-b-2 border-transparent px-1 py-4 text-sm font-semibold text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                    My Leave Requests
+                </button>
+            </div>
+        </div>
+
+        <!-- New Request -->
+        <div id="panelNewLeave" class="p-4 sm:p-6">
+            <form id="leaveForm" class="space-y-5">
+                <div>
                     <label for="leaveType" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Leave type</label>
-                    <select id="leaveType" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                    <select id="leaveType"
+                            required
+                            class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                         <option value="">Select type</option>
-                        <option value="Vacation">Vacation</option>
-                        <option value="Sick">Sick leave</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Bereavement">Bereavement</option>
-                        <option value="Parental">Parental</option>
-                        <option value="Other">Other</option>
+                        <option value="SIL"
+                                data-balance="3"
+                                data-advance-days="1"
+                                data-max-consecutive="5"
+                                data-requires-document="false"
+                                data-label="Service Incentive Leave">
+                            Service Incentive Leave
+                        </option>
+                        <option value="SLW"
+                                data-balance="60"
+                                data-advance-days="1"
+                                data-max-consecutive="60"
+                                data-requires-document="true"
+                                data-label="Special Leave for Women">
+                            Special Leave for Women
+                        </option>
                     </select>
                 </div>
-                <div>
-                    <label for="leaveStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Start date</label>
-                    <input type="date" id="leaveStart" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
-                </div>
-                <div>
-                    <label for="leaveEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">End date</label>
-                    <input type="date" id="leaveEnd" required class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
-                </div>
-                <div class="sm:col-span-2">
-                    <label for="leaveReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason / notes</label>
-                    <textarea id="leaveReason" rows="3" placeholder="Optional details" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"></textarea>
-                </div>
-            </div>
-            <p id="leaveValidationMsg" class="mt-2 hidden text-sm text-red-600 dark:text-red-400"></p>
-            <button type="submit" class="mt-4 w-full rounded-xl bg-subgreen-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">Submit Request</button>
-        </form>
-    </div>
 
-    <div id="panelMyLeaves" class="hidden space-y-4">
-        <p class="text-sm text-slate-500 dark:text-slate-400">View and track your leave requests.</p>
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Type</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Start</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">End</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Days</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Notes</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Submitted</th>
-                            <th class="px-5 py-3 font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaveTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                        <tr>
-                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Vacation</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Mar 10, 2025</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Mar 14, 2025</td>
-                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">5</td>
-                            <td class="max-w-[160px] truncate px-5 py-3 text-slate-500 dark:text-slate-400">Family trip</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 18, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Sick leave</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Feb 12, 2025</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Feb 12, 2025</td>
-                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">1</td>
-                            <td class="max-w-[160px] truncate px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 11, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Personal</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Feb 5, 2025</td>
-                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">Feb 6, 2025</td>
-                            <td class="px-5 py-3 tabular-nums text-slate-600 dark:text-slate-400">2</td>
-                            <td class="max-w-[160px] truncate px-5 py-3 text-slate-500 dark:text-slate-400">—</td>
-                            <td class="px-5 py-3 text-slate-500 dark:text-slate-400">Feb 1, 2025</td>
-                            <td class="px-5 py-3">
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="leaveTableEmpty" class="hidden px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No leave requests yet. Submit one from the New Request tab.</div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="leaveStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Start date</label>
+                        <input type="date"
+                               id="leaveStart"
+                               required
+                               class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+                    </div>
+                    <div>
+                        <label for="leaveEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">End date</label>
+                        <input type="date"
+                               id="leaveEnd"
+                               required
+                               class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
+                        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Available</p>
+                        <p id="summaryBalance" class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">—</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
+                        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Days</p>
+                        <p id="summaryDays" class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">0</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="leaveReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason / notes</label>
+                    <textarea id="leaveReason"
+                              rows="3"
+                              placeholder="Optional"
+                              class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"></textarea>
+                </div>
+
+                <div id="documentFieldWrap" class="hidden">
+                    <label for="leaveDocument" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Supporting document</label>
+                    <input type="file"
+                           id="leaveDocument"
+                           class="mt-1.5 block w-full rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-subgreen-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-subgreen-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:file:bg-subgreen-500 dark:hover:file:bg-subgreen-400" />
+                </div>
+
+                <p id="leaveValidationMsg" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"></p>
+                <p id="leaveSuccessMsg" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300"></p>
+
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button type="button"
+                            id="clearLeaveForm"
+                            class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                        Clear
+                    </button>
+                    <button type="submit"
+                            class="rounded-2xl bg-subgreen-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                        Submit Request
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
+
+        <!-- My Requests -->
+        <div id="panelMyLeaves" class="hidden space-y-4 p-4 sm:p-6">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <select id="filterStatus"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <option value="all">All status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+                <select id="filterType"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <option value="all">All types</option>
+                    <option value="Service Incentive Leave">Service Incentive Leave</option>
+                    <option value="Sick leave">Sick leave</option>
+                    <option value="Personal">Personal</option>
+                </select>
+
+                <select id="filterYear"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                    <option value="all">All years</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="2024">2024</option>
+                </select>
+            </div>
+
+            <!-- Desktop -->
+            <div class="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 md:block">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60">
+                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Type</th>
+                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Dates</th>
+                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Days</th>
+                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Submitted</th>
+                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaveTableBody" class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                            <tr class="leave-row"
+                                data-status="Pending"
+                                data-type="Service Incentive Leave"
+                                data-year="2025">
+                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Service Incentive Leave</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Mar 10–14, 2025</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">5</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 18, 2025</td>
+                                <td class="px-5 py-4">
+                                    <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Pending</span>
+                                </td>
+                            </tr>
+                            <tr class="leave-row"
+                                data-status="Approved"
+                                data-type="Sick leave"
+                                data-year="2025">
+                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Sick leave</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 12, 2025</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">1</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 11, 2025</td>
+                                <td class="px-5 py-4">
+                                    <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Approved</span>
+                                </td>
+                            </tr>
+                            <tr class="leave-row"
+                                data-status="Rejected"
+                                data-type="Personal"
+                                data-year="2025">
+                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Personal</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 5–6, 2025</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">2</td>
+                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 1, 2025</td>
+                                <td class="px-5 py-4">
+                                    <span class="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-500/10 dark:text-red-300">Rejected</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mobile -->
+            <div id="leaveMobileCards" class="space-y-3 md:hidden">
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                         data-status="Pending"
+                         data-type="Service Incentive Leave"
+                         data-year="2025">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-semibold text-slate-900 dark:text-white">Service Incentive Leave</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Mar 10–14, 2025</p>
+                        </div>
+                        <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Pending</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">5 day(s) • Submitted Feb 18, 2025</p>
+                </article>
+
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                         data-status="Approved"
+                         data-type="Sick leave"
+                         data-year="2025">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-semibold text-slate-900 dark:text-white">Sick leave</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Feb 12, 2025</p>
+                        </div>
+                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Approved</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">1 day • Submitted Feb 11, 2025</p>
+                </article>
+
+                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                         data-status="Rejected"
+                         data-type="Personal"
+                         data-year="2025">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-semibold text-slate-900 dark:text-white">Personal</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Feb 5–6, 2025</p>
+                        </div>
+                        <span class="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-500/10 dark:text-red-300">Rejected</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">2 day(s) • Submitted Feb 1, 2025</p>
+                </article>
+            </div>
+
+            <div id="leaveTableEmpty" class="hidden rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
+                No leave requests found.
+            </div>
+        </div>
+    </section>
 </div>
 
 @section Scripts {
-<script>
-(function () {
-    var tabNew = document.getElementById('tabNewLeave');
-    var tabMy = document.getElementById('tabMyLeaves');
-    var panelNew = document.getElementById('panelNewLeave');
-    var panelMy = document.getElementById('panelMyLeaves');
-    var form = document.getElementById('leaveForm');
-    var leaveType = document.getElementById('leaveType');
-    var leaveStart = document.getElementById('leaveStart');
-    var leaveEnd = document.getElementById('leaveEnd');
-    var leaveReason = document.getElementById('leaveReason');
-    var validationMsg = document.getElementById('leaveValidationMsg');
+    <script>
+        (function () {
+            var tabNew = document.getElementById('tabNewLeave');
+            var tabMy = document.getElementById('tabMyLeaves');
+            var panelNew = document.getElementById('panelNewLeave');
+            var panelMy = document.getElementById('panelMyLeaves');
 
-    function setActiveTab(active) {
-        var isNew = active === 'new';
-        panelNew.classList.toggle('hidden', !isNew);
-        panelMy.classList.toggle('hidden', isNew);
-        tabNew.classList.toggle('border-subgreen-600', isNew);
-        tabNew.classList.toggle('text-subgreen-600', isNew);
-        tabNew.classList.toggle('dark:border-subgreen-400', isNew);
-        tabNew.classList.toggle('dark:text-subgreen-400', isNew);
-        tabNew.classList.toggle('border-transparent', !isNew);
-        tabMy.classList.toggle('border-subgreen-600', !isNew);
-        tabMy.classList.toggle('text-subgreen-600', !isNew);
-        tabMy.classList.toggle('dark:border-subgreen-400', !isNew);
-        tabMy.classList.toggle('dark:text-subgreen-400', !isNew);
-        tabMy.classList.toggle('border-transparent', isNew);
-    }
+            var quickTabButtons = document.querySelectorAll('[data-tab-target]');
+            var form = document.getElementById('leaveForm');
+            var clearFormButton = document.getElementById('clearLeaveForm');
 
-    function showValidation(msg) {
-        if (!validationMsg) return;
-        validationMsg.textContent = msg || '';
-        validationMsg.classList.toggle('hidden', !msg);
-    }
+            var leaveType = document.getElementById('leaveType');
+            var leaveStart = document.getElementById('leaveStart');
+            var leaveEnd = document.getElementById('leaveEnd');
+            var leaveDocument = document.getElementById('leaveDocument');
 
-    tabNew && tabNew.addEventListener('click', function () { setActiveTab('new'); });
-    tabMy && tabMy.addEventListener('click', function () { setActiveTab('my'); });
+            var summaryBalance = document.getElementById('summaryBalance');
+            var summaryDays = document.getElementById('summaryDays');
+            var validationMsg = document.getElementById('leaveValidationMsg');
+            var successMsg = document.getElementById('leaveSuccessMsg');
+            var documentFieldWrap = document.getElementById('documentFieldWrap');
 
-    form && form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        showValidation('');
-        var typeVal = leaveType && leaveType.value;
-        var startVal = leaveStart && leaveStart.value;
-        var endVal = leaveEnd && leaveEnd.value;
-        if (!typeVal || !startVal || !endVal) {
-            showValidation('Please select leave type and enter start and end dates.');
-            return;
-        }
-        var start = new Date(startVal);
-        var end = new Date(endVal);
-        if (end < start) {
-            showValidation('End date must be on or after start date.');
-            return;
-        }
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (start < today) {
-            showValidation('Start date cannot be in the past.');
-            return;
-        }
-        showValidation('');
-        setActiveTab('my');
-        form.reset();
-    });
-})();
-</script>
+            var filterStatus = document.getElementById('filterStatus');
+            var filterType = document.getElementById('filterType');
+            var filterYear = document.getElementById('filterYear');
+            var leaveRows = document.querySelectorAll('.leave-row');
+            var leaveCards = document.querySelectorAll('.leave-card');
+            var emptyState = document.getElementById('leaveTableEmpty');
+
+            function setActiveTab(active) {
+                var isNew = active === 'new';
+
+                panelNew.classList.toggle('hidden', !isNew);
+                panelMy.classList.toggle('hidden', isNew);
+
+                tabNew.classList.toggle('border-subgreen-600', isNew);
+                tabNew.classList.toggle('text-subgreen-600', isNew);
+                tabNew.classList.toggle('dark:border-subgreen-400', isNew);
+                tabNew.classList.toggle('dark:text-subgreen-400', isNew);
+                tabNew.classList.toggle('border-transparent', !isNew);
+                tabNew.classList.toggle('text-slate-500', !isNew);
+                tabNew.classList.toggle('dark:text-slate-400', !isNew);
+
+                tabMy.classList.toggle('border-subgreen-600', !isNew);
+                tabMy.classList.toggle('text-subgreen-600', !isNew);
+                tabMy.classList.toggle('dark:border-subgreen-400', !isNew);
+                tabMy.classList.toggle('dark:text-subgreen-400', !isNew);
+                tabMy.classList.toggle('border-transparent', isNew);
+                tabMy.classList.toggle('text-slate-500', isNew);
+                tabMy.classList.toggle('dark:text-slate-400', isNew);
+            }
+
+            function showValidation(message) {
+                validationMsg.textContent = message || '';
+                validationMsg.classList.toggle('hidden', !message);
+            }
+
+            function showSuccess(message) {
+                successMsg.textContent = message || '';
+                successMsg.classList.toggle('hidden', !message);
+            }
+
+            function getSelectedPolicy() {
+                var option = leaveType && leaveType.options[leaveType.selectedIndex];
+                if (!option || !option.value) return null;
+
+                return {
+                    label: option.dataset.label || option.text,
+                    balance: parseFloat(option.dataset.balance || '0'),
+                    advanceDays: parseInt(option.dataset.advanceDays || '0', 10),
+                    maxConsecutive: parseInt(option.dataset.maxConsecutive || '0', 10),
+                    requiresDocument: option.dataset.requiresDocument === 'true'
+                };
+            }
+
+            function calculateRequestedDays() {
+                var startVal = leaveStart.value;
+                var endVal = leaveEnd.value;
+
+                if (!startVal || !endVal) {
+                    summaryDays.textContent = '0';
+                    return 0;
+                }
+
+                var start = new Date(startVal);
+                var end = new Date(endVal);
+
+                if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
+                    summaryDays.textContent = '0';
+                    return 0;
+                }
+
+                var diffTime = end.getTime() - start.getTime();
+                var days = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                summaryDays.textContent = String(days);
+                return days;
+            }
+
+            function updateLeaveTypeUI() {
+                var policy = getSelectedPolicy();
+
+                if (!policy) {
+                    summaryBalance.textContent = '—';
+                    documentFieldWrap.classList.add('hidden');
+                    if (leaveDocument) leaveDocument.value = '';
+                    return;
+                }
+
+                summaryBalance.textContent = policy.balance + ' day(s)';
+                documentFieldWrap.classList.toggle('hidden', !policy.requiresDocument);
+            }
+
+            function validateLeaveRequest() {
+                showValidation('');
+                showSuccess('');
+
+                var policy = getSelectedPolicy();
+                var startVal = leaveStart.value;
+                var endVal = leaveEnd.value;
+
+                if (!policy || !startVal || !endVal) {
+                    showValidation('Please complete the required fields.');
+                    return false;
+                }
+
+                var start = new Date(startVal);
+                var end = new Date(endVal);
+
+                if (end < start) {
+                    showValidation('End date must be on or after start date.');
+                    return false;
+                }
+
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                var minAllowed = new Date(today);
+                minAllowed.setDate(minAllowed.getDate() + policy.advanceDays);
+
+                if (start < minAllowed) {
+                    showValidation('This leave must be filed at least ' + policy.advanceDays + ' day in advance.');
+                    return false;
+                }
+
+                var requestedDays = calculateRequestedDays();
+
+                if (requestedDays > policy.maxConsecutive) {
+                    showValidation('Maximum of ' + policy.maxConsecutive + ' consecutive days per request.');
+                    return false;
+                }
+
+                if (requestedDays > policy.balance) {
+                    showValidation('Requested days exceed available balance.');
+                    return false;
+                }
+
+                if (policy.requiresDocument && leaveDocument && !leaveDocument.files.length) {
+                    showValidation('Please upload a supporting document.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function resetFormState() {
+                form.reset();
+                summaryBalance.textContent = '—';
+                summaryDays.textContent = '0';
+                documentFieldWrap.classList.add('hidden');
+                showValidation('');
+                showSuccess('');
+            }
+
+            function applyFilters() {
+                var statusValue = filterStatus ? filterStatus.value : 'all';
+                var typeValue = filterType ? filterType.value : 'all';
+                var yearValue = filterYear ? filterYear.value : 'all';
+
+                var visibleCount = 0;
+
+                function matches(item) {
+                    var statusMatch = statusValue === 'all' || item.dataset.status === statusValue;
+                    var typeMatch = typeValue === 'all' || item.dataset.type === typeValue;
+                    var yearMatch = yearValue === 'all' || item.dataset.year === yearValue;
+                    return statusMatch && typeMatch && yearMatch;
+                }
+
+                leaveRows.forEach(function (row) {
+                    var show = matches(row);
+                    row.classList.toggle('hidden', !show);
+                    if (show) visibleCount++;
+                });
+
+                leaveCards.forEach(function (card) {
+                    var show = matches(card);
+                    card.classList.toggle('hidden', !show);
+                });
+
+                emptyState.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            if (tabNew) {
+                tabNew.addEventListener('click', function () {
+                    setActiveTab('new');
+                });
+            }
+
+            if (tabMy) {
+                tabMy.addEventListener('click', function () {
+                    setActiveTab('requests');
+                });
+            }
+
+            quickTabButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var target = button.getAttribute('data-tab-target');
+                    setActiveTab(target === 'new' ? 'new' : 'requests');
+                });
+            });
+
+            if (leaveType) {
+                leaveType.addEventListener('change', updateLeaveTypeUI);
+            }
+
+            if (leaveStart) {
+                leaveStart.addEventListener('change', calculateRequestedDays);
+            }
+
+            if (leaveEnd) {
+                leaveEnd.addEventListener('change', calculateRequestedDays);
+            }
+
+            if (clearFormButton) {
+                clearFormButton.addEventListener('click', resetFormState);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    if (!validateLeaveRequest()) return;
+
+                    showSuccess('Leave request submitted.');
+                    setTimeout(function () {
+                        resetFormState();
+                        setActiveTab('requests');
+                    }, 700);
+                });
+            }
+
+            [filterStatus, filterType, filterYear].forEach(function (input) {
+                if (!input) return;
+                input.addEventListener('change', applyFilters);
+            });
+
+            updateLeaveTypeUI();
+            applyFilters();
+        })();
+    </script>
 }

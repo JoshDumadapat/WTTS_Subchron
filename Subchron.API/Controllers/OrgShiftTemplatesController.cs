@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,18 +13,14 @@ namespace Subchron.API.Controllers;
 [Route("api/org-shift-templates")]
 public class OrgShiftTemplatesController : ControllerBase
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-    };
-
     private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _tenantDb;
     private readonly IAuditService _audit;
 
-    public OrgShiftTemplatesController(SubchronDbContext db, IAuditService audit)
+    public OrgShiftTemplatesController(SubchronDbContext db, TenantDbContext tenantDb, IAuditService audit)
     {
         _db = db;
+        _tenantDb = tenantDb;
         _audit = audit;
     }
 
@@ -37,11 +32,12 @@ public class OrgShiftTemplatesController : ControllerBase
         if (!orgId.HasValue)
             return Forbid();
 
-        var settings = await _db.OrganizationSettings.AsNoTracking().FirstOrDefaultAsync(x => x.OrgID == orgId.Value, ct);
+        var settings = await _db.OrganizationSettings.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.OrgID == orgId.Value, ct);
         if (settings == null)
             return NotFound(new { ok = false, message = "Organization settings not found." });
 
-        var templates = OrgShiftSettingsValidator.NormalizeTemplates(Deserialize<List<OrgShiftTemplateDto>>(settings.ShiftTemplatesJson) ?? new List<OrgShiftTemplateDto>());
+        var templates = await LoadTemplateDtosAsync(orgId.Value, ct);
 
         return Ok(new OrgShiftTemplateListResponse
         {
@@ -84,21 +80,21 @@ public class OrgShiftTemplatesController : ControllerBase
         if (settings == null)
             return NotFound(new { ok = false, message = "Organization settings not found." });
 
-        var currentTemplates = Deserialize<List<OrgShiftTemplateDto>>(settings.ShiftTemplatesJson) ?? new List<OrgShiftTemplateDto>();
-        var normalizedExisting = OrgShiftSettingsValidator.NormalizeTemplates(currentTemplates);
-        var index = normalizedExisting.FindIndex(t => string.Equals(t.Code, code, StringComparison.OrdinalIgnoreCase));
-        if (index < 0)
+        var entity = await _tenantDb.OrgShiftTemplates
+            .FirstOrDefaultAsync(t => t.OrgID == orgId.Value && t.Code == code, ct);
+
+        if (entity == null)
             return NotFound(new { ok = false, message = "Shift template not found." });
 
-        normalizedExisting.RemoveAt(index);
-        settings.ShiftTemplatesJson = Serialize(normalizedExisting);
+        _tenantDb.OrgShiftTemplates.Remove(entity);
+        await _tenantDb.SaveChangesAsync(ct);
+
         if (!string.IsNullOrWhiteSpace(settings.DefaultShiftTemplateCode) && string.Equals(settings.DefaultShiftTemplateCode, code, StringComparison.OrdinalIgnoreCase))
             settings.DefaultShiftTemplateCode = null;
         settings.UpdatedAt = DateTime.UtcNow;
-
         await _db.SaveChangesAsync(ct);
-        await LogAuditAsync(orgId.Value, GetUserId(), "OrgShiftTemplateDeleted", $"Shift template '{code}' deleted.", ct);
 
+        await LogAuditAsync(orgId.Value, GetUserId(), "OrgShiftTemplateDeleted", $"Shift template '{code}' deleted.", ct);
         return Ok(new { ok = true });
     }
 
@@ -111,12 +107,10 @@ public class OrgShiftTemplatesController : ControllerBase
         if (settings == null)
             return NotFound(new { ok = false, message = "Organization settings not found." });
 
-        var currentTemplates = Deserialize<List<OrgShiftTemplateDto>>(settings.ShiftTemplatesJson) ?? new List<OrgShiftTemplateDto>();
-        var normalizedExisting = OrgShiftSettingsValidator.NormalizeTemplates(currentTemplates);
+        var existingTemplates = await LoadTemplateDtosAsync(orgId, ct);
+        var normalizedExisting = OrgShiftSettingsValidator.NormalizeTemplates(existingTemplates);
 
         List<OrgShiftTemplateDto> updatedList;
-        OrgShiftTemplateDto? target = null;
-
         if (isUpdate)
         {
             if (string.IsNullOrWhiteSpace(code))
@@ -147,6 +141,7 @@ public class OrgShiftTemplatesController : ControllerBase
             return BadRequest(new { ok = false, message = ex.Message });
         }
 
+        OrgShiftTemplateDto? target;
         if (isUpdate)
         {
             target = normalizedFinal.FirstOrDefault(t => string.Equals(t.Code, request.Code, StringComparison.OrdinalIgnoreCase));
@@ -155,15 +150,16 @@ public class OrgShiftTemplatesController : ControllerBase
         {
             var existingCodes = new HashSet<string>(normalizedExisting
                 .Select(t => t.Code)
-                .Where(code => !string.IsNullOrWhiteSpace(code))
-                .Select(code => code!), StringComparer.OrdinalIgnoreCase);
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c!), StringComparer.OrdinalIgnoreCase);
             target = normalizedFinal.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Code) && !existingCodes.Contains(t.Code!));
         }
 
         if (target == null)
             return StatusCode(500, new { ok = false, message = "Unable to determine saved template." });
 
-        settings.ShiftTemplatesJson = Serialize(normalizedFinal);
+        await PersistTemplateAsync(orgId, target, isUpdate, ct);
+
         settings.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
 
@@ -176,22 +172,44 @@ public class OrgShiftTemplatesController : ControllerBase
             : StatusCode(StatusCodes.Status201Created, new OrgShiftTemplateMutationResponse { Ok = true, Template = target });
     }
 
-    private static T? Deserialize<T>(string? json)
+    private async Task PersistTemplateAsync(int orgId, OrgShiftTemplateDto target, bool isUpdate, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(json))
-            return default;
-        try
+        if (isUpdate)
         {
-            return JsonSerializer.Deserialize<T>(json, JsonOptions);
+            var entity = await _tenantDb.OrgShiftTemplates
+                .Include(t => t.WorkDays)
+                .Include(t => t.Breaks)
+                .Include(t => t.DayOverrides)
+                    .ThenInclude(o => o.WorkWindows)
+                .FirstOrDefaultAsync(t => t.OrgID == orgId && t.Code == target.Code, ct);
+
+            if (entity == null)
+                throw new InvalidOperationException("Shift template not found.");
+
+            OrgShiftTemplateMapper.ApplyDto(entity, target);
         }
-        catch
+        else
         {
-            return default;
+            var entity = OrgShiftTemplateMapper.CreateEntity(orgId, target);
+            _tenantDb.OrgShiftTemplates.Add(entity);
         }
+
+        await _tenantDb.SaveChangesAsync(ct);
     }
 
-    private static string Serialize<T>(T value)
-        => JsonSerializer.Serialize(value, JsonOptions);
+    private async Task<List<OrgShiftTemplateDto>> LoadTemplateDtosAsync(int orgId, CancellationToken ct)
+    {
+        var entities = await _tenantDb.OrgShiftTemplates
+            .Include(t => t.WorkDays)
+            .Include(t => t.Breaks)
+            .Include(t => t.DayOverrides)
+                .ThenInclude(o => o.WorkWindows)
+            .Where(t => t.OrgID == orgId)
+            .OrderBy(t => t.Name)
+            .ToListAsync(ct);
+
+        return entities.Select(OrgShiftTemplateMapper.ToDto).ToList();
+    }
 
     private async Task LogAuditAsync(int orgId, int? userId, string action, string description, CancellationToken ct)
     {

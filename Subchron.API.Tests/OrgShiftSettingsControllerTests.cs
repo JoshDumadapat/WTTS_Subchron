@@ -16,16 +16,25 @@ public class OrgShiftSettingsControllerTests
     public async Task GetCurrent_ReturnsExpandedGraphIncludingNightDifferential()
     {
         await using var db = BuildDb();
-        db.OrganizationSettings.Add(new OrganizationSettings
-        {
-            OrgID = 77,
-            ShiftTemplatesJson = "[]",
-            OvertimeSettingsJson = "{\"enabled\":true}",
-            NightDifferentialSettingsJson = "{\"enabled\":true,\"startTime\":\"22:00\",\"endTime\":\"06:00\",\"minimumMinutes\":0,\"excludedAttendanceBuckets\":[]}"
-        });
+        await using var tenantDb = BuildTenantDb();
+        db.OrganizationSettings.Add(new OrganizationSettings { OrgID = 77 });
         await db.SaveChangesAsync();
 
-        var controller = BuildController(db, 77);
+        var store = new LegacyOrgSettingsStore();
+        store.SetShiftSettings(77, new OrgShiftSettingsSnapshot
+        {
+            Templates = new List<OrgShiftTemplateDto>(),
+            Overtime = new OrgOvertimeSettingsDto { Enabled = true },
+            NightDifferential = new OrgNightDifferentialSettingsDto
+            {
+                Enabled = true,
+                StartTime = "22:00",
+                EndTime = "06:00",
+                MinimumMinutes = 0
+            }
+        });
+
+        var controller = BuildController(db, tenantDb, store, 77);
         var result = await controller.GetCurrentAsync(CancellationToken.None);
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var payload = Assert.IsType<OrgShiftSettingsResponse>(ok.Value);
@@ -39,10 +48,12 @@ public class OrgShiftSettingsControllerTests
     public async Task UpdateCurrent_PersistsNightDifferentialSeparately()
     {
         await using var db = BuildDb();
-        db.OrganizationSettings.Add(new OrganizationSettings { OrgID = 88, ShiftTemplatesJson = "[]", OvertimeSettingsJson = "{}" });
+        await using var tenantDb = BuildTenantDb();
+        db.OrganizationSettings.Add(new OrganizationSettings { OrgID = 88 });
         await db.SaveChangesAsync();
 
-        var controller = BuildController(db, 88);
+        var store = new LegacyOrgSettingsStore();
+        var controller = BuildController(db, tenantDb, store, 88);
         var req = new OrgShiftSettingsUpdateRequest
         {
             Templates = new List<OrgShiftTemplateDto>(),
@@ -58,10 +69,10 @@ public class OrgShiftSettingsControllerTests
 
         var action = await controller.UpdateCurrentAsync(req, CancellationToken.None);
         Assert.IsType<OkObjectResult>(action);
-
-        var saved = await db.OrganizationSettings.SingleAsync(x => x.OrgID == 88);
-        Assert.Contains("minimumMinutes", saved.NightDifferentialSettingsJson!);
-        Assert.DoesNotContain("minimumMinutes", saved.OvertimeSettingsJson!);
+        var snapshot = store.GetShiftSettings(88);
+        Assert.Equal(15, snapshot.NightDifferential.MinimumMinutes);
+        Assert.True(snapshot.Overtime.Enabled);
+        Assert.Empty(tenantDb.OrgShiftTemplates.Where(t => t.OrgID == 88));
     }
 
     private static SubchronDbContext BuildDb()
@@ -72,7 +83,15 @@ public class OrgShiftSettingsControllerTests
         return new SubchronDbContext(options);
     }
 
-    private static OrgShiftSettingsController BuildController(SubchronDbContext db, int orgId)
+    private static TenantDbContext BuildTenantDb()
+    {
+        var options = new DbContextOptionsBuilder<TenantDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
+            .Options;
+        return new TenantDbContext(options);
+    }
+
+    private static OrgShiftSettingsController BuildController(SubchronDbContext db, TenantDbContext tenantDb, ILegacyOrgSettingsStore store, int orgId)
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
@@ -81,7 +100,7 @@ public class OrgShiftSettingsControllerTests
             new Claim(ClaimTypes.Role, "Admin")
         }, "Test"));
 
-        var controller = new OrgShiftSettingsController(db, new NoopAuditService())
+        var controller = new OrgShiftSettingsController(db, tenantDb, new NoopAuditService(), store)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } }
         };

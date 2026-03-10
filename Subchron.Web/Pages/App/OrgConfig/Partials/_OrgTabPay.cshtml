@@ -1,4 +1,35 @@
 @* Pay Components Engine - Payroll Configuration Tab *@
+<style>
+    .pay-section-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+    }
+
+    .pay-step-badge {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: rgb(16 185 129);
+        background: rgba(16, 185, 129, 0.15);
+        border-radius: 9999px;
+        width: 1.9rem;
+        height: 1.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .pay-hint {
+        font-size: 11px;
+        color: rgb(100 116 139);
+    }
+
+    .dark .pay-hint {
+        color: rgb(148 163 184);
+    }
+</style>
+
 <div id="tab-pay" class="tab-content hidden h-full flex-col">
 
     <div class="flex items-center justify-between border-b border-slate-300 px-8 py-5 dark:border-gray-700">
@@ -9,13 +40,18 @@
     </div>
 
     <div class="flex-1 overflow-y-auto p-8">
-        <div class="space-y-8">
+        <div class="flex flex-col gap-10 sm:gap-12">
 
             @* ── Financial Basis ──────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Financial Basis</h3>
-                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Base currency, pay frequency, daily hours, cutoff range, and attendance lock rules.</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">1</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Financial Basis</h3>
+                            <p class="pay-hint">Currency, pay frequency, cutoff rules, and 13th-month handling aligned with DOLE guidance.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-3">
                     <div>
@@ -74,6 +110,29 @@
                     </div>
 
                     <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Add Second Cutoff Window</label>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="pay-enable-second-cutoff" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" onchange="window.toggleSecondCutoff()" />
+                            <span class="pay-hint">Enable if you run 1–15 and 16–EOM or weekly cycles.</span>
+                        </div>
+                    </div>
+
+                    <div id="pay-second-cutoff-fields" class="hidden col-span-3 grid gap-5 sm:grid-cols-3">
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff Start Day</label>
+                            <input id="pay-second-cutoff-start" type="number" min="1" max="31" value="16" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff End Day</label>
+                            <input id="pay-second-cutoff-end" type="number" min="1" max="31" value="30" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Payroll Release Lag (days)</label>
+                            <input id="pay-release-lag" type="number" min="0" max="30" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                        </div>
+                    </div>
+
+                    <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Lock Attendance After Cutoff</label>
                         <div class="relative">
                             <select id="pay-lock-attendance-after-cutoff" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
@@ -84,15 +143,36 @@
                                 <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                             </div>
                         </div>
+                        <p class="pay-hint mt-1">If enabled, supervisors must approve corrections before payroll cut.</p>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">13th Month Calculation</label>
+                        <div class="relative">
+                            <select id="pay-thirteenth-basis" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                <option value="basic" selected>Basic pay only</option>
+                                <option value="basic_plus_allowances">Basic + selected allowances</option>
+                                <option value="custom">Custom formula</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                        <p class="pay-hint mt-1">Aligns with DOLE rules; choose "Custom" if you grant prorated or project-based 13th month.</p>
                     </div>
                 </div>
+            </div>
             </div>
 
             @* ── Compensation Basis ───────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compensation Basis</h3>
-                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define the standard unit for employee compensation.</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">2</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Compensation Basis</h3>
+                            <p class="pay-hint">Define your base unit (monthly/daily/hourly/custom) and how custom units map to hours.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
                     <div>
@@ -128,9 +208,12 @@
             @* ── Earnings Rules ───────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <div>
-                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Earnings Rules</h3>
-                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Define how extra pay applies (OT, holiday, rest day, night diff, special premiums).</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">3</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Earnings Rules</h3>
+                            <p class="pay-hint">Configure OT, rest-day, night diff, and holiday premiums per DOLE classification.</p>
+                        </div>
                     </div>
                     <button type="button" onclick="openEarningRuleModal()" class="btn-primary gap-1.5">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -165,9 +248,12 @@
             @* ── Allowances ───────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <div>
-                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowances</h3>
-                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Configure tenant-specific allowances such as meal, transport, rice, communication, or hazard allowances.</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">4</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowances</h3>
+                            <p class="pay-hint">Capture non-taxable allowances, hazard pay, or sector-specific grants with scopes per site/role.</p>
+                        </div>
                     </div>
                     <button type="button" onclick="openAllowanceModal()" class="btn-primary gap-1.5">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -179,6 +265,7 @@
                         <thead class="bg-slate-100 dark:bg-gray-700/40">
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Allowance Name</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Category</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Type</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Amount</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Taxable</th>
@@ -201,21 +288,90 @@
             @* ── Tax Toggle ───────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Tax</h3>
-                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Enable or disable tax processing for this organization.</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">5</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Statutory & Tax Settings</h3>
+                            <p class="pay-hint">Toggle PH statutory computations (BIR, SSS, PhilHealth, Pag-IBIG) and who bears each contribution.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-6">
-                    <div class="max-w-sm">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Apply Tax</label>
-                        <div class="relative">
-                            <select id="pay-apply-tax" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                <option value="true" selected>Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">BIR Withholding Tax</label>
+                            <div class="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-gray-700">
+                                <label class="inline-flex items-center gap-2">
+                                    <input type="checkbox" id="pay-enable-bir" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                    <span class="text-sm text-gray-700 dark:text-gray-200">Apply BIR tax table (Manual of Allowances)</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="pay-hint">Payroll Period</label>
+                                        <select id="pay-bir-period" class="mt-1 block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                                            <option value="semi-monthly" selected>Semi-Monthly</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="weekly">Weekly</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="pay-hint">Tax Table Version</label>
+                                        <input type="number" id="pay-bir-table-version" value="2023" class="mt-1 block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">SSS / PhilHealth / Pag-IBIG</label>
+                            <div class="space-y-3 rounded-lg border border-slate-200 p-3 dark:border-gray-700">
+                                <label class="inline-flex items-center gap-2">
+                                    <input type="checkbox" id="pay-enable-sss" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                    <span class="text-sm text-gray-700 dark:text-gray-200">Compute SSS contribution</span>
+                                </label>
+                                <label class="inline-flex items-center gap-2">
+                                    <input type="checkbox" id="pay-enable-phic" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                    <span class="text-sm text-gray-700 dark:text-gray-200">Compute PhilHealth contribution</span>
+                                </label>
+                                <label class="inline-flex items-center gap-2">
+                                    <input type="checkbox" id="pay-enable-hdmf" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                    <span class="text-sm text-gray-700 dark:text-gray-200">Compute Pag-IBIG contribution</span>
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="pay-hint">SSS (% employer)</label>
+                                        <input type="number" id="pay-sss-employer" min="0" step="0.01" value="8.5" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                                    </div>
+                                    <div>
+                                        <label class="pay-hint">PhilHealth (%)</label>
+                                        <input type="number" id="pay-phic-rate" min="0" step="0.1" value="3" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                                    </div>
+                                    <div>
+                                        <label class="pay-hint">Pag-IBIG (%)</label>
+                                        <input type="number" id="pay-hdmf-rate" min="0" step="0.1" value="2" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 rounded-lg border border-slate-200 p-4 dark:border-gray-700">
+                        <label class="mb-2 block text-xs font-semibold text-gray-600 dark:text-gray-400">Apply Additional Tax Logic</label>
+                        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                            <label class="inline-flex items-center gap-2">
+                                <input type="checkbox" id="pay-tax-apply" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Enable income tax</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2">
+                                <input type="checkbox" id="pay-tax-prorate-new-hire" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Prorate for new hires</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2">
+                                <input type="checkbox" id="pay-tax-apply-threshold" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Skip tax below ₱250,000 annual</span>
+                            </label>
+                        </div>
+                        <p class="pay-hint mt-2">These settings are informational until backend wiring is completed but give HR clear intent.</p>
                     </div>
                 </div>
             </div>
@@ -223,9 +379,12 @@
             @* ── Deductions ──────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
-                    <div>
-                        <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Deductions</h3>
-                        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Tax, SSS, pension, insurance, loans, company deductions — fixed, percentage, or formula-based.</p>
+                    <div class="pay-section-heading">
+                        <span class="pay-step-badge">6</span>
+                        <div>
+                            <h3 class="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">Deductions</h3>
+                            <p class="pay-hint">Capture statutory (SSS/PhilHealth/Pag-IBIG), loans, and custom deductions with employer/employee shares.</p>
+                        </div>
                     </div>
                     <button type="button" onclick="openDeductionModal()" class="btn-primary gap-1.5">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -304,6 +463,26 @@
                 </div>
 
                 <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday / Rest-Day Combo</label>
+                    <select id="earningRuleHolidayCombo" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="Standard" selected>Follow day type</option>
+                        <option value="RegularRestDay">Regular Holiday + Rest Day</option>
+                        <option value="SpecialRestDay">Special Holiday + Rest Day</option>
+                        <option value="DoubleHoliday">Double Holiday</option>
+                        <option value="SpecialWorking">Special Working Holiday</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rest-Day Handling</label>
+                    <select id="earningRuleRestDayHandling" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="FollowAttendance" selected>Follow attendance config</option>
+                        <option value="ForcePremium">Force rest-day premium</option>
+                        <option value="IgnorePremium">Ignore rest-day premium</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope</label>
                     <select id="earningRuleScope" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="AllEmployees" selected>All Employees</option>
@@ -318,6 +497,12 @@
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Effective From</label>
                     <input type="date" id="earningRuleEffectiveFrom" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                 </div>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope Tags (comma separated)</label>
+                <input type="text" id="earningRuleScopeTags" placeholder="e.g. Cebu, Healthcare, Team A" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                <p class="pay-hint mt-1">Tag LGUs, accounts, or project codes to describe coverage.</p>
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -349,6 +534,11 @@
                     <input type="checkbox" id="earningRuleRequiresApproval" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Requires approval?</span>
                 </label>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Additional Notes</label>
+                <textarea id="earningRuleNotes" rows="2" placeholder="e.g. Only for DOLE-approved special projects" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600"></textarea>
             </div>
         </div>
 
@@ -387,6 +577,16 @@
                 </div>
 
                 <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Category</label>
+                    <select id="allowanceRuleCategory" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                        <option value="DeMinimis" selected>De Minimis / Non-taxable</option>
+                        <option value="Taxable">Taxable</option>
+                        <option value="Hazard">Hazard</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
                     <input type="number" id="allowanceRuleAmount" min="0" step="0.01" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                 </div>
@@ -403,6 +603,11 @@
                         <option value="false">No</option>
                     </select>
                 </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope Tags (comma separated)</label>
+                    <input type="text" id="allowanceRuleScopeTags" placeholder="e.g. BPO, Cebu Sites, Nurses" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                </div>
             </div>
 
             <div class="flex flex-wrap gap-4">
@@ -418,6 +623,11 @@
                     <input type="checkbox" id="allowanceRuleProratePartialPeriod" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 dark:bg-gray-700 dark:border-gray-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300">Prorate if partial period?</span>
                 </label>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compliance Notes</label>
+                <textarea id="allowanceRuleComplianceNotes" rows="2" placeholder="Reference memo / DOLE guidance" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600"></textarea>
             </div>
         </div>
 
@@ -515,6 +725,16 @@
             </div>
 
             <p class="text-xs text-gray-500 dark:text-gray-400">If Auto-compute is off, this deduction can be entered manually per pay period.</p>
+
+            <div class="mt-3">
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope Tags (comma separated)</label>
+                <input type="text" id="deductionRuleScopeTags" placeholder="e.g. Head Office, Agency Staff" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Notes / Basis</label>
+                <textarea id="deductionRuleNotes" rows="2" placeholder="e.g. Follow SSS table version 2024" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600"></textarea>
+            </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
@@ -547,6 +767,16 @@
             return value ? 'Yes' : 'No';
         }
 
+        function parseTags(value) {
+            if (!value) return [];
+            return value.split(',').map(function (tag) { return tag.trim(); }).filter(function (tag) { return tag.length > 0; });
+        }
+
+        function joinTags(values) {
+            if (!values || !values.length) return '';
+            return values.join(', ');
+        }
+
         function openEarningRuleModal(editId) {
             document.getElementById('earningRuleModalTitle').textContent = editId ? 'Edit Earning Rule' : 'Add Earning Rule';
             document.getElementById('earningRuleId').value = editId || '';
@@ -557,6 +787,8 @@
                     document.getElementById('earningRuleName').value = r.name || '';
                     document.getElementById('earningRuleAppliesTo').value = r.appliesTo || 'OT';
                     document.getElementById('earningRuleDayType').value = r.dayType || 'Any';
+                    document.getElementById('earningRuleHolidayCombo').value = r.holidayCombo || 'Standard';
+                    document.getElementById('earningRuleRestDayHandling').value = r.restDayHandling || 'FollowAttendance';
                     document.getElementById('earningRuleScope').value = r.scope || 'AllEmployees';
                     document.getElementById('earningRuleEffectiveFrom').value = r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '';
                     document.getElementById('earningRuleRateType').value = r.rateType || 'Multiplier';
@@ -564,11 +796,15 @@
                     document.getElementById('earningRuleTaxable').checked = !!r.isTaxable;
                     document.getElementById('earningRuleBenefitBase').checked = !!r.includeInBenefitBase;
                     document.getElementById('earningRuleRequiresApproval').checked = !!r.requiresApproval;
+                    document.getElementById('earningRuleScopeTags').value = joinTags(r.scopeTags || []);
+                    document.getElementById('earningRuleNotes').value = r.notes || '';
                 }
             } else {
                 document.getElementById('earningRuleName').value = '';
                 document.getElementById('earningRuleAppliesTo').value = 'OT';
                 document.getElementById('earningRuleDayType').value = 'Any';
+                document.getElementById('earningRuleHolidayCombo').value = 'Standard';
+                document.getElementById('earningRuleRestDayHandling').value = 'FollowAttendance';
                 document.getElementById('earningRuleScope').value = 'AllEmployees';
                 document.getElementById('earningRuleEffectiveFrom').value = '';
                 document.getElementById('earningRuleRateType').value = 'Multiplier';
@@ -576,6 +812,8 @@
                 document.getElementById('earningRuleTaxable').checked = true;
                 document.getElementById('earningRuleBenefitBase').checked = false;
                 document.getElementById('earningRuleRequiresApproval').checked = false;
+                document.getElementById('earningRuleScopeTags').value = '';
+                document.getElementById('earningRuleNotes').value = '';
             }
 
             document.getElementById('earningRuleModal').classList.remove('hidden');
@@ -596,22 +834,28 @@
                 if (r) {
                     document.getElementById('allowanceRuleName').value = r.name || '';
                     document.getElementById('allowanceRuleType').value = r.allowanceType || 'FixedPerPayroll';
+                    document.getElementById('allowanceRuleCategory').value = r.category || 'DeMinimis';
                     document.getElementById('allowanceRuleAmount').value = r.amount != null ? r.amount : 0;
                     document.getElementById('allowanceRuleTaxable').checked = !!r.isTaxable;
                     document.getElementById('allowanceRuleAttendanceDependent').checked = !!r.attendanceDependent;
                     document.getElementById('allowanceRuleProratePartialPeriod').checked = !!r.prorateIfPartialPeriod;
                     document.getElementById('allowanceRuleEffectiveFrom').value = r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '';
                     document.getElementById('allowanceRuleActive').value = String(!!r.isActive);
+                    document.getElementById('allowanceRuleScopeTags').value = joinTags(r.scopeTags || []);
+                    document.getElementById('allowanceRuleComplianceNotes').value = r.complianceNotes || '';
                 }
             } else {
                 document.getElementById('allowanceRuleName').value = '';
                 document.getElementById('allowanceRuleType').value = 'FixedPerPayroll';
+                document.getElementById('allowanceRuleCategory').value = 'DeMinimis';
                 document.getElementById('allowanceRuleAmount').value = '0';
                 document.getElementById('allowanceRuleTaxable').checked = false;
                 document.getElementById('allowanceRuleAttendanceDependent').checked = false;
                 document.getElementById('allowanceRuleProratePartialPeriod').checked = false;
                 document.getElementById('allowanceRuleEffectiveFrom').value = '';
                 document.getElementById('allowanceRuleActive').value = 'true';
+                document.getElementById('allowanceRuleScopeTags').value = '';
+                document.getElementById('allowanceRuleComplianceNotes').value = '';
             }
 
             document.getElementById('allowanceModal').classList.remove('hidden');
@@ -642,6 +886,8 @@
                     document.getElementById('deductionEmployeeShare').checked = !!r.hasEmployeeShare;
                     document.getElementById('deductionAutoCompute').checked = !!r.autoCompute;
                     document.getElementById('deductionRuleActive').checked = r.isActive !== false;
+                    document.getElementById('deductionRuleScopeTags').value = joinTags(r.scopeTags || []);
+                    document.getElementById('deductionRuleNotes').value = r.notes || '';
                 }
             } else {
                 document.getElementById('deductionRuleName').value = '';
@@ -656,6 +902,8 @@
                 document.getElementById('deductionEmployeeShare').checked = true;
                 document.getElementById('deductionAutoCompute').checked = true;
                 document.getElementById('deductionRuleActive').checked = true;
+                document.getElementById('deductionRuleScopeTags').value = '';
+                document.getElementById('deductionRuleNotes').value = '';
             }
 
             toggleDeductionAmountVsFormula();
@@ -681,6 +929,11 @@
             document.getElementById('deductionFormulaWrap').classList.toggle('hidden', t !== 'Formula');
         };
 
+        window.toggleSecondCutoff = function () {
+            var enabled = document.getElementById('pay-enable-second-cutoff').checked;
+            document.getElementById('pay-second-cutoff-fields').classList.toggle('hidden', !enabled);
+        };
+
         function saveEarningRule() {
             var id = document.getElementById('earningRuleId').value;
             var name = (document.getElementById('earningRuleName').value || '').trim();
@@ -693,13 +946,17 @@
                 name: name,
                 appliesTo: document.getElementById('earningRuleAppliesTo').value,
                 dayType: document.getElementById('earningRuleDayType').value,
+                holidayCombo: document.getElementById('earningRuleHolidayCombo').value,
+                restDayHandling: document.getElementById('earningRuleRestDayHandling').value,
                 scope: document.getElementById('earningRuleScope').value,
                 effectiveFrom: document.getElementById('earningRuleEffectiveFrom').value || null,
                 rateType: document.getElementById('earningRuleRateType').value,
                 rateValue: parseFloat(document.getElementById('earningRuleRateValue').value) || 1,
                 isTaxable: document.getElementById('earningRuleTaxable').checked,
                 includeInBenefitBase: document.getElementById('earningRuleBenefitBase').checked,
-                requiresApproval: document.getElementById('earningRuleRequiresApproval').checked
+                requiresApproval: document.getElementById('earningRuleRequiresApproval').checked,
+                scopeTags: parseTags(document.getElementById('earningRuleScopeTags').value),
+                notes: document.getElementById('earningRuleNotes').value || ''
             };
 
             var oid = getOrgId();
@@ -742,12 +999,15 @@
             var payload = {
                 name: name,
                 allowanceType: document.getElementById('allowanceRuleType').value,
+                category: document.getElementById('allowanceRuleCategory').value,
                 amount: parseFloat(document.getElementById('allowanceRuleAmount').value) || 0,
                 isTaxable: document.getElementById('allowanceRuleTaxable').checked,
                 attendanceDependent: document.getElementById('allowanceRuleAttendanceDependent').checked,
                 prorateIfPartialPeriod: document.getElementById('allowanceRuleProratePartialPeriod').checked,
                 effectiveFrom: document.getElementById('allowanceRuleEffectiveFrom').value || null,
-                isActive: document.getElementById('allowanceRuleActive').value === 'true'
+                isActive: document.getElementById('allowanceRuleActive').value === 'true',
+                scopeTags: parseTags(document.getElementById('allowanceRuleScopeTags').value),
+                complianceNotes: document.getElementById('allowanceRuleComplianceNotes').value || ''
             };
 
             var oid = getOrgId();
@@ -800,7 +1060,9 @@
                 hasEmployerShare: document.getElementById('deductionEmployerShare').checked,
                 hasEmployeeShare: document.getElementById('deductionEmployeeShare').checked,
                 autoCompute: document.getElementById('deductionAutoCompute').checked,
-                isActive: document.getElementById('deductionRuleActive').checked
+                isActive: document.getElementById('deductionRuleActive').checked,
+                scopeTags: parseTags(document.getElementById('deductionRuleScopeTags').value),
+                notes: document.getElementById('deductionRuleNotes').value || ''
             };
 
             var oid = getOrgId();
@@ -898,7 +1160,7 @@
                     if (ph) ph.remove();
 
                     if (!_allowancesList.length) {
-                        tbody.innerHTML = '<tr class="allowances-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="9" class="px-5 py-8">No allowances yet. Click <strong>Add Allowance</strong> to create one.</td></tr>';
+                        tbody.innerHTML = '<tr class="allowances-placeholder text-center text-sm text-gray-400 dark:text-gray-500"><td colspan="10" class="px-5 py-8">No allowances yet. Click <strong>Add Allowance</strong> to create one.</td></tr>';
                         return;
                     }
 
@@ -907,6 +1169,7 @@
                         tr.className = 'allowances-row';
                         tr.innerHTML =
                             '<td class="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">' + safeText(r.name) + '</td>' +
+                            '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.category) + '</td>' +
                             '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.allowanceType) + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + safeText(r.amount) + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + boolText(r.isTaxable) + '</td>' +

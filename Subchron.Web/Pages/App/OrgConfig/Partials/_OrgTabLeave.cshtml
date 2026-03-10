@@ -154,9 +154,10 @@
                 </div>
 
                 <div class="flex items-center justify-end border-t border-slate-300 bg-slate-200 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
-                    <button onclick="saveLeaveSettings()" class="btn-primary gap-1.5">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                        Save General Settings
+                    <button id="leaveSettingsSaveBtn" onclick="saveLeaveSettings()" class="btn-primary gap-1.5">
+                        <svg id="leaveSettingsSaveSpinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8" /></svg>
+                        <svg id="leaveSettingsSaveIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        <span id="leaveSettingsSaveText">Save General Settings</span>
                     </button>
                 </div>
             </div>
@@ -168,36 +169,26 @@
 
 @* ─── ADD LEAVE TYPE MODAL ─── *@
 <div id="leaveModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-    <div class="leave-modal-panel w-full max-w-2xl overflow-hidden rounded-2xl bg-slate-50 shadow-xl dark:bg-gray-800">
+    <div id="leaveModalPanel" class="leave-modal-panel w-full max-w-5xl overflow-hidden rounded-2xl bg-slate-50 shadow-xl dark:bg-gray-800">
 
         <div class="flex items-center justify-between border-b border-slate-300 px-6 py-4 dark:border-gray-700">
             <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h3 id="leaveModalTitle" class="text-base font-bold text-gray-900 dark:text-white">New Leave Type</h3>
-                    <span id="leaveProtectedBadge" class="hidden inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-500/20 dark:bg-purple-900/20 dark:text-purple-300">Statutory</span>
-                    <span id="leaveLockedBadge" class="hidden inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-400/30 dark:bg-slate-700 dark:text-slate-200">Protected</span>
-                </div>
-                <p id="leaveModalSubtitle" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Configure leave rules for your organization.</p>
+                <h3 id="leaveModalTitle" class="text-base font-bold text-gray-900 dark:text-white">New Leave Type</h3>
+                <p id="leaveModalSubtitle" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Configure leave rules with clear entitlement, filing, and approval settings.</p>
             </div>
             <button onclick="closeLeaveModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
 
-        <div id="leaveProtectedBanner" class="hidden border-b border-amber-200 bg-amber-50 px-6 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-200">
-            This is a statutory leave template protected by Philippine labor rules. Core legal identity fields are read-only, while workflow and filing settings remain editable.
+        <div id="leaveProtectedBanner" class="hidden border-b border-slate-200 bg-slate-100/70 px-6 py-2 text-xs text-slate-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
+            Protected template: legal identity fields are read-only in edit mode.
         </div>
 
-        <div class="leave-modal-body max-h-[72vh] overflow-y-auto space-y-5 px-6 py-5">
+        <div class="leave-modal-body max-h-[72vh] overflow-y-auto space-y-6 px-8 py-6">
 
-            <div id="leaveLockedLegalIdentity" class="hidden overflow-hidden rounded-xl border border-slate-300 bg-slate-100/70 dark:border-gray-700 dark:bg-gray-900/40">
-                <div class="border-b border-slate-300 px-4 py-3 dark:border-gray-700">
-                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white">Legal Identity (Protected)</h4>
-                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">These fields define the legal identity of the leave type and cannot be edited while this leave is protected.</p>
-                </div>
-                <div class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                    You may still edit filing rules, approval flow, document requirements, and internal organization workflow settings below.
-                </div>
+            <div id="leaveLockedLegalIdentity" class="hidden rounded-lg border border-slate-200 bg-slate-100/70 px-4 py-2 text-xs text-slate-600 dark:border-gray-700 dark:bg-gray-900/30 dark:text-gray-300">
+                Reminder: Legal identity fields are locked for protected templates during editing.
             </div>
 
             @* Leave Type *@
@@ -464,7 +455,7 @@
                         <div class="flex items-center justify-between px-4 py-3">
                             <div>
                                 <span class="text-sm font-semibold text-gray-800 dark:text-white">Requires Legal Qualification</span>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">Use for leaves needing special eligibility under law.</p>
+                                <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Use for leaves needing special eligibility under law.</p>
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" id="flagLegalQualification" class="peer sr-only">
@@ -477,7 +468,7 @@
                         <div class="flex items-center justify-between px-4 py-3">
                             <div>
                                 <span class="text-sm font-semibold text-gray-800 dark:text-white">Requires HR Validation</span>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">HR must validate legal documents or qualifications.</p>
+                                <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">HR must validate legal documents or qualifications.</p>
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" id="flagHrValidation" class="peer sr-only">
@@ -492,7 +483,7 @@
                         <div class="flex items-center justify-between px-4 py-3">
                             <div>
                                 <span class="text-sm font-semibold text-gray-800 dark:text-white">Organization Can Override</span>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">Allow the org to enhance or adjust this leave rule.</p>
+                                <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Allow the org to enhance or adjust this leave rule.</p>
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" id="flagCanOrgOverride" checked class="peer sr-only">
@@ -505,7 +496,7 @@
                         <div class="flex items-center justify-between px-4 py-3">
                             <div>
                                 <span class="text-sm font-semibold text-gray-800 dark:text-white">System Protected</span>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">Protected templates are shown as baseline leaves and cannot be deleted in this UI flow.</p>
+                                <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Protected templates are shown as baseline leaves and cannot be deleted in this UI flow.</p>
                             </div>
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input type="checkbox" id="flagSystemProtected" class="peer sr-only">
@@ -524,7 +515,7 @@
                 <div class="flex items-center justify-between border-b border-slate-300 px-4 py-3 dark:border-gray-700">
                     <div>
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Approval</span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Manager or HR must approve before leave is confirmed.</p>
+                        <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Manager or HR must approve before leave is confirmed.</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" id="flagApproval" checked class="peer sr-only">
@@ -552,7 +543,7 @@
                 <div class="flex items-center justify-between border-b border-slate-300 px-4 py-3 dark:border-gray-700">
                     <div>
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">Require Document</span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Employee must upload supporting documents.</p>
+                        <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Employee must upload supporting documents.</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" id="flagDoc" class="peer sr-only">
@@ -565,7 +556,7 @@
                 <div class="flex items-center justify-between px-4 py-3">
                     <div>
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">Allow Negative Balance</span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">Allow employee to go below zero leave credits.</p>
+                        <p class="leave-compact-on-edit text-xs text-gray-400 dark:text-gray-500">Allow employee to go below zero leave credits.</p>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" id="flagNegative" class="peer sr-only">
@@ -632,14 +623,14 @@
     }
 
     #leaveModal .field-lock-note {
-        margin-top: 0.375rem;
-        display: none;
+        margin-top: 0;
+        display: none !important;
         font-size: 0.7rem;
         color: rgb(148 163 184);
     }
 
         #leaveModal .field-lock-note.is-visible {
-            display: block;
+            display: none !important;
         }
 
     #leaveModal .protected-input-wrap {
@@ -650,7 +641,7 @@
             position: absolute;
             top: 0.55rem;
             right: 0.65rem;
-            display: none;
+            display: none !important;
             align-items: center;
             gap: 0.2rem;
             border-radius: 9999px;
@@ -670,7 +661,11 @@
     }
 
     #leaveModal .protected-input-wrap.is-locked .lock-chip {
-        display: inline-flex;
+        display: none !important;
+    }
+
+    #leaveModal.mode-edit .leave-compact-on-edit {
+        display: none;
     }
 
     .leave-flags-dropdown {
@@ -708,7 +703,7 @@
         const leaveRowsOptions = [3, 5, 7, 10];
         let apiBase = '';
         let apiToken = '';
-        let usingDemoTemplates = false;
+        let isSavingLeaveSettings = false;
         let nextDemoId = -1000;
 
         const buildApiUrl = (path) => {
@@ -1257,6 +1252,40 @@
             }
         }
 
+        function inferStatutoryCodeFromName(name) {
+            const key = (name || '').trim().toLowerCase();
+            if (!key) return 'NONE';
+            if (key.includes('service incentive') || key === 'sil') return 'SIL';
+            if (key.includes('maternity') || key === 'ml') return 'MATERNITY';
+            if (key.includes('paternity') || key === 'pl') return 'PATERNITY';
+            if (key.includes('solo parent') || key === 'spl') return 'SOLO_PARENT';
+            if (key.includes('vawc')) return 'VAWC';
+            if (key.includes('special leave for women') || key.includes('special women') || key === 'slw') return 'SPECIAL_LEAVE_WOMEN';
+            return 'NONE';
+        }
+
+        function autoPopulateStatutoryCode() {
+            const statutoryEl = document.getElementById('leaveStatutoryCode');
+            const categoryEl = document.getElementById('leaveCategory');
+            const typeEl = document.getElementById('leaveTypeSelect');
+            const customNameEl = document.getElementById('customLeaveName');
+            if (!statutoryEl || !categoryEl || !typeEl) return;
+
+            const category = categoryEl.value || 'company';
+            if (category !== 'statutory') {
+                statutoryEl.value = 'NONE';
+                return;
+            }
+
+            const selectedType = typeEl.value || 'sil';
+            let code = phLeaveTemplates[selectedType]?.statutoryCode || 'NONE';
+            if (selectedType === 'custom' || code === 'NONE') {
+                code = inferStatutoryCodeFromName(customNameEl?.value || '');
+            }
+
+            statutoryEl.value = code || 'NONE';
+        }
+
         function getProtectedInputWrapper(fieldId) {
             const field = document.getElementById(fieldId);
             return field?.closest('.protected-input-wrap') || null;
@@ -1339,21 +1368,23 @@
         }
 
         function applyProtectedMode(isProtected) {
+            const isEditMode = !!currentEditLeaveTypeId;
+            const useProtectedMode = !!isProtected && isEditMode;
             const protectedBanner = document.getElementById('leaveProtectedBanner');
             const protectedBadge = document.getElementById('leaveProtectedBadge');
             const lockedBadge = document.getElementById('leaveLockedBadge');
             const subtitle = document.getElementById('leaveModalSubtitle');
             const legalIdentityBox = document.getElementById('leaveLockedLegalIdentity');
 
-            protectedBanner?.classList.toggle('hidden', !isProtected);
-            protectedBadge?.classList.toggle('hidden', !isProtected);
-            lockedBadge?.classList.toggle('hidden', !isProtected);
-            legalIdentityBox?.classList.toggle('hidden', !isProtected);
+            protectedBanner?.classList.toggle('hidden', !useProtectedMode);
+            protectedBadge?.classList.toggle('hidden', !useProtectedMode);
+            lockedBadge?.classList.toggle('hidden', !useProtectedMode);
+            legalIdentityBox?.classList.toggle('hidden', !useProtectedMode);
 
             if (subtitle) {
-                subtitle.textContent = isProtected
+                subtitle.textContent = useProtectedMode
                     ? 'Protected statutory template with editable workflow settings.'
-                    : 'Configure leave rules for your organization.';
+                    : 'Configure leave rules with clear entitlement, filing, and approval settings.';
             }
 
             protectedDisabledSelectIds.forEach((fieldId) => {
@@ -1362,10 +1393,10 @@
                 const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
                 if (!field) return;
 
-                field.disabled = !!isProtected;
-                field.classList.toggle('protected-field', !!isProtected);
-                wrapper?.classList.toggle('is-locked', !!isProtected);
-                note?.classList.toggle('is-visible', !!isProtected);
+                field.disabled = useProtectedMode;
+                field.classList.toggle('protected-field', useProtectedMode);
+                wrapper?.classList.toggle('is-locked', useProtectedMode);
+                note?.classList.toggle('is-visible', useProtectedMode);
             });
 
             protectedReadonlyInputIds.forEach((fieldId) => {
@@ -1374,10 +1405,10 @@
                 const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
                 if (!field) return;
 
-                field.readOnly = !!isProtected;
-                field.classList.toggle('protected-field', !!isProtected);
-                wrapper?.classList.toggle('is-locked', !!isProtected);
-                note?.classList.toggle('is-visible', !!isProtected);
+                field.readOnly = useProtectedMode;
+                field.classList.toggle('protected-field', useProtectedMode);
+                wrapper?.classList.toggle('is-locked', useProtectedMode);
+                note?.classList.toggle('is-visible', useProtectedMode);
             });
 
             protectedToggleIds.forEach((fieldId) => {
@@ -1385,11 +1416,11 @@
                 const note = document.querySelector(`.field-lock-note[data-for="${fieldId}"]`);
                 if (!field) return;
 
-                field.disabled = !!isProtected;
-                note?.classList.toggle('is-visible', !!isProtected);
+                field.disabled = useProtectedMode;
+                note?.classList.toggle('is-visible', useProtectedMode);
 
                 const host = field.closest('label')?.parentElement;
-                host?.classList.toggle('opacity-80', !!isProtected);
+                host?.classList.toggle('opacity-80', useProtectedMode);
             });
         }
 
@@ -1491,12 +1522,14 @@
             document.getElementById('flagNegative').checked = t.allowNegativeBalance;
 
             applyProtectedMode(!!t.isSystemProtected);
+            autoPopulateStatutoryCode();
         }
 
         function onLeaveTypeChange(sel) {
             const value = sel.value;
             document.getElementById('customNameField')?.classList.toggle('hidden', value !== 'custom');
             applyTemplateToForm(value);
+            autoPopulateStatutoryCode();
         }
 
         function toggleCarryOverInput(show) {
@@ -1507,25 +1540,36 @@
             document.getElementById('leaveExpiryCustomMonthsWrap')?.classList.toggle('hidden', !show);
         }
 
+        function setLeaveCategoryLocked(isLocked) {
+            const categoryField = document.getElementById('leaveCategory');
+            if (!categoryField) return;
+
+            categoryField.disabled = !!isLocked;
+            categoryField.classList.toggle('protected-field', !!isLocked);
+            if (isLocked) {
+                categoryField.setAttribute('title', 'Statutory leave category is fixed in edit mode.');
+            } else {
+                categoryField.removeAttribute('title');
+            }
+        }
+
         async function loadLeaveTypes() {
             replaceLeaveTypes([]);
+
+            if (!apiBase) {
+                window.showToast?.('Unable to load leave types: API is not configured.', false);
+                return;
+            }
 
             try {
                 const res = await apiFetch('/api/leave-types');
                 if (!res.ok) {
-                    usingDemoTemplates = true;
-                    replaceLeaveTypes(getDefaultDemoTemplates());
+                    window.showToast?.('Unable to load leave types.', false);
                     return;
                 }
 
                 const items = await res.json();
                 const activeItems = Array.isArray(items) ? items.filter(item => item.isActive) : [];
-                usingDemoTemplates = activeItems.length === 0;
-
-                if (usingDemoTemplates) {
-                    replaceLeaveTypes(getDefaultDemoTemplates());
-                    return;
-                }
 
                 const hydratedItems = activeItems.map(item => {
                     if (typeof item.leaveCategory === 'undefined') {
@@ -1546,19 +1590,10 @@
                     return item;
                 });
 
-                const displayItems = [...hydratedItems];
-                const existingNames = new Set(hydratedItems.map(x => (x.leaveTypeName || '').trim().toLowerCase()));
-                ['sil', 'maternity', 'paternity', 'solo_parent', 'vawc', 'special_women'].forEach((key, idx) => {
-                    const template = phLeaveTemplates[key];
-                    if (!existingNames.has(template.leaveTypeName.toLowerCase())) {
-                        displayItems.push(templateToRecord(key, -200 - idx));
-                    }
-                });
-
-                replaceLeaveTypes(displayItems);
+                replaceLeaveTypes(hydratedItems);
             } catch (err) {
-                usingDemoTemplates = true;
-                replaceLeaveTypes(getDefaultDemoTemplates());
+                console.warn('Failed to load leave types', err);
+                window.showToast?.('Unable to load leave types.', false);
             }
         }
 
@@ -1622,7 +1657,7 @@
                 if (!condition) return;
                 flagEntries.push({
                     label,
-                    badge: `<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${classes}">${label}</span>`
+                    badge: `<span class="inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium leading-none ring-1 ${classes}">${label}</span>`
                 });
             };
 
@@ -1734,14 +1769,14 @@
 
                 <td class="w-[6%] px-5 py-4 align-top text-right">
                     <div class="flex items-center justify-end gap-1">
-                        <button onclick="openEditLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300">
+                        <button type="button" title="Edit leave type" onclick="openEditLeaveType(${item.leaveTypeID})" class="rounded-lg bg-amber-50 p-1.5 text-amber-600 transition-colors hover:bg-amber-100 hover:text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30 dark:hover:text-amber-200">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${editSvg}</svg>
                         </button>
                         ${item.isSystemProtected
-                            ? `<button type="button" class="cursor-not-allowed rounded-lg p-1.5 text-gray-300 dark:text-gray-600" title="Protected leave template">
+                            ? `<button type="button" class="cursor-not-allowed rounded-lg bg-slate-100 p-1.5 text-slate-400 dark:bg-slate-700/60 dark:text-slate-500" title="Protected leave template">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${lockSvg}</svg>
                                </button>`
-                            : `<button onclick="deleteLeaveType(${item.leaveTypeID})" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                            : `<button type="button" title="Delete leave type" onclick="deleteLeaveType(${item.leaveTypeID})" class="rounded-lg bg-rose-50 p-1.5 text-rose-600 transition-colors hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-900/30 dark:hover:text-rose-200">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">${trashSvg}</svg>
                                </button>`
                         }
@@ -1960,22 +1995,24 @@
                 return;
             }
 
-            if (String(id).startsWith('-') || usingDemoTemplates) {
-                removeLeaveTypeRecord(id);
-                window.showToast?.('Leave type removed from demo UI.', true);
+            if (!apiBase) {
+                window.showToast?.('Unable to delete leave type: API is not configured.', false);
                 return;
             }
 
             try {
                 const res = await apiFetch(`/api/leave-types/${id}`, { method: 'DELETE' });
                 if (!res.ok) {
-                    console.warn('Failed to delete leave type');
+                    const data = await res.json().catch(() => null);
+                    window.showToast?.(data?.message || 'Failed to delete leave type.', false);
                     return;
                 }
 
                 removeLeaveTypeRecord(id);
+                window.showToast?.('Leave type archived.', true);
             } catch (err) {
                 console.warn('Failed to delete leave type', err);
+                window.showToast?.('Failed to delete leave type.', false);
             }
         }
 
@@ -2026,7 +2063,10 @@
             const leaveCategory = categorySelect?.value || 'company';
             const compensationSource = compensationSelect?.value || 'company_paid';
             const paidStatus = paidStatusSelect?.value || 'paid';
-            const statutoryCode = document.getElementById('leaveStatutoryCode')?.value || 'NONE';
+            const statutoryCodeRaw = document.getElementById('leaveStatutoryCode')?.value || 'NONE';
+            const statutoryCode = leaveCategory === 'statutory' && statutoryCodeRaw === 'NONE'
+                ? inferStatutoryCodeFromName(typeName)
+                : statutoryCodeRaw;
 
             const advanceFilingDays = Number(document.getElementById('leaveAdvanceFiling')?.value || 0);
             const allowRetroactiveFiling = !!document.getElementById('flagRetroactive')?.checked;
@@ -2084,28 +2124,16 @@
         async function saveLeavePolicy() {
             if (isSavingLeaveType) return;
 
+            if (!apiBase) {
+                window.showToast?.('Unable to save leave type: API is not configured.', false);
+                return;
+            }
+
             isSavingLeaveType = true;
             setLeaveModalSaving(true);
 
             const existing = currentEditLeaveTypeId ? leaveTypeStore.get(currentEditLeaveTypeId) : null;
             const payload = buildPayloadFromForm(existing);
-
-            const isDemoMode = usingDemoTemplates || !apiBase || String(currentEditLeaveTypeId || '').startsWith('-');
-
-            if (isDemoMode) {
-                const record = {
-                    ...(existing || {}),
-                    ...payload,
-                    leaveTypeID: currentEditLeaveTypeId || nextDemoId--
-                };
-
-                upsertLeaveTypeRecord(record);
-                closeLeaveModal();
-                isSavingLeaveType = false;
-                setLeaveModalSaving(false);
-                window.showToast?.(currentEditLeaveTypeId ? 'Leave type updated in demo UI.' : 'Leave type added to demo UI.', true);
-                return;
-            }
 
             const url = currentEditLeaveTypeId ? `/api/leave-types/${currentEditLeaveTypeId}` : '/api/leave-types';
             const method = currentEditLeaveTypeId ? 'PUT' : 'POST';
@@ -2118,15 +2146,18 @@
                 });
 
                 if (!res.ok) {
-                    console.warn('Failed to save leave type');
+                    const data = await res.json().catch(() => null);
+                    window.showToast?.(data?.message || 'Failed to save leave type.', false);
                     return;
                 }
 
                 const created = await res.json();
                 upsertLeaveTypeRecord(created);
                 closeLeaveModal();
+                window.showToast?.(currentEditLeaveTypeId ? 'Leave type updated.' : 'Leave type created.', true);
             } catch (err) {
                 console.error('Failed to save leave type', err);
+                window.showToast?.('Failed to save leave type.', false);
             } finally {
                 isSavingLeaveType = false;
                 setLeaveModalSaving(false);
@@ -2134,6 +2165,8 @@
         }
 
         async function saveLeaveSettings() {
+            if (isSavingLeaveSettings) return;
+
             const fiscalLabel = document.getElementById('leaveFiscalYearStart')?.value || 'January 1';
             const resetLabel = document.getElementById('leaveResetRule')?.value || 'Reset on Fiscal Year Start';
             const prorated = document.getElementById('leaveProrated')?.checked ?? true;
@@ -2144,12 +2177,14 @@
                 proratedForNewHires: prorated
             };
 
-            if (usingDemoTemplates || !apiBase) {
-                window.showToast?.('General leave settings saved in demo UI.', true);
+            if (!apiBase) {
+                window.showToast?.('Unable to save leave settings: API is not configured.', false);
                 return;
             }
 
             try {
+                isSavingLeaveSettings = true;
+                setLeaveSettingsSaving(true);
                 const res = await apiFetch('/api/org-leave-settings/current', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -2169,16 +2204,23 @@
                 window.showToast?.(toastMessage, persisted);
             } catch (err) {
                 window.showToast?.('Unable to save leave settings.', false);
+            } finally {
+                isSavingLeaveSettings = false;
+                setLeaveSettingsSaving(false);
             }
         }
 
         function resetLeaveModal() {
             currentEditLeaveTypeId = null;
+            const modal = document.getElementById('leaveModal');
+            modal?.classList.remove('mode-edit');
+            modal?.classList.add('mode-add');
 
             document.getElementById('leaveModalTitle').textContent = 'New Leave Type';
             document.getElementById('leaveModalSaveText').textContent = 'Save Leave Type';
 
             document.getElementById('leaveTypeSelect').value = 'sil';
+            setLeaveCategoryLocked(false);
             document.getElementById('customLeaveName').value = '';
             document.getElementById('customNameField').classList.add('hidden');
 
@@ -2220,6 +2262,9 @@
             if (!item) return;
 
             currentEditLeaveTypeId = id;
+            const modal = document.getElementById('leaveModal');
+            modal?.classList.remove('mode-add');
+            modal?.classList.add('mode-edit');
             document.getElementById('leaveModalTitle').textContent = 'Edit Leave Type';
             document.getElementById('leaveModalSaveText').textContent = 'Update Leave Type';
 
@@ -2235,6 +2280,7 @@
             }
 
             document.getElementById('leaveCategory').value = item.leaveCategory === 1 ? 'statutory' : item.leaveCategory === 3 ? 'unpaid_admin' : 'company';
+            setLeaveCategoryLocked(item.leaveCategory === 1 || item.statutoryCode > 0);
             document.getElementById('leaveCompensationSource').value =
                 item.compensationSource === 2 ? 'government_benefit'
                 : item.compensationSource === 3 ? 'unpaid'
@@ -2301,6 +2347,7 @@
 
             document.getElementById('approverRoleContainer').classList.toggle('hidden', !item.requireApproval);
             applyProtectedMode(!!item.isSystemProtected);
+            setLeaveCategoryLocked(item.leaveCategory === 1 || item.statutoryCode > 0);
             setLeaveModalSaving(false);
 
             const m = document.getElementById('leaveModal');
@@ -2333,6 +2380,18 @@
                 compensationSelect.addEventListener('change', syncPaidFromCompensation);
             }
 
+            const leaveCategorySelect = document.getElementById('leaveCategory');
+            if (leaveCategorySelect && leaveCategorySelect.dataset.bound !== 'true') {
+                leaveCategorySelect.dataset.bound = 'true';
+                leaveCategorySelect.addEventListener('change', autoPopulateStatutoryCode);
+            }
+
+            const customLeaveName = document.getElementById('customLeaveName');
+            if (customLeaveName && customLeaveName.dataset.bound !== 'true') {
+                customLeaveName.dataset.bound = 'true';
+                customLeaveName.addEventListener('input', autoPopulateStatutoryCode);
+            }
+
             if (!document.body.dataset.leaveFlagsBound) {
                 document.body.dataset.leaveFlagsBound = 'true';
 
@@ -2347,16 +2406,40 @@
         function init() {
             currentEditLeaveTypeId = null;
             isSavingLeaveType = false;
+            isSavingLeaveSettings = false;
             leaveTypeStore.clear();
-             leaveTypeList = [];
-             leaveCurrentPage = 1;
+              leaveTypeList = [];
+              leaveCurrentPage = 1;
             refreshApiContext();
             ensureFieldDecorations();
             attachLeaveModalDismiss();
             bindLeaveEvents();
             bindLeaveTableControls();
+            setLeaveSettingsSaving(false);
             loadLeaveTypes();
             loadLeaveSettings();
+        }
+
+        function setLeaveSettingsSaving(isSaving) {
+            const btn = document.getElementById('leaveSettingsSaveBtn');
+            const spinner = document.getElementById('leaveSettingsSaveSpinner');
+            const icon = document.getElementById('leaveSettingsSaveIcon');
+            const text = document.getElementById('leaveSettingsSaveText');
+            if (!btn || !spinner || !icon || !text) return;
+
+            if (isSaving) {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                spinner.classList.remove('hidden');
+                icon.classList.add('hidden');
+                text.textContent = 'Saving...';
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                spinner.classList.add('hidden');
+                icon.classList.remove('hidden');
+                text.textContent = 'Save General Settings';
+            }
         }
 
         window.openLeaveModal = openLeaveModal;

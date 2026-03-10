@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Subchron.API.Models.Entities;
 
 /// <summary>
@@ -13,6 +15,9 @@ public class DeductionRule
 
     /// <summary>Display name, e.g. "Income Tax", "SSS", "Health Insurance"</summary>
     public string Name { get; set; } = string.Empty;
+
+    [MaxLength(30)]
+    public string Category { get; set; } = "Statutory";
 
     /// <summary>
     /// How the deduction amount is computed.
@@ -49,6 +54,20 @@ public class DeductionRule
 
     /// <summary>If true, system computes this automatically; otherwise admin inputs manually.</summary>
     public bool AutoCompute { get; set; } = true;
+
+    /// <summary>Basis for computation, e.g. BasicPay, GrossPay, TaxablePay.</summary>
+    public string ComputeBasedOn { get; set; } = "BasicPay";
+
+    public DateTime? EffectiveFrom { get; set; }
+        = null;
+
+    public decimal? MaxDeductionAmount { get; set; }
+        = null;
+
+    /// <summary>JSON array of scope tags (departments, LGUs, etc.).</summary>
+    public string ScopeTagsJson { get; set; } = "[]";
+
+    public string Notes { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }

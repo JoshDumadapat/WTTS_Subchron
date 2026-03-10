@@ -28,6 +28,7 @@ public class OrgShiftTemplateDto
     public List<OrgShiftBreakDto> Breaks { get; set; } = new();
     public List<OrgShiftDayOverrideDto> DayOverrides { get; set; } = new();
     public bool IsActive { get; set; } = true;
+    public string? DisabledReason { get; set; }
 }
 
 public class OrgShiftBreakDto

@@ -602,6 +602,8 @@
                                 </div>
                             </div>
 
+                            <p id="otApprovalRuleError" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400"></p>
+
                             <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900/30">
                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
@@ -1250,16 +1252,26 @@
         if (!apiBase || !token) return;
 
         const manualToggle = document.getElementById('manualEntryToggle');
+        const manualEntryAccessInputs = attendanceForm?.querySelectorAll('input[name="manual_entry_access"]') || [];
         const requireGeofenceToggle = document.getElementById('requireGeofenceToggle');
         const restrictByIpToggle = document.getElementById('restrictByIpToggle');
         const preventDoubleClockInToggle = document.getElementById('preventDoubleClockInToggle');
         const autoClockOutToggle = document.getElementById('autoClockOutToggle');
         const autoClockOutHours = document.getElementById('autoClockOutHours');
+        const earliestClockInInput = document.getElementById('earliestClockIn');
+        const latestClockInInput = document.getElementById('latestClockIn');
+        const allowIncompleteLogsToggle = document.getElementById('allowIncompleteLogsToggle');
+        const autoFlagMissingToggle = document.getElementById('autoFlagMissingToggle');
+        const defaultActionIncompleteSelect = document.getElementById('defaultActionIncompleteLog');
+        const useGracePeriodToggle = document.getElementById('useGracePeriodToggle');
+        const markUndertimeToggle = document.getElementById('markUndertimeToggle');
+        const autoAbsentToggle = document.getElementById('autoAbsentToggle');
         const defaultShiftInput = document.getElementById('defaultShiftTemplateCode');
         const attendanceSaveBtn = document.getElementById('attendanceSettingsSaveBtn');
         const attendanceErrorBox = document.getElementById('attendanceSettingsError');
         const otSaveBtn = document.getElementById('otSettingsSaveBtn');
         const otErrorBox = document.getElementById('otSettingsError');
+        const otApprovalRuleError = document.getElementById('otApprovalRuleError');
         const attendanceButtonDefault = attendanceSaveBtn?.innerHTML || '';
         const otButtonDefault = otSaveBtn?.innerHTML || '';
 
@@ -1349,17 +1361,19 @@
         ];
 
         const scopeOptionMap = {
-            DEPARTMENT: ['Operations', 'Warehouse', 'Finance', 'Customer Success'],
-            SITE: ['Metro Manila HQ', 'Cebu Hub', 'Davao Site', 'Clark Satellite'],
-            ROLE: ['Supervisor', 'Shift Lead', 'HR Partner', 'Finance Reviewer'],
-            EMPLOYMENT_TYPE: ['Regular', 'Project-based', 'Seasonal', 'Probationary']
+            DEPARTMENT: [],
+            SITE: [],
+            ROLE: [],
+            EMPLOYMENT_TYPE: []
         };
+        let scopeOptionsLoaded = false;
 
         const ndScopedOptions = {
-            DEPARTMENT: ['Support', 'Sales', 'Field Ops', 'Warehouse'],
-            SITE: ['Baguio Site', 'Iloilo Hub', 'Remote-only'],
-            ROLE: ['Executives', 'Supervisors', 'Apprentices']
+            departments: [],
+            sites: [],
+            roles: []
         };
+        let ndOptionsLoaded = false;
         const ndAddExclusionBtnDefault = ndAddExclusionBtn?.innerHTML || 'Add Exclusion';
 
         let scopeEntries = [];
@@ -1428,6 +1442,16 @@
         });
 
         const switchInputs = [
+            manualToggle,
+            requireGeofenceToggle,
+            restrictByIpToggle,
+            preventDoubleClockInToggle,
+            autoClockOutToggle,
+            allowIncompleteLogsToggle,
+            autoFlagMissingToggle,
+            useGracePeriodToggle,
+            markUndertimeToggle,
+            autoAbsentToggle,
             otEnabledToggle,
             restHolidayOverrideToggle,
             earlyOtToggle,
@@ -1469,6 +1493,8 @@
         scopeEntryType?.addEventListener('change', handleScopeEntryTypeChange);
         addScopeEntryBtn?.addEventListener('click', handleAddScopeEntry);
         scopeEntriesTableBody?.addEventListener('click', handleScopeEntryTableClick);
+        preApprovalToggle?.addEventListener('change', syncApprovalToggleRuleState);
+        autoApproveToggle?.addEventListener('change', syncApprovalToggleRuleState);
         ndAddExclusionBtn?.addEventListener('click', handleNdAddCombo);
         ndCancelExclusionEditBtn?.addEventListener('click', () => resetNdComboForm());
         ndCombosTableBody?.addEventListener('click', handleNdCombosTableClick);
@@ -1545,6 +1571,25 @@
                 otErrorBox.textContent = '';
                 otErrorBox.classList.add('hidden');
             }
+        }
+
+        function showApprovalToggleRuleError(message) {
+            if (!otApprovalRuleError) return;
+            otApprovalRuleError.textContent = message || '';
+            otApprovalRuleError.classList.toggle('hidden', !message);
+        }
+
+        function getApprovalToggleRuleError(preApprovalRequired, autoApprove) {
+            if (preApprovalRequired && autoApprove) {
+                return 'Rule: Pre-Approval and Auto-Approve cannot both be ON. Post-Filing can be ON with either option.';
+            }
+            return '';
+        }
+
+        function syncApprovalToggleRuleState() {
+            const message = getApprovalToggleRuleError(preApprovalToggle?.checked ?? false, autoApproveToggle?.checked ?? false);
+            showApprovalToggleRuleError(message);
+            return !message;
         }
 
         function setAttendanceSaving(state) {
@@ -1746,8 +1791,91 @@
             if (!scopeEntryType || !scopeEntryValue) return;
             const type = scopeEntryType.value || 'DEPARTMENT';
             const options = scopeOptionMap[type] || [];
-            scopeEntryValue.innerHTML = options.map(val => `<option value="${val}">${val}</option>`).join('');
-            if (scopeEntryValue.options.length) scopeEntryValue.selectedIndex = 0;
+
+            scopeEntryValue.innerHTML = '';
+
+            if (!options.length) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = scopeOptionsLoaded
+                    ? `No ${formatScopeType(type).toLowerCase()} options available`
+                    : 'Loading options...';
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                scopeEntryValue.appendChild(placeholder);
+                scopeEntryValue.disabled = true;
+                return;
+            }
+
+            scopeEntryValue.disabled = false;
+            options.forEach(val => {
+                const option = document.createElement('option');
+                option.value = val;
+                option.textContent = val;
+                scopeEntryValue.appendChild(option);
+            });
+            scopeEntryValue.selectedIndex = 0;
+        }
+
+        async function preloadScopeOptions() {
+            if (!apiBase || !token) {
+                scopeOptionsLoaded = true;
+                handleScopeEntryTypeChange();
+                return;
+            }
+
+            const endpoints = [
+                fetchJsonWithAuth(`${apiBase}/api/departments?activeOnly=true`),
+                fetchJsonWithAuth(`${apiBase}/api/org-locations/current`),
+                fetchJsonWithAuth(`${apiBase}/api/employees/roles`),
+                fetchJsonWithAuth(`${apiBase}/api/employees`)
+            ];
+
+            const [departmentsResult, sitesResult, rolesResult, employeesResult] = await Promise.allSettled(endpoints);
+            const failures = [];
+
+            if (departmentsResult.status === 'fulfilled') {
+                const departments = Array.isArray(departmentsResult.value) ? departmentsResult.value : [];
+                const names = departments.map(d => d?.departmentName || d?.DepartmentName || '').filter(Boolean);
+                scopeOptionMap.DEPARTMENT = normalizeOptionList(names);
+            } else {
+                failures.push('departments');
+            }
+
+            if (sitesResult.status === 'fulfilled') {
+                const sites = Array.isArray(sitesResult.value) ? sitesResult.value : [];
+                const names = sites.map(site => site?.locationName || site?.LocationName || '').filter(Boolean);
+                scopeOptionMap.SITE = normalizeOptionList(names);
+            } else {
+                failures.push('sites');
+            }
+
+            if (rolesResult.status === 'fulfilled') {
+                const roles = Array.isArray(rolesResult.value) ? rolesResult.value : [];
+                scopeOptionMap.ROLE = normalizeOptionList(roles);
+            } else {
+                failures.push('roles');
+            }
+
+            if (employeesResult.status === 'fulfilled') {
+                const employees = Array.isArray(employeesResult.value) ? employeesResult.value : [];
+                const employmentTypes = employees
+                    .map(emp => emp?.employmentType || emp?.EmploymentType || '')
+                    .filter(Boolean);
+                scopeOptionMap.EMPLOYMENT_TYPE = normalizeOptionList(employmentTypes);
+            } else {
+                failures.push('employment types');
+            }
+
+            scopeOptionsLoaded = true;
+            handleScopeEntryTypeChange();
+
+            if (failures.length === 0) return;
+            const label = failures.join(', ');
+            const message = failures.length === 4
+                ? 'Unable to load OT eligibility options. Some selections may be unavailable.'
+                : `Unable to load ${label} options for OT eligibility. Some selections may be unavailable.`;
+            window.showToast?.(message, false);
         }
 
         function showScopeEntryError(message) {
@@ -1796,6 +1924,8 @@
             if (scopeEntryValue) scopeEntryValue.disabled = disabled;
 
             scopeEntriesTableBody?.querySelectorAll('[data-remove-scope]')?.forEach(btn => btn.disabled = disabled);
+
+            if (!disabled) handleScopeEntryTypeChange();
         }
 
         function formatScopeType(type) {
@@ -1841,17 +1971,110 @@
         }
 
         function populateNdComboSelects() {
-            populateNdComboSelect(ndComboDepartment, ndScopedOptions.DEPARTMENT, 'Select department');
-            populateNdComboSelect(ndComboSite, ndScopedOptions.SITE, 'Select site');
-            populateNdComboSelect(ndComboRole, ndScopedOptions.ROLE, 'Select role');
+            const deptPlaceholder = ndOptionsLoaded ? 'No departments available' : 'Loading departments…';
+            const sitePlaceholder = ndOptionsLoaded ? 'No sites available' : 'Loading sites…';
+            const rolePlaceholder = ndOptionsLoaded ? 'No roles available' : 'Loading roles…';
+            populateNdComboSelect(ndComboDepartment, ndScopedOptions.departments, deptPlaceholder);
+            populateNdComboSelect(ndComboSite, ndScopedOptions.sites, sitePlaceholder);
+            populateNdComboSelect(ndComboRole, ndScopedOptions.roles, rolePlaceholder);
         }
 
-        function populateNdComboSelect(selectEl, options, placeholder) {
+        function populateNdComboSelect(selectEl, options, emptyLabel) {
             if (!selectEl) return;
             const opts = Array.isArray(options) ? options : [];
-            const html = ['<option value="">' + placeholder + '</option>', ...opts.map(opt => `<option value="${opt}">${opt}</option>`)].join('');
-            selectEl.innerHTML = html;
-            selectEl.selectedIndex = 0;
+            const previousValue = selectEl.value;
+            selectEl.innerHTML = '';
+
+            if (!opts.length) {
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = emptyLabel;
+                placeholderOption.disabled = true;
+                placeholderOption.selected = true;
+                selectEl.appendChild(placeholderOption);
+                selectEl.disabled = true;
+                return;
+            }
+
+            selectEl.disabled = false;
+            opts.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                selectEl.appendChild(option);
+            });
+
+            if (previousValue && opts.includes(previousValue))
+                selectEl.value = previousValue;
+            else
+                selectEl.selectedIndex = 0;
+        }
+
+        async function preloadNdScopedOptions() {
+            if (!apiBase || !token) {
+                populateNdComboSelects();
+                return;
+            }
+
+            const endpoints = [
+                fetchJsonWithAuth(`${apiBase}/api/departments?activeOnly=true`),
+                fetchJsonWithAuth(`${apiBase}/api/org-locations/current`),
+                fetchJsonWithAuth(`${apiBase}/api/employees/roles`)
+            ];
+
+            const [departmentsResult, sitesResult, rolesResult] = await Promise.allSettled(endpoints);
+            const failures = [];
+
+            if (departmentsResult.status === 'fulfilled') {
+                const departments = Array.isArray(departmentsResult.value) ? departmentsResult.value : [];
+                const names = departments.map(d => d?.departmentName || d?.DepartmentName || '').filter(Boolean);
+                ndScopedOptions.departments = normalizeOptionList(names);
+            } else {
+                failures.push('departments');
+            }
+
+            if (sitesResult.status === 'fulfilled') {
+                const sites = Array.isArray(sitesResult.value) ? sitesResult.value : [];
+                const names = sites.map(site => site?.locationName || site?.LocationName || '').filter(Boolean);
+                ndScopedOptions.sites = normalizeOptionList(names);
+            } else {
+                failures.push('sites');
+            }
+
+            if (rolesResult.status === 'fulfilled') {
+                const roles = Array.isArray(rolesResult.value) ? rolesResult.value : [];
+                ndScopedOptions.roles = normalizeOptionList(roles);
+            } else {
+                failures.push('roles');
+            }
+
+            ndOptionsLoaded = true;
+            populateNdComboSelects();
+
+            if (failures.length === 0) return;
+            const label = failures.join(', ');
+            const message = failures.length === 3
+                ? 'Unable to load scope option lists. Some selections may be unavailable.'
+                : `Unable to load ${label} options. Some selections may be unavailable.`;
+            window.showToast?.(message, false);
+        }
+
+        async function fetchJsonWithAuth(url) {
+            const resp = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const text = await resp.text();
+            let data = null;
+            if (text) {
+                try { data = JSON.parse(text); }
+                catch { data = null; }
+            }
+            if (!resp.ok) {
+                const err = new Error(data?.message || 'Request failed.');
+                err.status = resp.status;
+                throw err;
+            }
+            return data;
         }
 
         function ensureOption(selectEl, value) {
@@ -1864,6 +2087,7 @@
                 option.textContent = value;
                 selectEl.appendChild(option);
             }
+            selectEl.disabled = false;
             selectEl.value = value;
         }
 
@@ -2000,10 +2224,20 @@
             return result;
         }
 
+        function normalizeOptionList(values) {
+            const deduped = dedupeStrings(values || []);
+            return deduped.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+        }
+
         function toggleFieldsetInteractivity(fieldset, enabled, options = {}) {
             if (!fieldset) return;
             const controls = fieldset.querySelectorAll('input, select, textarea, button, [contenteditable="true"]');
             controls.forEach(control => {
+                if (control.tagName === 'BUTTON' && control.hasAttribute('data-accordion-target')) {
+                    control.disabled = false;
+                    return;
+                }
+
                 if (control.tagName === 'SELECT' && options.readOnlySelects) {
                     if (!enabled) {
                         lockSelect(control);
@@ -2050,6 +2284,27 @@
         function getSelectedMode() {
             const selected = attendanceForm?.querySelector('input[name="primaryMode"]:checked');
             return selected ? selected.value : null;
+        }
+
+        function getManualEntryAccessMode() {
+            const selected = attendanceForm?.querySelector('input[name="manual_entry_access"]:checked');
+            const normalized = (selected?.value || 'supervisor').toString().toUpperCase();
+            return normalized === 'ADMIN' ? 'ADMIN' : 'SUPERVISOR';
+        }
+
+        function setManualEntryAccessMode(value) {
+            const normalized = (value || 'supervisor').toString().toLowerCase();
+            let matched = false;
+            manualEntryAccessInputs.forEach(input => {
+                const shouldCheck = input.value === normalized;
+                input.checked = shouldCheck;
+                if (shouldCheck) matched = true;
+            });
+            if (!matched && manualEntryAccessInputs.length) {
+                manualEntryAccessInputs.forEach(input => {
+                    input.checked = input.value === 'supervisor';
+                });
+            }
         }
 
         function parseHours() {
@@ -2102,10 +2357,19 @@
             const payload = {
                 primaryMode: getSelectedMode(),
                 allowManualEntry: manualToggle?.checked ?? false,
+                manualEntryAccessMode: getManualEntryAccessMode(),
                 requireGeo: requireGeofenceToggle?.checked ?? false,
                 enforceGeofence: requireGeofenceToggle?.checked ?? false,
                 restrictByIp: restrictByIpToggle?.checked ?? false,
                 preventDoubleClockIn: preventDoubleClockInToggle?.checked ?? false,
+                earliestClockInMinutes: normalizeInt(earliestClockInInput),
+                latestClockInMinutes: normalizeInt(latestClockInInput),
+                allowIncompleteLogs: allowIncompleteLogsToggle?.checked ?? false,
+                autoFlagMissingPunch: autoFlagMissingToggle?.checked ?? false,
+                defaultMissingPunchAction: (defaultActionIncompleteSelect?.value || 'IGNORE').toUpperCase(),
+                useGracePeriodForLate: useGracePeriodToggle?.checked ?? false,
+                markUndertimeBasedOnSchedule: markUndertimeToggle?.checked ?? false,
+                autoAbsentWithoutLog: autoAbsentToggle?.checked ?? false,
                 autoClockOutEnabled: autoClockOutToggle?.checked ?? false,
                 autoClockOutMaxHours: null,
                 defaultShiftTemplateCode: defaultShiftInput?.value?.trim() || null
@@ -2113,6 +2377,16 @@
 
             if (!payload.primaryMode) {
                 throw new Error('Select a primary attendance mode.');
+            }
+
+            if (payload.earliestClockInMinutes != null) {
+                if (payload.earliestClockInMinutes < 0) throw new Error('Earliest clock-in before shift cannot be negative.');
+                if (payload.earliestClockInMinutes > 720) throw new Error('Earliest clock-in before shift cannot exceed 720 minutes.');
+            }
+
+            if (payload.latestClockInMinutes != null) {
+                if (payload.latestClockInMinutes < 0) throw new Error('Latest clock-in grace cannot be negative.');
+                if (payload.latestClockInMinutes > 720) throw new Error('Latest clock-in grace cannot exceed 720 minutes.');
             }
 
             if (payload.autoClockOutEnabled) {
@@ -2323,6 +2597,7 @@
             if (limitModeSelect) limitModeSelect.value = merged.limitMode || 'SOFT';
             if (overrideRoleSelect) overrideRoleSelect.value = merged.overrideRole || '';
             handleLimitModeChange();
+            syncApprovalToggleRuleState();
 
             const bucketMap = new Map((merged.buckets || []).map(b => [b.key, b]));
             bucketKeys.forEach(key => {
@@ -2375,25 +2650,43 @@
             if (manualToggle) {
                 manualToggle.checked = !!data?.allowManualEntry;
                 toggleManualOptions(manualToggle);
+                syncSwitchAria(manualToggle);
             }
+
+            setManualEntryAccessMode((data?.manualEntryAccessMode || 'SUPERVISOR').toString().toLowerCase());
 
             if (requireGeofenceToggle) {
                 const requireValue = (data?.enforceGeofence ?? data?.requireGeo) || false;
                 requireGeofenceToggle.checked = requireValue;
+                syncSwitchAria(requireGeofenceToggle);
             }
 
-            if (restrictByIpToggle) restrictByIpToggle.checked = !!data?.restrictByIp;
-            if (preventDoubleClockInToggle) preventDoubleClockInToggle.checked = data?.preventDoubleClockIn ?? true;
+            if (restrictByIpToggle) { restrictByIpToggle.checked = !!data?.restrictByIp; syncSwitchAria(restrictByIpToggle); }
+            if (preventDoubleClockInToggle) { preventDoubleClockInToggle.checked = data?.preventDoubleClockIn ?? true; syncSwitchAria(preventDoubleClockInToggle); }
+
+            if (earliestClockInInput) earliestClockInInput.value = data?.earliestClockInMinutes != null ? data.earliestClockInMinutes : '';
+            if (latestClockInInput) latestClockInInput.value = data?.latestClockInMinutes != null ? data.latestClockInMinutes : '';
 
             if (autoClockOutToggle) {
                 autoClockOutToggle.checked = !!data?.autoClockOutEnabled;
                 toggleAutoClockOut(autoClockOutToggle);
+                syncSwitchAria(autoClockOutToggle);
             }
 
             if (autoClockOutHours) {
                 if (data?.autoClockOutMaxHours != null) autoClockOutHours.value = Number(data.autoClockOutMaxHours).toString();
                 else autoClockOutHours.value = '';
             }
+
+            if (allowIncompleteLogsToggle) { allowIncompleteLogsToggle.checked = !!data?.allowIncompleteLogs; syncSwitchAria(allowIncompleteLogsToggle); }
+            if (autoFlagMissingToggle) { autoFlagMissingToggle.checked = !!data?.autoFlagMissingPunch; syncSwitchAria(autoFlagMissingToggle); }
+            if (defaultActionIncompleteSelect) {
+                const normalizedAction = (data?.defaultMissingPunchAction || 'IGNORE').toString().toUpperCase();
+                defaultActionIncompleteSelect.value = ['IGNORE', 'EXCEPTION', 'CORRECTION'].includes(normalizedAction) ? normalizedAction : 'IGNORE';
+            }
+            if (useGracePeriodToggle) { useGracePeriodToggle.checked = !!data?.useGracePeriodForLate; syncSwitchAria(useGracePeriodToggle); }
+            if (markUndertimeToggle) { markUndertimeToggle.checked = !!data?.markUndertimeBasedOnSchedule; syncSwitchAria(markUndertimeToggle); }
+            if (autoAbsentToggle) { autoAbsentToggle.checked = !!data?.autoAbsentWithoutLog; syncSwitchAria(autoAbsentToggle); }
 
             if (defaultShiftInput) defaultShiftInput.value = data?.defaultShiftTemplateCode || '';
         }
@@ -2527,7 +2820,15 @@
 
             const payload = { ...overtimeRules, nightDifferential };
 
+            const approvalRuleMessage = getApprovalToggleRuleError(!!payload.preApprovalRequired, !!payload.autoApprove);
+            if (approvalRuleMessage) {
+                showApprovalToggleRuleError(approvalRuleMessage);
+                showOtError('Fix the approval workflow rule before saving.');
+                return;
+            }
+
             showOtError('');
+            showApprovalToggleRuleError('');
             setOtSaving(true);
 
             try {
@@ -2554,7 +2855,11 @@
                     || (persisted ? 'Overtime rules updated.' : 'Overtime rules saved locally and will sync once reconnected.');
                 window.showToast?.(toastMessage, persisted);
             } catch (err) {
-                showOtError(err?.message || 'Failed to save overtime settings.');
+                const errMessage = err?.message || 'Failed to save overtime settings.';
+                if (errMessage.toLowerCase().includes('auto-approve') && errMessage.toLowerCase().includes('pre-approval')) {
+                    showApprovalToggleRuleError('Rule: Pre-Approval and Auto-Approve cannot both be ON. Post-Filing can be ON with either option.');
+                }
+                showOtError(errMessage);
                 window.showToast?.('Unable to save overtime settings.', false);
             } finally {
                 setOtSaving(false);
@@ -2571,6 +2876,6 @@
             saveOvertimeSettings();
         });
 
-        Promise.all([loadAttendanceSettings(), loadOvertimeSettings()]);
+        Promise.all([loadAttendanceSettings(), loadOvertimeSettings(), preloadNdScopedOptions(), preloadScopeOptions()]);
     })();
 </script>

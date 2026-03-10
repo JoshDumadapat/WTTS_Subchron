@@ -63,6 +63,8 @@ public class DepartmentsController : ControllerBase
                 OrgID = d.OrgID,
                 DepartmentName = d.DepartmentName,
                 Description = d.Description,
+                DefaultShiftTemplateCode = d.DefaultShiftTemplateCode,
+                DefaultLocationId = d.DefaultLocationId,
                 IsActive = d.IsActive,
                 CreatedAt = d.CreatedAt
             })
@@ -98,6 +100,8 @@ public class DepartmentsController : ControllerBase
                 OrgID = d.OrgID,
                 DepartmentName = d.DepartmentName,
                 Description = d.Description,
+                DefaultShiftTemplateCode = d.DefaultShiftTemplateCode,
+                DefaultLocationId = d.DefaultLocationId,
                 IsActive = d.IsActive,
                 CreatedAt = d.CreatedAt
             })
@@ -124,11 +128,19 @@ public class DepartmentsController : ControllerBase
         if (nameExists)
             return Conflict(new { ok = false, message = "A department with this name already exists in your organization." });
 
+        var defaultShiftTemplateCode = string.IsNullOrWhiteSpace(req.DefaultShiftTemplateCode) ? null : req.DefaultShiftTemplateCode.Trim();
+        var defaultLocationId = req.DefaultLocationId;
+        var defaultsError = await ValidateDepartmentDefaultsAsync(orgId.Value, defaultShiftTemplateCode, defaultLocationId);
+        if (!string.IsNullOrEmpty(defaultsError))
+            return BadRequest(new { ok = false, message = defaultsError });
+
         var dep = new Department
         {
             OrgID = orgId.Value,
             DepartmentName = name,
             Description = null,
+            DefaultShiftTemplateCode = defaultShiftTemplateCode,
+            DefaultLocationId = defaultLocationId,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -143,6 +155,8 @@ public class DepartmentsController : ControllerBase
             OrgID = dep.OrgID,
             DepartmentName = dep.DepartmentName,
             Description = dep.Description,
+            DefaultShiftTemplateCode = dep.DefaultShiftTemplateCode,
+            DefaultLocationId = dep.DefaultLocationId,
             IsActive = dep.IsActive,
             CreatedAt = dep.CreatedAt
         });
@@ -168,7 +182,15 @@ public class DepartmentsController : ControllerBase
         if (nameExists)
             return Conflict(new { ok = false, message = "A department with this name already exists in your organization." });
 
+        var defaultShiftTemplateCode = string.IsNullOrWhiteSpace(req.DefaultShiftTemplateCode) ? null : req.DefaultShiftTemplateCode.Trim();
+        var defaultLocationId = req.DefaultLocationId;
+        var defaultsError = await ValidateDepartmentDefaultsAsync(orgId.Value, defaultShiftTemplateCode, defaultLocationId);
+        if (!string.IsNullOrEmpty(defaultsError))
+            return BadRequest(new { ok = false, message = defaultsError });
+
         dep.DepartmentName = name;
+        dep.DefaultShiftTemplateCode = defaultShiftTemplateCode;
+        dep.DefaultLocationId = defaultLocationId;
         await _db.SaveChangesAsync();
 
         await _audit.LogTenantAsync(orgId!.Value, userId, "DepartmentUpdated", "Department", dep.DepID, dep.DepartmentName);
@@ -179,6 +201,8 @@ public class DepartmentsController : ControllerBase
             OrgID = dep.OrgID,
             DepartmentName = dep.DepartmentName,
             Description = dep.Description,
+            DefaultShiftTemplateCode = dep.DefaultShiftTemplateCode,
+            DefaultLocationId = dep.DefaultLocationId,
             IsActive = dep.IsActive,
             CreatedAt = dep.CreatedAt
         });
@@ -197,8 +221,8 @@ public class DepartmentsController : ControllerBase
             return NotFound(new { ok = false, message = "Department not found." });
 
         var reason = (req?.Reason ?? "").Trim();
-        if (reason.Length > 200)
-            reason = reason[..200];
+        if (reason.Length > 60)
+            reason = reason[..60];
 
         var targetActive = req?.IsActive ?? !dep.IsActive;
         if (!targetActive && string.IsNullOrEmpty(reason))
@@ -217,9 +241,32 @@ public class DepartmentsController : ControllerBase
             OrgID = dep.OrgID,
             DepartmentName = dep.DepartmentName,
             Description = dep.Description,
+            DefaultShiftTemplateCode = dep.DefaultShiftTemplateCode,
+            DefaultLocationId = dep.DefaultLocationId,
             IsActive = dep.IsActive,
             CreatedAt = dep.CreatedAt
         });
+    }
+
+    private async Task<string?> ValidateDepartmentDefaultsAsync(int orgId, string? defaultShiftTemplateCode, int? defaultLocationId)
+    {
+        if (!string.IsNullOrWhiteSpace(defaultShiftTemplateCode))
+        {
+            var shiftExists = await _db.OrgShiftTemplates.AsNoTracking()
+                .AnyAsync(s => s.OrgID == orgId && s.Code == defaultShiftTemplateCode && s.IsActive);
+            if (!shiftExists)
+                return "Selected default shift is invalid or inactive.";
+        }
+
+        if (defaultLocationId.HasValue)
+        {
+            var locationExists = await _db.Locations.AsNoTracking()
+                .AnyAsync(l => l.OrgID == orgId && l.LocationID == defaultLocationId.Value && l.IsActive);
+            if (!locationExists)
+                return "Selected default location is invalid or inactive.";
+        }
+
+        return null;
     }
 }
 
@@ -229,6 +276,8 @@ public class DepartmentDto
     public int OrgID { get; set; }
     public string DepartmentName { get; set; } = "";
     public string? Description { get; set; }
+    public string? DefaultShiftTemplateCode { get; set; }
+    public int? DefaultLocationId { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int EmployeeCount { get; set; }
@@ -237,11 +286,15 @@ public class DepartmentDto
 public class DepartmentCreateRequest
 {
     public string DepartmentName { get; set; } = "";
+    public string? DefaultShiftTemplateCode { get; set; }
+    public int? DefaultLocationId { get; set; }
 }
 
 public class DepartmentUpdateRequest
 {
     public string DepartmentName { get; set; } = "";
+    public string? DefaultShiftTemplateCode { get; set; }
+    public int? DefaultLocationId { get; set; }
 }
 
 public class DepartmentStatusRequest

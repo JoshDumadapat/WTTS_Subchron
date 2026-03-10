@@ -95,6 +95,7 @@ public class EmployeesController : ControllerBase
                 BirthDate = e.BirthDate,
                 Gender = e.Gender,
                 Phone = e.Phone,
+                Email = e.Email,
                 AddressLine1 = e.AddressLine1,
                 City = e.City,
                 Country = e.Country,
@@ -126,13 +127,37 @@ public class EmployeesController : ControllerBase
 
         foreach (var dto in list)
         {
-            if (dto.UserID.HasValue && emailLookup.TryGetValue(dto.UserID.Value, out var email))
+            if (string.IsNullOrWhiteSpace(dto.Email) && dto.UserID.HasValue && emailLookup.TryGetValue(dto.UserID.Value, out var email))
                 dto.Email = email;
             if (dto.DepartmentID.HasValue && depLookup.TryGetValue(dto.DepartmentID.Value, out var depName))
                 dto.DepartmentName = depName;
         }
 
         return Ok(list);
+    }
+
+    [HttpGet("roles")]
+    public async Task<ActionResult<List<string>>> GetRoles([FromQuery] bool includeArchived = false)
+    {
+        var orgId = GetUserOrgId();
+        if (!orgId.HasValue && !IsSuperAdmin())
+            return Forbid();
+
+        var query = _db.Employees.AsNoTracking();
+        if (orgId.HasValue)
+            query = query.Where(e => e.OrgID == orgId.Value);
+
+        if (!includeArchived)
+            query = query.Where(e => !e.IsArchived);
+
+        var roles = await query
+            .Select(e => e.Role)
+            .Where(role => !string.IsNullOrWhiteSpace(role))
+            .Distinct()
+            .OrderBy(role => role)
+            .ToListAsync();
+
+        return Ok(roles);
     }
 
     // Employee management - upload employee ID/signature image.
@@ -200,13 +225,14 @@ public class EmployeesController : ControllerBase
             ? _db.Departments.AsNoTracking().Where(d => d.DepID == emp.DepartmentID).Select(d => d.DepartmentName).FirstOrDefaultAsync()
             : Task.FromResult<string?>(null);
         var dto = ToDto(emp);
-        var emailTask = emp.UserID.HasValue
+        var emailTask = string.IsNullOrWhiteSpace(emp.Email) && emp.UserID.HasValue
             ? _platformDb.Users.AsNoTracking().Where(u => u.UserID == emp.UserID.Value).Select(u => u.Email).FirstOrDefaultAsync()
             : Task.FromResult<string?>(null);
 
         await Task.WhenAll(depNameTask, emailTask);
         dto.DepartmentName = await depNameTask;
-        dto.Email = await emailTask;
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            dto.Email = await emailTask;
 
         return Ok(dto);
     }
@@ -240,6 +266,7 @@ public class EmployeesController : ControllerBase
 
         var role = string.IsNullOrWhiteSpace(r.Role) ? "Employee" : r.Role.Trim();
         var empNumber = string.IsNullOrWhiteSpace(r.EmpNumber) ? null : r.EmpNumber.Trim();
+        var normalizedEmail = NormalizeEmail(r.Email);
 
         if (empNumber != null)
         {
@@ -260,6 +287,46 @@ public class EmployeesController : ControllerBase
                 return Conflict(new { ok = false, message = "This contact number is already used by another employee." });
         }
 
+        if (!string.IsNullOrEmpty(normalizedEmail))
+        {
+            var emailExists = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.Email == normalizedEmail);
+            if (emailExists)
+                return Conflict(new { ok = false, message = "This email is already used by another employee." });
+        }
+
+        User? linkedUser = null;
+        Department? department = null;
+        if (r.DepartmentID.HasValue)
+        {
+            department = await _db.Departments.AsNoTracking().FirstOrDefaultAsync(d => d.OrgID == orgId.Value && d.DepID == r.DepartmentID.Value);
+            if (department is null)
+                return BadRequest(new { ok = false, message = "Department not found in this organization." });
+        }
+
+        if (r.UserID.HasValue)
+        {
+            linkedUser = await _platformDb.Users.FirstOrDefaultAsync(u => u.UserID == r.UserID.Value && u.OrgID == orgId.Value);
+            if (linkedUser is null)
+                return BadRequest(new { ok = false, message = "User not found in this organization." });
+
+            if (string.IsNullOrEmpty(normalizedEmail))
+            {
+                normalizedEmail = NormalizeEmail(linkedUser.Email);
+            }
+            else
+            {
+                var linkedUserEmail = NormalizeEmail(linkedUser.Email);
+                if (!string.Equals(linkedUserEmail, normalizedEmail, StringComparison.Ordinal))
+                {
+                    var inUseByAnotherUser = await _platformDb.Users.AnyAsync(u => u.UserID != linkedUser.UserID && u.Email.ToLower() == normalizedEmail);
+                    if (inUseByAnotherUser)
+                        return Conflict(new { ok = false, message = "This email is already used by another user account." });
+
+                    linkedUser.Email = normalizedEmail;
+                }
+            }
+        }
+
         var phoneTrimmed = string.IsNullOrWhiteSpace(r.Phone) ? null : r.Phone.Trim();
         var now = DateTime.UtcNow;
         var qrToken = AttendanceQrHelper.GenerateAttendanceQrToken(32);
@@ -267,12 +334,22 @@ public class EmployeesController : ControllerBase
         var idPictureUrl = string.IsNullOrWhiteSpace(r.IdPictureUrl) ? null : r.IdPictureUrl.Trim();
         var signatureUrl = string.IsNullOrWhiteSpace(r.SignatureUrl) ? null : r.SignatureUrl.Trim();
         var avatarUrl = idPictureUrl; // Use ID picture as profile/avatar
+        var assignedShiftTemplateCode = string.IsNullOrWhiteSpace(r.AssignedShiftTemplateCode)
+            ? department?.DefaultShiftTemplateCode
+            : r.AssignedShiftTemplateCode.Trim();
+        var assignedLocationId = r.AssignedLocationId ?? department?.DefaultLocationId;
+
+        var assignmentError = await ValidateShiftAndLocationAssignmentAsync(orgId.Value, assignedShiftTemplateCode, assignedLocationId);
+        if (!string.IsNullOrEmpty(assignmentError))
+            return BadRequest(new { ok = false, message = assignmentError });
 
         var emp = new Employee
         {
             OrgID = orgId.Value,
             UserID = r.UserID,
             DepartmentID = r.DepartmentID,
+            AssignedShiftTemplateCode = assignedShiftTemplateCode,
+            AssignedLocationId = assignedLocationId,
             EmpNumber = empNumber,
             FirstName = r.FirstName.Trim(),
             LastName = r.LastName.Trim(),
@@ -285,6 +362,7 @@ public class EmployeesController : ControllerBase
             DateHired = r.DateHired ?? DateTime.UtcNow.Date,
             Phone = phoneTrimmed?.Length > 30 ? phoneTrimmed[..30] : phoneTrimmed,
             PhoneNormalized = phoneNorm,
+            Email = normalizedEmail,
             AddressLine1 = string.IsNullOrWhiteSpace(r.AddressLine1) ? null : r.AddressLine1.Trim(),
             AddressLine2 = string.IsNullOrWhiteSpace(r.AddressLine2) ? null : r.AddressLine2.Trim(),
             City = string.IsNullOrWhiteSpace(r.City) ? null : r.City.Trim(),
@@ -305,6 +383,8 @@ public class EmployeesController : ControllerBase
         };
 
         _db.Employees.Add(emp);
+        if (linkedUser is not null)
+            await _platformDb.SaveChangesAsync();
         await _db.SaveChangesAsync();
 
         await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeCreated", "Employee", emp.EmpID, $"Added {emp.FirstName} {emp.LastName} ({emp.EmpNumber})");
@@ -370,13 +450,54 @@ public class EmployeesController : ControllerBase
         if (emp.IsArchived)
             return BadRequest(new { ok = false, message = "Cannot update an archived employee. Restore first." });
 
+        User? linkedUserForSync = null;
         if (req?.UserID.HasValue == true)
         {
             var linkUserId = req.UserID.Value;
-            var userExists = await _platformDb.Users.AnyAsync(u => u.UserID == linkUserId && u.OrgID == orgId.Value);
-            if (!userExists)
+            linkedUserForSync = await _platformDb.Users.FirstOrDefaultAsync(u => u.UserID == linkUserId && u.OrgID == orgId.Value);
+            if (linkedUserForSync is null)
                 return BadRequest(new { ok = false, message = "User not found in this organization." });
             emp.UserID = linkUserId;
+        }
+
+        if (req?.Email != null)
+        {
+            var normalizedEmail = NormalizeEmail(req.Email);
+            if (!string.IsNullOrEmpty(normalizedEmail))
+            {
+                var emailTaken = await _db.Employees.AnyAsync(e => e.OrgID == orgId.Value && e.Email == normalizedEmail && e.EmpID != id);
+                if (emailTaken)
+                    return Conflict(new { ok = false, message = "This email is already used by another employee." });
+            }
+
+            if (string.IsNullOrEmpty(normalizedEmail) && emp.UserID.HasValue)
+                return BadRequest(new { ok = false, message = "Email is required when this employee is linked to a user account." });
+
+            emp.Email = normalizedEmail;
+        }
+        else if (req?.UserID.HasValue == true && linkedUserForSync is not null)
+        {
+            emp.Email = NormalizeEmail(linkedUserForSync.Email);
+        }
+
+        if (emp.UserID.HasValue)
+        {
+            linkedUserForSync ??= await _platformDb.Users.FirstOrDefaultAsync(u => u.UserID == emp.UserID.Value && u.OrgID == orgId.Value);
+            if (linkedUserForSync is null)
+                return BadRequest(new { ok = false, message = "Linked user not found in this organization." });
+
+            if (!string.IsNullOrEmpty(emp.Email))
+            {
+                var linkedUserEmail = NormalizeEmail(linkedUserForSync.Email);
+                if (!string.Equals(linkedUserEmail, emp.Email, StringComparison.Ordinal))
+                {
+                    var inUseByAnotherUser = await _platformDb.Users.AnyAsync(u => u.UserID != linkedUserForSync.UserID && u.Email.ToLower() == emp.Email);
+                    if (inUseByAnotherUser)
+                        return Conflict(new { ok = false, message = "This email is already used by another user account." });
+
+                    linkedUserForSync.Email = emp.Email;
+                }
+            }
         }
 
         if (req?.FirstName != null) { var s = req.FirstName.Trim(); if (s.Length > 0) emp.FirstName = s.Length > 80 ? s[..80] : s; }
@@ -409,6 +530,21 @@ public class EmployeesController : ControllerBase
         if (req?.WorkState != null) { var s = req.WorkState.Trim(); if (s.Length > 0) emp.WorkState = s.Length > 40 ? s[..40] : s; }
         if (req?.EmploymentType != null) { var s = req.EmploymentType.Trim(); if (s.Length > 0) emp.EmploymentType = s.Length > 40 ? s[..40] : s; }
         if (req?.DepartmentID.HasValue == true) emp.DepartmentID = req.DepartmentID;
+        if (req?.AssignedShiftTemplateCode != null)
+        {
+            var shiftCode = string.IsNullOrWhiteSpace(req.AssignedShiftTemplateCode) ? null : req.AssignedShiftTemplateCode.Trim();
+            var shiftErr = await ValidateShiftAndLocationAssignmentAsync(orgId.Value, shiftCode, null);
+            if (!string.IsNullOrEmpty(shiftErr))
+                return BadRequest(new { ok = false, message = shiftErr });
+            emp.AssignedShiftTemplateCode = shiftCode;
+        }
+        if (req?.AssignedLocationId.HasValue == true)
+        {
+            var locationErr = await ValidateShiftAndLocationAssignmentAsync(orgId.Value, null, req.AssignedLocationId);
+            if (!string.IsNullOrEmpty(locationErr))
+                return BadRequest(new { ok = false, message = locationErr });
+            emp.AssignedLocationId = req.AssignedLocationId;
+        }
         if (req?.DateHired.HasValue == true) emp.DateHired = req.DateHired;
         if (req?.Phone != null)
         {
@@ -443,6 +579,8 @@ public class EmployeesController : ControllerBase
 
         emp.UpdatedAt = DateTime.UtcNow;
         emp.UpdatedByUserId = userId;
+        if (linkedUserForSync is not null)
+            await _platformDb.SaveChangesAsync();
         await _db.SaveChangesAsync();
 
         await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeUpdated", "Employee", emp.EmpID, $"{emp.FirstName} {emp.LastName}");
@@ -468,7 +606,7 @@ public class EmployeesController : ControllerBase
         var reason = (req?.Reason ?? "").Trim();
         if (string.IsNullOrEmpty(reason))
             return BadRequest(new { ok = false, message = "Archived reason is required (e.g. Resigned, Terminated)." });
-        if (reason.Length > 200) reason = reason[..200];
+        if (reason.Length > 60) reason = reason[..60];
 
         emp.IsArchived = true;
         emp.ArchivedAt = DateTime.UtcNow;
@@ -503,7 +641,7 @@ public class EmployeesController : ControllerBase
             return BadRequest(new { ok = false, message = "Employee is not archived." });
 
         var reason = (req?.Reason ?? "").Trim();
-        if (reason.Length > 200) reason = reason[..200];
+        if (reason.Length > 60) reason = reason[..60];
 
         emp.IsArchived = false;
         emp.RestoredAt = DateTime.UtcNow;
@@ -550,13 +688,20 @@ public class EmployeesController : ControllerBase
         }
         else if (kind == "email")
         {
-            var email = rawValue;
+            var email = NormalizeEmail(rawValue);
             if (!string.IsNullOrEmpty(email))
             {
                 var users = _platformDb.Users.AsQueryable();
+                var employees = _db.Employees.AsQueryable();
                 if (orgId.HasValue)
+                {
                     users = users.Where(u => u.OrgID == orgId.Value);
-                exists = await users.AnyAsync(u => u.Email != null && u.Email == email);
+                    employees = employees.Where(e => e.OrgID == orgId.Value);
+                }
+                var userExistsTask = users.AnyAsync(u => u.Email != null && u.Email == email);
+                var employeeExistsTask = employees.AnyAsync(e => e.Email != null && e.Email == email);
+                await Task.WhenAll(userExistsTask, employeeExistsTask);
+                exists = userExistsTask.Result || employeeExistsTask.Result;
             }
         }
         else
@@ -576,6 +721,13 @@ public class EmployeesController : ControllerBase
         if (digits.StartsWith("63") && digits.Length >= 10)
             digits = digits.Length > 11 ? digits.Substring(digits.Length - 10, 10) : digits.Substring(2);
         return digits.Length > 11 ? digits.Substring(digits.Length - 11, 11) : (digits.Length >= 10 ? digits : null);
+    }
+
+    private static string? NormalizeEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+        var normalized = email.Trim().ToLowerInvariant();
+        return normalized.Length == 0 ? null : normalized;
     }
 
     private static (bool ok, string? error) ValidateBirthDate(DateTime? birthDate)
@@ -669,6 +821,27 @@ public class EmployeesController : ControllerBase
         return depNames.ToDictionary(d => d.DepID, d => d.DepartmentName);
     }
 
+    private async Task<string?> ValidateShiftAndLocationAssignmentAsync(int orgId, string? shiftTemplateCode, int? locationId)
+    {
+        if (!string.IsNullOrWhiteSpace(shiftTemplateCode))
+        {
+            var shiftExists = await _db.OrgShiftTemplates.AsNoTracking()
+                .AnyAsync(s => s.OrgID == orgId && s.Code == shiftTemplateCode && s.IsActive);
+            if (!shiftExists)
+                return "Selected shift template is invalid or inactive.";
+        }
+
+        if (locationId.HasValue)
+        {
+            var locationExists = await _db.Locations.AsNoTracking()
+                .AnyAsync(l => l.OrgID == orgId && l.LocationID == locationId.Value && l.IsActive);
+            if (!locationExists)
+                return "Selected site location is invalid or inactive.";
+        }
+
+        return null;
+    }
+
     // Employee management - map entity model to API response shape.
     private static EmployeeDto ToDto(Employee e)
     {
@@ -678,6 +851,8 @@ public class EmployeesController : ControllerBase
             OrgID = e.OrgID,
             UserID = e.UserID,
             DepartmentID = e.DepartmentID,
+            AssignedShiftTemplateCode = e.AssignedShiftTemplateCode,
+            AssignedLocationId = e.AssignedLocationId,
             EmpNumber = e.EmpNumber,
             FirstName = e.FirstName,
             LastName = e.LastName,
@@ -689,6 +864,7 @@ public class EmployeesController : ControllerBase
             EmploymentType = e.EmploymentType,
             DateHired = e.DateHired,
             Phone = e.Phone,
+            Email = e.Email,
             AddressLine1 = e.AddressLine1,
             AddressLine2 = e.AddressLine2,
             City = e.City,
@@ -718,6 +894,8 @@ public class EmployeeDto
     public int OrgID { get; set; }
     public int? UserID { get; set; }
     public int? DepartmentID { get; set; }
+    public string? AssignedShiftTemplateCode { get; set; }
+    public int? AssignedLocationId { get; set; }
     public string? DepartmentName { get; set; }
     public string EmpNumber { get; set; } = "";
     public string FirstName { get; set; } = "";
@@ -730,6 +908,7 @@ public class EmployeeDto
     public string EmploymentType { get; set; } = "";
     public DateTime? DateHired { get; set; }
     public string? Phone { get; set; }
+    public string? Email { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
     public string? City { get; set; }
@@ -742,7 +921,6 @@ public class EmployeeDto
     public string? AvatarUrl { get; set; }
     public string? IdPictureUrl { get; set; }
     public string? SignatureUrl { get; set; }
-    public string? Email { get; set; }
     public bool IsArchived { get; set; }
     public DateTime? ArchivedAt { get; set; }
     public string? ArchivedReason { get; set; }
@@ -756,6 +934,8 @@ public class EmployeeCreateRequest
 {
     public int? UserID { get; set; }
     public int? DepartmentID { get; set; }
+    public string? AssignedShiftTemplateCode { get; set; }
+    public int? AssignedLocationId { get; set; }
     public string? EmpNumber { get; set; }
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
@@ -767,6 +947,7 @@ public class EmployeeCreateRequest
     public string? EmploymentType { get; set; }
     public DateTime? DateHired { get; set; }
     public string? Phone { get; set; }
+    public string? Email { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
     public string? City { get; set; }
@@ -793,8 +974,11 @@ public class EmployeeUpdateRequest
     public string? WorkState { get; set; }
     public string? EmploymentType { get; set; }
     public int? DepartmentID { get; set; }
+    public string? AssignedShiftTemplateCode { get; set; }
+    public int? AssignedLocationId { get; set; }
     public DateTime? DateHired { get; set; }
     public string? Phone { get; set; }
+    public string? Email { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
     public string? City { get; set; }

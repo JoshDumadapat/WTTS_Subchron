@@ -73,6 +73,9 @@ public static class OrgAttendanceOvertimeValidator
         var normalizedSteps = NormalizeApprovalSteps(source.ApprovalSteps);
         var scopeFilters = NormalizeScopeFilters(scopeMode, source.ScopeFilters);
 
+        if (source.AutoApprove && source.PreApprovalRequired)
+            throw new OrgAttendanceOvertimeValidationException("Disable Auto-Approve before requiring pre-approval.");
+
         return new OrgAttendanceOvertimeDto
         {
             Enabled = source.Enabled,
