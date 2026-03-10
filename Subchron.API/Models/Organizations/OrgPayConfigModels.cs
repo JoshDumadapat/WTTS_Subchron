@@ -12,6 +12,17 @@ public class OrgPayConfigRequest
     [MaxLength(30)]
     public string PayCycle { get; set; } = "SemiMonthly";
 
+    [Required]
+    [MaxLength(20)]
+    public string CompensationBasis { get; set; } = "Monthly";
+
+    [MaxLength(40)]
+    public string CustomUnitLabel { get; set; } = string.Empty;
+
+    [Range(0, 10000)]
+    public decimal? CustomWorkHours { get; set; }
+        = null;
+
     [Range(1, 24)]
     public decimal HoursPerDay { get; set; } = 8m;
 
@@ -50,6 +61,10 @@ public class OrgPayConfigResponse
 {
     public string Currency { get; set; } = "PHP";
     public string PayCycle { get; set; } = "SemiMonthly";
+    public string CompensationBasis { get; set; } = "Monthly";
+    public string CustomUnitLabel { get; set; } = string.Empty;
+    public decimal? CustomWorkHours { get; set; }
+        = null;
     public decimal HoursPerDay { get; set; } = 8m;
     public string CutoffWindowsJson { get; set; } = "[]";
     public bool LockAttendanceAfterCutoff { get; set; }

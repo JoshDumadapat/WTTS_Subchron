@@ -95,7 +95,7 @@ public class OrgHolidaysController : ControllerBase
         _tenantDb.OrgHolidayConfigs.Add(entity);
         await _tenantDb.SaveChangesAsync(ct);
 
-        await LogAuditAsync(orgId.Value, "OrgHolidayCreated", $"Created holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+        await TryLogAuditAsync(orgId.Value, "OrgHolidayCreated", $"Created holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
 
         return CreatedAtAction(nameof(GetByIdAsync), new { id = entity.OrgHolidayConfigID }, MapToResponse(entity));
     }
@@ -127,7 +127,7 @@ public class OrgHolidaysController : ControllerBase
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _tenantDb.SaveChangesAsync(ct);
-        await LogAuditAsync(orgId.Value, "OrgHolidayUpdated", $"Updated holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+        await TryLogAuditAsync(orgId.Value, "OrgHolidayUpdated", $"Updated holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
 
         return Ok(MapToResponse(entity));
     }
@@ -148,7 +148,7 @@ public class OrgHolidaysController : ControllerBase
         _tenantDb.OrgHolidayConfigs.Remove(entity);
         await _tenantDb.SaveChangesAsync(ct);
 
-        await LogAuditAsync(orgId.Value, "OrgHolidayDeleted", $"Deleted holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+        await TryLogAuditAsync(orgId.Value, "OrgHolidayDeleted", $"Deleted holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
 
         return Ok(new { ok = true });
     }
@@ -280,6 +280,19 @@ public class OrgHolidaysController : ControllerBase
 
         if (request.IncludePayroll && request.UsePayRules && string.IsNullOrWhiteSpace(request.PayrollRuleId))
             return "Please select a payroll rule when payroll is included and pay rules are enabled.";
+
+        if ((request.ReferenceNo?.Length ?? 0) > 100)
+            return "Reference number must be 100 characters or fewer.";
+        if ((request.ReferenceUrl?.Length ?? 0) > 200)
+            return "Reference URL must be 200 characters or fewer.";
+        if ((request.OfficialTag?.Length ?? 0) > 80)
+            return "Official tag must be 80 characters or fewer.";
+        if ((request.PayrollRuleId?.Length ?? 0) > 80)
+            return "Payroll rule id must be 80 characters or fewer.";
+        if ((request.RestDayPayrollRuleId?.Length ?? 0) > 80)
+            return "Rest day payroll rule id must be 80 characters or fewer.";
+        if ((request.Name?.Length ?? 0) > 150)
+            return "Holiday name must be 150 characters or fewer.";
 
         return null;
     }
@@ -440,34 +453,34 @@ public class OrgHolidaysController : ControllerBase
 
         entity.OrgID = orgId;
         entity.HolidayDate = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).Date;
-        entity.Name = request.Name.Trim();
-        entity.Type = request.Type.Trim();
+        entity.Name = Truncate(request.Name.Trim(), 150);
+        entity.Type = Truncate(request.Type.Trim(), 40);
         if (request.IsActive.HasValue)
             entity.Status = request.IsActive.Value ? "Active" : "Inactive";
         else
-            entity.Status = string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status.Trim();
-        entity.ScopeType = string.IsNullOrWhiteSpace(request.ScopeType) ? "Nationwide" : request.ScopeType.Trim();
+            entity.Status = Truncate(string.IsNullOrWhiteSpace(request.Status) ? "Active" : request.Status.Trim(), 40);
+        entity.ScopeType = Truncate(string.IsNullOrWhiteSpace(request.ScopeType) ? "Nationwide" : request.ScopeType.Trim(), 40);
         entity.ScopeValuesJson = SerializeList(request.ScopeValues);
-        entity.SourceTag = request.SourceTag ?? "ManualEntry";
-        entity.OverlapStrategy = request.OverlapStrategy ?? "HighestPrecedence";
+        entity.SourceTag = Truncate(request.SourceTag ?? "ManualEntry", 40);
+        entity.OverlapStrategy = Truncate(request.OverlapStrategy ?? "HighestPrecedence", 40);
         entity.Precedence = request.Precedence;
         entity.IncludeAttendance = request.IncludeAttendance;
         entity.NonWorkingDay = request.NonWorkingDay;
         entity.AllowWork = request.AllowWork;
         entity.ApplyRestDayRules = request.ApplyRestDayRules;
-        entity.AttendanceClassification = request.AttendanceClassification ?? "Holiday";
-        entity.RestDayAttendanceClassification = request.RestDayAttendanceClassification;
+        entity.AttendanceClassification = Truncate(request.AttendanceClassification ?? "Holiday", 60);
+        entity.RestDayAttendanceClassification = Truncate(request.RestDayAttendanceClassification, 60);
         entity.EmployeeGroupScopeJson = SerializeList(request.EmployeeGroupScope);
         entity.IncludePayroll = request.IncludePayroll;
         entity.UsePayRules = request.UsePayRules;
         entity.PaidWhenUnworked = request.PaidWhenUnworked;
-        entity.PayrollClassification = request.PayrollClassification ?? request.Type ?? "RegularHoliday";
-        entity.RestDayPayrollClassification = request.RestDayPayrollClassification;
-        entity.PayrollRuleId = request.PayrollRuleId;
-        entity.RestDayPayrollRuleId = request.RestDayPayrollRuleId;
-        entity.ReferenceNo = request.ReferenceNo ?? string.Empty;
-        entity.ReferenceUrl = request.ReferenceUrl ?? string.Empty;
-        entity.OfficialTag = request.OfficialTag ?? string.Empty;
+        entity.PayrollClassification = Truncate(request.PayrollClassification ?? request.Type ?? "RegularHoliday", 60);
+        entity.RestDayPayrollClassification = Truncate(request.RestDayPayrollClassification, 60);
+        entity.PayrollRuleId = Truncate(request.PayrollRuleId, 80);
+        entity.RestDayPayrollRuleId = Truncate(request.RestDayPayrollRuleId, 80);
+        entity.ReferenceNo = Truncate(request.ReferenceNo ?? string.Empty, 100);
+        entity.ReferenceUrl = Truncate(request.ReferenceUrl ?? string.Empty, 200);
+        entity.OfficialTag = Truncate(request.OfficialTag ?? string.Empty, 80);
         entity.PayrollNotes = request.PayrollNotes ?? string.Empty;
         entity.Notes = request.Notes ?? string.Empty;
 
@@ -495,17 +508,30 @@ public class OrgHolidaysController : ControllerBase
         }
     }
 
-    private async Task LogAuditAsync(int orgId, string action, string description, CancellationToken ct)
+    private async Task TryLogAuditAsync(int orgId, string action, string description, CancellationToken ct)
     {
-        var userId = GetUserId();
-        if (IsSuperAdmin())
+        try
         {
-            await _auditService.LogSuperAdminAsync(orgId, userId, action, nameof(OrgHolidayConfig), orgId, description, ct: ct);
+            var userId = GetUserId();
+            if (IsSuperAdmin())
+            {
+                await _auditService.LogSuperAdminAsync(orgId, userId, action, nameof(OrgHolidayConfig), orgId, description, ct: ct);
+            }
+            else
+            {
+                await _auditService.LogTenantAsync(orgId, userId, action, nameof(OrgHolidayConfig), orgId, description, ct: ct);
+            }
         }
-        else
+        catch
         {
-            await _auditService.LogTenantAsync(orgId, userId, action, nameof(OrgHolidayConfig), orgId, description, ct: ct);
+            // Do not block holiday save if audit logging fails.
         }
+    }
+
+    private static string? Truncate(string? value, int max)
+    {
+        if (value == null) return null;
+        return value.Length <= max ? value : value[..max];
     }
 
     private int? GetOrgId()

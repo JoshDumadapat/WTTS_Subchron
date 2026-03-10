@@ -15,9 +15,9 @@ public class PayComponentsController : ControllerBase
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public PayComponentsController(SubchronDbContext db)
+    public PayComponentsController(TenantDbContext db)
     {
         _db = db;
     }
@@ -314,7 +314,7 @@ public class PayComponentsController : ControllerBase
             MaxDeductionAmount = req.MaxDeductionAmount,
             ScopeTagsJson = SerializeTags(req.ScopeTags),
             Notes = req.Notes ?? string.Empty,
-            IsActive = true,
+            IsActive = req.IsActive,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -348,6 +348,7 @@ public class PayComponentsController : ControllerBase
         rule.MaxDeductionAmount = req.MaxDeductionAmount;
         rule.ScopeTagsJson = SerializeTags(req.ScopeTags);
         rule.Notes = req.Notes ?? string.Empty;
+        rule.IsActive = req.IsActive;
         rule.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -457,6 +458,8 @@ public class DeductionRuleRequest
     public decimal? EmployeeSharePercent { get; set; }
         = null;
     public bool AutoCompute { get; set; }
+        = true;
+    public bool IsActive { get; set; }
         = true;
     public DateTime? EffectiveFrom { get; set; }
         = null;

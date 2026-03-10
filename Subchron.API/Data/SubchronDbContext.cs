@@ -25,9 +25,6 @@ public class SubchronDbContext : DbContext
     public DbSet<OrganizationPaymentMethod> OrganizationPaymentMethods => Set<OrganizationPaymentMethod>();
     public DbSet<DemoRequest> DemoRequests => Set<DemoRequest>();
 
-    public DbSet<EarningRule> EarningRules => Set<EarningRule>();
-    public DbSet<DeductionRule> DeductionRules => Set<DeductionRule>();
-    public DbSet<OrgAllowanceRule> OrgAllowanceRules => Set<OrgAllowanceRule>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -289,82 +286,6 @@ public class SubchronDbContext : DbContext
             e.Property(x => x.Message).HasMaxLength(255);
             e.Property(x => x.Status).HasMaxLength(20);
             e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.HasIndex(x => x.OrgID);
-        });
-
-        // EarningRules
-        modelBuilder.Entity<EarningRule>(e =>
-        {
-            e.ToTable("EarningRules");
-            e.HasKey(x => x.EarningRuleID);
-            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
-            e.Property(x => x.AppliesTo).HasMaxLength(30).IsRequired();
-            e.Property(x => x.DayType).HasMaxLength(30).HasDefaultValue("Any");
-            e.Property(x => x.HolidayCombo).HasMaxLength(40).HasDefaultValue("Standard");
-            e.Property(x => x.RestDayHandling).HasMaxLength(40).HasDefaultValue("FollowAttendance");
-            e.Property(x => x.Scope).HasMaxLength(40).HasDefaultValue("AllEmployees");
-            e.Property(x => x.ScopeTagsJson).HasColumnType("NVARCHAR(MAX)").HasDefaultValue("[]");
-            e.Property(x => x.RateType).HasMaxLength(20).IsRequired();
-            e.Property(x => x.RateValue).HasColumnType("decimal(10,4)");
-            e.Property(x => x.IsTaxable).HasDefaultValue(true);
-            e.Property(x => x.IncludeInBenefitBase).HasDefaultValue(false);
-            e.Property(x => x.RequiresApproval).HasDefaultValue(false);
-            e.Property(x => x.Notes).HasColumnType("NVARCHAR(MAX)").HasDefaultValue(string.Empty);
-            e.Property(x => x.IsActive).HasDefaultValue(true);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.HasOne(x => x.Organization)
-                .WithMany()
-                .HasForeignKey(x => x.OrgID)
-                .OnDelete(DeleteBehavior.Cascade);
-            e.HasIndex(x => x.OrgID);
-        });
-
-        // DeductionRules
-        modelBuilder.Entity<DeductionRule>(e =>
-        {
-            e.ToTable("DeductionRules");
-            e.HasKey(x => x.DeductionRuleID);
-            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
-            e.Property(x => x.Category).HasMaxLength(30).HasDefaultValue("Statutory");
-            e.Property(x => x.DeductionType).HasMaxLength(20).IsRequired();
-            e.Property(x => x.Amount).HasColumnType("decimal(10,4)");
-            e.Property(x => x.FormulaExpression).HasMaxLength(500);
-            e.Property(x => x.EmployerSharePercent).HasColumnType("decimal(6,4)");
-            e.Property(x => x.EmployeeSharePercent).HasColumnType("decimal(6,4)");
-            e.Property(x => x.HasEmployerShare).HasDefaultValue(false);
-            e.Property(x => x.HasEmployeeShare).HasDefaultValue(true);
-            e.Property(x => x.AutoCompute).HasDefaultValue(true);
-            e.Property(x => x.ComputeBasedOn).HasMaxLength(30).HasDefaultValue("BasicPay");
-            e.Property(x => x.MaxDeductionAmount).HasColumnType("decimal(12,2)");
-            e.Property(x => x.ScopeTagsJson).HasColumnType("NVARCHAR(MAX)").HasDefaultValue("[]");
-            e.Property(x => x.Notes).HasColumnType("NVARCHAR(MAX)").HasDefaultValue(string.Empty);
-            e.Property(x => x.IsActive).HasDefaultValue(true);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.HasOne(x => x.Organization)
-                .WithMany()
-                .HasForeignKey(x => x.OrgID)
-                .OnDelete(DeleteBehavior.Cascade);
-            e.HasIndex(x => x.OrgID);
-        });
-
-        modelBuilder.Entity<OrgAllowanceRule>(e =>
-        {
-            e.ToTable("OrgAllowanceRules");
-            e.HasKey(x => x.OrgAllowanceRuleID);
-            e.Property(x => x.Name).HasMaxLength(120).IsRequired();
-            e.Property(x => x.AllowanceType).HasMaxLength(40).IsRequired();
-            e.Property(x => x.Category).HasMaxLength(40).IsRequired();
-             e.Property(x => x.Amount).HasColumnType("decimal(12,2)");
-            e.Property(x => x.ScopeTagsJson).HasColumnType("NVARCHAR(MAX)").HasDefaultValue("[]");
-            e.Property(x => x.ComplianceNotes).HasMaxLength(400);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
-            e.HasOne(x => x.Organization)
-                .WithMany()
-                .HasForeignKey(x => x.OrgID)
-                .OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(x => x.OrgID);
         });
 

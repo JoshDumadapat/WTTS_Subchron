@@ -282,14 +282,14 @@
         </div>
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50/40 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/60">
-            <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayStatusModal()" class="btn-secondary">Cancel</button>
+            <button id="holidayStatusCancelBtn" type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayStatusModal()" class="btn-secondary">Cancel</button>
             <button id="holidayStatusConfirmBtn" type="button" onclick="window.SubchronOrgTabHoliday.confirmHolidayStatusChange()"
                     class="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 dark:bg-red-600 dark:hover:bg-red-500">
                 <svg id="holidayStatusConfirmSpinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle cx="12" cy="12" r="9" class="opacity-30" stroke="currentColor" stroke-width="3"></circle>
                     <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
                 </svg>
-                Confirm
+                <span id="holidayStatusConfirmText">Confirm</span>
             </button>
         </div>
     </div>
@@ -1086,12 +1086,16 @@
         function setHolidayStatusSaving(isSaving) {
             const btn = $('holidayStatusConfirmBtn');
             const spinner = $('holidayStatusConfirmSpinner');
-            if (!btn || !spinner) return;
+            const text = $('holidayStatusConfirmText');
+            const cancelBtn = $('holidayStatusCancelBtn');
+            if (!btn || !spinner || !text) return;
 
             btn.disabled = !!isSaving;
             btn.classList.toggle('opacity-70', !!isSaving);
             btn.classList.toggle('cursor-not-allowed', !!isSaving);
             spinner.classList.toggle('hidden', !isSaving);
+            text.textContent = isSaving ? 'Processing...' : 'Confirm';
+            if (cancelBtn) cancelBtn.disabled = !!isSaving;
         }
 
         function extractTaggedReason(notes, tag) {
@@ -1157,7 +1161,6 @@
             setHolidayStatusSaving(false);
 
             if (confirmBtn) {
-                confirmBtn.textContent = isDeactivate ? 'Deactivate' : 'Activate';
                 confirmBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400', 'bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
                 if (isDeactivate) {
                     confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
@@ -1165,6 +1168,8 @@
                     confirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400');
                 }
             }
+            const confirmText = $('holidayStatusConfirmText');
+            if (confirmText) confirmText.textContent = isDeactivate ? 'Deactivate' : 'Activate';
 
             const modal = $(selectors.statusModal);
             modal?.classList.remove('hidden');

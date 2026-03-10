@@ -28,6 +28,16 @@
     .dark .pay-hint {
         color: rgb(148 163 184);
     }
+
+    .pay-modal-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .pay-modal-scroll::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
 </style>
 
 <div id="tab-pay" class="tab-content hidden h-full flex-col">
@@ -40,10 +50,10 @@
     </div>
 
     <div class="flex-1 overflow-y-auto p-8">
-        <div class="flex flex-col gap-10 sm:gap-12">
+        <div class="flex flex-col gap-3">
 
             @* ── Financial Basis ──────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+            <div id="pay-section-financial" class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div class="pay-section-heading">
                         <span class="pay-step-badge">1</span>
@@ -55,26 +65,13 @@
                 </div>
                 <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-3">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Currency</label>
-                        <div class="relative">
-                            <select id="pay-currency" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
-                                <option value="PHP" selected>PHP (&#8369;)</option>
-                                <option value="USD">USD ($)</option>
-                                <option value="SGD">SGD (S$)</option>
-                                <option value="EUR">EUR (&#8364;)</option>
-                                <option value="GBP">GBP (&#163;)</option>
-                                <option value="MYR">MYR (RM)</option>
-                                <option value="AUD">AUD (A$)</option>
-                                <option value="JPY">JPY (&#165;)</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                            </div>
-                        </div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Currency <span class="text-red-500">*</span></label>
+                        <input type="hidden" id="pay-currency" value="PHP" />
+                        <input type="text" value="PHP (&#8369;)" readonly class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Pay Cycle</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Pay Cycle <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="pay-cycle" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                 <option value="Weekly">Weekly</option>
@@ -89,7 +86,7 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Hours Per Day</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Work Hours Per Day <span class="text-red-500">*</span></label>
                         <div class="flex items-center gap-2">
                             <input id="pay-hours-per-day" type="number" min="1" max="24" value="8"
                                    class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
@@ -98,13 +95,13 @@
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff Start Day</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff Start Day <span class="text-red-500">*</span></label>
                         <input id="pay-cutoff-start-day" type="number" min="1" max="31" value="1"
                                class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                     </div>
 
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff End Day</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Cutoff End Day <span class="text-red-500">*</span></label>
                         <input id="pay-cutoff-end-day" type="number" min="1" max="31" value="15"
                                class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                     </div>
@@ -119,15 +116,15 @@
 
                     <div id="pay-second-cutoff-fields" class="hidden col-span-3 grid gap-5 sm:grid-cols-3">
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff Start Day</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff Start Day <span class="text-red-500">*</span></label>
                             <input id="pay-second-cutoff-start" type="number" min="1" max="31" value="16" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff End Day</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Second Cutoff End Day <span class="text-red-500">*</span></label>
                             <input id="pay-second-cutoff-end" type="number" min="1" max="31" value="30" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Payroll Release Lag (days)</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Payroll Release Lag (days) <span class="text-red-500">*</span></label>
                             <input id="pay-release-lag" type="number" min="0" max="30" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
                     </div>
@@ -146,7 +143,7 @@
                         <p class="pay-hint mt-1">If enabled, supervisors must approve corrections before payroll cut.</p>
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">13th Month Calculation</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">13th Month Calculation <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="pay-thirteenth-basis" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                 <option value="basic" selected>Basic pay only</option>
@@ -160,11 +157,15 @@
                         <p class="pay-hint mt-1">Aligns with DOLE rules; choose "Custom" if you grant prorated or project-based 13th month.</p>
                     </div>
                 </div>
-            </div>
+                <div class="flex items-center justify-end border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+                    <button type="button" onclick="handlePaySectionAction('financial', this)" class="btn-secondary">Edit Financial Basis</button>
+                </div>
             </div>
 
+            <div class="h-[3px] w-full"></div>
+
             @* ── Compensation Basis ───────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+            <div id="pay-section-compensation" class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div class="pay-section-heading">
                         <span class="pay-step-badge">2</span>
@@ -176,7 +177,7 @@
                 </div>
                 <div class="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compensation Basis</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compensation Basis <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select id="compensation-basis" onchange="toggleCustomCompensationFields()" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                 <option value="Monthly" selected>Monthly</option>
@@ -192,18 +193,22 @@
 
                     <div id="custom-compensation-fields" class="hidden sm:grid sm:grid-cols-2 sm:gap-5 sm:col-span-2">
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Unit Label</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Unit Label <span class="text-red-500">*</span></label>
                             <input id="custom-unit-label" type="text" placeholder="e.g. Project, Task"
                                    class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Work Hours Per Unit</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Custom Work Hours Per Unit <span class="text-red-500">*</span></label>
                             <input id="custom-work-hours" type="number" min="0" placeholder="e.g. 160"
                                    class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
                     </div>
                 </div>
+                <div class="flex items-center justify-end border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+                    <button type="button" onclick="handlePaySectionAction('compensation', this)" class="btn-secondary">Edit Compensation Basis</button>
+                </div>
             </div>
+            <div class="h-[3px] w-full"></div>
 
             @* ── Earnings Rules ───────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
@@ -244,6 +249,7 @@
                     </table>
                 </div>
             </div>
+            <div class="h-[3px] w-full"></div>
 
             @* ── Allowances ───────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
@@ -284,9 +290,10 @@
                     </table>
                 </div>
             </div>
+            <div class="h-[3px] w-full"></div>
 
             @* ── Tax Toggle ───────────────────────────────────────────────── *@
-            <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
+            <div id="pay-section-statutory" class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-slate-300 px-6 py-4 dark:border-gray-700">
                     <div class="pay-section-heading">
                         <span class="pay-step-badge">5</span>
@@ -307,7 +314,7 @@
                                 </label>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="pay-hint">Payroll Period</label>
+                                        <label class="pay-hint">Payroll Period <span class="text-red-500">*</span></label>
                                         <select id="pay-bir-period" class="mt-1 block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                             <option value="semi-monthly" selected>Semi-Monthly</option>
                                             <option value="monthly">Monthly</option>
@@ -315,7 +322,7 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="pay-hint">Tax Table Version</label>
+                                        <label class="pay-hint">Tax Table Version <span class="text-red-500">*</span></label>
                                         <input type="number" id="pay-bir-table-version" value="2023" class="mt-1 block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     </div>
                                 </div>
@@ -339,15 +346,15 @@
                                 </label>
                                 <div class="grid grid-cols-3 gap-2">
                                     <div>
-                                        <label class="pay-hint">SSS (% employer)</label>
+                                        <label class="pay-hint">SSS (% employer) <span class="text-red-500">*</span></label>
                                         <input type="number" id="pay-sss-employer" min="0" step="0.01" value="8.5" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     </div>
                                     <div>
-                                        <label class="pay-hint">PhilHealth (%)</label>
+                                        <label class="pay-hint">PhilHealth (%) <span class="text-red-500">*</span></label>
                                         <input type="number" id="pay-phic-rate" min="0" step="0.1" value="3" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     </div>
                                     <div>
-                                        <label class="pay-hint">Pag-IBIG (%)</label>
+                                        <label class="pay-hint">Pag-IBIG (%) <span class="text-red-500">*</span></label>
                                         <input type="number" id="pay-hdmf-rate" min="0" step="0.1" value="2" class="mt-1 block w-full rounded-lg border-0 py-2 px-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                                     </div>
                                 </div>
@@ -371,10 +378,14 @@
                                 <span class="text-sm text-gray-700 dark:text-gray-300">Skip tax below ₱250,000 annual</span>
                             </label>
                         </div>
-                        <p class="pay-hint mt-2">These settings are informational until backend wiring is completed but give HR clear intent.</p>
+                        <p class="pay-hint mt-2">These settings control tenant-level payroll behavior and tax logic.</p>
                     </div>
                 </div>
+                <div class="flex items-center justify-end border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
+                    <button type="button" onclick="handlePaySectionAction('statutory', this)" class="btn-secondary">Edit Statutory and Tax Settings</button>
+                </div>
             </div>
+            <div class="h-[3px] w-full"></div>
 
             @* ── Deductions ──────────────────────────────────────────────── *@
             <div class="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-md dark:border-gray-700 dark:bg-gray-800">
@@ -430,18 +441,18 @@
             <button type="button" onclick="closeEarningRuleModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
 
-        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
+        <div class="pay-modal-scroll max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
             <input type="hidden" id="earningRuleId" value="" />
 
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
-                <input type="text" id="earningRuleName" placeholder="e.g. OT 1.25x, Night Diff 10%" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                <input type="text" id="earningRuleName" required placeholder="e.g. OT 1.25x, Night Diff 10%" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To</label>
-                    <select id="earningRuleAppliesTo" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Applies To <span class="text-red-500">*</span></label>
+                    <select id="earningRuleAppliesTo" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="Regular">Regular</option>
                         <option value="OT" selected>OT</option>
                         <option value="Holiday">Holiday</option>
@@ -507,8 +518,8 @@
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Type</label>
-                    <select id="earningRuleRateType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Type <span class="text-red-500">*</span></label>
+                    <select id="earningRuleRateType" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="Multiplier" selected>Multiplier (e.g. 1.25x)</option>
                         <option value="Percentage">Percentage (e.g. 10%)</option>
                         <option value="Fixed">Fixed Amount</option>
@@ -516,8 +527,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Value</label>
-                    <input type="number" id="earningRuleRateValue" min="0" step="0.01" value="1.25" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Rate Value <span class="text-red-500">*</span></label>
+                    <input type="number" id="earningRuleRateValue" required min="0" step="0.01" value="1.25" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                 </div>
             </div>
 
@@ -544,7 +555,7 @@
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeEarningRuleModal()" class="btn-secondary">Cancel</button>
-            <button type="button" onclick="saveEarningRule()" class="btn-primary gap-1.5">Save Earning Rule</button>
+            <button type="button" onclick="saveEarningRule(this)" class="btn-primary gap-1.5">Save Earning Rule</button>
         </div>
     </div>
 </div>
@@ -557,18 +568,18 @@
             <button type="button" onclick="closeAllowanceModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
 
-        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
+        <div class="pay-modal-scroll max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
             <input type="hidden" id="allowanceRuleId" value="" />
 
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Name <span class="text-red-500">*</span></label>
-                <input type="text" id="allowanceRuleName" placeholder="e.g. Rice Allowance, Meal Allowance, Transport Allowance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                <input type="text" id="allowanceRuleName" required placeholder="e.g. Rice Allowance, Meal Allowance, Transport Allowance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Type</label>
-                    <select id="allowanceRuleType" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Type <span class="text-red-500">*</span></label>
+                    <select id="allowanceRuleType" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="FixedPerPayroll" selected>Fixed per Payroll</option>
                         <option value="FixedPerDay">Fixed per Day</option>
                         <option value="FixedPerAttendanceDay">Fixed per Attendance Day</option>
@@ -577,8 +588,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Category</label>
-                    <select id="allowanceRuleCategory" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Allowance Category <span class="text-red-500">*</span></label>
+                    <select id="allowanceRuleCategory" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="DeMinimis" selected>De Minimis / Non-taxable</option>
                         <option value="Taxable">Taxable</option>
                         <option value="Hazard">Hazard</option>
@@ -587,8 +598,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
-                    <input type="number" id="allowanceRuleAmount" min="0" step="0.01" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount <span class="text-red-500">*</span></label>
+                    <input type="number" id="allowanceRuleAmount" required min="0" step="0.01" value="0" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                 </div>
 
                 <div>
@@ -633,7 +644,7 @@
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeAllowanceModal()" class="btn-secondary">Cancel</button>
-            <button type="button" onclick="saveAllowanceRule()" class="btn-primary gap-1.5">Save Allowance</button>
+            <button type="button" onclick="saveAllowanceRule(this)" class="btn-primary gap-1.5">Save Allowance</button>
         </div>
     </div>
 </div>
@@ -646,18 +657,18 @@
             <button type="button" onclick="closeDeductionModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
 
-        <div class="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
+        <div class="pay-modal-scroll max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5">
             <input type="hidden" id="deductionRuleId" value="" />
 
             <div>
                 <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Name <span class="text-red-500">*</span></label>
-                <input type="text" id="deductionRuleName" placeholder="e.g. Tax, SSS, PhilHealth, Loan, Cash Advance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
+                <input type="text" id="deductionRuleName" required placeholder="e.g. Tax, SSS, PhilHealth, Loan, Cash Advance" maxlength="80" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Deduction Category</label>
-                    <select id="deductionRuleCategory" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Deduction Category <span class="text-red-500">*</span></label>
+                    <select id="deductionRuleCategory" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="Statutory" selected>Statutory</option>
                         <option value="Company">Company</option>
                         <option value="Loan">Loan</option>
@@ -666,8 +677,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type</label>
-                    <select id="deductionRuleType" onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Type <span class="text-red-500">*</span></label>
+                    <select id="deductionRuleType" required onchange="toggleDeductionAmountVsFormula()" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="Fixed" selected>Fixed</option>
                         <option value="Percentage">Percentage</option>
                         <option value="Formula">Formula-based</option>
@@ -675,8 +686,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compute Based On</label>
-                    <select id="deductionRuleComputeBasedOn" class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                    <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compute Based On <span class="text-red-500">*</span></label>
+                    <select id="deductionRuleComputeBasedOn" required class="block w-full rounded-lg border-0 bg-slate-100 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                         <option value="BasicPay" selected>Basic Pay</option>
                         <option value="GrossPay">Gross Pay</option>
                         <option value="TaxablePay">Taxable Pay</option>
@@ -691,12 +702,12 @@
             </div>
 
             <div id="deductionAmountWrap">
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</label>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Amount <span class="text-red-500">*</span></label>
                 <input type="number" id="deductionRuleAmount" min="0" step="0.01" placeholder="Fixed amount or %" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
 
             <div id="deductionFormulaWrap" class="hidden">
-                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Formula Expression</label>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Formula Expression <span class="text-red-500">*</span></label>
                 <input type="text" id="deductionRuleFormula" placeholder="e.g. progressive_tax(gross)" class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
             </div>
 
@@ -739,25 +750,402 @@
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-300 bg-slate-100 px-6 py-4 dark:border-gray-700 dark:bg-gray-700/40">
             <button type="button" onclick="closeDeductionModal()" class="btn-secondary">Cancel</button>
-            <button type="button" onclick="saveDeductionRule()" class="btn-primary gap-1.5">Save Deduction</button>
+            <button type="button" onclick="saveDeductionRule(this)" class="btn-primary gap-1.5">Save Deduction</button>
         </div>
     </div>
 </div>
 
 <script>
     (function () {
-        var orgId = window.__orgIdForPay || 0;
+        var appRoot = document.getElementById('appRoot');
+        var apiBase = (appRoot && appRoot.getAttribute('data-api-base') || '').trim().replace(/\/$/, '');
+        var accessToken = (appRoot && appRoot.getAttribute('data-access-token') || '').trim();
+        var resolvedApiBase = apiBase || window.location.origin;
+
+        function buildApiUrl(path) {
+            if (!path) return resolvedApiBase;
+            return resolvedApiBase + (path.startsWith('/') ? path : '/' + path);
+        }
+
+        function parseJwtPayload(token) {
+            try {
+                if (!token) return null;
+                var parts = token.split('.');
+                if (parts.length < 2) return null;
+                var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                var normalized = payload + '='.repeat((4 - payload.length % 4) % 4);
+                var decoded = atob(normalized);
+                return JSON.parse(decoded);
+            } catch (_) {
+                return null;
+            }
+        }
+
+        var tokenPayload = parseJwtPayload(accessToken);
+        var tokenOrgId = tokenPayload && (tokenPayload.orgId || tokenPayload.orgID || tokenPayload.OrgID || tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']);
+        var parsedTokenOrgId = parseInt(tokenOrgId || '0', 10);
+        var orgId = window.__orgIdForPay || (Number.isFinite(parsedTokenOrgId) ? parsedTokenOrgId : 0);
 
         function getOrgId() {
             if (orgId) return orgId;
             var m = document.cookie.match(/orgId=(\d+)/);
             if (m) return parseInt(m[1], 10);
+            var queryOrg = parseInt(new URLSearchParams(window.location.search).get('orgId') || '0', 10);
+            if (Number.isFinite(queryOrg) && queryOrg > 0) return queryOrg;
             return 0;
+        }
+
+        function getJsonHeaders() {
+            var headers = { 'Content-Type': 'application/json' };
+            if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
+            return headers;
+        }
+
+        function getAcceptHeaders() {
+            var headers = { 'Accept': 'application/json' };
+            if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
+            return headers;
+        }
+
+        function getAuthHeaders() {
+            if (!accessToken) return {};
+            return { 'Authorization': 'Bearer ' + accessToken };
         }
 
         var _earningsList = [];
         var _deductionsList = [];
         var _allowancesList = [];
+        var paySectionState = {
+            financial: false,
+            compensation: false,
+            statutory: false
+        };
+        var paySectionMeta = {
+            financial: { id: 'pay-section-financial', label: 'Financial Basis' },
+            compensation: { id: 'pay-section-compensation', label: 'Compensation Basis' },
+            statutory: { id: 'pay-section-statutory', label: 'Statutory and Tax Settings' }
+        };
+
+        function notify(type, message) {
+            if (window.showToast) {
+                var success = type === 'success';
+                window.showToast(message, success, type);
+                return;
+            }
+            console.log(type + ': ' + message);
+        }
+
+        function setButtonLoading(button, isLoading, idleText) {
+            if (!button) return;
+            if (!button.dataset.idleText) button.dataset.idleText = idleText || button.textContent.trim();
+            if (isLoading) {
+                button.disabled = true;
+                button.innerHTML = '<span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white"></span><span>Saving...</span>';
+                button.classList.add('inline-flex', 'items-center', 'gap-2');
+            } else {
+                button.disabled = false;
+                button.textContent = button.dataset.idleText;
+                button.classList.remove('inline-flex', 'items-center', 'gap-2');
+            }
+        }
+
+        function setPaySectionEditable(sectionKey, editable) {
+            var meta = paySectionMeta[sectionKey];
+            if (!meta) return;
+            var section = document.getElementById(meta.id);
+            if (!section) return;
+            section.querySelectorAll('input, select, textarea').forEach(function (field) {
+                if (field.type === 'hidden') return;
+                field.disabled = !editable;
+            });
+            paySectionState[sectionKey] = editable;
+        }
+
+        function initializePaySectionLocking() {
+            Object.keys(paySectionMeta).forEach(function (key) {
+                setPaySectionEditable(key, false);
+            });
+        }
+
+        function toDecimal(value, fallback) {
+            var parsed = parseFloat(value);
+            return Number.isFinite(parsed) ? parsed : fallback;
+        }
+
+        function parseCutoffWindowsFromForm() {
+            var windows = [];
+            windows.push({
+                startDay: Math.max(1, Math.min(31, parseInt(document.getElementById('pay-cutoff-start-day').value || '1', 10))),
+                endDay: Math.max(1, Math.min(31, parseInt(document.getElementById('pay-cutoff-end-day').value || '15', 10))),
+                releaseLagDays: 0
+            });
+
+            var hasSecond = document.getElementById('pay-enable-second-cutoff').checked;
+            if (hasSecond) {
+                windows.push({
+                    startDay: Math.max(1, Math.min(31, parseInt(document.getElementById('pay-second-cutoff-start').value || '16', 10))),
+                    endDay: Math.max(1, Math.min(31, parseInt(document.getElementById('pay-second-cutoff-end').value || '30', 10))),
+                    releaseLagDays: Math.max(0, Math.min(30, parseInt(document.getElementById('pay-release-lag').value || '0', 10)))
+                });
+            }
+
+            return windows;
+        }
+
+        function applyCutoffWindowsToForm(cutoffJson) {
+            var windows = [];
+            try {
+                windows = JSON.parse(cutoffJson || '[]');
+            } catch (_) {
+                windows = [];
+            }
+
+            var first = windows[0] || { startDay: 1, endDay: 15 };
+            document.getElementById('pay-cutoff-start-day').value = first.startDay || 1;
+            document.getElementById('pay-cutoff-end-day').value = first.endDay || 15;
+
+            var second = windows[1] || null;
+            document.getElementById('pay-enable-second-cutoff').checked = !!second;
+            if (second) {
+                document.getElementById('pay-second-cutoff-start').value = second.startDay || 16;
+                document.getElementById('pay-second-cutoff-end').value = second.endDay || 30;
+                document.getElementById('pay-release-lag').value = second.releaseLagDays || 0;
+            }
+
+            window.toggleSecondCutoff();
+        }
+
+        function collectPayConfigPayload() {
+            return {
+                currency: 'PHP',
+                payCycle: document.getElementById('pay-cycle').value,
+                compensationBasis: document.getElementById('compensation-basis').value,
+                customUnitLabel: (document.getElementById('custom-unit-label').value || '').trim(),
+                customWorkHours: toDecimal(document.getElementById('custom-work-hours').value, null),
+                hoursPerDay: toDecimal(document.getElementById('pay-hours-per-day').value, 8),
+                cutoffWindowsJson: JSON.stringify(parseCutoffWindowsFromForm()),
+                lockAttendanceAfterCutoff: document.getElementById('pay-lock-attendance-after-cutoff').value === 'true',
+                thirteenthMonthBasis: document.getElementById('pay-thirteenth-basis').value,
+                thirteenthMonthNotes: '',
+                enableBIR: document.getElementById('pay-enable-bir').checked,
+                birPeriod: document.getElementById('pay-bir-period').value,
+                birTableVersion: parseInt(document.getElementById('pay-bir-table-version').value || String(new Date().getFullYear()), 10),
+                enableSSS: document.getElementById('pay-enable-sss').checked,
+                sssEmployerPercent: toDecimal(document.getElementById('pay-sss-employer').value, 8.5),
+                enablePhilHealth: document.getElementById('pay-enable-phic').checked,
+                philHealthRate: toDecimal(document.getElementById('pay-phic-rate').value, 3),
+                enablePagIbig: document.getElementById('pay-enable-hdmf').checked,
+                pagIbigRate: toDecimal(document.getElementById('pay-hdmf-rate').value, 2),
+                enableIncomeTax: document.getElementById('pay-tax-apply').checked,
+                prorateNewHires: document.getElementById('pay-tax-prorate-new-hire').checked,
+                applyTaxThreshold: document.getElementById('pay-tax-apply-threshold').checked
+            };
+        }
+
+        function validatePayConfigForm() {
+            var payCycle = document.getElementById('pay-cycle').value;
+            if (!payCycle) {
+                return { message: 'Pay cycle is required.', focusId: 'pay-cycle' };
+            }
+
+            var hoursPerDay = toDecimal(document.getElementById('pay-hours-per-day').value, null);
+            if (hoursPerDay == null || hoursPerDay <= 0 || hoursPerDay > 24) {
+                return { message: 'Work hours per day must be between 0.01 and 24.', focusId: 'pay-hours-per-day' };
+            }
+
+            var cutoffStart = parseInt(document.getElementById('pay-cutoff-start-day').value || '0', 10);
+            var cutoffEnd = parseInt(document.getElementById('pay-cutoff-end-day').value || '0', 10);
+            if (!Number.isInteger(cutoffStart) || cutoffStart < 1 || cutoffStart > 31) {
+                return { message: 'Cutoff start day must be from 1 to 31.', focusId: 'pay-cutoff-start-day' };
+            }
+            if (!Number.isInteger(cutoffEnd) || cutoffEnd < 1 || cutoffEnd > 31) {
+                return { message: 'Cutoff end day must be from 1 to 31.', focusId: 'pay-cutoff-end-day' };
+            }
+            if (cutoffStart > cutoffEnd) {
+                return { message: 'Cutoff start day must be less than or equal to cutoff end day.', focusId: 'pay-cutoff-start-day' };
+            }
+
+            if (document.getElementById('pay-enable-second-cutoff').checked) {
+                var secondStart = parseInt(document.getElementById('pay-second-cutoff-start').value || '0', 10);
+                var secondEnd = parseInt(document.getElementById('pay-second-cutoff-end').value || '0', 10);
+                var releaseLag = parseInt(document.getElementById('pay-release-lag').value || '0', 10);
+                if (!Number.isInteger(secondStart) || secondStart < 1 || secondStart > 31) {
+                    return { message: 'Second cutoff start day must be from 1 to 31.', focusId: 'pay-second-cutoff-start' };
+                }
+                if (!Number.isInteger(secondEnd) || secondEnd < 1 || secondEnd > 31) {
+                    return { message: 'Second cutoff end day must be from 1 to 31.', focusId: 'pay-second-cutoff-end' };
+                }
+                if (secondStart > secondEnd) {
+                    return { message: 'Second cutoff start day must be less than or equal to second cutoff end day.', focusId: 'pay-second-cutoff-start' };
+                }
+                if (!Number.isInteger(releaseLag) || releaseLag < 0 || releaseLag > 30) {
+                    return { message: 'Payroll release lag must be from 0 to 30 days.', focusId: 'pay-release-lag' };
+                }
+            }
+
+            var compensationBasis = document.getElementById('compensation-basis').value;
+            if (!compensationBasis) {
+                return { message: 'Compensation basis is required.', focusId: 'compensation-basis' };
+            }
+
+            if (compensationBasis === 'Custom') {
+                var customLabel = (document.getElementById('custom-unit-label').value || '').trim();
+                var customHours = toDecimal(document.getElementById('custom-work-hours').value, null);
+                if (!customLabel) {
+                    return { message: 'Custom unit label is required.', focusId: 'custom-unit-label' };
+                }
+                if (customHours == null || customHours <= 0) {
+                    return { message: 'Custom work hours must be greater than zero.', focusId: 'custom-work-hours' };
+                }
+            }
+
+            if (!document.getElementById('pay-thirteenth-basis').value) {
+                return { message: '13th month calculation is required.', focusId: 'pay-thirteenth-basis' };
+            }
+
+            if (document.getElementById('pay-enable-bir').checked) {
+                if (!document.getElementById('pay-bir-period').value) {
+                    return { message: 'Payroll period is required when BIR withholding is enabled.', focusId: 'pay-bir-period' };
+                }
+                var birYear = parseInt(document.getElementById('pay-bir-table-version').value || '0', 10);
+                if (!Number.isInteger(birYear) || birYear < 2000 || birYear > 2100) {
+                    return { message: 'Tax table version must be a valid year between 2000 and 2100.', focusId: 'pay-bir-table-version' };
+                }
+            }
+
+            if (document.getElementById('pay-enable-sss').checked) {
+                var sssRate = toDecimal(document.getElementById('pay-sss-employer').value, null);
+                if (sssRate == null || sssRate < 0 || sssRate > 100) {
+                    return { message: 'SSS employer rate must be between 0 and 100.', focusId: 'pay-sss-employer' };
+                }
+            }
+
+            if (document.getElementById('pay-enable-phic').checked) {
+                var phicRate = toDecimal(document.getElementById('pay-phic-rate').value, null);
+                if (phicRate == null || phicRate < 0 || phicRate > 100) {
+                    return { message: 'PhilHealth rate must be between 0 and 100.', focusId: 'pay-phic-rate' };
+                }
+            }
+
+            if (document.getElementById('pay-enable-hdmf').checked) {
+                var hdmfRate = toDecimal(document.getElementById('pay-hdmf-rate').value, null);
+                if (hdmfRate == null || hdmfRate < 0 || hdmfRate > 100) {
+                    return { message: 'Pag-IBIG rate must be between 0 and 100.', focusId: 'pay-hdmf-rate' };
+                }
+            }
+
+            return null;
+        }
+
+        function applyPayConfigToForm(config) {
+            if (!config) return;
+            document.getElementById('pay-currency').value = 'PHP';
+            document.getElementById('pay-cycle').value = config.payCycle || 'SemiMonthly';
+            document.getElementById('compensation-basis').value = config.compensationBasis || 'Monthly';
+            document.getElementById('custom-unit-label').value = config.customUnitLabel || '';
+            document.getElementById('custom-work-hours').value = config.customWorkHours != null ? config.customWorkHours : '';
+            document.getElementById('pay-hours-per-day').value = config.hoursPerDay != null ? config.hoursPerDay : 8;
+            applyCutoffWindowsToForm(config.cutoffWindowsJson || '[]');
+            document.getElementById('pay-lock-attendance-after-cutoff').value = String(!!config.lockAttendanceAfterCutoff);
+            var thirteenthBasis = (config.thirteenthMonthBasis || 'basic').toString().toLowerCase();
+            if (thirteenthBasis !== 'basic' && thirteenthBasis !== 'basic_plus_allowances' && thirteenthBasis !== 'custom') {
+                thirteenthBasis = 'basic';
+            }
+            document.getElementById('pay-thirteenth-basis').value = thirteenthBasis;
+            document.getElementById('pay-enable-bir').checked = !!config.enableBIR;
+            var birPeriod = (config.birPeriod || 'semi-monthly').toString().toLowerCase();
+            if (birPeriod === 'semimonthly') birPeriod = 'semi-monthly';
+            if (birPeriod !== 'semi-monthly' && birPeriod !== 'monthly' && birPeriod !== 'weekly') {
+                birPeriod = 'semi-monthly';
+            }
+            document.getElementById('pay-bir-period').value = birPeriod;
+            document.getElementById('pay-bir-table-version').value = config.birTableVersion || new Date().getFullYear();
+            document.getElementById('pay-enable-sss').checked = !!config.enableSSS;
+            document.getElementById('pay-sss-employer').value = config.sssEmployerPercent != null ? config.sssEmployerPercent : 8.5;
+            document.getElementById('pay-enable-phic').checked = !!config.enablePhilHealth;
+            document.getElementById('pay-phic-rate').value = config.philHealthRate != null ? config.philHealthRate : 3;
+            document.getElementById('pay-enable-hdmf').checked = !!config.enablePagIbig;
+            document.getElementById('pay-hdmf-rate').value = config.pagIbigRate != null ? config.pagIbigRate : 2;
+            document.getElementById('pay-tax-apply').checked = !!config.enableIncomeTax;
+            document.getElementById('pay-tax-prorate-new-hire').checked = !!config.prorateNewHires;
+            document.getElementById('pay-tax-apply-threshold').checked = !!config.applyTaxThreshold;
+            window.toggleCustomCompensationFields();
+        }
+
+        function loadOrgPayConfig() {
+            fetch(buildApiUrl('/api/orgconfig/pay'), { headers: getAcceptHeaders() })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Failed to load pay config');
+                    return r.json();
+                })
+                .then(function (config) {
+                    applyPayConfigToForm(config);
+                })
+                .catch(function () {
+                    notify('warning', 'Unable to load saved pay settings.');
+                });
+        }
+
+        function saveOrgPayConfig(sectionName, button) {
+            var validationError = validatePayConfigForm();
+            if (validationError) {
+                notify('error', validationError.message);
+                if (validationError.focusId) {
+                    var field = document.getElementById(validationError.focusId);
+                    if (field && typeof field.focus === 'function') field.focus();
+                }
+                return Promise.resolve(false);
+            }
+
+            setButtonLoading(button, true, sectionName ? 'Save ' + sectionName : 'Save Pay Settings');
+
+            return fetch(buildApiUrl('/api/orgconfig/pay'), {
+                method: 'PUT',
+                headers: getJsonHeaders(),
+                body: JSON.stringify(collectPayConfigPayload())
+            })
+                .then(function (r) {
+                    if (!r.ok) {
+                        return r.json().then(function (e) {
+                            throw new Error(e.message || 'Failed to save pay settings');
+                        }).catch(function () {
+                            throw new Error('Failed to save pay settings');
+                        });
+                    }
+                    return r.json();
+                })
+                .then(function () {
+                    notify('success', (sectionName ? sectionName + ' saved.' : 'Pay settings saved.'));
+                    return true;
+                })
+                .catch(function (err) {
+                    notify('error', err.message || (sectionName ? 'Failed to save ' + sectionName + '.' : 'Failed to save pay settings.'));
+                    return false;
+                })
+                .finally(function () {
+                    setButtonLoading(button, false);
+                });
+        }
+
+        function handlePaySectionAction(sectionKey, button) {
+            var meta = paySectionMeta[sectionKey];
+            if (!meta || !button) return;
+
+            if (!paySectionState[sectionKey]) {
+                setPaySectionEditable(sectionKey, true);
+                button.textContent = 'Save ' + meta.label;
+                return;
+            }
+
+            saveOrgPayConfig(meta.label, button).then(function (ok) {
+                if (!ok) return;
+                setPaySectionEditable(sectionKey, false);
+                button.textContent = 'Edit ' + meta.label;
+            });
+        }
+
+        window.saveOrgPayConfig = saveOrgPayConfig;
+        window.handlePaySectionAction = handlePaySectionAction;
 
         function safeText(value) {
             return value == null || value === '' ? '—' : value;
@@ -765,6 +1153,19 @@
 
         function boolText(value) {
             return value ? 'Yes' : 'No';
+        }
+
+        function renderActionButtons(editJs, removeJs) {
+            return '<div class="inline-flex items-center gap-1.5">' +
+                '<button type="button" onclick="' + editJs + '" class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">' +
+                    '<svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-8.5 8.5a2 2 0 01-.878.497l-3.2.914a.75.75 0 01-.928-.928l.914-3.2a2 2 0 01.497-.878l8.5-8.5a2 2 0 012.828 0z" /><path d="M5.25 17.5a.75.75 0 000 1.5h9.5a.75.75 0 000-1.5h-9.5z" /></svg>' +
+                    '<span>Edit</span>' +
+                '</button>' +
+                '<button type="button" onclick="' + removeJs + '" class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/45">' +
+                    '<svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.5 2.75A1.75 1.75 0 0010.25 4.5h-.5A1.75 1.75 0 0111.5 2.75h2.094c.465 0 .91.185 1.238.513l.655.655a.75.75 0 01-.53 1.28H5.043a.75.75 0 01-.53-1.28l.655-.655A1.75 1.75 0 016.406 2.75H8.5zm-2 4.75a.75.75 0 00-.75.75v7a2.5 2.5 0 002.5 2.5h3.5a2.5 2.5 0 002.5-2.5v-7a.75.75 0 00-.75-.75h-7z" clip-rule="evenodd" /></svg>' +
+                    '<span>Remove</span>' +
+                '</button>' +
+            '</div>';
         }
 
         function parseTags(value) {
@@ -934,11 +1335,26 @@
             document.getElementById('pay-second-cutoff-fields').classList.toggle('hidden', !enabled);
         };
 
-        function saveEarningRule() {
+        function saveEarningRule(button) {
             var id = document.getElementById('earningRuleId').value;
             var name = (document.getElementById('earningRuleName').value || '').trim();
             if (!name) {
+                notify('error', 'Earning rule name is required.');
                 document.getElementById('earningRuleName').focus();
+                return;
+            }
+
+            var rateType = document.getElementById('earningRuleRateType').value;
+            if (!rateType) {
+                notify('error', 'Rate type is required.');
+                document.getElementById('earningRuleRateType').focus();
+                return;
+            }
+
+            var rateValue = parseFloat(document.getElementById('earningRuleRateValue').value);
+            if (!Number.isFinite(rateValue) || rateValue <= 0) {
+                notify('error', 'Rate value must be greater than zero.');
+                document.getElementById('earningRuleRateValue').focus();
                 return;
             }
 
@@ -950,8 +1366,8 @@
                 restDayHandling: document.getElementById('earningRuleRestDayHandling').value,
                 scope: document.getElementById('earningRuleScope').value,
                 effectiveFrom: document.getElementById('earningRuleEffectiveFrom').value || null,
-                rateType: document.getElementById('earningRuleRateType').value,
-                rateValue: parseFloat(document.getElementById('earningRuleRateValue').value) || 1,
+                rateType: rateType,
+                rateValue: rateValue,
                 isTaxable: document.getElementById('earningRuleTaxable').checked,
                 includeInBenefitBase: document.getElementById('earningRuleBenefitBase').checked,
                 requiresApproval: document.getElementById('earningRuleRequiresApproval').checked,
@@ -961,46 +1377,77 @@
 
             var oid = getOrgId();
             if (!oid) {
-                console.warn('No orgId for pay components');
-                closeEarningRuleModal();
+                notify('error', 'No organization id found for pay components.');
                 return;
             }
 
-            var url = '/api/organizations/' + oid + '/pay-components/earnings';
+            var url = buildApiUrl('/api/organizations/' + oid + '/pay-components/earnings');
             var method = 'POST';
             if (id) {
                 url += '/' + id;
                 method = 'PUT';
             }
 
+            setButtonLoading(button, true, 'Save Earning Rule');
+
             fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: getJsonHeaders(),
                 body: JSON.stringify(payload)
             })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    return r.json().then(function (e) { throw new Error(e.message || 'Failed to save earning rule.'); })
+                        .catch(function () { throw new Error('Failed to save earning rule.'); });
+                }
+                return r.json();
+            })
             .then(function (data) {
                 if (data.ok !== false) {
                     closeEarningRuleModal();
                     loadEarnings();
+                    notify('success', 'Earning rule saved.');
                 }
             })
-            .catch(function () { });
+            .catch(function (err) { notify('error', err.message || 'Failed to save earning rule.'); })
+            .finally(function () { setButtonLoading(button, false); });
         }
 
-        function saveAllowanceRule() {
+        function saveAllowanceRule(button) {
             var id = document.getElementById('allowanceRuleId').value;
             var name = (document.getElementById('allowanceRuleName').value || '').trim();
             if (!name) {
+                notify('error', 'Allowance name is required.');
                 document.getElementById('allowanceRuleName').focus();
+                return;
+            }
+
+            var allowanceType = document.getElementById('allowanceRuleType').value;
+            if (!allowanceType) {
+                notify('error', 'Allowance type is required.');
+                document.getElementById('allowanceRuleType').focus();
+                return;
+            }
+
+            var allowanceCategory = document.getElementById('allowanceRuleCategory').value;
+            if (!allowanceCategory) {
+                notify('error', 'Allowance category is required.');
+                document.getElementById('allowanceRuleCategory').focus();
+                return;
+            }
+
+            var amount = parseFloat(document.getElementById('allowanceRuleAmount').value);
+            if (!Number.isFinite(amount) || amount < 0) {
+                notify('error', 'Allowance amount must be 0 or greater.');
+                document.getElementById('allowanceRuleAmount').focus();
                 return;
             }
 
             var payload = {
                 name: name,
-                allowanceType: document.getElementById('allowanceRuleType').value,
-                category: document.getElementById('allowanceRuleCategory').value,
-                amount: parseFloat(document.getElementById('allowanceRuleAmount').value) || 0,
+                allowanceType: allowanceType,
+                category: allowanceCategory,
+                amount: amount,
                 isTaxable: document.getElementById('allowanceRuleTaxable').checked,
                 attendanceDependent: document.getElementById('allowanceRuleAttendanceDependent').checked,
                 prorateIfPartialPeriod: document.getElementById('allowanceRuleProratePartialPeriod').checked,
@@ -1012,49 +1459,86 @@
 
             var oid = getOrgId();
             if (!oid) {
-                console.warn('No orgId for allowances');
-                closeAllowanceModal();
+                notify('error', 'No organization id found for allowances.');
                 return;
             }
 
-            var url = '/api/organizations/' + oid + '/pay-components/allowances';
+            var url = buildApiUrl('/api/organizations/' + oid + '/pay-components/allowances');
             var method = 'POST';
             if (id) {
                 url += '/' + id;
                 method = 'PUT';
             }
 
+            setButtonLoading(button, true, 'Save Allowance');
+
             fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: getJsonHeaders(),
                 body: JSON.stringify(payload)
             })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    return r.json().then(function (e) { throw new Error(e.message || 'Failed to save allowance rule.'); })
+                        .catch(function () { throw new Error('Failed to save allowance rule.'); });
+                }
+                return r.json();
+            })
             .then(function (data) {
                 if (data.ok !== false) {
                     closeAllowanceModal();
                     loadAllowances();
+                    notify('success', 'Allowance rule saved.');
                 }
             })
-            .catch(function () { });
+            .catch(function (err) { notify('error', err.message || 'Failed to save allowance rule.'); })
+            .finally(function () { setButtonLoading(button, false); });
         }
 
-        function saveDeductionRule() {
+        function saveDeductionRule(button) {
             var id = document.getElementById('deductionRuleId').value;
             var name = (document.getElementById('deductionRuleName').value || '').trim();
             if (!name) {
+                notify('error', 'Deduction name is required.');
                 document.getElementById('deductionRuleName').focus();
                 return;
             }
 
             var t = document.getElementById('deductionRuleType').value;
+            if (!t) {
+                notify('error', 'Deduction type is required.');
+                document.getElementById('deductionRuleType').focus();
+                return;
+            }
+
+            var computeBasedOn = document.getElementById('deductionRuleComputeBasedOn').value;
+            if (!computeBasedOn) {
+                notify('error', 'Compute based on is required.');
+                document.getElementById('deductionRuleComputeBasedOn').focus();
+                return;
+            }
+
+            var amountField = parseFloat(document.getElementById('deductionRuleAmount').value);
+            if (t !== 'Formula' && (!Number.isFinite(amountField) || amountField < 0)) {
+                notify('error', 'Deduction amount must be 0 or greater.');
+                document.getElementById('deductionRuleAmount').focus();
+                return;
+            }
+
+            var formulaValue = (document.getElementById('deductionRuleFormula').value || '').trim();
+            if (t === 'Formula' && !formulaValue) {
+                notify('error', 'Formula expression is required for formula-based deduction.');
+                document.getElementById('deductionRuleFormula').focus();
+                return;
+            }
+
             var payload = {
                 name: name,
                 category: document.getElementById('deductionRuleCategory').value,
                 deductionType: t,
-                computeBasedOn: document.getElementById('deductionRuleComputeBasedOn').value,
-                amount: t === 'Formula' ? null : (parseFloat(document.getElementById('deductionRuleAmount').value) || null),
-                formulaExpression: t === 'Formula' ? (document.getElementById('deductionRuleFormula').value || '').trim() : null,
+                computeBasedOn: computeBasedOn,
+                amount: t === 'Formula' ? null : amountField,
+                formulaExpression: t === 'Formula' ? formulaValue : null,
                 effectiveFrom: document.getElementById('deductionRuleEffectiveFrom').value || null,
                 maxDeductionAmount: parseFloat(document.getElementById('deductionRuleMaxAmount').value) || null,
                 hasEmployerShare: document.getElementById('deductionEmployerShare').checked,
@@ -1067,31 +1551,40 @@
 
             var oid = getOrgId();
             if (!oid) {
-                console.warn('No orgId');
-                closeDeductionModal();
+                notify('error', 'No organization id found for deductions.');
                 return;
             }
 
-            var url = '/api/organizations/' + oid + '/pay-components/deductions';
+            var url = buildApiUrl('/api/organizations/' + oid + '/pay-components/deductions');
             var method = 'POST';
             if (id) {
                 url += '/' + id;
                 method = 'PUT';
             }
 
+            setButtonLoading(button, true, 'Save Deduction');
+
             fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: getJsonHeaders(),
                 body: JSON.stringify(payload)
             })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    return r.json().then(function (e) { throw new Error(e.message || 'Failed to save deduction rule.'); })
+                        .catch(function () { throw new Error('Failed to save deduction rule.'); });
+                }
+                return r.json();
+            })
             .then(function (data) {
                 if (data.ok !== false) {
                     closeDeductionModal();
                     loadDeductions();
+                    notify('success', 'Deduction rule saved.');
                 }
             })
-            .catch(function () { });
+            .catch(function (err) { notify('error', err.message || 'Failed to save deduction rule.'); })
+            .finally(function () { setButtonLoading(button, false); });
         }
 
         window.saveEarningRule = saveEarningRule;
@@ -1102,7 +1595,7 @@
             var oid = getOrgId();
             if (!oid) return;
 
-            fetch('/api/organizations/' + oid + '/pay-components/earnings', { headers: { 'Accept': 'application/json' } })
+            fetch(buildApiUrl('/api/organizations/' + oid + '/pay-components/earnings'), { headers: getAcceptHeaders() })
                 .then(function (r) { return r.json(); })
                 .then(function (list) {
                     _earningsList = Array.isArray(list) ? list : [];
@@ -1134,10 +1627,7 @@
                             '<td class="px-5 py-3 text-xs">' + boolText(r.includeInBenefitBase) + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + boolText(r.requiresApproval) + '</td>' +
                             '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
-                            '<td class="px-5 py-3 text-right">' +
-                                '<button type="button" onclick="window.editEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
-                                '<button type="button" onclick="window.deleteEarningRule(' + r.earningRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
-                            '</td>';
+                            '<td class="px-5 py-3 text-right">' + renderActionButtons('window.editEarningRule(' + r.earningRuleID + ')', 'window.deleteEarningRule(' + r.earningRuleID + ')') + '</td>';
 
                         tbody.appendChild(tr);
                     });
@@ -1149,7 +1639,7 @@
             var oid = getOrgId();
             if (!oid) return;
 
-            fetch('/api/organizations/' + oid + '/pay-components/allowances', { headers: { 'Accept': 'application/json' } })
+            fetch(buildApiUrl('/api/organizations/' + oid + '/pay-components/allowances'), { headers: getAcceptHeaders() })
                 .then(function (r) { return r.json(); })
                 .then(function (list) {
                     _allowancesList = Array.isArray(list) ? list : [];
@@ -1177,10 +1667,7 @@
                             '<td class="px-5 py-3 text-xs">' + boolText(r.prorateIfPartialPeriod) + '</td>' +
                             '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + boolText(r.isActive !== false) + '</td>' +
-                            '<td class="px-5 py-3 text-right">' +
-                                '<button type="button" onclick="window.editAllowanceRule(' + r.allowanceRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
-                                '<button type="button" onclick="window.deleteAllowanceRule(' + r.allowanceRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
-                            '</td>';
+                            '<td class="px-5 py-3 text-right">' + renderActionButtons('window.editAllowanceRule(' + r.allowanceRuleID + ')', 'window.deleteAllowanceRule(' + r.allowanceRuleID + ')') + '</td>';
 
                         tbody.appendChild(tr);
                     });
@@ -1192,7 +1679,7 @@
             var oid = getOrgId();
             if (!oid) return;
 
-            fetch('/api/organizations/' + oid + '/pay-components/deductions', { headers: { 'Accept': 'application/json' } })
+            fetch(buildApiUrl('/api/organizations/' + oid + '/pay-components/deductions'), { headers: getAcceptHeaders() })
                 .then(function (r) { return r.json(); })
                 .then(function (list) {
                     _deductionsList = Array.isArray(list) ? list : [];
@@ -1226,10 +1713,7 @@
                             '<td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">' + safeText(r.effectiveFrom ? String(r.effectiveFrom).substring(0, 10) : '') + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + boolText(r.isActive !== false) + '</td>' +
                             '<td class="px-5 py-3 text-xs">' + (r.autoCompute ? 'Auto' : 'Manual') + '</td>' +
-                            '<td class="px-5 py-3 text-right">' +
-                                '<button type="button" onclick="window.editDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>' +
-                                '<button type="button" onclick="window.deleteDeductionRule(' + r.deductionRuleID + ')" class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">Delete</button>' +
-                            '</td>';
+                            '<td class="px-5 py-3 text-right">' + renderActionButtons('window.editDeductionRule(' + r.deductionRuleID + ')', 'window.deleteDeductionRule(' + r.deductionRuleID + ')') + '</td>';
 
                         tbody.appendChild(tr);
                     });
@@ -1243,21 +1727,21 @@
 
         window.deleteEarningRule = function (id) {
             if (confirm('Remove this earning rule?')) {
-                fetch('/api/organizations/' + getOrgId() + '/pay-components/earnings/' + id, { method: 'DELETE' })
+                fetch(buildApiUrl('/api/organizations/' + getOrgId() + '/pay-components/earnings/' + id), { method: 'DELETE', headers: getAuthHeaders() })
                     .then(function () { loadEarnings(); });
             }
         };
 
         window.deleteAllowanceRule = function (id) {
             if (confirm('Remove this allowance?')) {
-                fetch('/api/organizations/' + getOrgId() + '/pay-components/allowances/' + id, { method: 'DELETE' })
+                fetch(buildApiUrl('/api/organizations/' + getOrgId() + '/pay-components/allowances/' + id), { method: 'DELETE', headers: getAuthHeaders() })
                     .then(function () { loadAllowances(); });
             }
         };
 
         window.deleteDeductionRule = function (id) {
             if (confirm('Remove this deduction?')) {
-                fetch('/api/organizations/' + getOrgId() + '/pay-components/deductions/' + id, { method: 'DELETE' })
+                fetch(buildApiUrl('/api/organizations/' + getOrgId() + '/pay-components/deductions/' + id), { method: 'DELETE', headers: getAuthHeaders() })
                     .then(function () { loadDeductions(); });
             }
         };
@@ -1276,10 +1760,15 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             if (document.getElementById('tab-pay')) {
+                initializePaySectionLocking();
+                loadOrgPayConfig();
                 loadEarnings();
                 loadAllowances();
                 loadDeductions();
+                window.toggleSecondCutoff();
+                window.toggleCustomCompensationFields();
             }
+
         });
 
         document.getElementById('earningRuleModal')?.addEventListener('click', function (e) {

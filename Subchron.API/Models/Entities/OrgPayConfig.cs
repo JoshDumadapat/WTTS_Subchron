@@ -13,6 +13,15 @@ public class OrgPayConfig
     [MaxLength(30)]
     public string PayCycle { get; set; } = "SemiMonthly";
 
+    [MaxLength(20)]
+    public string CompensationBasis { get; set; } = "Monthly";
+
+    [MaxLength(40)]
+    public string CustomUnitLabel { get; set; } = string.Empty;
+
+    public decimal? CustomWorkHours { get; set; }
+        = null;
+
     public decimal HoursPerDay { get; set; } = 8m;
 
     /// <summary>JSON array describing cutoff windows and release lags.</summary>

@@ -45,6 +45,19 @@ public class OrgPayConfigController : ControllerBase
 
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
+        var compensationBasis = (request.CompensationBasis ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(compensationBasis))
+            return BadRequest(new { ok = false, message = "Compensation basis is required." });
+
+        if (string.Equals(compensationBasis, "Custom", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(request.CustomUnitLabel))
+                return BadRequest(new { ok = false, message = "Custom unit label is required for custom compensation basis." });
+
+            if (!request.CustomWorkHours.HasValue || request.CustomWorkHours.Value <= 0)
+                return BadRequest(new { ok = false, message = "Custom work hours must be greater than zero for custom compensation basis." });
+        }
+
         var entity = await _tenantDb.OrgPayConfigs.FirstOrDefaultAsync(x => x.OrgID == orgId.Value, ct);
         if (entity == null)
         {
@@ -54,6 +67,13 @@ public class OrgPayConfigController : ControllerBase
 
         entity.Currency = request.Currency;
         entity.PayCycle = request.PayCycle;
+        entity.CompensationBasis = compensationBasis;
+        entity.CustomUnitLabel = string.Equals(compensationBasis, "Custom", StringComparison.OrdinalIgnoreCase)
+            ? (request.CustomUnitLabel ?? string.Empty).Trim()
+            : string.Empty;
+        entity.CustomWorkHours = string.Equals(compensationBasis, "Custom", StringComparison.OrdinalIgnoreCase)
+            ? request.CustomWorkHours
+            : null;
         entity.HoursPerDay = request.HoursPerDay;
         entity.CutoffWindowsJson = request.CutoffWindowsJson ?? "[]";
         entity.LockAttendanceAfterCutoff = request.LockAttendanceAfterCutoff;
@@ -81,6 +101,9 @@ public class OrgPayConfigController : ControllerBase
     {
         Currency = entity.Currency,
         PayCycle = entity.PayCycle,
+        CompensationBasis = entity.CompensationBasis,
+        CustomUnitLabel = entity.CustomUnitLabel,
+        CustomWorkHours = entity.CustomWorkHours,
         HoursPerDay = entity.HoursPerDay,
         CutoffWindowsJson = entity.CutoffWindowsJson,
         LockAttendanceAfterCutoff = entity.LockAttendanceAfterCutoff,

@@ -10,9 +10,9 @@ namespace Subchron.API.Controllers;
 [Route("api/orgconfig/payroll/holiday-rules")]
 public class OrgHolidayPayrollRulesController : ControllerBase
 {
-    private readonly SubchronDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public OrgHolidayPayrollRulesController(SubchronDbContext db)
+    public OrgHolidayPayrollRulesController(TenantDbContext db)
     {
         _db = db;
     }
