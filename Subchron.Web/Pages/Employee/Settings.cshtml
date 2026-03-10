@@ -6,55 +6,192 @@
     Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
 }
 
-<div class="w-full px-3 sm:px-4">
-    <p class="mb-6 text-sm text-slate-500 dark:text-slate-400">Manage your attendance and security options.</p>
+<div class="w-full px-3 sm:px-4 space-y-3 sm:space-y-4">
+    <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Manage your preferences and account security.</p>
 
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Biometrics</h3>
-        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use your device fingerprint or face to record time in/out from this app.</p>
+    <!-- Biometrics Section -->
+    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m5.506-7.971c2.31.155 4.383 1.379 5.824 3.215m-6.08-8.715a9 9 0 110-17.464m6.5-1.921A9.003 9.003 0 0012 2c-4.478 0-8.268 2.943-9.543 7m9.543 6.908c-.955.076-1.883.206-2.77.372m5.21-.78a9.47 9.47 0 015.3 2.821m0 0A9.001 9.001 0 0012 2" /></svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Biometrics</h3>
+                </div>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use fingerprint or face to record time in/out.</p>
+            </div>
+        </div>
         <div class="mt-4 flex items-center justify-between">
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Enable Biometrics</span>
-            <button type="button" id="toggleBiometrics" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600">
+            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Enable Biometrics</span>
+            <button type="button" id="toggleBiometrics" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600 dark:focus:ring-offset-slate-800">
                 <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
             </button>
         </div>
-        <p id="biometricsStatus" class="mt-2 text-sm text-slate-500 dark:text-slate-400">Status: Disabled</p>
+        <p id="biometricsStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Status: Disabled</p>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+        <div class="flex items-start gap-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 flex-shrink-0">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Notifications</h3>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Control how you receive updates.</p>
+            </div>
+        </div>
+        <div class="mt-4 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Attendance Reminders</span>
+                <button type="button" id="toggleAttendanceReminder" role="switch" aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-subgreen-600 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-subgreen-500 dark:focus:ring-offset-slate-800">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Payroll Alerts</span>
+                <button type="button" id="togglePayrollAlerts" role="switch" aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-subgreen-600 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-subgreen-500 dark:focus:ring-offset-slate-800">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Overtime Approvals</span>
+                <button type="button" id="toggleOvertimeAlerts" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600 dark:focus:ring-offset-slate-800">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Security Section -->
+    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+        <div class="flex items-start gap-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Account Security</h3>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage your password and login security.</p>
+            </div>
+        </div>
+        <div class="mt-4 space-y-2">
+            <button type="button" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">
+                Change Password
+            </button>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Last changed 3 months ago</p>
+        </div>
+    </div>
+
+    <!-- Preferences Section -->
+    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+        <div class="flex items-start gap-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 flex-shrink-0">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Preferences</h3>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Customize your experience.</p>
+            </div>
+        </div>
+        <div class="mt-4 space-y-3">
+            <div class="flex items-center justify-between">
+                <label for="languageSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Language</label>
+                <select id="languageSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
+                    <option>English</option>
+                    <option>Filipino (Tagalog)</option>
+                    <option>Spanish</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-between">
+                <label for="themeSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Theme</label>
+                <select id="themeSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
+                    <option>Auto (System)</option>
+                    <option>Light</option>
+                    <option>Dark</option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
 (function () {
-    var toggle = document.getElementById('toggleBiometrics');
-    var statusEl = document.getElementById('biometricsStatus');
-    function setState(on) {
-        toggle.setAttribute('aria-checked', on ? 'true' : 'false');
-        var thumb = toggle.querySelector('span');
-        if (on) {
-            toggle.classList.remove('bg-slate-200', 'dark:bg-slate-600');
-            toggle.classList.add('bg-subgreen-600', 'dark:bg-subgreen-500');
-            if (thumb) { thumb.classList.remove('translate-x-0'); thumb.classList.add('translate-x-5'); }
-            if (statusEl) statusEl.textContent = 'Status: Enabled';
-        } else {
-            toggle.classList.add('bg-slate-200', 'dark:bg-slate-600');
-            toggle.classList.remove('bg-subgreen-600', 'dark:bg-subgreen-500');
-            if (thumb) { thumb.classList.add('translate-x-0'); thumb.classList.remove('translate-x-5'); }
-            if (statusEl) statusEl.textContent = 'Status: Disabled';
+    // Helper function to toggle switch
+    function createToggleHandler(elementId, onChangeFn) {
+        const toggle = document.getElementById(elementId);
+        if (!toggle) return;
+        
+        function setState(on) {
+            toggle.setAttribute('aria-checked', on ? 'true' : 'false');
+            const thumb = toggle.querySelector('span');
+            if (on) {
+                toggle.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+                toggle.classList.add('bg-subgreen-600', 'dark:bg-subgreen-500');
+                if (thumb) { thumb.classList.remove('translate-x-0'); thumb.classList.add('translate-x-5'); }
+            } else {
+                toggle.classList.add('bg-slate-200', 'dark:bg-slate-600');
+                toggle.classList.remove('bg-subgreen-600', 'dark:bg-subgreen-500');
+                if (thumb) { thumb.classList.add('translate-x-0'); thumb.classList.remove('translate-x-5'); }
+            }
         }
+        
+        toggle.addEventListener('click', function () {
+            const on = this.getAttribute('aria-checked') === 'true';
+            setState(!on);
+            if (onChangeFn) onChangeFn(!on);
+        });
+        
+        return { setState };
     }
-    toggle?.addEventListener('click', function () {
-        var on = this.getAttribute('aria-checked') === 'true';
-        if (!on) {
+
+    // Biometrics toggle with verification
+    const biometricsStatus = document.getElementById('biometricsStatus');
+    const biometricsToggle = createToggleHandler('toggleBiometrics', function (enabled) {
+        if (enabled) {
             if (typeof PublicKeyCredential !== 'undefined') {
                 alert('OS biometric prompt would appear here to verify. (Demo: no backend.)');
             } else {
                 alert('Biometric verification would run here. (Demo: no backend.)');
             }
-            setState(true);
-        } else {
-            setState(false);
+        }
+        if (biometricsStatus) {
+            biometricsStatus.textContent = 'Status: ' + (enabled ? 'Enabled' : 'Disabled');
         }
     });
+
+    // Simple toggles for notifications
+    createToggleHandler('toggleAttendanceReminder');
+    createToggleHandler('togglePayrollAlerts');
+    createToggleHandler('toggleOvertimeAlerts');
+
+    // Theme selector
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+        themeSelect.addEventListener('change', function () {
+            // In a real app, this would save to backend and apply theme
+            console.log('Theme changed to:', this.value);
+        });
+    }
+
+    // Language selector
+    const languageSelect = document.getElementById('languageSelect');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function () {
+            // In a real app, this would save to backend and update language
+            console.log('Language changed to:', this.value);
+        });
+    }
 })();
 </script>
 }
+
