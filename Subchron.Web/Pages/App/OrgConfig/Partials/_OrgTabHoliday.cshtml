@@ -49,7 +49,7 @@
                         <h3 id="holidayCalendarTitle" class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">January 2026</h3>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[auto_auto_auto_auto_auto_1fr]">
+                    <div class="grid grid-cols-1 gap-3 xl:grid-cols-[auto_auto_auto_auto_auto] xl:justify-end">
                         <div class="inline-flex items-center overflow-hidden rounded-xl border border-slate-300 bg-slate-50 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                             <button type="button" onclick="window.SubchronOrgTabHoliday.goToPreviousMonth()" class="inline-flex h-11 w-11 items-center justify-center text-gray-500 transition hover:bg-slate-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white" title="Previous Month">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -187,27 +187,110 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 gap-3 border-b border-slate-300 px-6 py-4 md:grid-cols-[minmax(240px,1fr)_220px] dark:border-gray-700">
+                    <div class="relative">
+                        <input type="text" id="holidayTableSearch" placeholder="Search holiday, reference, scope..."
+                               class="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-700 ring-0 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+                        <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m0 0A7.65 7.65 0 1 0 5.82 5.82a7.65 7.65 0 0 0 10.83 10.83Z" />
+                        </svg>
+                    </div>
+                    <div class="relative">
+                        <select id="holidayTableStatusFilter"
+                                class="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-700 ring-0 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all">All Statuses</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-300 dark:divide-gray-700">
+                    <table class="min-w-[980px] w-full table-fixed divide-y divide-slate-300 dark:divide-gray-700">
                         <thead class="bg-slate-200 dark:bg-gray-700/40">
                             <tr>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Date</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Holiday</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Classification</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Scope</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Attendance</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Payroll</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Reference</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
-                                <th class="px-5 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
+                                <th class="w-[12%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Date</th>
+                                <th class="w-[15%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Holiday</th>
+                                <th class="w-[14%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Classification</th>
+                                <th class="w-[10%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Scope</th>
+                                <th class="w-[13%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Attendance</th>
+                                <th class="w-[13%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Payroll</th>
+                                <th class="w-[13%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Reference</th>
+                                <th class="w-[5%] px-3 py-3 text-left text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
+                                <th class="w-[5%] px-3 py-3 text-right text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="holidayRulesTableBody" class="divide-y divide-slate-300 bg-slate-50 dark:divide-gray-700 dark:bg-gray-800">
                         </tbody>
                     </table>
                 </div>
+
+                <div class="flex flex-col gap-3 border-t border-slate-300 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
+                    <div class="text-xs text-slate-500 dark:text-slate-400" id="holidayTablePaginationInfo">Showing 0 of 0</div>
+                    <div class="flex items-center gap-2">
+                        <label for="holidayTableRowsPerPage" class="text-xs text-slate-500 dark:text-slate-400">Rows</label>
+                        <select id="holidayTableRowsPerPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                        </select>
+                        <button type="button" id="holidayTablePrevPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">Prev</button>
+                        <button type="button" id="holidayTableNextPage" class="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">Next</button>
+                    </div>
+                </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+@* ─── HOLIDAY STATUS MODAL ─── *@
+<div id="holidayStatusModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-gray-700">
+            <div class="flex items-center gap-2.5 text-slate-900 dark:text-white">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                    <svg class="h-4 w-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007v.008H12v-.008z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 18.75h15a1.5 1.5 0 001.299-2.25l-7.5-12.99a1.5 1.5 0 00-2.598 0l-7.5 12.99A1.5 1.5 0 004.5 18.75z" />
+                    </svg>
+                </div>
+                <h3 id="holidayStatusModalTitle" class="text-base font-bold">Deactivate Holiday</h3>
+            </div>
+            <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayStatusModal()" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-3 px-6 py-5 text-sm text-gray-600 dark:text-gray-200">
+            <p id="holidayStatusModalMessage">Are you sure you want to deactivate this holiday rule?</p>
+            <div id="holidayStatusCurrentReason" class="hidden rounded-lg border border-slate-200 bg-slate-100/70 px-3 py-2 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-300"></div>
+            <div id="holidayStatusReasonGroup" class="space-y-1.5">
+                <label id="holidayStatusReasonLabel" for="holidayStatusReason" class="block text-xs font-semibold text-gray-600 dark:text-gray-300">Reason for deactivation</label>
+                <textarea id="holidayStatusReason" rows="3" maxlength="60" placeholder="Enter reason"
+                          class="block w-full rounded-lg border border-white bg-white py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-white focus:outline-none dark:border-white/20 dark:bg-gray-900 dark:text-white dark:ring-gray-700"></textarea>
+                <div class="flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500">
+                    <p id="holidayStatusReasonHint">Required when deactivating. Max 60 characters.</p>
+                    <span id="holidayStatusReasonCount">0/60</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50/40 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/60">
+            <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayStatusModal()" class="btn-secondary">Cancel</button>
+            <button id="holidayStatusConfirmBtn" type="button" onclick="window.SubchronOrgTabHoliday.confirmHolidayStatusChange()"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1 dark:bg-red-600 dark:hover:bg-red-500">
+                <svg id="holidayStatusConfirmSpinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" class="opacity-30" stroke="currentColor" stroke-width="3"></circle>
+                    <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+                </svg>
+                Confirm
+            </button>
         </div>
     </div>
 </div>
@@ -247,13 +330,13 @@
 
                     <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
                         <div class="xl:col-span-2">
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Name</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Name <span class="text-red-500">*</span></label>
                             <input type="text" id="holidayName" placeholder="e.g. Independence Day"
                                    class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Date</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Date <span class="text-red-500">*</span></label>
                             <input type="date" id="holidayDate"
                                    class="block w-full rounded-lg border-0 py-2.5 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600" />
                         </div>
@@ -275,7 +358,7 @@
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Classification</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Holiday Classification <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select id="holidayType"
                                         class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
@@ -295,7 +378,7 @@
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope Type</label>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Scope Type <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select id="holidayScopeType"
                                         class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
@@ -656,11 +739,15 @@
 
             <div class="flex items-center gap-3">
                 <button type="button" onclick="window.SubchronOrgTabHoliday.closeHolidayModal()" class="btn-secondary">Cancel</button>
-                <button type="button" onclick="window.SubchronOrgTabHoliday.saveHolidayRule()" class="btn-primary gap-1.5">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <button type="button" id="holidaySaveButton" onclick="window.SubchronOrgTabHoliday.saveHolidayRule()" class="btn-primary gap-1.5">
+                    <svg id="holidaySaveSpinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" class="opacity-30" stroke="currentColor" stroke-width="3"></circle>
+                        <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+                    </svg>
+                    <svg id="holidaySaveIcon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Save Holiday Rule
+                    <span id="holidaySaveText">Save Holiday Rule</span>
                 </button>
             </div>
         </div>
@@ -714,6 +801,28 @@
 
     .dark .holiday-corner-indicator {
         box-shadow: 0 0 0 2px rgba(7, 20, 45, 0.95);
+    }
+
+    .holiday-rule-flag {
+        position: absolute;
+        top: 0.4rem;
+        left: 0.42rem;
+        width: 0;
+        height: 0;
+        border-top: 0.55rem solid #10b981;
+        border-right: 0.55rem solid transparent;
+        filter: drop-shadow(0 0 1px rgba(15, 23, 42, 0.25));
+    }
+
+    .dark .holiday-rule-flag {
+        border-top-color: #34d399;
+        filter: drop-shadow(0 0 1px rgba(15, 23, 42, 0.45));
+    }
+
+    .holiday-field-error {
+        margin-top: 0.3rem;
+        font-size: 0.72rem;
+        color: rgb(220 38 38);
     }
 
     .holiday-type-regular {
@@ -895,6 +1004,13 @@
             typeFilter: 'holidayTypeFilter',
             scopeFilter: 'holidayScopeFilter',
             tableBody: 'holidayRulesTableBody',
+            tableSearch: 'holidayTableSearch',
+            tableStatusFilter: 'holidayTableStatusFilter',
+            tableRowsPerPage: 'holidayTableRowsPerPage',
+            tablePrevPage: 'holidayTablePrevPage',
+            tableNextPage: 'holidayTableNextPage',
+            tablePaginationInfo: 'holidayTablePaginationInfo',
+            statusModal: 'holidayStatusModal',
             grid: 'holidayCalendarGrid',
             title: 'holidayCalendarTitle',
             modal: 'holidayModal',
@@ -925,6 +1041,14 @@
             selectedScopeType: 'all',
             editingHolidayId: null,
             holidays: [],
+            configuredHolidays: [],
+            defaultHolidays: [],
+            tableSearchQuery: '',
+            tableStatusFilter: 'all',
+            tablePage: 1,
+            tableRowsPerPage: 10,
+            statusTargetId: null,
+            statusTargetActive: true,
             payrollRules: [],
             isLoading: false
         };
@@ -950,6 +1074,349 @@
                 .split(',')
                 .map(x => x.trim())
                 .filter(Boolean);
+        }
+
+        function updateHolidayStatusReasonCounter() {
+            const input = $('holidayStatusReason');
+            const counter = $('holidayStatusReasonCount');
+            if (!input || !counter) return;
+            counter.textContent = `${input.value.length}/60`;
+        }
+
+        function setHolidayStatusSaving(isSaving) {
+            const btn = $('holidayStatusConfirmBtn');
+            const spinner = $('holidayStatusConfirmSpinner');
+            if (!btn || !spinner) return;
+
+            btn.disabled = !!isSaving;
+            btn.classList.toggle('opacity-70', !!isSaving);
+            btn.classList.toggle('cursor-not-allowed', !!isSaving);
+            spinner.classList.toggle('hidden', !isSaving);
+        }
+
+        function extractTaggedReason(notes, tag) {
+            const prefix = `[${tag}] `;
+            const line = (notes || '').split('\n').find(x => x.startsWith(prefix));
+            return line ? line.slice(prefix.length).trim() : '';
+        }
+
+        function mergeReactivationReason(existingNotes, reason) {
+            const cleanReason = (reason || '').trim();
+            const reactivationPrefix = '[Reactivation Reason] ';
+            const lines = (existingNotes || '')
+                .split('\n')
+                .filter(x => x && !x.startsWith(reactivationPrefix));
+            if (cleanReason) lines.push(`${reactivationPrefix}${cleanReason}`);
+            return lines.join('\n').trim();
+        }
+
+        function openHolidayStatusModal(id) {
+            const item = state.configuredHolidays.find(x => String(x.id) === String(id));
+            if (!item) {
+                window.showToast?.('Holiday record not found.', false);
+                return;
+            }
+
+            state.statusTargetId = item.id;
+            state.statusTargetActive = !!item.isActive;
+
+            const title = $('holidayStatusModalTitle');
+            const msg = $('holidayStatusModalMessage');
+            const reasonGroup = $('holidayStatusReasonGroup');
+            const reasonInput = $('holidayStatusReason');
+            const reasonLabel = $('holidayStatusReasonLabel');
+            const reasonHint = $('holidayStatusReasonHint');
+            const currentReason = $('holidayStatusCurrentReason');
+            const confirmBtn = $('holidayStatusConfirmBtn');
+
+            const isDeactivate = !!item.isActive;
+            if (title) title.textContent = isDeactivate ? 'Deactivate Holiday' : 'Activate Holiday';
+            if (msg) msg.textContent = isDeactivate
+                ? `Are you sure you want to deactivate "${item.name}"?`
+                : `Are you sure you want to activate "${item.name}"?`;
+            if (reasonGroup) reasonGroup.classList.remove('hidden');
+            if (reasonInput) {
+                reasonInput.value = '';
+                reasonInput.required = isDeactivate;
+                reasonInput.readOnly = false;
+                reasonInput.placeholder = isDeactivate ? 'Enter reason for deactivation' : 'Optional reason for reactivation';
+            }
+            if (reasonLabel) reasonLabel.textContent = isDeactivate ? 'Reason for deactivation' : 'Reason for reactivation';
+            if (reasonHint) reasonHint.textContent = isDeactivate ? 'Required when deactivating. Max 60 characters.' : 'Optional when activating. Max 60 characters.';
+            const lastDeactivation = extractTaggedReason(item.notes, 'Deactivation Reason');
+            if (currentReason) {
+                if (!isDeactivate && lastDeactivation) {
+                    currentReason.classList.remove('hidden');
+                    currentReason.innerHTML = `<span class="font-semibold">Reason of its deactivation:</span> ${escapeHtml(lastDeactivation)}`;
+                } else {
+                    currentReason.classList.add('hidden');
+                    currentReason.textContent = '';
+                }
+            }
+            updateHolidayStatusReasonCounter();
+            setHolidayStatusSaving(false);
+
+            if (confirmBtn) {
+                confirmBtn.textContent = isDeactivate ? 'Deactivate' : 'Activate';
+                confirmBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400', 'bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
+                if (isDeactivate) {
+                    confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600', 'focus:ring-red-300', 'dark:bg-red-600', 'dark:hover:bg-red-500');
+                } else {
+                    confirmBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'focus:ring-emerald-300', 'dark:bg-emerald-500', 'dark:hover:bg-emerald-400');
+                }
+            }
+
+            const modal = $(selectors.statusModal);
+            modal?.classList.remove('hidden');
+            modal?.classList.add('flex');
+        }
+
+        function closeHolidayStatusModal() {
+            state.statusTargetId = null;
+            state.statusTargetActive = true;
+            const input = $('holidayStatusReason');
+            if (input) {
+                input.value = '';
+                input.required = false;
+                input.readOnly = false;
+            }
+            $('holidayStatusCurrentReason')?.classList.add('hidden');
+            if ($('holidayStatusCurrentReason')) $('holidayStatusCurrentReason').textContent = '';
+            updateHolidayStatusReasonCounter();
+            setHolidayStatusSaving(false);
+            const modal = $(selectors.statusModal);
+            modal?.classList.add('hidden');
+            modal?.classList.remove('flex');
+        }
+
+        function mergeDeactivationReason(existingNotes, reason) {
+            const cleanReason = (reason || '').trim();
+            if (!cleanReason) return existingNotes || '';
+            const notePrefix = '[Deactivation Reason] ';
+            const current = (existingNotes || '').trim();
+            const lines = current.split('\n').filter(x => !x.startsWith(notePrefix));
+            lines.push(`${notePrefix}${cleanReason}`);
+            return lines.join('\n').trim();
+        }
+
+        async function confirmHolidayStatusChange() {
+            if (!state.statusTargetId) return;
+
+            const item = state.configuredHolidays.find(x => String(x.id) === String(state.statusTargetId));
+            if (!item) {
+                closeHolidayStatusModal();
+                return;
+            }
+
+            const isDeactivate = !!item.isActive;
+            const reason = ($('holidayStatusReason')?.value || '').trim();
+            if (isDeactivate && !reason) {
+                $('holidayStatusReason')?.focus();
+                window.showToast?.('Please provide a reason for deactivation.', false);
+                return;
+            }
+            if (reason.length > 60) {
+                $('holidayStatusReason')?.focus();
+                window.showToast?.('Reason must be 60 characters or fewer.', false);
+                return;
+            }
+
+            const payload = {
+                date: item.date,
+                name: item.name,
+                type: item.type,
+                isActive: !item.isActive,
+                scopeType: item.scopeType,
+                scopeValues: item.scopeValues || [],
+                sourceTag: item.sourceTag || 'ManualEntry',
+                includeAttendance: !!item.includeAttendance,
+                nonWorkingDay: !!item.nonWorkingDay,
+                allowWork: !!item.allowWork,
+                applyRestDayRules: !!item.applyRestDayRules,
+                attendanceClassification: item.attendanceClassification || 'Holiday',
+                restDayAttendanceClassification: item.restDayClassification || '',
+                employeeGroupScope: item.employeeGroupScope || [],
+                includePayroll: !!item.includePayroll,
+                usePayRules: !!item.usePayRules,
+                paidWhenUnworked: !!item.paidWhenUnworked,
+                payrollClassification: item.payrollClassification || item.type,
+                restDayPayrollClassification: item.restDayPayrollClassification || '',
+                payrollRuleId: item.payrollRuleId || '',
+                restDayPayrollRuleId: item.restDayPayrollRuleId || '',
+                payrollNotes: item.payrollNotes || '',
+                referenceNo: item.referenceNo || '',
+                referenceUrl: item.referenceUrl || '',
+                officialTag: item.officialTag || '',
+                overlapStrategy: item.overlapStrategy || 'HighestPrecedence',
+                precedence: Number(item.precedence || 100),
+                notes: isDeactivate ? mergeDeactivationReason(item.notes, reason) : mergeReactivationReason(item.notes, reason)
+            };
+
+            try {
+                setHolidayStatusSaving(true);
+                const result = await apiRequest(`${api.holidays}/${encodeURIComponent(item.id)}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+
+                const saved = normalizeHoliday(result?.data || result || payload);
+                const idx = state.configuredHolidays.findIndex(x => String(x.id) === String(saved.id));
+                if (idx >= 0) state.configuredHolidays.splice(idx, 1, saved);
+                else state.configuredHolidays.push(saved);
+                mergeCalendarHolidays();
+                renderHolidayCalendar();
+                renderHolidayTable();
+                closeHolidayStatusModal();
+                window.showToast?.(`Holiday ${isDeactivate ? 'deactivated' : 'activated'} successfully.`, true);
+            } catch (error) {
+                window.showToast?.(`Unable to update holiday status. ${error.message}`, false);
+            } finally {
+                setHolidayStatusSaving(false);
+            }
+        }
+
+        function setHolidaySaving(isSaving) {
+            const btn = $('holidaySaveButton');
+            const spinner = $('holidaySaveSpinner');
+            const icon = $('holidaySaveIcon');
+            const text = $('holidaySaveText');
+            if (!btn || !spinner || !icon || !text) return;
+
+            btn.disabled = !!isSaving;
+            btn.classList.toggle('opacity-70', !!isSaving);
+            btn.classList.toggle('cursor-not-allowed', !!isSaving);
+            spinner.classList.toggle('hidden', !isSaving);
+            icon.classList.toggle('hidden', !!isSaving);
+            text.textContent = isSaving ? 'Saving...' : 'Save Holiday Rule';
+        }
+
+        function clearHolidayValidationErrors() {
+            const ids = [
+                'holidayName', 'holidayDate', 'holidayType', 'holidayScopeType', 'holidayScopeValues',
+                'holidayPayrollRuleId', 'holidayRestDayPayrollRuleId', 'holidayReferenceUrl',
+                'holidayOverlapStrategy', 'holidayIncludePayroll', 'holidayUsePayRules', 'holidayAllowWork', 'holidayNonWorkingDay'
+            ];
+
+            ids.forEach(id => {
+                const field = $(id);
+                if (!field) return;
+                field.classList.remove('ring-red-400', 'focus:ring-red-500');
+                const existing = document.getElementById(`${id}Error`);
+                existing?.remove();
+            });
+        }
+
+        function setHolidayFieldError(fieldId, message) {
+            const field = $(fieldId);
+            if (!field) return;
+
+            field.classList.add('ring-red-400', 'focus:ring-red-500');
+
+            const existing = document.getElementById(`${fieldId}Error`);
+            existing?.remove();
+
+            const error = document.createElement('p');
+            error.id = `${fieldId}Error`;
+            error.className = 'holiday-field-error';
+            error.textContent = message;
+
+            const host = field.closest('.relative')?.parentElement || field.parentElement;
+            host?.appendChild(error);
+        }
+
+        function scrollToHolidayField(fieldId) {
+            const field = $(fieldId);
+            if (!field) return;
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            try { field.focus({ preventScroll: true }); } catch { field.focus(); }
+        }
+
+        function makeScopeKey(scopeValues) {
+            return JSON.stringify([...(scopeValues || [])].map(x => String(x).trim().toLowerCase()).filter(Boolean).sort());
+        }
+
+        function validateHolidayPayloadDetailed(payload) {
+            const errors = [];
+            const add = (fieldId, message) => errors.push({ fieldId, message });
+
+            if (!payload.name) add('holidayName', 'Holiday name is required.');
+            if (!payload.date) add('holidayDate', 'Holiday date is required.');
+            if (!payload.type) add('holidayType', 'Holiday classification is required.');
+            if (!payload.scopeType) add('holidayScopeType', 'Scope type is required.');
+
+            if (payload.scopeType !== 'Nationwide' && payload.scopeType !== 'CompanyWide' && (!payload.scopeValues || !payload.scopeValues.length)) {
+                add('holidayScopeValues', 'Scope values are required for this scope type.');
+            }
+
+            if (payload.referenceUrl) {
+                try {
+                    new URL(payload.referenceUrl);
+                } catch {
+                    add('holidayReferenceUrl', 'Reference URL must be a valid URL (include https://).');
+                }
+            }
+
+            if (!payload.includePayroll && payload.usePayRules) {
+                add('holidayUsePayRules', 'Use Pay Rules cannot be enabled when Include Payroll is disabled.');
+            }
+
+            if (payload.includePayroll && payload.usePayRules && !payload.payrollRuleId) {
+                add('holidayPayrollRuleId', 'Please select a payroll rule when Use Holiday Pay Rules is enabled.');
+            }
+
+            if (payload.applyRestDayRules && payload.includePayroll && payload.usePayRules && payload.restDayPayrollClassification && !payload.restDayPayrollRuleId) {
+                add('holidayRestDayPayrollRuleId', 'Select a rest day payroll rule for the selected rest day payroll classification.');
+            }
+
+            if (!payload.nonWorkingDay && !payload.allowWork) {
+                add('holidayAllowWork', 'Invalid setup: working day cannot be blocked from work.');
+            }
+
+            const sameDateOverlaps = state.holidays.filter(x =>
+                String(x.id) !== String(payload.id || '') &&
+                x.date === payload.date &&
+                x.scopeType === payload.scopeType &&
+                makeScopeKey(x.scopeValues) === makeScopeKey(payload.scopeValues)
+            );
+
+            if (sameDateOverlaps.length > 0 && payload.overlapStrategy === 'ManualResolution') {
+                add('holidayOverlapStrategy', 'An overlapping holiday exists for this date/scope. Choose another overlap strategy or change precedence.');
+            }
+
+            return {
+                isValid: errors.length === 0,
+                errors,
+                firstErrorFieldId: errors.length ? errors[0].fieldId : null
+            };
+        }
+
+        function autoFillComplianceFields() {
+            const sourceTag = $('holidaySourceTag')?.value || 'ManualEntry';
+            const type = $('holidayType')?.value || 'RegularHoliday';
+            const scopeType = $('holidayScopeType')?.value || 'Nationwide';
+            const holidayDate = $('holidayDate')?.value || '';
+
+            const officialTagInput = $('holidayOfficialTag');
+            const referenceNoInput = $('holidayReferenceNo');
+            const referenceUrlInput = $('holidayReferenceUrl');
+
+            if (officialTagInput && !officialTagInput.value.trim()) {
+                if (scopeType === 'CompanyWide' || type === 'CompanyHoliday') officialTagInput.value = 'Company';
+                else if (type === 'LocalHoliday') officialTagInput.value = 'Local';
+                else if (sourceTag === 'Imported') officialTagInput.value = 'Imported';
+                else if (sourceTag === 'Official') officialTagInput.value = 'Nationwide';
+            }
+
+            if (referenceNoInput && !referenceNoInput.value.trim()) {
+                if (sourceTag === 'Official') referenceNoInput.value = 'Proclamation No. ____';
+                else if (sourceTag === 'Imported' && holidayDate) referenceNoInput.value = `HolidayAPI-${holidayDate.slice(0, 4)}`;
+                else if (sourceTag === 'CompanyPolicy') referenceNoInput.value = 'Policy Ref. ____';
+            }
+
+            if (referenceUrlInput && !referenceUrlInput.value.trim()) {
+                if (sourceTag === 'Official') referenceUrlInput.value = 'https://www.officialgazette.gov.ph/';
+                else if (sourceTag === 'Imported') referenceUrlInput.value = 'https://holidayapi.com/';
+            }
         }
 
         function boolToStatus(value) {
@@ -1106,6 +1573,25 @@
             return `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
         }
 
+        function computeRuleConfiguredFallback(raw) {
+            const scopeType = raw.scopeType ?? 'Nationwide';
+            const scopeValues = Array.isArray(raw.scopeValues) ? raw.scopeValues : parseCsv(raw.scopeValues);
+            const groupScope = Array.isArray(raw.employeeGroupScope) ? raw.employeeGroupScope : parseCsv(raw.employeeGroupScope);
+            return scopeType !== 'Nationwide'
+                || scopeValues.length > 0
+                || groupScope.length > 0
+                || (raw.overlapStrategy ?? 'HighestPrecedence') !== 'HighestPrecedence'
+                || Number(raw.precedence ?? 100) !== 100
+                || raw.includeAttendance === false
+                || raw.applyRestDayRules === false
+                || raw.includePayroll === false
+                || raw.usePayRules === false
+                || !!(raw.payrollRuleId)
+                || !!(raw.restDayPayrollRuleId)
+                || !!(raw.restDayClassification)
+                || !!(raw.restDayPayrollClassification);
+        }
+
         function normalizeHoliday(raw) {
             const scopeValues = Array.isArray(raw.scopeValues)
                 ? raw.scopeValues
@@ -1130,7 +1616,7 @@
                 allowWork: raw.allowWork !== false,
                 applyRestDayRules: raw.applyRestDayRules !== false,
                 attendanceClassification: raw.attendanceClassification ?? 'Holiday',
-                restDayClassification: raw.restDayClassification ?? '',
+                restDayClassification: raw.restDayClassification ?? raw.restDayAttendanceClassification ?? '',
                 includePayroll: raw.includePayroll !== false,
                 usePayRules: raw.usePayRules !== false,
                 paidWhenUnworked: raw.paidWhenUnworked !== false,
@@ -1146,6 +1632,7 @@
                 precedence: Number(raw.precedence ?? 100),
                 employeeGroupScope,
                 notes: raw.notes ?? '',
+                hasRuleConfigured: raw.hasRuleConfigured === true || raw.HasRuleConfigured === true || computeRuleConfiguredFallback(raw),
                 createdAt: raw.createdAt ?? null,
                 updatedAt: raw.updatedAt ?? null,
                 isSynced: !!raw.isSynced
@@ -1200,6 +1687,16 @@
         }
 
         function getFilteredHolidays() {
+            return state.configuredHolidays
+                .filter(x => {
+                    const year = new Date(x.date + 'T00:00:00').getFullYear();
+                    return year === state.selectedYear;
+                })
+                .filter(x => state.selectedHolidayType === 'all' || x.type === state.selectedHolidayType)
+                .filter(x => state.selectedScopeType === 'all' || x.scopeType === state.selectedScopeType);
+        }
+
+        function getCalendarFilteredHolidays() {
             return state.holidays
                 .filter(x => {
                     const year = new Date(x.date + 'T00:00:00').getFullYear();
@@ -1214,11 +1711,24 @@
         }
 
         function getVisibleHolidaysByDate(dateString) {
-            return getFilteredHolidays().filter(x => x.date === dateString);
+            return getCalendarFilteredHolidays().filter(x => x.date === dateString);
+        }
+
+        function buildHolidayKey(item) {
+            const date = item?.date || '';
+            const name = (item?.name || '').trim().toLowerCase();
+            return `${date}|${name}`;
+        }
+
+        function mergeCalendarHolidays() {
+            const merged = new Map();
+            state.defaultHolidays.forEach(item => merged.set(buildHolidayKey(item), item));
+            state.configuredHolidays.forEach(item => merged.set(buildHolidayKey(item), { ...item, hasRuleConfigured: true }));
+            state.holidays = [...merged.values()];
         }
 
         function renderSummary() {
-            const visible = getFilteredHolidays();
+            const visible = getCalendarFilteredHolidays();
             const coverageSet = new Set(
                 state.holidays
                     .filter(x => new Date(x.date + 'T00:00:00').getFullYear() === state.selectedYear)
@@ -1286,19 +1796,33 @@
                     holidayContent += `<div class="mt-1.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">${allHolidays.length} hidden by filter</div>`;
                 }
 
+                const hasCustomRules = visibleHolidays.some(h => h.hasRuleConfigured);
+
                 cell.innerHTML = `
                     ${visibleHolidays.length > 0 ? `<span class="holiday-corner-indicator ${getTypeDotClass(visibleHolidays[0].type)}"></span>` : ''}
+                    ${hasCustomRules ? `<span class="holiday-rule-flag" title="Holiday has custom rule configuration"></span>` : ''}
                     <div class="holiday-day-number">${cellDate.getDate()}</div>
                     <div class="mt-1.5 w-full">
                         ${holidayContent}
                     </div>
+                    ${hasCustomRules ? `<span class="pointer-events-none absolute bottom-1 left-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Configured</span>` : ''}
                 `;
 
                 cell.addEventListener('click', function () {
                     if (visibleHolidays.length > 0) {
-                        openHolidayModal(visibleHolidays[0].id);
+                        const first = visibleHolidays[0];
+                        if (first.id) {
+                            openHolidayModal(first.id);
+                        } else {
+                            openHolidayModal(null, dateString, first);
+                        }
                     } else if (allHolidays.length > 0) {
-                        openHolidayModal(allHolidays[0].id);
+                        const first = allHolidays[0];
+                        if (first.id) {
+                            openHolidayModal(first.id);
+                        } else {
+                            openHolidayModal(null, dateString, first);
+                        }
                     } else {
                         openHolidayModal(null, dateString);
                     }
@@ -1312,11 +1836,42 @@
             const tbody = $(selectors.tableBody);
             if (!tbody) return;
 
-            const rows = getFilteredHolidays().sort((a, b) => {
+            const sorted = getFilteredHolidays().sort((a, b) => {
                 const byDate = a.date.localeCompare(b.date);
                 if (byDate !== 0) return byDate;
                 return (b.precedence || 0) - (a.precedence || 0);
             });
+
+            const tableQuery = (state.tableSearchQuery || '').trim().toLowerCase();
+            const filtered = sorted.filter(item => {
+                const status = boolToStatus(item.isActive);
+                if (state.tableStatusFilter !== 'all' && status !== state.tableStatusFilter) return false;
+                if (!tableQuery) return true;
+
+                const haystack = [
+                    item.name,
+                    item.type,
+                    item.scopeType,
+                    (item.scopeValues || []).join(', '),
+                    item.referenceNo,
+                    item.referenceUrl,
+                    item.officialTag,
+                    item.notes,
+                    status
+                ].join(' ').toLowerCase();
+
+                return haystack.includes(tableQuery);
+            });
+
+            const total = filtered.length;
+            const perPage = Math.max(1, Number(state.tableRowsPerPage || 10));
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            if (state.tablePage > totalPages) state.tablePage = totalPages;
+            if (state.tablePage < 1) state.tablePage = 1;
+
+            const from = total === 0 ? 0 : ((state.tablePage - 1) * perPage) + 1;
+            const to = total === 0 ? 0 : Math.min(state.tablePage * perPage, total);
+            const rows = filtered.slice(from > 0 ? from - 1 : 0, to);
 
             tbody.innerHTML = '';
 
@@ -1328,6 +1883,7 @@
                         </td>
                     </tr>
                 `;
+                updateHolidayTablePagination(total, from, to, totalPages);
                 renderSummary();
                 return;
             }
@@ -1341,51 +1897,51 @@
                 const payrollRuleName = payrollRule?.name || item.payrollClassification || '—';
 
                 tr.innerHTML = `
-                    <td class="px-5 py-4 text-sm text-gray-700 dark:text-gray-200">${escapeHtml(formatDateDisplay(item.date))}</td>
-                    <td class="px-5 py-4">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white">${escapeHtml(item.name)}</div>
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">${escapeHtml(getSourceTagLabel(item.sourceTag))}</div>
+                    <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap">${escapeHtml(formatDateDisplay(item.date))}</td>
+                    <td class="px-3 py-3">
+                        <div class="truncate text-sm font-semibold text-gray-900 dark:text-white" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(getSourceTagLabel(item.sourceTag))}">${escapeHtml(getSourceTagLabel(item.sourceTag))}</div>
                     </td>
-                    <td class="px-5 py-4">
-                        <div class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                    <td class="px-3 py-3">
+                        <div class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-200" title="${escapeHtml(getTypeLabel(item.type))}">
                             <span class="holiday-type-dot ${getTypeDotClass(item.type)}"></span>
-                            <span>${escapeHtml(getTypeLabel(item.type))}</span>
+                            <span class="whitespace-normal break-words leading-4">${escapeHtml(getTypeLabel(item.type))}</span>
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
-                        <div class="font-semibold text-gray-700 dark:text-gray-200">${escapeHtml(getScopeLabel(item.scopeType))}</div>
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">${escapeHtml(scopeValues)}</div>
+                    <td class="px-3 py-3 text-xs text-gray-600 dark:text-gray-300">
+                        <div class="truncate font-semibold text-gray-700 dark:text-gray-200" title="${escapeHtml(getScopeLabel(item.scopeType))}">${escapeHtml(getScopeLabel(item.scopeType))}</div>
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(scopeValues)}">${escapeHtml(scopeValues)}</div>
                     </td>
-                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
+                    <td class="px-3 py-3 text-xs text-gray-600 dark:text-gray-300">
                         ${item.includeAttendance ? 'Included' : 'Ignored'}
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(item.nonWorkingDay ? 'Non-working' : 'Working')} • ${escapeHtml(item.allowWork ? 'Work allowed' : 'Work blocked')}">
                             ${item.nonWorkingDay ? 'Non-working' : 'Working'} • ${item.allowWork ? 'Work allowed' : 'Work blocked'}
                         </div>
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(item.attendanceClassification || 'Holiday')}">
                             ${escapeHtml(item.attendanceClassification || 'Holiday')}
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
+                    <td class="px-3 py-3 text-xs text-gray-600 dark:text-gray-300">
                         ${item.includePayroll ? 'Included' : 'Ignored'}
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${item.usePayRules ? escapeHtml(payrollRuleName) : 'Manual / no pay rule'}">
                             ${item.usePayRules ? escapeHtml(payrollRuleName) : 'Manual / no pay rule'}
                         </div>
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(item.restDayPayrollClassification || 'No rest day override')}">
                             ${escapeHtml(item.restDayPayrollClassification || 'No rest day override')}
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-xs text-gray-600 dark:text-gray-300">
-                        <div class="font-semibold text-gray-700 dark:text-gray-200">${escapeHtml(referenceText || '—')}</div>
-                        <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                    <td class="px-3 py-3 text-xs text-gray-600 dark:text-gray-300">
+                        <div class="truncate font-semibold text-gray-700 dark:text-gray-200" title="${escapeHtml(referenceText || '—')}">${escapeHtml(referenceText || '—')}</div>
+                        <div class="mt-1 truncate text-[11px] text-gray-400 dark:text-gray-500" title="${escapeHtml(item.referenceUrl || item.overlapStrategy || '—')}">
                             ${escapeHtml(item.referenceUrl || item.overlapStrategy || '—')}
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-xs">
-                        <span class="${item.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'} font-semibold">
+                    <td class="px-3 py-3 text-xs">
+                        <button type="button" onclick="window.SubchronOrgTabHoliday.openHolidayStatusModal(${item.id})" class="inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold ring-1 transition ${item.isActive ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 hover:bg-emerald-100 dark:bg-emerald-900/25 dark:text-emerald-300 dark:ring-emerald-500/30' : 'bg-rose-50 text-rose-700 ring-rose-600/20 hover:bg-rose-100 dark:bg-rose-900/25 dark:text-rose-300 dark:ring-rose-500/30'}" title="Click to ${item.isActive ? 'deactivate' : 'activate'}">
                             ${escapeHtml(boolToStatus(item.isActive))}
-                        </span>
+                        </button>
                     </td>
-                    <td class="px-5 py-4 text-right">
+                    <td class="px-3 py-3 text-right">
                         <div class="inline-flex items-center gap-2">
                             <button type="button" onclick="window.SubchronOrgTabHoliday.openHolidayModal(${item.id})" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
                                 Edit
@@ -1397,7 +1953,23 @@
                 tbody.appendChild(tr);
             });
 
+            updateHolidayTablePagination(total, from, to, totalPages);
             renderSummary();
+        }
+
+        function updateHolidayTablePagination(total, from, to, totalPages) {
+            const info = $(selectors.tablePaginationInfo);
+            const prev = $(selectors.tablePrevPage);
+            const next = $(selectors.tableNextPage);
+
+            if (info) {
+                info.textContent = total === 0
+                    ? 'Showing 0 of 0'
+                    : `Showing ${from}-${to} of ${total} (Page ${state.tablePage}/${totalPages})`;
+            }
+
+            if (prev) prev.disabled = state.tablePage <= 1 || total === 0;
+            if (next) next.disabled = state.tablePage >= totalPages || total === 0;
         }
 
         function fillYearOptions() {
@@ -1421,6 +1993,7 @@
                     state.selectedYear = parseInt(this.value, 10);
                     state.currentDate = new Date(state.selectedYear, state.selectedMonth, 1);
                     await loadHolidayData(state.selectedYear);
+                    await syncHolidayYear(false).catch(() => { });
                 });
             }
         }
@@ -1433,6 +2006,7 @@
                 typeFilter.dataset.bound = 'true';
                 typeFilter.addEventListener('change', function () {
                     state.selectedHolidayType = this.value;
+                    state.tablePage = 1;
                     renderHolidayCalendar();
                     renderHolidayTable();
                 });
@@ -1442,7 +2016,60 @@
                 scopeFilter.dataset.bound = 'true';
                 scopeFilter.addEventListener('change', function () {
                     state.selectedScopeType = this.value;
+                    state.tablePage = 1;
                     renderHolidayCalendar();
+                    renderHolidayTable();
+                });
+            }
+        }
+
+        function bindHolidayTableControls() {
+            const search = $(selectors.tableSearch);
+            const status = $(selectors.tableStatusFilter);
+            const rowsPerPage = $(selectors.tableRowsPerPage);
+            const prev = $(selectors.tablePrevPage);
+            const next = $(selectors.tableNextPage);
+
+            if (search && search.dataset.bound !== 'true') {
+                search.dataset.bound = 'true';
+                search.addEventListener('input', function () {
+                    state.tableSearchQuery = this.value || '';
+                    state.tablePage = 1;
+                    renderHolidayTable();
+                });
+            }
+
+            if (status && status.dataset.bound !== 'true') {
+                status.dataset.bound = 'true';
+                status.addEventListener('change', function () {
+                    state.tableStatusFilter = this.value || 'all';
+                    state.tablePage = 1;
+                    renderHolidayTable();
+                });
+            }
+
+            if (rowsPerPage && rowsPerPage.dataset.bound !== 'true') {
+                rowsPerPage.dataset.bound = 'true';
+                rowsPerPage.addEventListener('change', function () {
+                    state.tableRowsPerPage = Number(this.value || 10);
+                    state.tablePage = 1;
+                    renderHolidayTable();
+                });
+            }
+
+            if (prev && prev.dataset.bound !== 'true') {
+                prev.dataset.bound = 'true';
+                prev.addEventListener('click', function () {
+                    if (state.tablePage <= 1) return;
+                    state.tablePage -= 1;
+                    renderHolidayTable();
+                });
+            }
+
+            if (next && next.dataset.bound !== 'true') {
+                next.dataset.bound = 'true';
+                next.addEventListener('click', function () {
+                    state.tablePage += 1;
                     renderHolidayTable();
                 });
             }
@@ -1456,6 +2083,14 @@
             modal.addEventListener('click', function (e) {
                 if (e.target === this) closeHolidayModal();
             });
+
+            const statusModal = $(selectors.statusModal);
+            if (statusModal && statusModal.dataset.bound !== 'true') {
+                statusModal.dataset.bound = 'true';
+                statusModal.addEventListener('click', function (e) {
+                    if (e.target === this) closeHolidayStatusModal();
+                });
+            }
         }
 
         function bindHolidayTypeAutoMapping() {
@@ -1465,7 +2100,40 @@
             holidayType.dataset.bound = 'true';
             holidayType.addEventListener('change', function () {
                 applyDefaultConfigForType(this.value);
+                autoFillComplianceFields();
             });
+        }
+
+        function bindHolidayValidationAndAutomation() {
+            const fieldIds = [
+                'holidayName', 'holidayDate', 'holidayType', 'holidayScopeType', 'holidayScopeValues',
+                'holidayPayrollRuleId', 'holidayRestDayPayrollRuleId', 'holidayReferenceUrl',
+                'holidayOverlapStrategy', 'holidayIncludePayroll', 'holidayUsePayRules', 'holidayAllowWork', 'holidayNonWorkingDay',
+                'holidaySourceTag', 'holidayReferenceNo', 'holidayOfficialTag'
+            ];
+
+            fieldIds.forEach(id => {
+                const field = $(id);
+                if (!field || field.dataset.validateBound === 'true') return;
+                field.dataset.validateBound = 'true';
+
+                const eventName = field.tagName === 'INPUT' && field.type !== 'checkbox' ? 'input' : 'change';
+                field.addEventListener(eventName, () => {
+                    field.classList.remove('ring-red-400', 'focus:ring-red-500');
+                    document.getElementById(`${id}Error`)?.remove();
+
+                    if (id === 'holidaySourceTag' || id === 'holidayType' || id === 'holidayScopeType' || id === 'holidayDate') {
+                        autoFillComplianceFields();
+                    }
+                });
+            });
+
+            const statusReason = $('holidayStatusReason');
+            if (statusReason && statusReason.dataset.bound !== 'true') {
+                statusReason.dataset.bound = 'true';
+                statusReason.addEventListener('input', updateHolidayStatusReasonCounter);
+                updateHolidayStatusReasonCounter();
+            }
         }
 
         function applyDefaultConfigForType(type) {
@@ -1561,9 +2229,11 @@
                 state.isLoading = true;
                 const data = await apiRequest(`${api.holidays}?year=${encodeURIComponent(year)}`, { method: 'GET' });
                 const list = Array.isArray(data) ? data : (data?.items || data?.data || []);
-                state.holidays = list.map(normalizeHoliday);
+                state.configuredHolidays = list.map(normalizeHoliday);
+                mergeCalendarHolidays();
             } catch (error) {
-                state.holidays = [];
+                state.configuredHolidays = [];
+                mergeCalendarHolidays();
                 window.showToast?.(`Unable to load holidays. ${error.message}`, false);
             } finally {
                 state.isLoading = false;
@@ -1581,6 +2251,8 @@
 
         function resetHolidayModal(prefillDate = null) {
             state.editingHolidayId = null;
+            clearHolidayValidationErrors();
+            setHolidaySaving(false);
 
             $('holidayRecordId').value = '';
             $('holidayModalTitle').textContent = 'Configure Holiday Rule';
@@ -1617,11 +2289,14 @@
             $('holidayNotes').value = '';
 
             suggestPayrollRuleSelection();
+            autoFillComplianceFields();
             $('holidayDeleteButton').classList.add('hidden');
         }
 
         function fillHolidayModal(item) {
             state.editingHolidayId = item.id;
+            clearHolidayValidationErrors();
+            setHolidaySaving(false);
 
             $('holidayRecordId').value = item.id ?? '';
             $('holidayModalTitle').textContent = 'Edit Holiday Rule';
@@ -1657,17 +2332,40 @@
             $('holidayPayrollNotes').value = item.payrollNotes || '';
             $('holidayNotes').value = item.notes || '';
 
+            autoFillComplianceFields();
             $('holidayDeleteButton').classList.remove('hidden');
         }
 
-        function openHolidayModal(id = null, prefillDate = null) {
+        function prefillHolidayModalFromTemplate(item, prefillDate = null) {
+            resetHolidayModal(prefillDate || item?.date || null);
+            if (!item) return;
+
+            $('holidayName').value = item.name || '';
+            $('holidayDate').value = prefillDate || item.date || '';
+            $('holidayType').value = item.type || 'RegularHoliday';
+            $('holidayScopeType').value = item.scopeType || 'Nationwide';
+            $('holidayScopeValues').value = (item.scopeValues || []).join(', ');
+            $('holidaySourceTag').value = item.sourceTag || 'Imported';
+            $('holidayOfficialTag').value = item.officialTag || 'HolidayApi';
+            $('holidayReferenceUrl').value = item.referenceUrl || 'https://holidayapi.com/';
+
+            applyDefaultConfigForType($('holidayType').value);
+            suggestPayrollRuleSelection();
+            autoFillComplianceFields();
+        }
+
+        function openHolidayModal(id = null, prefillDate = null, prefillTemplate = null) {
             const modal = $(selectors.modal);
             if (!modal) return;
 
             populatePayrollRuleOptions();
 
             if (id == null) {
-                resetHolidayModal(prefillDate);
+                if (prefillTemplate) {
+                    prefillHolidayModalFromTemplate(prefillTemplate, prefillDate);
+                } else {
+                    resetHolidayModal(prefillDate);
+                }
                 if (prefillDate) {
                     const d = new Date(prefillDate + 'T00:00:00');
                     if (d.getFullYear() !== state.selectedYear) {
@@ -1736,7 +2434,7 @@
                 allowWork: $('holidayAllowWork').checked,
                 applyRestDayRules: $('holidayApplyRestDayRules').checked,
                 attendanceClassification: $('holidayAttendanceClassification').value,
-                restDayClassification: $('holidayRestDayClassification').value,
+                restDayAttendanceClassification: $('holidayRestDayClassification').value,
                 employeeGroupScope: parseCsv($('holidayEmployeeGroupScope').value),
                 includePayroll: $('holidayIncludePayroll').checked,
                 usePayRules: $('holidayUsePayRules').checked,
@@ -1756,14 +2454,21 @@
         }
 
         async function saveHolidayRule() {
+            clearHolidayValidationErrors();
             const payload = collectHolidayPayload();
-            const validationError = validateHolidayPayload(payload);
-            if (validationError) {
-                window.showToast?.(validationError, false);
+
+            const validation = validateHolidayPayloadDetailed(payload);
+            if (!validation.isValid) {
+                validation.errors.forEach(err => setHolidayFieldError(err.fieldId, err.message));
+                if (validation.firstErrorFieldId) {
+                    scrollToHolidayField(validation.firstErrorFieldId);
+                }
+                window.showToast?.('Please fix the highlighted fields before saving.', false);
                 return;
             }
 
             try {
+                setHolidaySaving(true);
                 const isEdit = !!payload.id;
                 const url = isEdit ? `${api.holidays}/${encodeURIComponent(payload.id)}` : api.holidays;
                 const method = isEdit ? 'PUT' : 'POST';
@@ -1774,13 +2479,15 @@
                 });
 
                 const saved = normalizeHoliday(result?.data || result || payload);
-                const existingIndex = state.holidays.findIndex(x => String(x.id) === String(saved.id));
+                const existingIndex = state.configuredHolidays.findIndex(x => String(x.id) === String(saved.id));
 
                 if (existingIndex >= 0) {
-                    state.holidays.splice(existingIndex, 1, saved);
+                    state.configuredHolidays.splice(existingIndex, 1, saved);
                 } else {
-                    state.holidays.push(saved);
+                    state.configuredHolidays.push(saved);
                 }
+
+                mergeCalendarHolidays();
 
                 closeHolidayModal();
                 renderHolidayCalendar();
@@ -1788,6 +2495,8 @@
                 window.showToast?.(`Holiday rule ${isEdit ? 'updated' : 'created'} successfully.`, true);
             } catch (error) {
                 window.showToast?.(`Unable to save holiday rule. ${error.message}`, false);
+            } finally {
+                setHolidaySaving(false);
             }
         }
 
@@ -1800,7 +2509,8 @@
 
             try {
                 await apiRequest(`${api.holidays}/${encodeURIComponent(id)}`, { method: 'DELETE' });
-                state.holidays = state.holidays.filter(x => String(x.id) !== String(id));
+                state.configuredHolidays = state.configuredHolidays.filter(x => String(x.id) !== String(id));
+                mergeCalendarHolidays();
                 closeHolidayModal();
                 renderHolidayCalendar();
                 renderHolidayTable();
@@ -1818,7 +2528,8 @@
 
                 const list = Array.isArray(result) ? result : (result?.items || result?.data || null);
                 if (Array.isArray(list)) {
-                    state.holidays = list.map(normalizeHoliday);
+                    state.defaultHolidays = list.map(normalizeHoliday);
+                    mergeCalendarHolidays();
                 } else {
                     await loadHolidayData(state.selectedYear);
                 }
@@ -1867,6 +2578,7 @@
             state.currentDate = new Date(state.selectedYear, state.selectedMonth, 1);
             updateYearSelect();
             loadHolidayData(state.selectedYear);
+            syncHolidayYear(false).catch(() => { });
         }
 
         async function init() {
@@ -1885,21 +2597,26 @@
 
             fillYearOptions();
             bindFilters();
+            bindHolidayTableControls();
             bindModalDismiss();
             bindHolidayTypeAutoMapping();
+            bindHolidayValidationAndAutomation();
+            state.tableSearchQuery = $(selectors.tableSearch)?.value || '';
+            state.tableStatusFilter = $(selectors.tableStatusFilter)?.value || 'all';
+            state.tableRowsPerPage = Number($(selectors.tableRowsPerPage)?.value || 10);
             updateYearSelect();
             await loadPayrollRules();
-            try {
-                await syncHolidayYear(false);
-            } catch {
-                await loadHolidayData(state.selectedYear);
-            }
+            await loadHolidayData(state.selectedYear);
+            await syncHolidayYear(false).catch(() => { });
         }
 
         return {
             init,
             openHolidayModal,
             closeHolidayModal,
+            openHolidayStatusModal,
+            closeHolidayStatusModal,
+            confirmHolidayStatusChange,
             saveHolidayRule,
             deleteHolidayRule,
             goToPreviousMonth,

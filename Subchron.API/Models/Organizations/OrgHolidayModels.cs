@@ -121,6 +121,7 @@ public class OrgHolidayResponse
     public string? OfficialTag { get; set; } = string.Empty;
     public string PayrollNotes { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+    public bool HasRuleConfigured { get; set; } = false;
     public bool IsSynced { get; set; }
         = false;
     public DateTime CreatedAt { get; set; }

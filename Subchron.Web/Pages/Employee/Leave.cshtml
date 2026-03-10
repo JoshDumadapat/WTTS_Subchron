@@ -6,51 +6,70 @@
     Layout = "/Pages/Employee/Shared/_LayoutEmployee.cshtml";
 }
 
-<div class="mx-auto w-full max-w-6xl space-y-6">
-    <!-- Header -->
-    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
+<div class="mx-auto max-w-7xl space-y-6">
+    <!-- Header / Actions -->
+    <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Leave</h1>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">View balance, file a request, and track status.</p>
+                <h1 class="text-xl font-semibold text-slate-900 dark:text-white sm:text-2xl">Leave</h1>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">View balance, file a request, and track status.</p>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex flex-col gap-2 sm:flex-row">
                 <button type="button"
                         data-tab-target="new"
-                        class="rounded-2xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                        class="inline-flex items-center justify-center rounded-lg bg-subgreen-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-subgreen-600 dark:bg-subgreen-500 dark:hover:bg-subgreen-600">
                     New Request
                 </button>
                 <button type="button"
                         data-tab-target="requests"
-                        class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
                     My Requests
                 </button>
             </div>
         </div>
     </section>
 
-    <!-- Balance -->
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Service Incentive Leave</p>
-            <div class="mt-2 flex items-end gap-2">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">3</h2>
-                <p class="pb-1 text-sm text-slate-500 dark:text-slate-400">of 5 days available</p>
+    <!-- Summary Cards -->
+    <section>
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <!-- Leave Balance -->
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Service Incentive Leave</p>
+                        <p class="mt-1 text-3xl font-bold text-emerald-600 dark:text-emerald-400">3</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-500">of 5 days available</p>
+                    </div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 9h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Request</p>
-            <div class="mt-2 flex items-end gap-2">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">1</h2>
-                <p class="pb-1 text-sm text-slate-500 dark:text-slate-400">awaiting approval</p>
+            <!-- Pending Requests -->
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Pending Request</p>
+                        <p class="mt-1 text-3xl font-bold text-amber-600 dark:text-amber-400">1</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-500">awaiting approval</p>
+                    </div>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Tabs -->
-    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <!-- Main Content -->
+    <section class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <!-- Tabs -->
         <div class="border-b border-slate-200 px-4 dark:border-slate-700 sm:px-6">
             <div class="flex gap-6 overflow-x-auto">
                 <button type="button"
@@ -70,10 +89,10 @@
         <div id="panelNewLeave" class="p-4 sm:p-6">
             <form id="leaveForm" class="space-y-5">
                 <div>
-                    <label for="leaveType" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Leave type</label>
+                    <label for="leaveType" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Leave Type</label>
                     <select id="leaveType"
                             required
-                            class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                         <option value="">Select type</option>
                         <option value="SIL"
                                 data-balance="3"
@@ -96,58 +115,58 @@
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label for="leaveStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Start date</label>
+                        <label for="leaveStart" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Start Date</label>
                         <input type="date"
                                id="leaveStart"
                                required
-                               class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+                               class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
                     </div>
                     <div>
-                        <label for="leaveEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">End date</label>
+                        <label for="leaveEnd" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">End Date</label>
                         <input type="date"
                                id="leaveEnd"
                                required
-                               class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+                               class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Available</p>
-                        <p id="summaryBalance" class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">—</p>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-700/50">
+                        <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Available</p>
+                        <p id="summaryBalance" class="text-lg font-semibold text-slate-900 dark:text-white">—</p>
                     </div>
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Days</p>
-                        <p id="summaryDays" class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">0</p>
+                    <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-700/50">
+                        <p class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Days</p>
+                        <p id="summaryDays" class="text-lg font-semibold text-slate-900 dark:text-white">0</p>
                     </div>
                 </div>
 
                 <div>
-                    <label for="leaveReason" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason / notes</label>
+                    <label for="leaveReason" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Reason / Notes</label>
                     <textarea id="leaveReason"
                               rows="3"
                               placeholder="Optional"
-                              class="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"></textarea>
+                              class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400"></textarea>
                 </div>
 
                 <div id="documentFieldWrap" class="hidden">
-                    <label for="leaveDocument" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Supporting document</label>
+                    <label for="leaveDocument" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Supporting Document</label>
                     <input type="file"
                            id="leaveDocument"
-                           class="mt-1.5 block w-full rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-xl file:border-0 file:bg-subgreen-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-subgreen-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:file:bg-subgreen-500 dark:hover:file:bg-subgreen-400" />
+                           class="block w-full rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-subgreen-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-subgreen-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:file:bg-subgreen-500 dark:hover:file:bg-subgreen-600" />
                 </div>
 
-                <p id="leaveValidationMsg" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"></p>
-                <p id="leaveSuccessMsg" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300"></p>
+                <p id="leaveValidationMsg" class="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"></p>
+                <p id="leaveSuccessMsg" class="hidden rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300"></p>
 
                 <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button type="button"
                             id="clearLeaveForm"
-                            class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                            class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
                         Clear
                     </button>
                     <button type="submit"
-                            class="rounded-2xl bg-subgreen-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400">
+                            class="rounded-lg bg-subgreen-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-subgreen-600 dark:bg-subgreen-500 dark:hover:bg-subgreen-600">
                         Submit Request
                     </button>
                 </div>
@@ -156,79 +175,95 @@
 
         <!-- My Requests -->
         <div id="panelMyLeaves" class="hidden space-y-4 p-4 sm:p-6">
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <select id="filterStatus"
-                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <option value="all">All status</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
+            <!-- Filters -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                    <label for="filterStatus" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                    <select id="filterStatus"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="all">All status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
 
-                <select id="filterType"
-                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <option value="all">All types</option>
-                    <option value="Service Incentive Leave">Service Incentive Leave</option>
-                    <option value="Sick leave">Sick leave</option>
-                    <option value="Personal">Personal</option>
-                </select>
+                <div>
+                    <label for="filterType" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Type</label>
+                    <select id="filterType"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="all">All types</option>
+                        <option value="Service Incentive Leave">Service Incentive Leave</option>
+                        <option value="Sick leave">Sick leave</option>
+                        <option value="Personal">Personal</option>
+                    </select>
+                </div>
 
-                <select id="filterYear"
-                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <option value="all">All years</option>
-                    <option value="2025" selected>2025</option>
-                    <option value="2024">2024</option>
-                </select>
+                <div>
+                    <label for="filterYear" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Year</label>
+                    <select id="filterYear"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-subgreen-500 focus:ring-4 focus:ring-subgreen-500/10 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="all">All years</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Desktop -->
-            <div class="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 md:block">
+            <!-- Desktop Table -->
+            <div class="hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 md:block">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-left text-sm">
+                    <table class="w-full">
                         <thead>
                             <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50">
-                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Type</th>
-                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Dates</th>
-                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Days</th>
-                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Submitted</th>
-                                <th class="px-5 py-3.5 font-semibold text-slate-600 dark:text-slate-300">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Dates</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Days</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Submitted</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="leaveTableBody" class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-800">
-                            <tr class="leave-row"
+                        <tbody id="leaveTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                            <tr class="leave-row transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
                                 data-status="Pending"
                                 data-type="Service Incentive Leave"
                                 data-year="2025">
-                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Service Incentive Leave</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Mar 10–14, 2025</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">5</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 18, 2025</td>
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Pending</span>
+                                <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">Service Incentive Leave</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Mar 10–14, 2025</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">5</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Feb 18, 2025</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                                        Pending
+                                    </span>
                                 </td>
                             </tr>
-                            <tr class="leave-row"
+                            <tr class="leave-row transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
                                 data-status="Approved"
                                 data-type="Sick leave"
                                 data-year="2025">
-                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Sick leave</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 12, 2025</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">1</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 11, 2025</td>
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Approved</span>
+                                <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">Sick leave</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Feb 12, 2025</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">1</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Feb 11, 2025</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                        Approved
+                                    </span>
                                 </td>
                             </tr>
-                            <tr class="leave-row"
+                            <tr class="leave-row transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
                                 data-status="Rejected"
                                 data-type="Personal"
                                 data-year="2025">
-                                <td class="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">Personal</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 5–6, 2025</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">2</td>
-                                <td class="px-5 py-4 text-slate-600 dark:text-slate-400">Feb 1, 2025</td>
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-500/10 dark:text-red-300">Rejected</span>
+                                <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">Personal</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Feb 5–6, 2025</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">2</td>
+                                <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">Feb 1, 2025</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                        Rejected
+                                    </span>
                                 </td>
                             </tr>
                         </tbody>
@@ -236,9 +271,9 @@
                 </div>
             </div>
 
-            <!-- Mobile -->
+            <!-- Mobile Cards -->
             <div id="leaveMobileCards" class="space-y-3 md:hidden">
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                <article class="leave-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Pending"
                          data-type="Service Incentive Leave"
                          data-year="2025">
@@ -247,12 +282,14 @@
                             <h3 class="font-semibold text-slate-900 dark:text-white">Service Incentive Leave</h3>
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Mar 10–14, 2025</p>
                         </div>
-                        <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Pending</span>
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                            Pending
+                        </span>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">5 day(s) • Submitted Feb 18, 2025</p>
                 </article>
 
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                <article class="leave-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Approved"
                          data-type="Sick leave"
                          data-year="2025">
@@ -261,12 +298,14 @@
                             <h3 class="font-semibold text-slate-900 dark:text-white">Sick leave</h3>
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Feb 12, 2025</p>
                         </div>
-                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Approved</span>
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            Approved
+                        </span>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">1 day • Submitted Feb 11, 2025</p>
                 </article>
 
-                <article class="leave-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                <article class="leave-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                          data-status="Rejected"
                          data-type="Personal"
                          data-year="2025">
@@ -275,13 +314,15 @@
                             <h3 class="font-semibold text-slate-900 dark:text-white">Personal</h3>
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Feb 5–6, 2025</p>
                         </div>
-                        <span class="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:bg-red-500/10 dark:text-red-300">Rejected</span>
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                            Rejected
+                        </span>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">2 day(s) • Submitted Feb 1, 2025</p>
                 </article>
             </div>
 
-            <div id="leaveTableEmpty" class="hidden rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
+            <div id="leaveTableEmpty" class="hidden rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-700/30 dark:text-slate-400">
                 No leave requests found.
             </div>
         </div>

@@ -85,6 +85,9 @@ public class OrgHolidaysController : ControllerBase
         if (!string.IsNullOrEmpty(validationError))
             return BadRequest(new { ok = false, message = validationError });
 
+        request.Date = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+        await NormalizeHolidayRulesAsync(request, orgId.Value, null, ct);
+
         var entity = MapToEntity(request, orgId.Value);
         entity.CreatedAt = DateTime.UtcNow;
         entity.UpdatedAt = entity.CreatedAt;
@@ -116,6 +119,9 @@ public class OrgHolidaysController : ControllerBase
         var validationError = ValidateRequest(request);
         if (!string.IsNullOrEmpty(validationError))
             return BadRequest(new { ok = false, message = validationError });
+
+        request.Date = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+        await NormalizeHolidayRulesAsync(request, orgId.Value, id, ct);
 
         MapToEntity(request, orgId.Value, entity);
         entity.UpdatedAt = DateTime.UtcNow;
@@ -184,78 +190,52 @@ public class OrgHolidaysController : ControllerBase
         if (externalHolidays.Count == 0)
             return BadRequest(new { ok = false, message = "No holidays returned from Holiday API for the selected year or fallback year." });
 
-        var existing = await _tenantDb.OrgHolidayConfigs
-            .Where(h => h.OrgID == orgId.Value && h.HolidayDate.Year == targetYear && h.SourceTag == "HolidayApi")
-            .ToListAsync(ct);
-
-        foreach (var holiday in externalHolidays)
-        {
-            var match = existing.FirstOrDefault(x => x.HolidayDate.Date == holiday.Date.Date && string.Equals(x.Name, holiday.Name, StringComparison.OrdinalIgnoreCase));
-            if (match == null)
+        var items = externalHolidays
+            .OrderBy(h => h.Date)
+            .ThenBy(h => h.Name)
+            .Select(h => new
             {
-                match = new OrgHolidayConfig
-                {
-                    OrgID = orgId.Value,
-                    HolidayDate = holiday.Date.Date,
-                    Name = holiday.Name,
-                    Type = holiday.Type,
-                    Status = "Active",
-                    ScopeType = "Nationwide",
-                    ScopeValuesJson = "[]",
-                    SourceTag = "HolidayApi",
-                    OverlapStrategy = "HighestPrecedence",
-                    Precedence = 100,
-                    IncludeAttendance = true,
-                    NonWorkingDay = !string.Equals(holiday.Type, "SpecialWorkingHoliday", StringComparison.OrdinalIgnoreCase),
-                    AllowWork = true,
-                    ApplyRestDayRules = true,
-                    AttendanceClassification = holiday.Type,
-                    RestDayAttendanceClassification = string.Empty,
-                    IncludePayroll = true,
-                    UsePayRules = true,
-                    PaidWhenUnworked = holiday.IsPublic,
-                    PayrollClassification = holiday.Type,
-                    RestDayPayrollClassification = string.Empty,
-                    PayrollRuleId = string.Empty,
-                    RestDayPayrollRuleId = string.Empty,
-                    ReferenceNo = string.Empty,
-                    ReferenceUrl = string.Empty,
-                    OfficialTag = "HolidayApi",
-                    PayrollNotes = string.Empty,
-                    Notes = string.Empty,
-                    IsSynced = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                _tenantDb.OrgHolidayConfigs.Add(match);
-            }
-            else
-            {
-                match.Type = holiday.Type;
-                match.Status = "Active";
-                match.SourceTag = "HolidayApi";
-                match.AttendanceClassification = holiday.Type;
-                match.PayrollClassification = holiday.Type;
-                match.PaidWhenUnworked = holiday.IsPublic;
-                match.IsSynced = true;
-                match.UpdatedAt = DateTime.UtcNow;
-            }
-        }
-
-        await _tenantDb.SaveChangesAsync(ct);
-
-        var items = await _tenantDb.OrgHolidayConfigs.AsNoTracking()
-            .Where(h => h.OrgID == orgId.Value && h.HolidayDate.Year == targetYear)
-            .OrderBy(h => h.HolidayDate)
-            .ThenByDescending(h => h.Precedence)
-            .ToListAsync(ct);
+                id = (int?)null,
+                date = h.Date.ToString("yyyy-MM-dd"),
+                name = h.Name,
+                type = h.Type,
+                status = "Active",
+                isActive = true,
+                scopeType = "Nationwide",
+                scopeValues = Array.Empty<string>(),
+                sourceTag = "HolidayApi",
+                overlapStrategy = "HighestPrecedence",
+                precedence = 100,
+                includeAttendance = true,
+                nonWorkingDay = !string.Equals(h.Type, "SpecialWorkingHoliday", StringComparison.OrdinalIgnoreCase),
+                allowWork = true,
+                applyRestDayRules = true,
+                attendanceClassification = h.Type,
+                restDayAttendanceClassification = string.Empty,
+                employeeGroupScope = Array.Empty<string>(),
+                includePayroll = true,
+                usePayRules = true,
+                paidWhenUnworked = h.IsPublic,
+                payrollClassification = h.Type,
+                restDayPayrollClassification = string.Empty,
+                payrollRuleId = string.Empty,
+                restDayPayrollRuleId = string.Empty,
+                referenceNo = string.Empty,
+                referenceUrl = string.Empty,
+                officialTag = "HolidayApi",
+                payrollNotes = string.Empty,
+                notes = string.Empty,
+                hasRuleConfigured = false,
+                isSynced = true
+            })
+            .ToList();
 
         return Ok(new
         {
             synced = true,
             year = targetYear,
             importedFromYear,
-            items = items.Select(MapToResponse).ToList()
+            items
         });
     }
 
@@ -269,6 +249,27 @@ public class OrgHolidaysController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(request.Type))
             return "Holiday classification is required.";
+
+        var allowedTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "RegularHoliday", "SpecialNonWorkingHoliday", "SpecialWorkingHoliday", "DoubleHoliday", "LocalHoliday", "CompanyHoliday"
+        };
+        if (!allowedTypes.Contains(request.Type))
+            return "Holiday classification is invalid.";
+
+        var allowedScopes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Nationwide", "Region", "Province", "CityMunicipality", "Barangay", "Site", "Department", "EmployeeGroup", "CompanyWide"
+        };
+        if (!allowedScopes.Contains(request.ScopeType ?? string.Empty))
+            return "Scope type is invalid.";
+
+        var allowedOverlap = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "HighestPrecedence", "CombineAsDoubleHoliday", "ManualResolution"
+        };
+        if (!allowedOverlap.Contains(request.OverlapStrategy ?? string.Empty))
+            return "Overlap strategy is invalid.";
 
         if (!string.Equals(request.ScopeType, "Nationwide", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(request.ScopeType, "CompanyWide", StringComparison.OrdinalIgnoreCase))
@@ -317,9 +318,119 @@ public class OrgHolidaysController : ControllerBase
             OfficialTag = entity.OfficialTag,
             PayrollNotes = entity.PayrollNotes,
             Notes = entity.Notes,
+            HasRuleConfigured = ComputeHasRuleConfigured(entity),
             IsSynced = entity.IsSynced,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt
+        };
+    }
+
+    private async Task NormalizeHolidayRulesAsync(OrgHolidayRequest request, int orgId, int? excludeId, CancellationToken ct)
+    {
+        var scopeType = string.IsNullOrWhiteSpace(request.ScopeType) ? "Nationwide" : request.ScopeType.Trim();
+        var scopeValues = (request.ScopeValues ?? new List<string>())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        request.ScopeType = scopeType;
+        request.ScopeValues = scopeValues;
+
+        var holidayDate = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).Date;
+        var overlapExists = await _tenantDb.OrgHolidayConfigs.AsNoTracking()
+            .Where(h => h.OrgID == orgId)
+            .Where(h => !excludeId.HasValue || h.OrgHolidayConfigID != excludeId.Value)
+            .Where(h => h.HolidayDate == holidayDate)
+            .Where(h => h.ScopeType == scopeType)
+            .Select(h => new { h.ScopeValuesJson })
+            .ToListAsync(ct);
+
+        var hasOverlapForScope = overlapExists.Any(x => ScopeValuesEqual(DeserializeList(x.ScopeValuesJson), scopeValues));
+
+        var isCompanyWide = string.Equals(scopeType, "CompanyWide", StringComparison.OrdinalIgnoreCase);
+        var isNationwide = string.Equals(scopeType, "Nationwide", StringComparison.OrdinalIgnoreCase);
+        var isLocalScope = !isCompanyWide && !isNationwide;
+
+        var finalType = "RegularHoliday";
+        if (string.Equals(request.OverlapStrategy, "CombineAsDoubleHoliday", StringComparison.OrdinalIgnoreCase) && hasOverlapForScope)
+            finalType = "DoubleHoliday";
+        else if (isCompanyWide)
+            finalType = "CompanyHoliday";
+        else if (isLocalScope)
+            finalType = "LocalHoliday";
+        else if (!request.NonWorkingDay && request.AllowWork)
+            finalType = "SpecialWorkingHoliday";
+        else if (request.NonWorkingDay && !request.PaidWhenUnworked)
+            finalType = "SpecialNonWorkingHoliday";
+
+        request.Type = finalType;
+
+        var defaults = GetDefaultClassificationConfig(finalType);
+        request.NonWorkingDay = defaults.NonWorkingDay;
+        request.AllowWork = defaults.AllowWork;
+        request.AttendanceClassification = defaults.AttendanceClassification;
+        request.PayrollClassification = defaults.PayrollClassification;
+        request.PaidWhenUnworked = defaults.PaidWhenUnworked;
+
+        if (request.ApplyRestDayRules)
+        {
+            request.RestDayAttendanceClassification = defaults.RestDayAttendanceClassification;
+            request.RestDayPayrollClassification = defaults.RestDayPayrollClassification;
+        }
+        else
+        {
+            request.RestDayAttendanceClassification = string.Empty;
+            request.RestDayPayrollClassification = string.Empty;
+            request.RestDayPayrollRuleId = string.Empty;
+        }
+
+        if (!request.IncludePayroll)
+        {
+            request.UsePayRules = false;
+            request.PayrollRuleId = string.Empty;
+            request.RestDayPayrollRuleId = string.Empty;
+        }
+    }
+
+    private static bool ScopeValuesEqual(List<string> a, List<string> b)
+    {
+        var aa = a.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray();
+        var bb = b.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray();
+        return aa.Length == bb.Length && aa.SequenceEqual(bb, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool ComputeHasRuleConfigured(OrgHolidayConfig entity)
+    {
+        var hasScopeValues = DeserializeList(entity.ScopeValuesJson).Count > 0;
+        var hasGroupScope = DeserializeList(entity.EmployeeGroupScopeJson).Count > 0;
+
+        return !string.Equals(entity.ScopeType, "Nationwide", StringComparison.OrdinalIgnoreCase)
+            || hasScopeValues
+            || hasGroupScope
+            || !string.Equals(entity.OverlapStrategy, "HighestPrecedence", StringComparison.OrdinalIgnoreCase)
+            || entity.Precedence != 100
+            || !entity.IncludeAttendance
+            || !entity.ApplyRestDayRules
+            || !entity.IncludePayroll
+            || !entity.UsePayRules
+            || !string.IsNullOrWhiteSpace(entity.PayrollRuleId)
+            || !string.IsNullOrWhiteSpace(entity.RestDayPayrollRuleId)
+            || !string.IsNullOrWhiteSpace(entity.RestDayAttendanceClassification)
+            || !string.IsNullOrWhiteSpace(entity.RestDayPayrollClassification);
+    }
+
+    private static (bool NonWorkingDay, bool AllowWork, bool PaidWhenUnworked, string AttendanceClassification, string RestDayAttendanceClassification, string PayrollClassification, string RestDayPayrollClassification) GetDefaultClassificationConfig(string type)
+    {
+        return type switch
+        {
+            "RegularHoliday" => (true, true, true, "RegularHoliday", "RestDayRegularHoliday", "RegularHoliday", "RestDayRegularHoliday"),
+            "SpecialNonWorkingHoliday" => (true, true, false, "SpecialNonWorkingHoliday", "RestDaySpecialNonWorkingHoliday", "SpecialNonWorkingHoliday", "RestDaySpecialNonWorkingHoliday"),
+            "SpecialWorkingHoliday" => (false, true, false, "SpecialWorkingHoliday", "RestDaySpecialWorkingHoliday", "SpecialWorkingHoliday", "RestDaySpecialWorkingHoliday"),
+            "DoubleHoliday" => (true, true, true, "DoubleHoliday", "RestDayDoubleHoliday", "DoubleHoliday", "RestDayDoubleHoliday"),
+            "LocalHoliday" => (true, true, false, "LocalHoliday", "RestDayLocalHoliday", "LocalHoliday", "RestDayLocalHoliday"),
+            "CompanyHoliday" => (true, true, false, "CompanyHoliday", "RestDayCompanyHoliday", "CompanyHoliday", "RestDayCompanyHoliday"),
+            _ => (true, true, false, "Holiday", string.Empty, "RegularHoliday", string.Empty)
         };
     }
 
