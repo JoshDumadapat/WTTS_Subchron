@@ -12,24 +12,17 @@
         <button type="button" id="tabSchedule" class="emp-tab border-b-2 border-transparent pb-2 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 sm:text-sm">My Schedule</button>
     </div>
 
-     <div id="panelRecord" class="space-y-3 sm:space-y-4">
-         <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your time in/out history. Use Time In / Out or QR at kiosk to record attendance.</p>
-         <div class="flex flex-col gap-2 sm:items-end sm:gap-3">
-             <div class="flex gap-2 sm:gap-3">
-                 <input type="date" id="recordFrom" class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" placeholder="From" />
-                 <input type="date" id="recordTo" class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" placeholder="To" />
-                 <button type="button" id="recordFilterBtn" class="rounded-lg bg-subgreen-600 px-3 py-2 text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400" title="Apply filter">
-                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                     </svg>
-                 </button>
-                 <button type="button" id="recordClearBtn" class="rounded-lg bg-slate-200 px-3 py-2 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600" title="Clear filters">
-                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                     </svg>
-                 </button>
-             </div>
-         </div>
+      <div id="panelRecord" class="space-y-3 sm:space-y-4">
+          <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your time in/out history. Use Time In / Out or QR at kiosk to record attendance.</p>
+          <div class="flex gap-1 sm:gap-2">
+              <input type="date" id="recordFrom" class="flex-1 min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:px-3 sm:py-2" placeholder="From" />
+              <input type="date" id="recordTo" class="flex-1 min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:px-3 sm:py-2" placeholder="To" />
+              <button type="button" id="recordClearBtn" class="flex-shrink-0 rounded-lg bg-slate-200 px-2 py-1.5 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 sm:px-3 sm:py-2" title="Clear filters">
+                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+              </button>
+          </div>
          <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-2xl">
              <div class="overflow-x-auto">
                  <table class="w-full text-left text-xs sm:text-sm">
@@ -174,7 +167,6 @@
     var panelSchedule = document.getElementById('panelSchedule');
     var recordFrom = document.getElementById('recordFrom');
     var recordTo = document.getElementById('recordTo');
-    var recordFilterBtn = document.getElementById('recordFilterBtn');
     var recordClearBtn = document.getElementById('recordClearBtn');
 
     function setActiveTab(active) {
@@ -203,18 +195,10 @@
         recordTo.value = today.toISOString().slice(0, 10);
         recordFrom.value = weekAgo.toISOString().slice(0, 10);
     }
-    recordFilterBtn && recordFilterBtn.addEventListener('click', function () {
-        if (recordFrom && recordTo) {
-            var from = recordFrom.value;
-            var to = recordTo.value;
-            if (from && to) alert('Filter would apply: ' + from + ' to ' + to + '. (UI only – no backend.)');
-        }
-    });
     recordClearBtn && recordClearBtn.addEventListener('click', function () {
         if (recordFrom && recordTo) {
             recordFrom.value = '';
             recordTo.value = '';
-            alert('Filters cleared. (UI only – no backend.)');
         }
     });
 })();
