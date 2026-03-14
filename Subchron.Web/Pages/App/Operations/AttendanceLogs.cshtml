@@ -11,10 +11,16 @@
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Attendance Logs</h1>
         </div>
-        <button type="button" id="btnExportCsv" class="btn-secondary gap-2 px-4 py-2.5">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            Export CSV
-        </button>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btnExportCsv" class="btn-secondary gap-2 px-4 py-2.5">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Export CSV
+            </button>
+            <button type="button" id="btnExportPdf" class="btn-primary gap-2 px-4 py-2.5">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Export PDF
+            </button>
+        </div>
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -41,31 +47,15 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <label for="filterSite" class="text-xs font-medium text-slate-500 dark:text-slate-400">Site</label>
-                    <select id="filterSite" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                        <option value="">All sites</option>
-                        <option value="hq">HQ Building</option>
-                        <option value="warehouse">Warehouse A</option>
-                        <option value="branch2">Branch Office 2</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-1">
                     <label for="filterDepartment" class="text-xs font-medium text-slate-500 dark:text-slate-400">Department</label>
                     <select id="filterDepartment" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All departments</option>
-                        <option value="1">Engineering</option>
-                        <option value="2">Human Resources</option>
-                        <option value="3">Product Team</option>
-                        <option value="4">Finance</option>
                     </select>
                 </div>
                 <div class="flex flex-col gap-1">
                     <label for="filterEmployee" class="text-xs font-medium text-slate-500 dark:text-slate-400">Employee</label>
                     <select id="filterEmployee" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All employees</option>
-                        <option value="1">Tim Jones</option>
-                        <option value="2">Jane Smith</option>
-                        <option value="3">Alex Reyes</option>
                     </select>
                 </div>
                 <div class="flex flex-col gap-1">
@@ -81,8 +71,12 @@
                     <label for="filterStatus" class="text-xs font-medium text-slate-500 dark:text-slate-400">Status</label>
                     <select id="filterStatus" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         <option value="">All statuses</option>
-                        <option value="Accepted">Accepted</option>
-                        <option value="Rejected">Rejected</option>
+                        <option value="Timed In">Timed In</option>
+                        <option value="Present">Present</option>
+                        <option value="Late-In">Late-In</option>
+                        <option value="Undertime">Undertime</option>
+                        <option value="Overtime">Overtime</option>
+                        <option value="Late-In + Undertime">Late-In + Undertime</option>
                     </select>
                 </div>
                 <div class="flex gap-2">
@@ -98,86 +92,70 @@
                 <thead>
                     <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
                         <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employee</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Site</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Station</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Method</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Timestamp</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Decision</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Department</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time In</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time Out</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Worked</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Late</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Undertime</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Overtime</th>
+                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Latest Status</th>
                         <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="logsTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="1" data-employee="Tim Jones" data-site="HQ Building" data-station="Main Lobby Kiosk" data-method="QR" data-timestamp="2025-02-21T08:32:00" data-decision="Accepted" data-reason="">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Tim+Jones&background=209030&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <div>
-                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Tim Jones</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-001</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">HQ Building</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Main Lobby Kiosk</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">QR</span>
-                        </td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 08:32</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Accepted</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="1" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
-                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="2" data-employee="Jane Smith" data-site="HQ Building" data-station="Main Lobby Kiosk" data-method="ID" data-timestamp="2025-02-21T08:45:00" data-decision="Accepted" data-reason="">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=0060B0&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <div>
-                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Jane Smith</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-002</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">HQ Building</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Main Lobby Kiosk</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">ID</span>
-                        </td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 08:45</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Accepted</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="2" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
-                    <tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="3" data-employee="Alex Reyes" data-site="Warehouse A" data-station="" data-method="Bio" data-timestamp="2025-02-21T09:00:00" data-decision="Rejected" data-reason="Outside allowed time window">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Alex+Reyes&background=6b7280&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <div>
-                                    <div class="text-sm font-medium text-slate-900 dark:text-white">Alex Reyes</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">EMP-003</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Warehouse A</td>
-                        <td class="px-5 py-3 text-sm text-slate-500 dark:text-slate-500">—</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">Bio</span>
-                        </td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">Feb 21, 2025 09:00</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">Rejected</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/AttendanceLogs/Details" asp-route-id="3" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
+                    <tr><td colspan="11" class="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading attendance logs...</td></tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div id="exportModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-slate-900/60" id="exportModalBackdrop"></div>
+    <div class="relative mx-auto mt-16 w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Export Attendance Report</h3>
+            <button type="button" id="btnCloseExportModal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700" aria-label="Close">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+            <p class="text-sm text-slate-600 dark:text-slate-300">Generate a summary-first report with optional detailed rows and insights.</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="exportFrom" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">From</label>
+                    <input type="date" id="exportFrom" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                </div>
+                <div>
+                    <label for="exportTo" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">To</label>
+                    <input type="date" id="exportTo" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Format</label>
+                    <div id="exportFormatBadge" class="inline-flex h-10 w-full items-center rounded-xl border border-subgreen-200 bg-subgreen-50 px-3 text-sm font-semibold text-subgreen-700 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300">CSV</div>
+                </div>
+                <div>
+                    <label for="exportHourlyRate" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Hourly Rate (PHP)</label>
+                    <input type="number" id="exportHourlyRate" min="0" step="0.01" value="100" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+                </div>
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/30">
+                <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" id="exportIncludeRows" class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
+                    Include detailed attendance rows
+                </label>
+                <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                    <input type="checkbox" id="exportIncludeInsights" class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" checked />
+                    Include insights and recommendations
+                </label>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 px-6 py-4 dark:border-slate-700">
+            <button type="button" id="btnCancelExport" class="btn-secondary px-4 py-2">Cancel</button>
+            <button type="button" id="btnConfirmExport" class="btn-primary px-4 py-2">Download</button>
         </div>
     </div>
 </div>
@@ -186,7 +164,178 @@
 <script>
 (function () {
     var tbody = document.getElementById('logsTableBody');
-    var btnExport = document.getElementById('btnExportCsv');
+    var btnExportCsv = document.getElementById('btnExportCsv');
+    var btnExportPdf = document.getElementById('btnExportPdf');
+    var btnApply = document.getElementById('btnApplyFilters');
+    var btnReset = document.getElementById('btnResetFilters');
+    var filterDateFrom = document.getElementById('filterDateFrom');
+    var filterDateTo = document.getElementById('filterDateTo');
+    var filterDepartment = document.getElementById('filterDepartment');
+    var filterEmployee = document.getElementById('filterEmployee');
+    var filterMethod = document.getElementById('filterMethod');
+    var filterStatus = document.getElementById('filterStatus');
+    var exportModal = document.getElementById('exportModal');
+    var exportFrom = document.getElementById('exportFrom');
+    var exportTo = document.getElementById('exportTo');
+    var exportFormatBadge = document.getElementById('exportFormatBadge');
+    var exportHourlyRate = document.getElementById('exportHourlyRate');
+    var exportIncludeRows = document.getElementById('exportIncludeRows');
+    var exportIncludeInsights = document.getElementById('exportIncludeInsights');
+    var btnConfirmExport = document.getElementById('btnConfirmExport');
+    var btnCancelExport = document.getElementById('btnCancelExport');
+    var btnCloseExportModal = document.getElementById('btnCloseExportModal');
+    var exportModalBackdrop = document.getElementById('exportModalBackdrop');
+
+    var exportRequestedFormat = 'csv';
+
+    function openExportModal(format) {
+        exportRequestedFormat = (format || 'csv').toLowerCase() === 'pdf' ? 'pdf' : 'csv';
+        if (exportFrom && filterDateFrom) exportFrom.value = filterDateFrom.value || '';
+        if (exportTo && filterDateTo) exportTo.value = filterDateTo.value || '';
+        if (exportFormatBadge) exportFormatBadge.textContent = exportRequestedFormat.toUpperCase();
+        if (btnConfirmExport) btnConfirmExport.textContent = exportRequestedFormat === 'pdf' ? 'Download PDF' : 'Download CSV';
+        exportModal && exportModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeExportModal() {
+        exportModal && exportModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function buildExportQuery() {
+        var q = [];
+        if (exportFrom && exportFrom.value) q.push('from=' + encodeURIComponent(exportFrom.value));
+        if (exportTo && exportTo.value) q.push('to=' + encodeURIComponent(exportTo.value));
+        if (filterDepartment && filterDepartment.value) q.push('departmentId=' + encodeURIComponent(filterDepartment.value));
+        if (filterEmployee && filterEmployee.value) q.push('empId=' + encodeURIComponent(filterEmployee.value));
+        if (filterMethod && filterMethod.value) q.push('method=' + encodeURIComponent(filterMethod.value));
+        if (filterStatus && filterStatus.value) q.push('status=' + encodeURIComponent(filterStatus.value));
+        q.push('format=' + encodeURIComponent(exportRequestedFormat));
+        if (exportHourlyRate && exportHourlyRate.value) q.push('hourlyRate=' + encodeURIComponent(exportHourlyRate.value));
+        q.push('includeRows=' + ((exportIncludeRows && exportIncludeRows.checked) ? 'true' : 'false'));
+        q.push('includeInsights=' + ((exportIncludeInsights && exportIncludeInsights.checked) ? 'true' : 'false'));
+        return q.join('&');
+    }
+
+    function loadFilters() {
+        fetch('?handler=Departments', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (rows) {
+                if (!filterDepartment) return;
+                var opts = ['<option value="">All departments</option>'];
+                (rows || []).forEach(function (d) {
+                    opts.push('<option value="' + d.depID + '">' + (d.departmentName || ('Department ' + d.depID)) + '</option>');
+                });
+                filterDepartment.innerHTML = opts.join('');
+            });
+
+        fetch('?handler=Employees', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (rows) {
+                if (!filterEmployee) return;
+                var opts = ['<option value="">All employees</option>'];
+                (rows || []).forEach(function (e) {
+                    var name = ((e.firstName || '') + ' ' + (e.lastName || '')).trim() || ('Employee ' + e.empID);
+                    var empNo = e.empNumber ? (' (' + e.empNumber + ')') : '';
+                    opts.push('<option value="' + e.empID + '">' + name + empNo + '</option>');
+                });
+                filterEmployee.innerHTML = opts.join('');
+            });
+    }
+
+    function buildQuery() {
+        var q = [];
+        if (filterDateFrom && filterDateFrom.value) q.push('from=' + encodeURIComponent(filterDateFrom.value));
+        if (filterDateTo && filterDateTo.value) q.push('to=' + encodeURIComponent(filterDateTo.value));
+        if (filterDepartment && filterDepartment.value) q.push('departmentId=' + encodeURIComponent(filterDepartment.value));
+        if (filterEmployee && filterEmployee.value) q.push('empId=' + encodeURIComponent(filterEmployee.value));
+        if (filterMethod && filterMethod.value) q.push('method=' + encodeURIComponent(filterMethod.value));
+        return q.join('&');
+    }
+
+    function statusBadge(status) {
+        var s = (status || '').toLowerCase();
+        if (s === 'present') return 'bg-subgreen-50 text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300';
+        if (s === 'timed in') return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300';
+        if (s === 'late-in') return 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
+        if (s === 'undertime') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+        if (s === 'overtime') return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300';
+        if (s === 'late-in + undertime') return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300';
+        return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
+    }
+
+    function fmt(dt) {
+        var d = new Date(dt);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString();
+    }
+
+    function fmtTime(dt) {
+        var d = new Date(dt);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function fmtMinutes(minutes) {
+        var n = Number(minutes || 0);
+        if (!isFinite(n) || n <= 0) return '—';
+        return n + 'm';
+    }
+
+    function fmtWorked(minutes) {
+        var n = Number(minutes || 0);
+        if (!isFinite(n) || n <= 0) return '—';
+        return (n / 60).toFixed(2) + 'h';
+    }
+
+    function workedMinutesFallback(row) {
+        var worked = Number(row && row.workedMinutes);
+        if (isFinite(worked) && worked > 0) return worked;
+        var timeIn = row && row.timeIn ? new Date(row.timeIn) : null;
+        var timeOut = row && row.timeOut ? new Date(row.timeOut) : null;
+        if (!timeIn || !timeOut || isNaN(timeIn.getTime()) || isNaN(timeOut.getTime())) return 0;
+        var diff = Math.floor((timeOut.getTime() - timeIn.getTime()) / 60000);
+        return diff > 0 ? diff : 0;
+    }
+
+    function render(rows) {
+        if (!tbody) return;
+        if (!rows || !rows.length) {
+            tbody.innerHTML = '<tr><td colspan="11" class="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No attendance logs found.</td></tr>';
+            return;
+        }
+
+        var statusFilter = filterStatus && filterStatus.value ? filterStatus.value.toLowerCase() : '';
+        if (statusFilter) {
+            rows = rows.filter(function (r) { return String(r.status || '').toLowerCase() === statusFilter.toLowerCase(); });
+        }
+
+        tbody.innerHTML = rows.map(function (r) {
+            var avatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(r.employeeName || 'Employee') + '&background=209030&color=fff';
+            return '<tr class="log-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-log-id="' + r.attendanceID + '">' +
+                '<td class="px-5 py-3"><div class="flex items-center gap-3"><img src="' + avatar + '" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" /><div><div class="text-sm font-medium text-slate-900 dark:text-white">' + (r.employeeName || '—') + '</div><div class="text-xs text-slate-500 dark:text-slate-400">' + (r.empNumber || '—') + '</div></div></div></td>' +
+                '<td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">' + (r.departmentName || '—') + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmt(r.logDate) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtTime(r.timeIn) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtTime(r.timeOut) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtWorked(workedMinutesFallback(r)) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtMinutes(r.lateMinutes) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtMinutes(r.undertimeMinutes) + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + fmtMinutes(r.overtimeMinutes) + '</td>' +
+                '<td class="px-5 py-3"><span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + statusBadge(r.status) + '">' + (r.status || '—') + '</span></td>' +
+                '<td class="px-5 py-3 text-right"><a href="/App/Operations/AttendanceLogs/Details?id=' + encodeURIComponent(r.attendanceID) + '" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a></td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function loadRows() {
+        var q = buildQuery();
+        fetch('?handler=Rows' + (q ? '&' + q : ''), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(render)
+            .catch(function () { render([]); });
+    }
     if (tbody) {
         tbody.addEventListener('click', function (e) {
             var row = e.target.closest('tr.log-row');
@@ -198,9 +347,39 @@
             }
         });
     }
-    if (btnExport) btnExport.addEventListener('click', function () {
-        alert('Export CSV will be implemented when backend is connected. Filtered logs would be exported.');
+    if (btnExportCsv) btnExportCsv.addEventListener('click', function () { openExportModal('csv'); });
+    if (btnExportPdf) btnExportPdf.addEventListener('click', function () { openExportModal('pdf'); });
+    btnCancelExport && btnCancelExport.addEventListener('click', closeExportModal);
+    btnCloseExportModal && btnCloseExportModal.addEventListener('click', closeExportModal);
+    exportModalBackdrop && exportModalBackdrop.addEventListener('click', closeExportModal);
+    btnConfirmExport && btnConfirmExport.addEventListener('click', function () {
+        var q = buildExportQuery();
+        closeExportModal();
+        window.location.href = '?handler=ExportReport' + (q ? '&' + q : '');
     });
+    btnApply && btnApply.addEventListener('click', loadRows);
+    btnReset && btnReset.addEventListener('click', function () {
+        var today = new Date().toISOString().slice(0, 10);
+        if (filterDateFrom) filterDateFrom.value = today;
+        if (filterDateTo) filterDateTo.value = today;
+        if (filterDepartment) filterDepartment.value = '';
+        if (filterEmployee) filterEmployee.value = '';
+        if (filterMethod) filterMethod.value = '';
+        if (filterStatus) filterStatus.value = '';
+        loadRows();
+    });
+
+    var today = new Date().toISOString().slice(0, 10);
+    if (filterDateFrom && !filterDateFrom.value) filterDateFrom.value = today;
+    if (filterDateTo && !filterDateTo.value) filterDateTo.value = today;
+
+    loadFilters();
+    loadRows();
+
+    setInterval(function () {
+        if (document.hidden) return;
+        loadRows();
+    }, 10000);
 })();
 </script>
 }

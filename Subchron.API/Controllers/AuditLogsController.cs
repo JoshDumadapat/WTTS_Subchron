@@ -12,10 +12,12 @@ namespace Subchron.API.Controllers;
 public class AuditLogsController : ControllerBase
 {
     private readonly TenantDbContext _db;
+    private readonly SubchronDbContext _platformDb;
 
-    public AuditLogsController(TenantDbContext db)
+    public AuditLogsController(TenantDbContext db, SubchronDbContext platformDb)
     {
         _db = db;
+        _platformDb = platformDb;
     }
 
     /// <summary>List tenant audit logs. Tenants see only their OrgID. SuperAdmin is explicitly forbidden from reading TenantAuditLogs.</summary>
@@ -85,6 +87,22 @@ public class AuditLogsController : ControllerBase
                 UserAgent = a.UserAgent
             })
             .ToListAsync();
+
+        var userIds = list.Where(x => x.UserID.HasValue).Select(x => x.UserID!.Value).Distinct().ToList();
+        Dictionary<int, string> userNameMap = new();
+        if (userIds.Count > 0)
+        {
+            userNameMap = await _platformDb.Users.AsNoTracking()
+                .Where(u => userIds.Contains(u.UserID))
+                .Select(u => new { u.UserID, u.Name, u.Email })
+                .ToDictionaryAsync(x => x.UserID, x => string.IsNullOrWhiteSpace(x.Name) ? (x.Email ?? "User") : x.Name!);
+        }
+
+        foreach (var row in list)
+        {
+            if (row.UserID.HasValue && userNameMap.TryGetValue(row.UserID.Value, out var name))
+                row.UserName = name;
+        }
 
         Response.Headers.Append("X-Total-Count", total.ToString());
         return Ok(list);

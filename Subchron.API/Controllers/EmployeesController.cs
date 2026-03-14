@@ -91,6 +91,11 @@ public class EmployeesController : ControllerBase
                 Role = e.Role,
                 WorkState = e.WorkState,
                 EmploymentType = e.EmploymentType,
+                CompensationBasisOverride = e.CompensationBasisOverride,
+                BasePayAmount = e.BasePayAmount,
+                BaseSalary = e.BasePayAmount,
+                CustomUnitLabel = e.CustomUnitLabel,
+                CustomWorkHours = e.CustomWorkHours,
                 DateHired = e.DateHired,
                 BirthDate = e.BirthDate,
                 Gender = e.Gender,
@@ -254,6 +259,17 @@ public class EmployeesController : ControllerBase
             return BadRequest(new { ok = false, message = "First name is required." });
         if (string.IsNullOrWhiteSpace(r.LastName))
             return BadRequest(new { ok = false, message = "Last name is required." });
+
+        var createFirstName = (r.FirstName ?? string.Empty).Trim().ToLower();
+        var createLastName = (r.LastName ?? string.Empty).Trim().ToLower();
+        var createMiddleName = (r.MiddleName ?? string.Empty).Trim().ToLower();
+        var duplicateNameOnCreate = await _db.Employees.AnyAsync(e =>
+            e.OrgID == orgId.Value
+            && ((e.FirstName ?? string.Empty).Trim().ToLower() == createFirstName)
+            && ((e.LastName ?? string.Empty).Trim().ToLower() == createLastName)
+            && ((e.MiddleName ?? string.Empty).Trim().ToLower() == createMiddleName));
+        if (duplicateNameOnCreate)
+            return Conflict(new { ok = false, message = "This employee name already exists." });
         DateTime? normalizedBirthDate = null;
         if (r.BirthDate.HasValue)
         {
@@ -265,6 +281,24 @@ public class EmployeesController : ControllerBase
         }
 
         var role = string.IsNullOrWhiteSpace(r.Role) ? "Employee" : r.Role.Trim();
+        var compensationBasisOverride = NormalizeCompensationBasisOverride(r.CompensationBasisOverride);
+        var basePayAmount = r.BasePayAmount;
+        if (!ValidateCompensationInput(compensationBasisOverride, basePayAmount, out var compensationError))
+            return BadRequest(new { ok = false, message = compensationError });
+        var customUnitLabel = string.IsNullOrWhiteSpace(r.CustomUnitLabel) ? null : r.CustomUnitLabel.Trim();
+        var customWorkHours = r.CustomWorkHours;
+        if (compensationBasisOverride != "Custom")
+        {
+            customUnitLabel = null;
+            customWorkHours = null;
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(customUnitLabel))
+                return BadRequest(new { ok = false, message = "Custom unit label is required for custom compensation basis." });
+            if (!customWorkHours.HasValue || customWorkHours <= 0)
+                return BadRequest(new { ok = false, message = "Custom work hours must be greater than zero for custom compensation basis." });
+        }
         var empNumber = string.IsNullOrWhiteSpace(r.EmpNumber) ? null : r.EmpNumber.Trim();
         var normalizedEmail = NormalizeEmail(r.Email);
 
@@ -359,6 +393,10 @@ public class EmployeesController : ControllerBase
             Role = role,
             WorkState = string.IsNullOrWhiteSpace(r.WorkState) ? "Active" : r.WorkState.Trim(),
             EmploymentType = string.IsNullOrWhiteSpace(r.EmploymentType) ? "Regular" : r.EmploymentType.Trim(),
+            CompensationBasisOverride = compensationBasisOverride,
+            BasePayAmount = basePayAmount,
+            CustomUnitLabel = customUnitLabel,
+            CustomWorkHours = customWorkHours,
             DateHired = r.DateHired ?? DateTime.UtcNow.Date,
             Phone = phoneTrimmed?.Length > 30 ? phoneTrimmed[..30] : phoneTrimmed,
             PhoneNormalized = phoneNorm,
@@ -512,6 +550,18 @@ public class EmployeesController : ControllerBase
         }
         if (req?.Gender != null) emp.Gender = string.IsNullOrWhiteSpace(req.Gender) ? null : req.Gender.Trim().Length > 20 ? req.Gender.Trim()[..20] : req.Gender.Trim();
         if (req?.MiddleName != null) emp.MiddleName = string.IsNullOrWhiteSpace(req.MiddleName) ? null : (req.MiddleName.Trim().Length > 80 ? req.MiddleName.Trim()[..80] : req.MiddleName.Trim());
+
+        var updateFirstName = (emp.FirstName ?? string.Empty).Trim().ToLower();
+        var updateLastName = (emp.LastName ?? string.Empty).Trim().ToLower();
+        var updateMiddleName = (emp.MiddleName ?? string.Empty).Trim().ToLower();
+        var duplicateNameOnUpdate = await _db.Employees.AnyAsync(e =>
+            e.OrgID == orgId.Value
+            && e.EmpID != id
+            && ((e.FirstName ?? string.Empty).Trim().ToLower() == updateFirstName)
+            && ((e.LastName ?? string.Empty).Trim().ToLower() == updateLastName)
+            && ((e.MiddleName ?? string.Empty).Trim().ToLower() == updateMiddleName));
+        if (duplicateNameOnUpdate)
+            return Conflict(new { ok = false, message = "This employee name already exists." });
         if (req?.EmpNumber != null)
         {
             var s = req.EmpNumber.Trim();
@@ -529,6 +579,32 @@ public class EmployeesController : ControllerBase
         if (req?.Role != null) { var s = req.Role.Trim(); if (s.Length > 0) emp.Role = s.Length > 40 ? s[..40] : s; }
         if (req?.WorkState != null) { var s = req.WorkState.Trim(); if (s.Length > 0) emp.WorkState = s.Length > 40 ? s[..40] : s; }
         if (req?.EmploymentType != null) { var s = req.EmploymentType.Trim(); if (s.Length > 0) emp.EmploymentType = s.Length > 40 ? s[..40] : s; }
+        if (req?.CompensationBasisOverride != null)
+        {
+            var compensationBasisOverride = NormalizeCompensationBasisOverride(req.CompensationBasisOverride);
+            if (!ValidateCompensationInput(compensationBasisOverride, req.BasePayAmount ?? emp.BasePayAmount, out var compensationError))
+                return BadRequest(new { ok = false, message = compensationError });
+            emp.CompensationBasisOverride = compensationBasisOverride;
+            if (compensationBasisOverride != "Custom")
+            {
+                emp.CustomUnitLabel = null;
+                emp.CustomWorkHours = null;
+            }
+        }
+        if (req?.BasePayAmount.HasValue == true)
+        {
+            if (req.BasePayAmount.Value < 0)
+                return BadRequest(new { ok = false, message = "Base pay amount cannot be negative." });
+            emp.BasePayAmount = req.BasePayAmount.Value;
+        }
+        if (req?.CustomUnitLabel != null)
+            emp.CustomUnitLabel = string.IsNullOrWhiteSpace(req.CustomUnitLabel) ? null : (req.CustomUnitLabel.Trim().Length > 40 ? req.CustomUnitLabel.Trim()[..40] : req.CustomUnitLabel.Trim());
+        if (req?.CustomWorkHours.HasValue == true)
+        {
+            if (req.CustomWorkHours <= 0)
+                return BadRequest(new { ok = false, message = "Custom work hours must be greater than zero." });
+            emp.CustomWorkHours = req.CustomWorkHours;
+        }
         if (req?.DepartmentID.HasValue == true) emp.DepartmentID = req.DepartmentID;
         if (req?.AssignedShiftTemplateCode != null)
         {
@@ -586,6 +662,100 @@ public class EmployeesController : ControllerBase
         await _audit.LogTenantAsync(orgId!.Value, userId, "EmployeeUpdated", "Employee", emp.EmpID, $"{emp.FirstName} {emp.LastName}");
 
         return Ok(ToDto(emp));
+    }
+
+    [HttpGet("{id:int}/deductions")]
+    public async Task<IActionResult> GetEmployeeDeductions(int id)
+    {
+        var orgId = GetUserOrgId();
+        if (!orgId.HasValue && !IsSuperAdmin())
+            return Forbid();
+
+        var emp = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmpID == id && (orgId == null || e.OrgID == orgId.Value));
+        if (emp is null)
+            return NotFound(new { ok = false, message = "Employee not found." });
+
+        var rules = await _db.DeductionRules.AsNoTracking()
+            .Where(r => r.OrgID == emp.OrgID && r.IsActive)
+            .OrderBy(r => r.Name)
+            .Select(r => new
+            {
+                r.DeductionRuleID,
+                r.Name,
+                r.Category,
+                r.DeductionType,
+                r.Amount,
+                r.ComputeBasedOn
+            })
+            .ToListAsync();
+
+        var selected = await _db.EmployeeDeductionProfiles.AsNoTracking()
+            .Where(x => x.OrgID == emp.OrgID && x.EmpID == emp.EmpID && x.IsActive)
+            .Select(x => new
+            {
+                x.DeductionRuleID,
+                x.Mode,
+                x.Value,
+                x.Notes
+            })
+            .ToListAsync();
+
+        return Ok(new { rules, selected });
+    }
+
+    [HttpPut("{id:int}/deductions")]
+    public async Task<IActionResult> SaveEmployeeDeductions(int id, [FromBody] EmployeeDeductionSaveRequest req)
+    {
+        var orgId = GetUserOrgId();
+        if (!orgId.HasValue || !GetUserId().HasValue)
+            return Forbid();
+
+        var emp = await _db.Employees.FirstOrDefaultAsync(e => e.EmpID == id && e.OrgID == orgId.Value);
+        if (emp is null)
+            return NotFound(new { ok = false, message = "Employee not found." });
+
+        var requested = req?.Items ?? new List<EmployeeDeductionItemRequest>();
+        var ruleIds = requested.Select(x => x.DeductionRuleID).Distinct().ToList();
+        var validRuleIds = await _db.DeductionRules.AsNoTracking()
+            .Where(r => r.OrgID == orgId.Value && r.IsActive && ruleIds.Contains(r.DeductionRuleID))
+            .Select(r => r.DeductionRuleID)
+            .ToListAsync();
+
+        if (validRuleIds.Count != ruleIds.Count)
+            return BadRequest(new { ok = false, message = "One or more selected deduction rules are invalid or inactive." });
+
+        var existing = await _db.EmployeeDeductionProfiles
+            .Where(x => x.OrgID == orgId.Value && x.EmpID == id)
+            .ToListAsync();
+
+        foreach (var old in existing)
+            old.IsActive = false;
+
+        foreach (var item in requested)
+        {
+            var mode = NormalizeDeductionMode(item.Mode);
+            var profile = existing.FirstOrDefault(x => x.DeductionRuleID == item.DeductionRuleID);
+            if (profile == null)
+            {
+                profile = new EmployeeDeductionProfile
+                {
+                    OrgID = orgId.Value,
+                    EmpID = id,
+                    DeductionRuleID = item.DeductionRuleID,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.EmployeeDeductionProfiles.Add(profile);
+            }
+
+            profile.Mode = mode;
+            profile.Value = item.Value;
+            profile.Notes = string.IsNullOrWhiteSpace(item.Notes) ? null : item.Notes.Trim();
+            profile.IsActive = true;
+            profile.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _db.SaveChangesAsync();
+        return Ok(new { ok = true });
     }
 
     [HttpPatch("{id:int}/archive")]
@@ -662,7 +832,7 @@ public class EmployeesController : ControllerBase
 
     // Employee management - check uniqueness for phone/email.
     [HttpGet("check-unique")]
-    public async Task<IActionResult> CheckUnique([FromQuery] string type, [FromQuery] string value)
+    public async Task<IActionResult> CheckUnique([FromQuery] string type, [FromQuery] string value, [FromQuery] string? scope = null)
     {
         var orgId = GetUserOrgId();
         var isSuperAdmin = IsSuperAdmin();
@@ -671,7 +841,7 @@ public class EmployeesController : ControllerBase
 
         var kind = (type ?? string.Empty).Trim().ToLowerInvariant();
         var rawValue = (value ?? string.Empty).Trim();
-        if (string.IsNullOrEmpty(kind) || string.IsNullOrEmpty(rawValue))
+        if (string.IsNullOrEmpty(kind) || (string.IsNullOrEmpty(rawValue) && kind != "fullname" && kind != "full-name" && kind != "name"))
             return BadRequest(new { ok = false, message = "Type and value are required." });
 
         bool exists = false;
@@ -691,17 +861,37 @@ public class EmployeesController : ControllerBase
             var email = NormalizeEmail(rawValue);
             if (!string.IsNullOrEmpty(email))
             {
+                var checkGlobalUser = string.Equals(scope, "global-user", StringComparison.OrdinalIgnoreCase);
                 var users = _platformDb.Users.AsQueryable();
                 var employees = _db.Employees.AsQueryable();
                 if (orgId.HasValue)
                 {
-                    users = users.Where(u => u.OrgID == orgId.Value);
+                    if (!checkGlobalUser)
+                        users = users.Where(u => u.OrgID == orgId.Value);
                     employees = employees.Where(e => e.OrgID == orgId.Value);
                 }
                 var userExistsTask = users.AnyAsync(u => u.Email != null && u.Email == email);
                 var employeeExistsTask = employees.AnyAsync(e => e.Email != null && e.Email == email);
                 await Task.WhenAll(userExistsTask, employeeExistsTask);
                 exists = userExistsTask.Result || employeeExistsTask.Result;
+            }
+        }
+        else if (kind == "fullname" || kind == "full-name" || kind == "name")
+        {
+            var parts = rawValue.Split('|');
+            var firstName = parts.Length > 0 ? (parts[0] ?? string.Empty).Trim().ToLower() : string.Empty;
+            var lastName = parts.Length > 1 ? (parts[1] ?? string.Empty).Trim().ToLower() : string.Empty;
+            var middleName = parts.Length > 2 ? (parts[2] ?? string.Empty).Trim().ToLower() : string.Empty;
+            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
+            {
+                var employees = _db.Employees.AsQueryable();
+                if (orgId.HasValue)
+                    employees = employees.Where(e => e.OrgID == orgId.Value);
+
+                exists = await employees.AnyAsync(e =>
+                    ((e.FirstName ?? string.Empty).Trim().ToLower() == firstName)
+                    && ((e.LastName ?? string.Empty).Trim().ToLower() == lastName)
+                    && ((e.MiddleName ?? string.Empty).Trim().ToLower() == middleName));
             }
         }
         else
@@ -862,6 +1052,11 @@ public class EmployeesController : ControllerBase
             Role = e.Role,
             WorkState = e.WorkState,
             EmploymentType = e.EmploymentType,
+            CompensationBasisOverride = e.CompensationBasisOverride,
+            BasePayAmount = e.BasePayAmount,
+            BaseSalary = e.BasePayAmount,
+            CustomUnitLabel = e.CustomUnitLabel,
+            CustomWorkHours = e.CustomWorkHours,
             DateHired = e.DateHired,
             Phone = e.Phone,
             Email = e.Email,
@@ -886,6 +1081,46 @@ public class EmployeesController : ControllerBase
             UpdatedAt = e.UpdatedAt
         };
     }
+
+    private static string NormalizeCompensationBasisOverride(string? value)
+    {
+        var normalized = (value ?? string.Empty).Trim();
+        return normalized switch
+        {
+            "Monthly" => "Monthly",
+            "Daily" => "Daily",
+            "Hourly" => "Hourly",
+            "Custom" => "Custom",
+            _ => "UseOrgDefault"
+        };
+    }
+
+    private static bool ValidateCompensationInput(string compensationBasisOverride, decimal basePayAmount, out string? message)
+    {
+        message = null;
+        if (basePayAmount < 0)
+        {
+            message = "Base pay amount cannot be negative.";
+            return false;
+        }
+        if (compensationBasisOverride != "UseOrgDefault" && basePayAmount <= 0)
+        {
+            message = "Base pay amount must be greater than zero when compensation basis override is set.";
+            return false;
+        }
+        return true;
+    }
+
+    private static string NormalizeDeductionMode(string? mode)
+    {
+        var m = (mode ?? string.Empty).Trim();
+        return m switch
+        {
+            "Fixed" => "Fixed",
+            "Percent" => "Percent",
+            _ => "UseRule"
+        };
+    }
 }
 
 public class EmployeeDto
@@ -906,6 +1141,11 @@ public class EmployeeDto
     public string Role { get; set; } = "";
     public string WorkState { get; set; } = "";
     public string EmploymentType { get; set; } = "";
+    public string CompensationBasisOverride { get; set; } = "UseOrgDefault";
+    public decimal BasePayAmount { get; set; }
+    public decimal BaseSalary { get; set; }
+    public string? CustomUnitLabel { get; set; }
+    public decimal? CustomWorkHours { get; set; }
     public DateTime? DateHired { get; set; }
     public string? Phone { get; set; }
     public string? Email { get; set; }
@@ -945,6 +1185,10 @@ public class EmployeeCreateRequest
     public string? Role { get; set; }
     public string? WorkState { get; set; }
     public string? EmploymentType { get; set; }
+    public string? CompensationBasisOverride { get; set; }
+    public decimal BasePayAmount { get; set; }
+    public string? CustomUnitLabel { get; set; }
+    public decimal? CustomWorkHours { get; set; }
     public DateTime? DateHired { get; set; }
     public string? Phone { get; set; }
     public string? Email { get; set; }
@@ -973,6 +1217,10 @@ public class EmployeeUpdateRequest
     public string? Role { get; set; }
     public string? WorkState { get; set; }
     public string? EmploymentType { get; set; }
+    public string? CompensationBasisOverride { get; set; }
+    public decimal? BasePayAmount { get; set; }
+    public string? CustomUnitLabel { get; set; }
+    public decimal? CustomWorkHours { get; set; }
     public int? DepartmentID { get; set; }
     public string? AssignedShiftTemplateCode { get; set; }
     public int? AssignedLocationId { get; set; }
@@ -996,6 +1244,19 @@ public class EmployeeUpdateRequest
 public class EmployeeArchiveRequest
 {
     public string? Reason { get; set; }
+}
+
+public class EmployeeDeductionSaveRequest
+{
+    public List<EmployeeDeductionItemRequest> Items { get; set; } = new();
+}
+
+public class EmployeeDeductionItemRequest
+{
+    public int DeductionRuleID { get; set; }
+    public string? Mode { get; set; }
+    public decimal? Value { get; set; }
+    public string? Notes { get; set; }
 }
 
 public class EmployeeRestoreRequest

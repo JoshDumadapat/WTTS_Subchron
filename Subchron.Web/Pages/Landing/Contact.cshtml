@@ -23,11 +23,20 @@
             <div data-reveal class="reveal-base rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 sm:p-8 dark:border-slate-600 dark:bg-slate-800/90 dark:ring-slate-700">
                 <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Submit your request</h2>
                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">We’ll get back to you within 1–2 business days.</p>
-                <form class="mt-8 space-y-6">
+                @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+                {
+                    <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">@Model.SuccessMessage</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">@Model.ErrorMessage</div>
+                }
+
+                <form id="landingDemoRequestForm" method="post" class="mt-8 space-y-6">
                     <!-- Organization Name -->
                     <div>
                         <label for="orgName" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Organization name</label>
-                        <input id="orgName" name="OrgName" type="text"
+                        <input id="orgName" name="Input.OrgName" type="text" value="@Model.Input.OrgName"
                                class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                                placeholder="Your organization" required />
                     </div>
@@ -36,13 +45,13 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="contactName" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Contact name</label>
-                            <input id="contactName" name="ContactName" type="text"
+                            <input id="contactName" name="Input.ContactName" type="text" value="@Model.Input.ContactName"
                                    class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                                    placeholder="Juan Dela Cruz" required />
                         </div>
                         <div>
                             <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
-                            <input id="email" name="Email" type="email"
+                            <input id="email" name="Input.Email" type="email" value="@Model.Input.Email"
                                    class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                                    placeholder="juan@company.com" required />
                         </div>
@@ -52,19 +61,19 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone number <span class="text-slate-400">(optional)</span></label>
-                            <input id="phone" name="Phone" type="tel"
+                            <input id="phone" name="Input.Phone" type="tel" value="@Model.Input.Phone"
                                    class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                                    placeholder="+63 912 345 6789" />
                         </div>
                         <div>
                             <label for="orgSize" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Organization size <span class="text-slate-400">(optional)</span></label>
-                            <select id="orgSize" name="OrgSize"
+                            <select id="orgSize" name="Input.OrgSize"
                                     class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
                                 <option value="">Select size</option>
-                                <option value="1-50">1–50</option>
-                                <option value="51-200">51–200</option>
-                                <option value="201-500">201–500</option>
-                                <option value="500+">500+</option>
+                                <option value="1-50" selected="@(Model.Input.OrgSize == "1-50")">1–50</option>
+                                <option value="51-200" selected="@(Model.Input.OrgSize == "51-200")">51–200</option>
+                                <option value="201-500" selected="@(Model.Input.OrgSize == "201-500")">201–500</option>
+                                <option value="500+" selected="@(Model.Input.OrgSize == "500+")">500+</option>
                             </select>
                         </div>
                     </div>
@@ -72,31 +81,37 @@
                     <!-- Desired Demo Mode -->
                     <div>
                         <label for="desiredMode" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Desired demo mode</label>
-                        <select id="desiredMode" name="DesiredMode" required
+                        <select id="desiredMode" name="Input.DesiredMode" required
                                 class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
                             <option value="">Select a mode</option>
-                            <option value="QR">QR</option>
-                            <option value="BioGeo">BioGeo</option>
-                            <option value="Hybrid">Hybrid</option>
+                            <option value="QR" selected="@(Model.Input.DesiredMode == "QR")">QR</option>
+                            <option value="BioGeo" selected="@(Model.Input.DesiredMode == "BioGeo")">BioGeo</option>
+                            <option value="Hybrid" selected="@(Model.Input.DesiredMode == "Hybrid")">Hybrid</option>
                         </select>
                     </div>
 
                     <!-- Message / Notes -->
                     <div>
                         <label for="message" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Message / notes <span class="text-slate-400">(optional)</span></label>
-                        <textarea id="message" name="Message" rows="4"
+                        <textarea id="message" name="Input.Message" rows="4"
                                   class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors outline-none focus:border-subblue-500 focus:ring-2 focus:ring-subblue-500/20 dark:placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
-                                  placeholder="Tell us about your needs or questions..."></textarea>
+                                  placeholder="Tell us about your needs or questions...">@Model.Input.Message</textarea>
                     </div>
 
                     <div class="flex flex-col items-start gap-3 pt-2">
-                        <button type="submit"
+                        <button id="landingDemoSubmitBtn" type="submit"
                                 class="w-full rounded-lg bg-gradient-to-r from-subgreen-500 to-subgreen-600
-               px-8 py-3.5 text-sm font-bold text-white shadow-md transition
-               hover:from-subgreen-600 hover:to-subgreen-700
-               focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
-               focus:outline-none dark:focus:ring-offset-slate-800">
-                            Send Request
+                px-8 py-3.5 text-sm font-bold text-white shadow-md transition
+                hover:from-subgreen-600 hover:to-subgreen-700
+                focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2
+                focus:outline-none disabled:cursor-not-allowed disabled:opacity-70 dark:focus:ring-offset-slate-800">
+                            <span class="inline-flex items-center justify-center">
+                                <svg id="landingDemoSpinner" class="mr-2 hidden h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                                <span id="landingDemoBtnText">Send Request</span>
+                            </span>
                         </button>
 
                         <p class="text-xs text-slate-500 dark:text-slate-400">
@@ -109,3 +124,19 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('landingDemoRequestForm');
+    const btn = document.getElementById('landingDemoSubmitBtn');
+    const spinner = document.getElementById('landingDemoSpinner');
+    const text = document.getElementById('landingDemoBtnText');
+    if (!form || !btn || !spinner || !text) return;
+
+    form.addEventListener('submit', function () {
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+        text.textContent = 'Sending...';
+    });
+});
+</script>

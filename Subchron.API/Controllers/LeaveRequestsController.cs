@@ -37,6 +37,113 @@ public class LeaveRequestsController : ControllerBase
         return RoleModuleAccess.CanAccessModule(User, AppModule.LeaveManagement);
     }
 
+    [HttpGet("mine")]
+    public async Task<ActionResult<List<LeaveRequestDto>>> Mine()
+    {
+        var ctx = await ResolveEmployeeContextAsync();
+        if (!ctx.ok || !ctx.orgId.HasValue)
+            return Forbid();
+        if (!ctx.empId.HasValue)
+            return Ok(new List<LeaveRequestDto>());
+
+        var rows = await _db.LeaveRequests.AsNoTracking()
+            .Include(lr => lr.Employee)
+            .Where(lr => lr.OrgID == ctx.orgId.Value && lr.EmpID == ctx.empId.Value)
+            .OrderByDescending(lr => lr.CreatedAt)
+            .Select(lr => new LeaveRequestDto
+            {
+                LeaveRequestID = lr.LeaveRequestID,
+                OrgID = lr.OrgID,
+                EmpID = lr.EmpID,
+                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName,
+                EmpNumber = lr.Employee.EmpNumber,
+                LeaveType = lr.LeaveType,
+                StartDate = lr.StartDate,
+                EndDate = lr.EndDate,
+                Status = lr.Status,
+                Reason = lr.Reason,
+                ReviewedByUserName = null,
+                ReviewedAt = lr.ReviewedAt,
+                ReviewNotes = lr.ReviewNotes,
+                CreatedAt = lr.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(rows);
+    }
+
+    [HttpPost("mine")]
+    public async Task<ActionResult<LeaveRequestDto>> CreateMine([FromBody] CreateLeaveRequestDto req)
+    {
+        var ctx = await ResolveEmployeeContextAsync();
+        if (!ctx.ok || !ctx.orgId.HasValue || !ctx.userId.HasValue)
+            return Forbid();
+        if (!ctx.empId.HasValue)
+            return BadRequest(new { ok = false, message = "Employee profile not found for this account." });
+
+        var emp = await _db.Employees.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.EmpID == ctx.empId.Value && e.OrgID == ctx.orgId.Value && !e.IsArchived);
+        if (emp == null)
+            return BadRequest(new { ok = false, message = "Employee not found or not active." });
+
+        var leaveTypeName = (req.LeaveType ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(leaveTypeName))
+            return BadRequest(new { ok = false, message = "Leave type is required." });
+
+        var leaveType = await _db.LeaveTypes.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.OrgID == ctx.orgId.Value && x.IsActive && x.LeaveTypeName == leaveTypeName);
+        if (leaveType == null)
+            return BadRequest(new { ok = false, message = "Selected leave type is not available." });
+
+        if (!IsLeaveTypeApplicableToEmployee(leaveType, emp))
+            return BadRequest(new { ok = false, message = "Selected leave type is not applicable to your profile." });
+
+        var startDate = req.StartDate.Date;
+        var endDate = req.EndDate.Date;
+        if (endDate < startDate)
+            return BadRequest(new { ok = false, message = "End date must be on or after start date." });
+
+        var requestedDays = (endDate - startDate).Days + 1;
+        if (leaveType.MaxConsecutiveDays > 0 && requestedDays > leaveType.MaxConsecutiveDays)
+            return BadRequest(new { ok = false, message = $"Maximum of {leaveType.MaxConsecutiveDays} consecutive day(s) allowed for this leave type." });
+
+        var today = DateTime.UtcNow.Date;
+        if (!leaveType.AllowRetroactiveFiling && startDate < today)
+            return BadRequest(new { ok = false, message = "Retroactive filing is not allowed for this leave type." });
+        if (leaveType.AdvanceFilingDays > 0 && startDate < today.AddDays(leaveType.AdvanceFilingDays))
+            return BadRequest(new { ok = false, message = $"This leave type requires filing at least {leaveType.AdvanceFilingDays} day(s) in advance." });
+
+        var lr = new LeaveRequest
+        {
+            OrgID = ctx.orgId.Value,
+            EmpID = emp.EmpID,
+            LeaveType = leaveType.LeaveTypeName,
+            StartDate = startDate,
+            EndDate = endDate,
+            Status = "Pending",
+            Reason = req.Reason?.Trim(),
+            CreatedByUserID = ctx.userId.Value
+        };
+
+        _db.LeaveRequests.Add(lr);
+        await _db.SaveChangesAsync();
+
+        return Ok(new LeaveRequestDto
+        {
+            LeaveRequestID = lr.LeaveRequestID,
+            OrgID = lr.OrgID,
+            EmpID = lr.EmpID,
+            EmployeeName = emp.FirstName + " " + emp.LastName,
+            EmpNumber = emp.EmpNumber,
+            LeaveType = lr.LeaveType,
+            StartDate = lr.StartDate,
+            EndDate = lr.EndDate,
+            Status = lr.Status,
+            Reason = lr.Reason,
+            CreatedAt = lr.CreatedAt
+        });
+    }
+
     // List leave requests with optional filters. Requires LeaveManagement module access.
     [HttpGet]
     public async Task<ActionResult<PagedLeaveResult>> List(
@@ -271,5 +378,35 @@ public class LeaveRequestsController : ControllerBase
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? Reason { get; set; }
+    }
+
+    private async Task<(bool ok, int? orgId, int? userId, int? empId)> ResolveEmployeeContextAsync()
+    {
+        var orgId = GetUserOrgId();
+        var userId = GetUserId();
+        if (!orgId.HasValue || !userId.HasValue)
+            return (false, null, null, null);
+
+        var empId = await _db.Employees.AsNoTracking()
+            .Where(e => e.OrgID == orgId.Value && e.UserID == userId.Value && !e.IsArchived)
+            .Select(e => (int?)e.EmpID)
+            .FirstOrDefaultAsync();
+
+        return (true, orgId, userId, empId);
+    }
+
+    private static bool IsLeaveTypeApplicableToEmployee(LeaveType leaveType, Employee emp)
+    {
+        return leaveType.AppliesTo switch
+        {
+            Models.LeaveTypes.LeaveAppliesTo.All => true,
+            Models.LeaveTypes.LeaveAppliesTo.FullTime => string.Equals(emp.EmploymentType, "Full Time", StringComparison.OrdinalIgnoreCase) || string.Equals(emp.EmploymentType, "Regular", StringComparison.OrdinalIgnoreCase),
+            Models.LeaveTypes.LeaveAppliesTo.PartTime => string.Equals(emp.EmploymentType, "Part Time", StringComparison.OrdinalIgnoreCase),
+            Models.LeaveTypes.LeaveAppliesTo.Probationary => string.Equals(emp.EmploymentType, "Probationary", StringComparison.OrdinalIgnoreCase),
+            Models.LeaveTypes.LeaveAppliesTo.Regular => string.Equals(emp.EmploymentType, "Regular", StringComparison.OrdinalIgnoreCase),
+            Models.LeaveTypes.LeaveAppliesTo.FemaleOnly => string.Equals(emp.Gender, "Female", StringComparison.OrdinalIgnoreCase),
+            Models.LeaveTypes.LeaveAppliesTo.MaleOnly => string.Equals(emp.Gender, "Male", StringComparison.OrdinalIgnoreCase),
+            _ => true
+        };
     }
 }

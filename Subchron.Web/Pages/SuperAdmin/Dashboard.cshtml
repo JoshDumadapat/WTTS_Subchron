@@ -6,23 +6,23 @@
     ViewData["PageDescription"] = "Overview of system metrics and activity";
     Layout = "~/Pages/SuperAdmin/Shared/_LayoutSuperAdmin.cshtml";
 
-    // ===== FRONT-END DEMO FALLBACKS =====
-    // If your model is empty/0 (demo mode), use these values so the UI always renders nicely.
-    var totalOrgs = Model.TotalOrganizations > 0 ? Model.TotalOrganizations : 42;
-    var newOrgsThisMonth = Model.NewOrgsThisMonth > 0 ? Model.NewOrgsThisMonth : 6;
+    var totalOrgs = Model.TotalOrganizations;
+    var newOrgsThisMonth = Model.NewOrgsThisMonth;
 
-    var trialOrgs = Model.TrialOrganizations > 0 ? Model.TrialOrganizations : 8;
-    var trialsExpiringSoon = Model.TrialsExpiringSoon > 0 ? Model.TrialsExpiringSoon : 3;
+    var trialOrgs = Model.TrialOrganizations;
+    var trialsExpiringSoon = Model.TrialsExpiringSoon;
 
-    var activeOrgs = Model.ActiveOrganizations > 0 ? Model.ActiveOrganizations : 32;
-    var newActiveThisMonth = Model.NewActiveThisMonth > 0 ? Model.NewActiveThisMonth : 4;
+    var activeOrgs = Model.ActiveOrganizations;
+    var newActiveThisMonth = Model.NewActiveThisMonth;
 
-    var pendingDemo = Model.PendingDemoRequests > 0 ? Model.PendingDemoRequests : 5;
+    var pendingDemo = Model.PendingDemoRequests;
+    var totalUsers = Model.TotalUsers;
+    var totalRevenueDisplay = Model.TotalRevenue.ToString("N2");
+    var churnPct = totalOrgs > 0 ? Math.Round((Model.SuspendedOrganizations * 100m) / totalOrgs, 1) : 0;
 
-    // System Health demo values
-    var trialPct = 64;
-    var retentionPct = 91;
-    var storagePct = 38;
+    var trialPct = totalOrgs > 0 ? (int)Math.Round((trialOrgs * 100m) / totalOrgs, 0) : 0;
+    var retentionPct = totalOrgs > 0 ? (int)Math.Round((activeOrgs * 100m) / totalOrgs, 0) : 0;
+    var storagePct = totalOrgs > 0 ? (int)Math.Round((pendingDemo * 100m) / totalOrgs, 0) : 0;
 
     string FillHex(int pct)
         => pct >= 80 ? "#22c55e" : (pct >= 50 ? "#f59e0b" : "#ef4444"); // green / yellow / red
@@ -131,7 +131,7 @@
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
       <div style="display: flex; align-items: center; gap: 0.25rem;">
 <span class="kpi-badge kpi-badge-green" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
-     +12%
+     +@newOrgsThisMonth
       </span>
          <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
     this month
@@ -142,7 +142,7 @@
             <!-- Right Section: Value -->
    <div style="text-align: right;">
           <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
-      ₱347.9K
+      ₱@totalRevenueDisplay
       </p>
        </div>
         </div>
@@ -158,7 +158,7 @@
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
 <!-- Title (Left Aligned) -->
          <h3 class="kpi-label" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin: 0; line-height: 1;">
- Active Users
+  Active Users
  </h3>
       
       <!-- Icon (Right Aligned) -->
@@ -174,8 +174,8 @@
      <!-- Left Section: Growth Badge -->
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
     <div style="display: flex; align-items: center; gap: 0.25rem;">
-       <span class="kpi-badge kpi-badge-blue" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
-  +8%
+        <span class="kpi-badge kpi-badge-blue" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+  +@newActiveThisMonth
       </span>
       <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
      this month
@@ -186,7 +186,7 @@
    <!-- Right Section: Value -->
         <div style="text-align: right;">
     <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
-  2,847
+  @totalUsers.ToString("N0")
      </p>
          </div>
         </div>
@@ -218,8 +218,8 @@
  <!-- Left Section: Growth Badge -->
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
       <div style="display: flex; align-items: center; gap: 0.25rem;">
-   <span class="kpi-badge kpi-badge-purple" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
-        +15%
+    <span class="kpi-badge kpi-badge-purple" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+        +@newOrgsThisMonth
      </span>
    <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
      this month
@@ -230,7 +230,7 @@
  <!-- Right Section: Value -->
        <div style="text-align: right;">
  <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
-     184
+     @activeOrgs.ToString("N0")
     </p>
   </div>
         </div>
@@ -262,11 +262,11 @@
     <!-- Left Section: Growth Badge -->
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
   <div style="display: flex; align-items: center; gap: 0.25rem;">
-   <span class="kpi-badge kpi-badge-red" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
-   -2%
+    <span class="kpi-badge kpi-badge-red" style="font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.35rem; border-radius: 9999px; display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em;">
+   @pendingDemo
   </span>
         <span class="kpi-badge-subtext" style="font-size: 0.8rem; font-weight: 400;">
-     this month
+      pending demos
             </span>
     </div>
     </div>
@@ -274,7 +274,7 @@
  <!-- Right Section: Value -->
          <div style="text-align: right;">
     <p class="kpi-value" style="font-size: 2.50rem; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1;">
-       3.2%
+       @churnPct%
        </p>
 </div>
    </div>
@@ -282,11 +282,11 @@
 </div>
 
 <!-- CHART + HEALTH -->
-<div class="dashboard-container" style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+<div class="dashboard-container" style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1rem;">
 
     <!-- Chart -->
-    <div class="dashboard-card chart-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box;">
-        <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+    <div class="dashboard-card chart-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box; min-height: 300px;">
+        <div style="margin-bottom: 1rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem;">
             <div>
   <h3 class="card-title" style="font-size: 1.125rem; font-weight: bold; margin: 0 0 0.25rem 0;">Organization Growth</h3>
          <p class="card-subtitle" style="font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin: 0;">Last 6 Months</p>
@@ -303,16 +303,16 @@
             </div>
         </div>
 
-        <div style="position: relative; width: 100%; flex: 1; min-height: 200px;">
+        <div style="position: relative; width: 100%; flex: 1; min-height: 170px;">
   <canvas id="growthChart" style="width: 100%; height: 100%; max-width: 100%;"></canvas>
         </div>
     </div>
 
     <!-- System Health -->
-    <div class="dashboard-card health-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box;">
-        <h3 class="card-title" style="margin-bottom: 1.5rem; font-size: 1.125rem; font-weight: bold; margin-top: 0;">System Health</h3>
+    <div class="dashboard-card health-card" style="display: flex; flex-direction: column; border-radius: 1rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 100%; box-sizing: border-box; min-height: 300px;">
+        <h3 class="card-title" style="margin-bottom: 1rem; font-size: 1.125rem; font-weight: bold; margin-top: 0;">System Health</h3>
 
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 1rem;">
 
   <!-- Trial Conversion -->
      <div style="width: 100%;">
@@ -368,7 +368,7 @@
 
 </div>
 
-        <div class="ai-insight-box" style="margin-top: 2rem; border-radius: 0.75rem; padding: 1rem;">
+        <div class="ai-insight-box" style="margin-top: 1rem; border-radius: 0.75rem; padding: 1rem;">
         <div class="ai-insight-header" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                 <svg style="height: 1rem; width: 1rem; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-3 5a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
@@ -668,6 +668,16 @@ background-color: #1e293b !important;
      .dashboard-card:last-child {
             width: 40% !important;
         }
+
+        .chart-card,
+        .health-card {
+            height: 360px !important;
+            min-height: 360px !important;
+        }
+
+        .health-card .ai-insight-box {
+            margin-top: auto !important;
+        }
     }
 
     /* Dark Mode - ONLY when .dark class is present on parent */
@@ -750,38 +760,42 @@ color: #94a3b8 !important;
 
         <div class="flex-1 p-6 pt-0">
             <div class="space-y-4">
+                @if (Model.TrialsExpiring.Any())
+                {
+                    @foreach (var trial in Model.TrialsExpiring.Take(5))
+                    {
+                        var initials = string.Join("", (trial.OrgName ?? string.Empty)
+                            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                            .Take(2)
+                            .Select(s => char.ToUpperInvariant(s[0])));
+                        if (string.IsNullOrWhiteSpace(initials))
+                            initials = "--";
 
-                <div class="flex items-center justify-between rounded-xl border-[0.25px] border-gray-200 bg-slate-50
-            p-3 shadow-sm sm:p-4 dark:border-slate-700
-            dark:bg-slate-900">
+                        <div class="flex items-center justify-between rounded-xl border-[0.25px] border-gray-200 bg-slate-50 p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900">
+                            <div class="flex min-w-0 items-center">
+                                <div class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-subgreen-500 text-xs font-bold text-white sm:mr-5 sm:h-10 sm:w-10 sm:text-base dark:bg-subgreen-600">
+                                    @initials
+                                </div>
 
-                    <div class="flex min-w-0 items-center">
-                        <div class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-subgreen-500
-                    text-xs font-bold text-white sm:mr-5 sm:h-10 sm:w-10 sm:text-base dark:bg-subgreen-600">
-                            TE
+                                <div class="min-w-0" style="margin-left: 20px;">
+                                    <p class="truncate text-sm font-bold text-slate-900 sm:text-sm dark:text-white">@trial.OrgName</p>
+                                    <p class="text-xs font-normal text-slate-500 uppercase sm:text-xs">@trial.OrgCode</p>
+                                </div>
+                            </div>
+
+                            <div class="shrink-0 text-right">
+                                <span class="inline-block rounded-md bg-amber-50 px-1.5 py-0.5 text-sm font-semibold tracking-wide text-amber-700 sm:px-2 sm:py-1 sm:text-xs dark:bg-amber-900/40 dark:text-amber-300">
+                                    @trial.DaysRemaining day(s) left
+                                </span>
+                                <p class="mt-1 text-xs font-medium text-slate-400 sm:text-xs">@trial.EndDate.ToString("MMM dd")</p>
+                            </div>
                         </div>
-
-                        <div class="min-w-0" style="margin-left: 20px;">
-                            <p class="truncate text-sm font-bold text-slate-900 sm:text-sm dark:text-white">
-                                TechCorp Solutions
-                            </p>
-                            <p class="text-xs font-normal text-slate-500 uppercase sm:text-xs">
-                                TECH001
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <div class="shrink-0 text-right">
-                        <span class="inline-block rounded-md bg-amber-50 px-1.5 py-0.5 text-sm font-semibold tracking-wide text-amber-700 sm:px-2 sm:py-1 sm:text-xs dark:bg-amber-900/40 dark:text-amber-300">
-                            5 Days Left
-                        </span>
-                        <p class="mt-1 text-xs font-medium text-slate-400 sm:text-xs">
-                            Feb 13
-                        </p>
-                    </div>
-
-                </div>
+                    }
+                }
+                else
+                {
+                    <p class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">No trials expiring soon.</p>
+                }
 
             </div>
         </div>
@@ -802,104 +816,35 @@ color: #94a3b8 !important;
         <div class="flex-1 p-6 pt-0">
 
             <ul class="space-y-6">
+                @if (Model.RecentAuditLogs.Any())
+                {
+                    @foreach (var item in Model.RecentAuditLogs.Take(8))
+                    {
+                        <li>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400" style="margin-right:20px;"></div>
+                                    <p class="text-sm font-medium text-slate-900 dark:text-white">@item.Action</p>
+                                </div>
 
-                <!-- ROW -->
-                <li>
+                                <time class="text-xs font-medium text-slate-400">@item.CreatedAt.ToLocalTime().ToString("HH:mm")</time>
+                            </div>
 
-                    <!-- TOP LINE (DOT + TITLE + TIME IN ONE ROW) -->
-                    <div class="flex items-center justify-between">
-
-                        <!-- LEFT GROUP -->
-                        <div class="flex items-center">
-
-                            <!-- GREEN DOT -->
-                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
-                                 style="margin-right:20px;"></div>
-
-                            <!-- TITLE -->
-                            <p class="text-sm font-medium text-slate-900 dark:text-white">
-                                CREATE_ORG
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
+                                Affected: <span class="text-slate-700 dark:text-slate-300">@(string.IsNullOrWhiteSpace(item.EntityName) ? "System" : item.EntityName)</span>
+                                @if (!string.IsNullOrWhiteSpace(item.OrgName))
+                                {
+                                    <span class="mx-1">•</span>
+                                    <text>Org: @item.OrgName</text>
+                                }
                             </p>
-
-                        </div>
-
-                        <!-- TIME -->
-                        <time class="text-xs font-medium text-slate-400">
-                            09:31
-                        </time>
-
-                    </div>
-
-                    <!-- SUBTEXT -->
-                    <p class="mt-1 ml-[32px] text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
-                        Affected: <span class="text-slate-700 dark:text-slate-300">Organizations</span>
-                        <span class="mx-1">•</span>
-                        Org: NewCorp
-                    </p>
-
-                </li>
-
-
-                <!-- ROW -->
-                <li>
-
-                    <div class="flex items-center justify-between">
-
-                        <div class="flex items-center">
-
-                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
-                                 style="margin-right:20px;"></div>
-
-                            <p class="text-sm font-medium text-slate-900 dark:text-white">
-                                APPROVE_DEMO_REQUEST
-                            </p>
-
-                        </div>
-
-                        <time class="text-xs font-medium text-slate-400">
-                            07:31
-                        </time>
-
-                    </div>
-
-                    <p class="mt-1 ml-[32px] text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
-                        Affected: <span class="text-slate-700 dark:text-slate-300">DemoRequests</span>
-                        <span class="mx-1">•</span>
-                        Org: TechCorp
-                    </p>
-
-                </li>
-
-
-                <!-- ROW -->
-                <li>
-
-                    <div class="flex items-center justify-between">
-
-                        <div class="flex items-center">
-
-                            <div class="h-2.5 w-2.5 rounded-full bg-subgreen-500 dark:bg-subgreen-400"
-                                 style="margin-right:20px;"></div>
-
-                            <p class="text-sm font-medium text-slate-900 dark:text-white">
-                                UPDATE_SUBSCRIPTION
-                            </p>
-
-                        </div>
-
-                        <time class="text-xs font-medium text-slate-400">
-                            06:12
-                        </time>
-
-                    </div>
-
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" style="margin-left: 30px;">
-                        Affected: <span class="text-slate-700 dark:text-slate-300">Subscriptions</span>
-                        <span class="mx-1">•</span>
-                        Org: Digital Ventures
-                    </p>
-
-                </li>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">No recent activity found.</li>
+                }
 
             </ul>
 
@@ -911,6 +856,10 @@ color: #94a3b8 !important;
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        const growthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrganizationGrowth.Select(g => new DateTime(g.Year, g.Month, 1).ToString("MMM yy"))));
+        const growthNewData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrganizationGrowth.Select(g => g.NewOrganizations)));
+        const growthTotalData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrganizationGrowth.Select(g => g.TotalOrganizationsCumulative)));
+
         // Filter preset button toggle
       function setActivePreset(btn) {
    document.querySelectorAll('.filter-preset-btn').forEach(b => b.classList.remove('filter-preset-active'));
@@ -953,31 +902,58 @@ color: #94a3b8 !important;
             window.__superGrowthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
-                    datasets: [{
-                        label: 'New Organizations',
-                        data: [15, 28, 22, 35, 30, 42],
-                        borderColor: '#10b981',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true,
-                        backgroundColor: gradient,
-                        tension: 0.35
-                    }]
+                    labels: growthLabels,
+                    datasets: [
+                        {
+                            label: 'New Organizations',
+                            data: growthNewData,
+                            borderColor: '#10b981',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            backgroundColor: gradient,
+                            tension: 0.35,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Total Organizations',
+                            data: growthTotalData,
+                            borderColor: '#94a3b8',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#94a3b8',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { borderRadius: 8, padding: 12 } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { borderRadius: 8, padding: 12 }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
                             border: { display: false },
                             grid: { color: 'rgba(148, 163, 184, 0.12)', drawBorder: false },
+                            ticks: { padding: 10, color: '#94a3b8', font: { size: 11, weight: '600' } }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            border: { display: false },
+                            grid: { display: false, drawBorder: false },
                             ticks: { padding: 10, color: '#94a3b8', font: { size: 11, weight: '600' } }
                         },
                         x: {

@@ -1,0 +1,200 @@
+@page
+@model Subchron.Web.Pages.App.Finance.FinanceModel
+@{
+    ViewData["Title"] = "Finance";
+    ViewData["PageTitle"] = "Finance";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="mx-auto space-y-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Finance Overview</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Track organization transactions, cashflow, and tax footprint.</p>
+        </div>
+        <button type="button" id="btnExportFinancePdf" class="btn-secondary gap-2 px-4 py-2.5 text-sm">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Export PDF
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.LoadError))
+    {
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">@Model.LoadError</div>
+    }
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-emerald-900/40 dark:bg-emerald-900/20">
+            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Total Income</p>
+            <p class="mt-2 text-2xl font-bold text-emerald-800 dark:text-emerald-200">@Model.TotalIncome.ToString("N2")</p>
+        </div>
+        <div class="rounded-2xl border border-rose-100 bg-rose-50/60 p-4 dark:border-rose-900/40 dark:bg-rose-900/20">
+            <p class="text-xs font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-300">Total Expenses</p>
+            <p class="mt-2 text-2xl font-bold text-rose-800 dark:text-rose-200">@Model.TotalExpenses.ToString("N2")</p>
+        </div>
+        <div class="rounded-2xl border border-sky-100 bg-sky-50/60 p-4 dark:border-sky-900/40 dark:bg-sky-900/20">
+            <p class="text-xs font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300">Net Cashflow</p>
+            <p class="mt-2 text-2xl font-bold @(Model.NetCashflow >= 0 ? "text-sky-800 dark:text-sky-200" : "text-amber-700 dark:text-amber-300")">@Model.NetCashflow.ToString("N2")</p>
+        </div>
+        <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 dark:border-amber-900/40 dark:bg-amber-900/20">
+            <p class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Accumulated Tax</p>
+            <p class="mt-2 text-2xl font-bold text-amber-800 dark:text-amber-200">@Model.TotalTax.ToString("N2")</p>
+        </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="border-b border-slate-100 p-4 dark:border-slate-700">
+            <form method="get" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+                <div class="md:col-span-2">
+                    <label for="SearchTerm" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Search</label>
+                    <input asp-for="SearchTerm" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700" placeholder="Ref #, description, category" />
+                </div>
+                <div>
+                    <label for="TypeFilter" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Type</label>
+                    <select asp-for="TypeFilter" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700">
+                        <option value="">All types</option>
+                        <option value="Income">Income</option>
+                        <option value="Expense">Expense</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="DateStart" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Date from</label>
+                    <input asp-for="DateStart" type="date" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700" />
+                </div>
+                <div>
+                    <label for="DateEnd" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Date to</label>
+                    <input asp-for="DateEnd" type="date" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700" />
+                </div>
+                <input asp-for="CurrentPage" type="hidden" value="1" />
+                <input asp-for="PageSize" type="hidden" value="@Model.PageSize" />
+                <div class="md:col-span-5 flex gap-2">
+                    <button type="submit" class="btn-primary h-10 px-4">Apply</button>
+                    <a href="/App/Finance/Finance" class="btn-secondary h-10 px-4">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 border-b border-slate-100 p-4 dark:border-slate-700 lg:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Income vs Expense Trend</p>
+                @{
+                    var max = Math.Max(1m, Model.Trend.Select(x => Math.Max(x.Income, x.Expense)).DefaultIfEmpty(0m).Max());
+                }
+                <div class="space-y-2">
+                    @foreach (var p in Model.Trend.TakeLast(6))
+                    {
+                        var incomeWidth = (int)Math.Round((p.Income / max) * 100m);
+                        var expenseWidth = (int)Math.Round((p.Expense / max) * 100m);
+                        <div>
+                            <div class="mb-1 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                                <span>@p.Label</span>
+                                <span>I:@p.Income.ToString("N0") / E:@p.Expense.ToString("N0")</span>
+                            </div>
+                            <div class="flex h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                <div class="bg-emerald-500" style="width:@incomeWidth%"></div>
+                                <div class="bg-rose-500" style="width:@expenseWidth%"></div>
+                            </div>
+                        </div>
+                    }
+                    @if (!Model.Trend.Any())
+                    {
+                        <p class="text-xs text-slate-500 dark:text-slate-400">No trend data available.</p>
+                    }
+                </div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Transaction Snapshot</p>
+                <dl class="grid grid-cols-2 gap-3 text-sm">
+                    <div><dt class="text-slate-500 dark:text-slate-400">Total Records</dt><dd class="font-semibold text-slate-900 dark:text-slate-100">@Model.TotalCount</dd></div>
+                    <div><dt class="text-slate-500 dark:text-slate-400">Currency</dt><dd class="font-semibold text-slate-900 dark:text-slate-100">@Model.Currency</dd></div>
+                    <div><dt class="text-slate-500 dark:text-slate-400">Income Transactions</dt><dd class="font-semibold text-emerald-700 dark:text-emerald-300">@Model.Transactions.Count(t => t.Type == "Income")</dd></div>
+                    <div><dt class="text-slate-500 dark:text-slate-400">Expense Transactions</dt><dd class="font-semibold text-rose-700 dark:text-rose-300">@Model.Transactions.Count(t => t.Type == "Expense")</dd></div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table id="financeTransactionsTable" class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+                        <th class="px-4 py-3">Date</th>
+                        <th class="px-4 py-3">Reference</th>
+                        <th class="px-4 py-3">Description</th>
+                        <th class="px-4 py-3">Category</th>
+                        <th class="px-4 py-3">Type</th>
+                        <th class="px-4 py-3 text-right">Amount</th>
+                        <th class="px-4 py-3 text-right">Tax</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    @if (Model.Transactions.Any())
+                    {
+                        @foreach (var t in Model.Transactions)
+                        {
+                            <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-700/40">
+                                <td class="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-300">@t.Date.ToString("yyyy-MM-dd")</td>
+                                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">@(string.IsNullOrWhiteSpace(t.ReferenceNumber) ? "-" : t.ReferenceNumber)</td>
+                                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
+                                    <div class="font-medium">@t.Description</div>
+                                    @if (!string.IsNullOrWhiteSpace(t.Notes))
+                                    {
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">@t.Notes</div>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-300">@(string.IsNullOrWhiteSpace(t.Category) ? "-" : t.Category)</td>
+                                <td class="px-4 py-3">
+                                    @if (t.Type == "Expense")
+                                    {
+                                        <span class="inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">Expense</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">Income</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold @(t.Type == "Expense" ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300")">@t.Amount.ToString("N2")</td>
+                                <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-300">@t.TaxAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">No transaction records found for current filters.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Page @Model.CurrentPage of @Model.TotalPages</p>
+                <div class="flex gap-2">
+                    <a class="btn-secondary px-3 py-1.5 text-xs @(Model.CurrentPage <= 1 ? "pointer-events-none opacity-50" : "")" href="?CurrentPage=@(Model.CurrentPage - 1)&PageSize=@Model.PageSize&SearchTerm=@Model.SearchTerm&TypeFilter=@Model.TypeFilter&DateStart=@Model.DateStart?.ToString("yyyy-MM-dd")&DateEnd=@Model.DateEnd?.ToString("yyyy-MM-dd")">Previous</a>
+                    <a class="btn-secondary px-3 py-1.5 text-xs @(Model.CurrentPage >= Model.TotalPages ? "pointer-events-none opacity-50" : "")" href="?CurrentPage=@(Model.CurrentPage + 1)&PageSize=@Model.PageSize&SearchTerm=@Model.SearchTerm&TypeFilter=@Model.TypeFilter&DateStart=@Model.DateStart?.ToString("yyyy-MM-dd")&DateEnd=@Model.DateEnd?.ToString("yyyy-MM-dd")">Next</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var btn = document.getElementById('btnExportFinancePdf');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        var params = new URLSearchParams(window.location.search);
+        var q = new URLSearchParams();
+        if (params.get('SearchTerm')) q.set('searchTerm', params.get('SearchTerm'));
+        if (params.get('TypeFilter')) q.set('typeFilter', params.get('TypeFilter'));
+        if (params.get('DateStart')) q.set('dateStart', params.get('DateStart'));
+        if (params.get('DateEnd')) q.set('dateEnd', params.get('DateEnd'));
+        window.location.href = '?handler=ExportPdf' + (q.toString() ? '&' + q.toString() : '');
+    });
+})();
+</script>
+}

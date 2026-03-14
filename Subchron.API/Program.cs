@@ -151,6 +151,19 @@ using (var scope = app.Services.CreateScope())
                 {
                     await tenantDb.Database.MigrateAsync(cts.Token);
                     logger.LogInformation("Tenant DB migrations applied successfully.");
+
+                    var seedOrg111Bpo = app.Configuration.GetValue<bool>("Database:SeedOrg111Bpo", true);
+                    if (seedOrg111Bpo)
+                    {
+                        try
+                        {
+                            await BpoOrgConfigurationSeeder.SeedAsync(tenantDb, logger, cts.Token);
+                        }
+                        catch (Exception seedEx)
+                        {
+                            logger.LogError(seedEx, "Org 111 BPO seed failed.");
+                        }
+                    }
                 }
                 else
                     logger.LogWarning("Tenant DB not reachable. Skipping tenant migrations.");

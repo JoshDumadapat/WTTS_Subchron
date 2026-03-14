@@ -111,7 +111,7 @@ public class ShiftScheduleModel : PageModel
         catch { return new JsonResult(new List<DepOption>()); }
     }
 
-    public async Task<IActionResult> OnPostCreateShiftAsync([FromForm] int empId, [FromForm] DateTime assignmentDate, [FromForm] string startTime, [FromForm] string endTime, [FromForm] string? notes)
+    public async Task<IActionResult> OnPostCreateShiftAsync([FromForm] int empId, [FromForm] DateTime assignmentDate, [FromForm] string startTime, [FromForm] string endTime, [FromForm] string? notes, [FromForm] bool overrideExisting)
     {
         if (!RoleModuleAccess.CanAccessModule(User, AppModule.ShiftSchedule))
             return new JsonResult(new { ok = false, message = "Forbidden" });
@@ -122,14 +122,59 @@ public class ShiftScheduleModel : PageModel
         try
         {
             var client = await GetApiClientAsync();
-            var body = new { empId, assignmentDate = assignmentDate.Date, startTime = start, endTime = end, notes };
+            var body = new { empId, assignmentDate = assignmentDate.Date, startTime = start, endTime = end, notes, overrideExisting };
             var resp = await client.PostAsJsonAsync(baseUrl + "/api/shiftassignments", body);
             var msg = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)
-                return new JsonResult(new { ok = false, message = msg.Length > 200 ? "Request failed" : msg });
+            {
+                var conflict = false;
+                var message = "Request failed.";
+                try
+                {
+                    var doc = JsonDocument.Parse(msg);
+                    if (doc.RootElement.TryGetProperty("conflict", out var c) && c.ValueKind == JsonValueKind.True)
+                        conflict = true;
+                    if (doc.RootElement.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String)
+                        message = m.GetString() ?? message;
+                }
+                catch
+                {
+                    message = msg.Length > 200 ? message : msg;
+                }
+
+                return new JsonResult(new { ok = false, conflict, message });
+            }
             return new JsonResult(new { ok = true });
         }
         catch (Exception ex) { return new JsonResult(new { ok = false, message = ex.Message }); }
+    }
+
+    public async Task<IActionResult> OnGetAttendanceConfigAsync()
+    {
+        if (!RoleModuleAccess.CanAccessModule(User, AppModule.ShiftSchedule))
+            return new JsonResult(new { earliestClockInMinutes = 0, latestClockInMinutes = 0 });
+        var baseUrl = ApiBaseUrl;
+        if (string.IsNullOrEmpty(baseUrl))
+            return new JsonResult(new { earliestClockInMinutes = 0, latestClockInMinutes = 0 });
+
+        try
+        {
+            var client = await GetApiClientAsync();
+            var resp = await client.GetAsync(baseUrl + "/api/org-attendance-settings/current");
+            if (!resp.IsSuccessStatusCode)
+                return new JsonResult(new { earliestClockInMinutes = 0, latestClockInMinutes = 0 });
+            var raw = await resp.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(raw);
+            var earliest = 0;
+            var latest = 0;
+            if (doc.RootElement.TryGetProperty("earliestClockInMinutes", out var e) && e.TryGetInt32(out var eInt)) earliest = eInt;
+            if (doc.RootElement.TryGetProperty("latestClockInMinutes", out var l) && l.TryGetInt32(out var lInt)) latest = lInt;
+            return new JsonResult(new { earliestClockInMinutes = earliest, latestClockInMinutes = latest });
+        }
+        catch
+        {
+            return new JsonResult(new { earliestClockInMinutes = 0, latestClockInMinutes = 0 });
+        }
     }
 
     public async Task<IActionResult> OnPostDeleteShiftAsync([FromForm] int id)
@@ -167,6 +212,9 @@ public class ShiftScheduleModel : PageModel
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? EmpNumber { get; set; }
+        public string? DepartmentName { get; set; }
+        public string? Role { get; set; }
+        public string? Email { get; set; }
     }
 
     public class DepOption

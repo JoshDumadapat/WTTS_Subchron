@@ -234,44 +234,32 @@ of
     }
 </div>
 
+<form id="antiForgeryForm" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+
 <script>
-    // Pagination state
+    // Pagination state (show all by default to avoid hidden rows)
     let currentPage = 1;
-    let rowsPerPage = 10;
+    let rowsPerPage = Number.MAX_SAFE_INTEGER;
     let allRows = [];
 
     function initializePagination() {
         allRows = Array.from(document.querySelectorAll('tbody tr'));
+        rowsPerPage = Number.MAX_SAFE_INTEGER;
         updatePagination();
     }
 
     function updatePagination() {
   const totalRows = allRows.length;
-      const totalPages = Math.ceil(totalRows / rowsPerPage);
-        const start = (currentPage - 1) * rowsPerPage;
-     const end = start + rowsPerPage;
-
-// Show/hide rows
-        allRows.forEach((row, index) => {
-    if (index >= start && index < end) {
-    row.style.display = '';
-   } else {
-  row.style.display = 'none';
-   }
-  });
+      const start = totalRows > 0 ? 1 : 0;
+     const end = totalRows;
 
         // Update pagination info
-   document.querySelector('.text-sm.text-slate-700 span:nth-of-type(1)').textContent = start + 1;
-        document.querySelector('.text-sm.text-slate-700 span:nth-of-type(2)').textContent = Math.min(end, totalRows);
+   document.querySelector('.text-sm.text-slate-700 span:nth-of-type(1)').textContent = start;
+        document.querySelector('.text-sm.text-slate-700 span:nth-of-type(2)').textContent = end;
      document.querySelector('.text-sm.text-slate-700 span:nth-of-type(3)').textContent = totalRows;
     }
 
-    // Rows per page change
-    document.getElementById('rowsPerPage')?.addEventListener('change', function(e) {
-        rowsPerPage = parseInt(e.target.value);
-        currentPage = 1;
-        updatePagination();
-    });
+    // Rows per page change intentionally disabled; all rows are shown.
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -280,18 +268,18 @@ of
 
     function suspendOrg(orgId, orgName) {
     if (confirm(`Are you sure you want to suspend "${orgName}"?`)) {
-         // TODO: Implement suspend organization
-   fetch(`/SuperAdmin/Organizations/Suspend`, {
-       method: 'POST',
-      headers: {
+   fetch(`?handler=Suspend`, {
+        method: 'POST',
+       headers: {
     'Content-Type': 'application/json',
+    'RequestVerificationToken': document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value || ''
         },
-    body: JSON.stringify({ orgId: orgId })
-    }).then(response => {
+     body: JSON.stringify({ orgId: orgId })
+     }).then(response => {
 if (response.ok) {
-               location.reload();
+                location.reload();
 }
-            });
+             });
         }
     }
 

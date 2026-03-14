@@ -7,6 +7,7 @@
 }
 
 <div class="w-full px-3 sm:px-4">
+    @Html.AntiForgeryToken()
     <!-- Tab Navigation -->
     <div class="mb-4 flex gap-3 border-b border-slate-200 dark:border-slate-700 sm:mb-6 sm:gap-6">
         <button type="button" id="tabNewRequest" class="emp-tab border-b-2 border-subgreen-600 px-2 py-3 text-xs font-semibold text-subgreen-600 transition-colors dark:border-subgreen-400 dark:text-subgreen-400 sm:px-0 sm:pb-2 sm:text-sm">New Request</button>
@@ -165,16 +166,41 @@
     var rowsPerPage = 5;
     var currentFilter = { status: '', dateFrom: '', dateTo: '' };
 
-    // Sample data - in real app would come from server
-    var allRequests = [
-        { date: 'Feb 22, 2025', time: '18:00 – 21:00', hours: '3.0', reason: 'Project deadline', status: 'Pending' },
-        { date: 'Feb 20, 2025', time: '19:00 – 22:00', hours: '3.0', reason: 'Deployment support', status: 'Approved' },
-        { date: 'Feb 18, 2025', time: '17:00 – 19:00', hours: '2.0', reason: 'Inventory', status: 'Rejected' },
-        { date: 'Feb 15, 2025', time: '16:00 – 19:00', hours: '3.0', reason: 'System maintenance', status: 'Approved' },
-        { date: 'Feb 12, 2025', time: '18:00 – 20:00', hours: '2.0', reason: 'Report generation', status: 'Pending' },
-        { date: 'Feb 10, 2025', time: '17:00 – 19:30', hours: '2.5', reason: 'Client meeting', status: 'Approved' },
-        { date: 'Feb 08, 2025', time: '19:00 – 21:00', hours: '2.0', reason: 'Data backup', status: 'Rejected' },
-    ];
+    var allRequests = [];
+
+    function toDateOnly(value) {
+        if (!value) return '';
+        var d = new Date(value);
+        if (isNaN(d.getTime())) return '';
+        return d.toISOString().slice(0, 10);
+    }
+
+    function mapApiItem(item) {
+        var start = item.startTime ? new Date(item.startTime) : null;
+        var end = item.endTime ? new Date(item.endTime) : null;
+        var dateIso = item.otDate ? (String(item.otDate).length >= 10 ? String(item.otDate).substring(0, 10) : toDateOnly(item.startTime)) : toDateOnly(item.startTime);
+        return {
+            dateIso: dateIso,
+            date: dateIso ? new Date(dateIso + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' }) : '—',
+            time: (start ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '—') + ' – ' + (end ? end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '—'),
+            hours: Number(item.totalHours || 0).toFixed(2),
+            reason: item.reason || '—',
+            status: item.status || 'Pending'
+        };
+    }
+
+    function loadMyRequests() {
+        return fetch('?handler=MyRequests', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+                allRequests = (list || []).map(mapApiItem);
+                updatePagination();
+            })
+            .catch(function () {
+                allRequests = [];
+                updatePagination();
+            });
+    }
 
     function setActiveTab(active) {
         var isNew = active === 'new';
@@ -209,7 +235,8 @@
             if (currentFilter.status && req.status !== currentFilter.status) {
                 return false;
             }
-            // Add date filtering if needed
+            if (currentFilter.dateFrom && req.dateIso && req.dateIso < currentFilter.dateFrom) return false;
+            if (currentFilter.dateTo && req.dateIso && req.dateIso > currentFilter.dateTo) return false;
             return true;
         });
     }
@@ -356,21 +383,31 @@
             showValidation('End time must be after start time.');
             return;
         }
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        var chosen = new Date(dateVal);
-        if (chosen < today) {
-            showValidation('Date cannot be in the past.');
-            return;
-        }
         showValidation('');
-        setActiveTab('my');
-        otForm.reset();
-        updatePagination();
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
+        fd.append('otDate', dateVal);
+        fd.append('otStart', startVal);
+        fd.append('otEnd', endVal);
+        fd.append('otReason', reasonVal);
+        fetch('?handler=CreateRequest', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data && data.ok) {
+                    setActiveTab('my');
+                    otForm.reset();
+                    loadMyRequests();
+                    return;
+                }
+                showValidation((data && data.message) || 'Unable to submit overtime request.');
+            })
+            .catch(function () {
+                showValidation('Unable to submit overtime request.');
+            });
     });
 
     // Initialize
-    updatePagination();
+    loadMyRequests();
 })();
 </script>
 }

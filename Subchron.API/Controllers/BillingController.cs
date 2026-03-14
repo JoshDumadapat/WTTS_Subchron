@@ -351,6 +351,11 @@ public class BillingController : ControllerBase
             {
                 sub.Status = "Active";
                 sub.EndDate = DateTime.UtcNow.AddMonths(1);
+                if (tx != null)
+                    tx.SubscriptionID = sub.SubscriptionID;
+                var org = await _db.Organizations.FirstOrDefaultAsync(o => o.OrgID == payload.OrgId);
+                if (org != null)
+                    org.Status = "Active";
                 await _db.SaveChangesAsync();
             }
         }

@@ -7,93 +7,256 @@
 }
 
 <div class="w-full px-3 sm:px-4 space-y-3 sm:space-y-4">
-    <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Manage your preferences and account security.</p>
+    <div>
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white sm:text-lg">Account Settings</h2>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Manage your profile, security, biometrics, and preferences.</p>
+    </div>
 
-    <!-- Biometrics Section -->
-    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
-        <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m5.506-7.971c2.31.155 4.383 1.379 5.824 3.215m-6.08-8.715a9 9 0 110-17.464m6.5-1.921A9.003 9.003 0 0012 2c-4.478 0-8.268 2.943-9.543 7m9.543 6.908c-.955.076-1.883.206-2.77.372m5.21-.78a9.47 9.47 0 015.3 2.821m0 0A9.001 9.001 0 0012 2" /></svg>
+    @if (TempData["ProfileMessage"] is string profileMsg)
+    {
+        <div class="rounded-lg border border-subgreen-200 bg-subgreen-50 px-3 py-2 text-xs text-subgreen-800 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300 sm:text-sm">@profileMsg</div>
+    }
+    @if (TempData["ProfileError"] is string profileErr)
+    {
+        <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 sm:text-sm">@profileErr</div>
+    }
+
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-3 sm:gap-4">
+        <div class="space-y-3 lg:col-span-2 sm:space-y-4">
+            <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Profile Information</h3>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Minimal editable details for your employee profile.</p>
                     </div>
-                    <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Biometrics</h3>
+                    <button type="button" id="profileEditToggle" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">Edit</button>
                 </div>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use fingerprint or face to record time in/out.</p>
-            </div>
-        </div>
-        <div class="mt-4 flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Enable Biometrics</span>
-            <button type="button" id="toggleBiometrics" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600 dark:focus:ring-offset-slate-800">
-                <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
-            </button>
-        </div>
-        <p id="biometricsStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Status: Disabled</p>
-    </div>
 
-    <!-- Account Security Section -->
-    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
-        <div class="flex items-start gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Account Security</h3>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage your password and login security.</p>
-            </div>
-        </div>
-        <div class="mt-4 space-y-2">
-            <button type="button" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">
-                Change Password
-            </button>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Last changed 3 months ago</p>
-        </div>
-    </div>
+                <form id="employeeProfileForm" method="post" asp-page-handler="UpdateEmployeeInfo" enctype="multipart/form-data" class="mt-4 space-y-5">
+                    @Html.AntiForgeryToken()
+                    <div class="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/40 sm:flex-row sm:items-start sm:p-4">
+                        <div class="h-20 w-20 overflow-hidden rounded-full border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                            @if (!string.IsNullOrWhiteSpace(Model.ProfileAvatarUrl))
+                            {
+                                <img id="profileAvatarPreview" src="@(Model.ProfileAvatarUrl + "?v=" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())" alt="Profile" class="h-full w-full object-cover" />
+                            }
+                            else
+                            {
+                                <img id="profileAvatarPreview" src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(User.Identity?.Name ?? "Employee"))&background=209030&color=fff&bold=true" alt="Profile" class="h-full w-full object-cover" />
+                            }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Profile Image</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">JPG, PNG, or WEBP up to 5MB.</p>
+                            <input id="profileAvatarInput" type="file" name="avatarFile" accept="image/jpeg,image/png,image/webp" disabled class="profile-edit-field mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-subgreen-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-subgreen-500 dark:text-slate-300" />
+                        </div>
+                    </div>
 
-    <!-- Preferences Section -->
-    <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
-        <div class="flex items-start gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 flex-shrink-0">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Email</label>
+                            <input type="email" value="@Model.ProfileEmail" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Phone</label>
+                            <input type="tel" name="Phone" value="@Model.EmpPhone" maxlength="30" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Birthdate</label>
+                            <input type="text" value="@(Model.EmpBirthDate.HasValue ? Model.EmpBirthDate.Value.ToString("MMM d, yyyy") + (Model.EmpAge.HasValue ? " Age: " + Model.EmpAge.Value : "") : "-")" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Gender</label>
+                            <input type="text" value="@(string.IsNullOrWhiteSpace(Model.EmpGender) ? "-" : Model.EmpGender)" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" />
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-4 dark:border-slate-700">
+                        <h4 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Employment Information</h4>
+                        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Role</label><input type="text" value="@(string.IsNullOrWhiteSpace(Model.EmpRole) ? "Employee" : Model.EmpRole)" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Department</label><input type="text" value="@(string.IsNullOrWhiteSpace(Model.EmpDepartmentName) ? "-" : Model.EmpDepartmentName)" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Work state</label><input type="text" value="@(string.IsNullOrWhiteSpace(Model.EmpWorkState) ? "Active" : Model.EmpWorkState)" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Employment type</label><input type="text" value="@(string.IsNullOrWhiteSpace(Model.EmpEmploymentType) ? "Regular" : Model.EmpEmploymentType)" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Date hired</label><input type="text" value="@(Model.EmpDateHired.HasValue ? Model.EmpDateHired.Value.ToString("MMM d, yyyy") : "-")" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Base salary</label><input type="text" value="@Model.EmpBaseSalaryDisplay" readonly class="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300 sm:text-sm" /></div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-4 dark:border-slate-700">
+                        <h4 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Address</h4>
+                        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="sm:col-span-2"><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Address line 1</label><input type="text" name="AddressLine1" value="@Model.EmpAddressLine1" maxlength="200" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div class="sm:col-span-2"><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Address line 2</label><input type="text" name="AddressLine2" value="@Model.EmpAddressLine2" maxlength="200" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">City</label><input type="text" name="City" value="@Model.EmpCity" maxlength="80" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">State / Province</label><input type="text" name="StateProvince" value="@Model.EmpStateProvince" maxlength="80" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Postal code</label><input type="text" name="PostalCode" value="@Model.EmpPostalCode" maxlength="20" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Country</label><input type="text" name="Country" value="@Model.EmpCountry" maxlength="80" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-4 dark:border-slate-700">
+                        <h4 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Emergency Contact</h4>
+                        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Name</label><input type="text" name="EmergencyContactName" value="@Model.EmpEmergencyContactName" maxlength="100" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Phone</label><input type="tel" name="EmergencyContactPhone" value="@Model.EmpEmergencyContactPhone" maxlength="30" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                            <div><label class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Relation</label><input type="text" name="EmergencyContactRelation" value="@Model.EmpEmergencyContactRelation" maxlength="50" disabled class="profile-edit-field mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:disabled:border-slate-600 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-400 sm:text-sm" /></div>
+                        </div>
+                    </div>
+
+                    <div id="profileEditActions" class="hidden items-center gap-2 pt-1">
+                        <button type="submit" id="profileSaveBtn" class="rounded-lg bg-subgreen-600 px-4 py-2 text-xs font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:text-sm">
+                            <span class="button-text">Save changes</span>
+                        </button>
+                        <button type="button" id="profileCancelBtn" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">Cancel</button>
+                    </div>
+                </form>
             </div>
-            <div class="flex-1 min-w-0">
+
+            <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+                <div class="flex items-start gap-2">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Account Security</h3>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage your password and login security.</p>
+                    </div>
+                </div>
+
+                <div id="securityPasswordSection" class="mt-4 space-y-4 @(Model.IsGoogleUser ? "hidden" : "")">
+                    <div id="changePwdStep1">
+                        <button type="button" id="btnStartChangePwd" class="inline-flex items-center gap-2 rounded-lg bg-subgreen-600 px-4 py-2 text-xs font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:text-sm">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                            Change password
+                        </button>
+                    </div>
+
+                    <div id="changePwdStep2" class="hidden max-w-md space-y-3">
+                        <p class="text-xs font-medium uppercase tracking-wide text-subgreen-600 dark:text-subgreen-400">Step 1 of 2</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Enter your current password to continue.</p>
+                        <div>
+                            <label for="currentPassword" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Current password</label>
+                            <div class="relative mt-1">
+                                <input type="password" id="currentPassword" autocomplete="current-password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm" />
+                                <button type="button" class="pwd-toggle absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100" data-target="currentPassword" aria-label="Show current password">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                </button>
+                            </div>
+                            <p id="currentPwdError" class="mt-1 hidden text-xs text-red-600 dark:text-red-400">Current password is incorrect.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" id="btnContinueToNewPwd" class="rounded-lg bg-subgreen-600 px-4 py-2 text-xs font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:text-sm">Continue</button>
+                            <button type="button" id="btnCancelChangePwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">Cancel</button>
+                        </div>
+                    </div>
+
+                    <form id="changePwdForm" method="post" asp-page-handler="ChangePassword" class="hidden max-w-md space-y-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="currentPassword" id="hiddenCurrentPassword" />
+                        <p class="text-xs font-medium uppercase tracking-wide text-subgreen-600 dark:text-subgreen-400">Step 2 of 2</p>
+                        <div>
+                            <label for="newPassword" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">New password</label>
+                            <div class="relative mt-1">
+                                <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required minlength="8" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm" />
+                                <button type="button" class="pwd-toggle absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100" data-target="newPassword" aria-label="Show new password">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="confirmPassword" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Confirm new password</label>
+                            <div class="relative mt-1">
+                                <input type="password" id="confirmPassword" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-xs text-slate-900 focus:border-subgreen-500 focus:outline-none focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm" />
+                                <button type="button" class="pwd-toggle absolute inset-y-0 right-0 inline-flex items-center px-3 text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100" data-target="confirmPassword" aria-label="Show confirm password">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                </button>
+                            </div>
+                            <p id="changePwdMismatch" class="mt-1 hidden text-xs text-red-600 dark:text-red-400">Passwords do not match.</p>
+                        </div>
+                        <div id="changePwdError" class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 sm:text-sm"></div>
+                        <div id="changePwdSuccess" class="hidden rounded-lg border border-subgreen-200 bg-subgreen-50 px-3 py-2 text-xs text-subgreen-800 dark:border-subgreen-800 dark:bg-subgreen-900/30 dark:text-subgreen-300 sm:text-sm">Password updated successfully.</div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="submit" id="btnSubmitChangePwd" class="rounded-lg bg-subgreen-600 px-4 py-2 text-xs font-semibold text-white hover:bg-subgreen-500 dark:bg-subgreen-500 dark:hover:bg-subgreen-400 sm:text-sm">Update password</button>
+                            <button type="button" id="btnCancelNewPwd" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 sm:text-sm">Cancel</button>
+                        </div>
+                    </form>
+
+                    <div class="rounded-lg border border-subgreen-200 bg-subgreen-50 p-3 dark:border-subgreen-700 dark:bg-subgreen-900/20">
+                        <p class="text-xs text-subgreen-800 dark:text-subgreen-300 sm:text-sm">Forgot your password? Send a reset link to your email.</p>
+                        <form id="sendResetLinkForm" method="post" asp-page-handler="SendPasswordResetLink" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" id="btnSendResetLink" class="inline-flex items-center gap-2 rounded-lg border border-subgreen-300 bg-white px-3 py-1.5 text-xs font-medium text-subgreen-700 hover:bg-subgreen-100 dark:border-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-900/50 sm:text-sm">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            <span id="btnSendResetLinkText">Send password reset link</span>
+                            </button>
+                        </form>
+                        <p id="resetLinkSuccess" class="mt-2 hidden text-xs text-subgreen-700 dark:text-subgreen-300">Reset link sent. Check your inbox.</p>
+                        <p id="resetLinkError" class="mt-2 hidden text-xs text-red-600 dark:text-red-400"></p>
+                    </div>
+                </div>
+
+                <div id="securityGoogleSection" class="mt-4 @(Model.IsGoogleUser ? "" : "hidden")">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-700/40 sm:p-4">
+                        <h4 class="text-xs font-semibold text-slate-800 dark:text-slate-200 sm:text-sm">Connected to Google</h4>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Your account uses Google sign-in. Password change and forgot password are not applicable here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 sm:space-y-4">
+            <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m5.506-7.971c2.31.155 4.383 1.379 5.824 3.215m-6.08-8.715a9 9 0 110-17.464m6.5-1.921A9.003 9.003 0 0012 2c-4.478 0-8.268 2.943-9.543 7m9.543 6.908c-.955.076-1.883.206-2.77.372m5.21-.78a9.47 9.47 0 015.3 2.821m0 0A9.001 9.001 0 0012 2" /></svg>
+                            </div>
+                            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Biometrics</h3>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use fingerprint or face to record time in/out.</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Enable Biometrics</span>
+                    <button type="button" id="toggleBiometrics" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-subgreen-500 focus:ring-offset-2 dark:bg-slate-600 dark:focus:ring-offset-slate-800">
+                        <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <p id="biometricsStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Status: Disabled</p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-xl sm:p-6">
                 <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Preferences</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Customize your experience.</p>
-            </div>
-        </div>
-        <div class="mt-4 space-y-3">
-            <div class="flex items-center justify-between">
-                <label for="languageSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Language</label>
-                <select id="languageSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
-                    <option>English</option>
-                    <option>Filipino (Tagalog)</option>
-                    <option>Spanish</option>
-                </select>
-            </div>
-            <div class="flex items-center justify-between">
-                <label for="themeSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Theme</label>
-                <select id="themeSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
-                    <option>Auto (System)</option>
-                    <option>Light</option>
-                    <option>Dark</option>
-                </select>
+                <div class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label for="languageSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Language</label>
+                        <select id="languageSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
+                            <option>English</option>
+                            <option>Filipino (Tagalog)</option>
+                            <option>Spanish</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label for="themeSelect" class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Theme</label>
+                        <select id="themeSelect" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-subgreen-500 focus:ring-1 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 sm:text-sm">
+                            <option>Auto (System)</option>
+                            <option>Light</option>
+                            <option>Dark</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Biometrics Registration Modal -->
 <div id="biometricsModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4">
     <div id="biometricsBackdrop" class="backdrop-blur-[1px] absolute inset-0 bg-slate-900/40" aria-hidden="true"></div>
 
     <div role="dialog" aria-modal="true" aria-labelledby="biometricsTitle" class="relative w-full max-w-md rounded-lg bg-white shadow-2xl dark:bg-slate-800 sm:rounded-xl">
-        <!-- Header -->
         <div class="border-b border-slate-200 px-4 py-3 dark:border-slate-700 sm:px-6 sm:py-4">
             <div class="flex items-center justify-between">
                 <h2 id="biometricsTitle" class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Register Biometrics</h2>
@@ -103,225 +266,383 @@
             </div>
         </div>
 
-        <!-- Content -->
         <div class="p-4 space-y-4 sm:p-6 sm:space-y-6">
-            <!-- Fingerprint Scanner Illustration -->
             <div class="flex justify-center">
                 <div class="relative h-32 w-32 sm:h-40 sm:w-40">
-                    <div id="fingerprintScanner" class="absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
-                        <svg class="h-16 w-16 text-slate-400 dark:text-slate-500 sm:h-20 sm:w-20" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 3a5 5 0 110 10 5 5 0 010-10z"/>
-                        </svg>
+                    <div class="absolute inset-0 flex items-center justify-center rounded-2xl border-4 border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-700/50">
+                        <svg class="h-16 w-16 text-slate-400 dark:text-slate-500 sm:h-20 sm:w-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm0 3a5 5 0 110 10 5 5 0 010-10z"/></svg>
                     </div>
                     <div id="scanningPulse" class="absolute inset-0 rounded-2xl border-2 border-subgreen-400 opacity-0"></div>
                 </div>
             </div>
-
-            <!-- Status Text -->
             <div id="registrationStatus" class="text-center">
                 <p class="text-sm font-semibold text-slate-900 dark:text-white">Place your finger on scanner</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">We're capturing your fingerprint</p>
             </div>
-
-            <!-- Progress Indicators -->
             <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                    <div id="scan1" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
-                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 1 - Ready</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="scan2" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
-                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 2 - Pending</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="scan3" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div>
-                    <span class="text-xs text-slate-600 dark:text-slate-300">Scan 3 - Pending</span>
-                </div>
+                <div class="flex items-center gap-2"><div id="scan1" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div><span class="text-xs text-slate-600 dark:text-slate-300">Scan 1</span></div>
+                <div class="flex items-center gap-2"><div id="scan2" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div><span class="text-xs text-slate-600 dark:text-slate-300">Scan 2</span></div>
+                <div class="flex items-center gap-2"><div id="scan3" class="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-600"></div><span class="text-xs text-slate-600 dark:text-slate-300">Scan 3</span></div>
             </div>
-
-            <!-- Progress Bar -->
-            <div class="h-1 bg-slate-200 rounded-full overflow-hidden dark:bg-slate-700">
-                <div id="progressBar" class="h-full bg-subgreen-500 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-
-            <!-- Info Message -->
-            <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                <p class="text-xs text-blue-800 dark:text-blue-200">Make sure your finger is clean and dry. Press firmly on the scanner for each scan.</p>
-            </div>
+            <div class="h-1 bg-slate-200 rounded-full overflow-hidden dark:bg-slate-700"><div id="progressBar" class="h-full bg-subgreen-500 rounded-full transition-all duration-500" style="width: 0%"></div></div>
         </div>
 
-        <!-- Footer -->
         <div class="border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50 sm:px-6 sm:py-4 flex items-center justify-end gap-2 sm:gap-3">
-            <button type="button" onclick="closeBiometricsModal()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
-                Cancel
-            </button>
-            <button type="button" id="completeBiometricsBtn" onclick="completeBiometricsRegistration()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-subgreen-500 hover:bg-subgreen-600 dark:bg-subgreen-600 dark:hover:bg-subgreen-500" disabled>
-                Complete
-            </button>
+            <button type="button" onclick="closeBiometricsModal()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
+            <button type="button" id="completeBiometricsBtn" onclick="completeBiometricsRegistration()" class="rounded-lg px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-subgreen-500 hover:bg-subgreen-600 dark:bg-subgreen-600 dark:hover:bg-subgreen-500" disabled>Complete</button>
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
-    // Biometrics Modal Functions
     function openBiometricsModal() {
-        const modal = document.getElementById('biometricsModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            simulateBiometricScanning();
-        }
+        var modal = document.getElementById('biometricsModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        simulateBiometricScanning();
     }
 
     function closeBiometricsModal() {
-        const modal = document.getElementById('biometricsModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
+        var modal = document.getElementById('biometricsModal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
     function simulateBiometricScanning() {
-        const progressBar = document.getElementById('progressBar');
-        const scan1 = document.getElementById('scan1');
-        const scan2 = document.getElementById('scan2');
-        const scan3 = document.getElementById('scan3');
-        const scanningPulse = document.getElementById('scanningPulse');
-        const statusText = document.getElementById('registrationStatus');
-        const completeBtn = document.getElementById('completeBiometricsBtn');
-        const fingerprintScanner = document.getElementById('fingerprintScanner');
+        var progressBar = document.getElementById('progressBar');
+        var scanningPulse = document.getElementById('scanningPulse');
+        var statusText = document.getElementById('registrationStatus');
+        var completeBtn = document.getElementById('completeBiometricsBtn');
+        var scanCount = 0;
+        var totalScans = 3;
 
-        let scanCount = 0;
-        const totalScans = 3;
+        if (completeBtn) completeBtn.disabled = true;
+        if (progressBar) progressBar.style.width = '0%';
+
+        ['scan1', 'scan2', 'scan3'].forEach(function (id) {
+            var dot = document.getElementById(id);
+            if (!dot) return;
+            dot.classList.remove('bg-subgreen-400');
+            dot.classList.add('bg-slate-200', 'dark:bg-slate-600');
+        });
 
         function startScan() {
             if (scanCount >= totalScans) {
-                completeScanning();
+                if (progressBar) progressBar.style.width = '100%';
+                if (statusText) statusText.innerHTML = '<p class="text-sm font-semibold text-subgreen-600 dark:text-subgreen-400">Registration complete!</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Your biometrics have been registered.</p>';
+                if (completeBtn) completeBtn.disabled = false;
                 return;
             }
 
             scanCount++;
-            
-            // Update status
-            const currentScanElement = document.getElementById(`scan${scanCount}`);
-            if (currentScanElement) {
-                currentScanElement.classList.remove('bg-slate-200', 'dark:bg-slate-600');
-                currentScanElement.classList.add('bg-subgreen-400');
+            var dot = document.getElementById('scan' + scanCount);
+            if (dot) {
+                dot.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+                dot.classList.add('bg-subgreen-400');
             }
+            if (statusText) statusText.innerHTML = '<p class="text-sm font-semibold text-slate-900 dark:text-white">Scan ' + scanCount + ' of 3</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Place your finger again...</p>';
+            if (scanningPulse) {
+                scanningPulse.classList.remove('opacity-0');
+                scanningPulse.classList.add('opacity-100', 'animate-pulse');
+            }
+            if (progressBar) progressBar.style.width = ((scanCount / totalScans) * 100) + '%';
 
-            statusText.innerHTML = `<p class="text-sm font-semibold text-slate-900 dark:text-white">Scan ${scanCount} of 3</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Place your finger again...</p>`;
-
-            // Animate scanning pulse
-            scanningPulse.classList.remove('opacity-0');
-            scanningPulse.classList.add('opacity-100', 'animate-pulse');
-
-            // Update progress bar
-            const progress = (scanCount / totalScans) * 100;
-            progressBar.style.width = progress + '%';
-
-            // Simulate scanning delay
-            setTimeout(() => {
-                scanningPulse.classList.remove('opacity-100', 'animate-pulse');
-                scanningPulse.classList.add('opacity-0');
-
-                if (scanCount < totalScans) {
-                    setTimeout(startScan, 1000);
-                } else {
-                    completeScanning();
+            setTimeout(function () {
+                if (scanningPulse) {
+                    scanningPulse.classList.remove('opacity-100', 'animate-pulse');
+                    scanningPulse.classList.add('opacity-0');
                 }
-            }, 2000);
+                setTimeout(startScan, scanCount < totalScans ? 800 : 0);
+            }, 1300);
         }
 
-        function completeScanning() {
-            progressBar.style.width = '100%';
-            statusText.innerHTML = `<p class="text-sm font-semibold text-subgreen-600 dark:text-subgreen-400">✓ Registration Complete!</p><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Your biometrics have been successfully registered.</p>`;
-            
-            const scan3 = document.getElementById('scan3');
-            if (scan3) {
-                scan3.classList.remove('bg-slate-200', 'dark:bg-slate-600');
-                scan3.classList.add('bg-subgreen-400');
-            }
-
-            completeBtn.disabled = false;
-            completeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-
-        // Start the first scan immediately
         startScan();
     }
 
     function completeBiometricsRegistration() {
-        alert('Biometrics registration saved! (UI demo only)');
         closeBiometricsModal();
     }
 
-    const biometricsBackdrop = document.getElementById('biometricsBackdrop');
-    const biometricsModal = document.getElementById('biometricsModal');
-    if (biometricsBackdrop && biometricsModal) {
-        biometricsBackdrop.addEventListener('click', closeBiometricsModal);
-    }
+    (function () {
+        function createToggleHandler(elementId, onChangeFn) {
+            var toggle = document.getElementById(elementId);
+            if (!toggle) return;
+            toggle.addEventListener('click', function () {
+                var on = this.getAttribute('aria-checked') === 'true';
+                var next = !on;
+                this.setAttribute('aria-checked', next ? 'true' : 'false');
+                var thumb = this.querySelector('span');
+                if (next) {
+                    this.classList.remove('bg-slate-200', 'dark:bg-slate-600');
+                    this.classList.add('bg-subgreen-600', 'dark:bg-subgreen-500');
+                    if (thumb) { thumb.classList.remove('translate-x-0'); thumb.classList.add('translate-x-5'); }
+                } else {
+                    this.classList.add('bg-slate-200', 'dark:bg-slate-600');
+                    this.classList.remove('bg-subgreen-600', 'dark:bg-subgreen-500');
+                    if (thumb) { thumb.classList.add('translate-x-0'); thumb.classList.remove('translate-x-5'); }
+                }
+                if (onChangeFn) onChangeFn(next);
+            });
+        }
 
-<script>
-(function () {
-    // Helper function to toggle switch
-    function createToggleHandler(elementId, onChangeFn) {
-        const toggle = document.getElementById(elementId);
-        if (!toggle) return;
-        
-        function setState(on) {
-            toggle.setAttribute('aria-checked', on ? 'true' : 'false');
-            const thumb = toggle.querySelector('span');
-            if (on) {
-                toggle.classList.remove('bg-slate-200', 'dark:bg-slate-600');
-                toggle.classList.add('bg-subgreen-600', 'dark:bg-subgreen-500');
-                if (thumb) { thumb.classList.remove('translate-x-0'); thumb.classList.add('translate-x-5'); }
-            } else {
-                toggle.classList.add('bg-slate-200', 'dark:bg-slate-600');
-                toggle.classList.remove('bg-subgreen-600', 'dark:bg-subgreen-500');
-                if (thumb) { thumb.classList.add('translate-x-0'); thumb.classList.remove('translate-x-5'); }
+        var biometricsStatus = document.getElementById('biometricsStatus');
+        createToggleHandler('toggleBiometrics', function (enabled) {
+            if (enabled) openBiometricsModal();
+            if (biometricsStatus) biometricsStatus.textContent = 'Status: ' + (enabled ? 'Enabled' : 'Disabled');
+        });
+
+        var biometricsBackdrop = document.getElementById('biometricsBackdrop');
+        if (biometricsBackdrop) biometricsBackdrop.addEventListener('click', closeBiometricsModal);
+
+        var isEditing = false;
+        var snapshot = {};
+        var editToggle = document.getElementById('profileEditToggle');
+        var cancelBtn = document.getElementById('profileCancelBtn');
+        var saveBtn = document.getElementById('profileSaveBtn');
+        var actions = document.getElementById('profileEditActions');
+        var form = document.getElementById('employeeProfileForm');
+        var fields = document.querySelectorAll('.profile-edit-field');
+        var avatarPreview = document.getElementById('profileAvatarPreview');
+        var avatarInput = document.getElementById('profileAvatarInput');
+
+        function setEditing(on) {
+            isEditing = on;
+            fields.forEach(function (f) { f.disabled = !on; });
+            if (actions) {
+                actions.classList.toggle('hidden', !on);
+                actions.classList.toggle('flex', on);
             }
+            if (editToggle) editToggle.textContent = on ? 'Editing' : 'Edit';
         }
-        
-        toggle.addEventListener('click', function () {
-            const on = this.getAttribute('aria-checked') === 'true';
-            setState(!on);
-            if (onChangeFn) onChangeFn(!on);
-        });
-        
-        return { setState };
-    }
 
-    // Biometrics toggle with registration modal
-    const biometricsStatus = document.getElementById('biometricsStatus');
-    const biometricsToggle = createToggleHandler('toggleBiometrics', function (enabled) {
-        if (enabled) {
-            openBiometricsModal();
+        function takeSnapshot() {
+            snapshot = {};
+            fields.forEach(function (f, i) { snapshot[f.name || i] = f.value; });
+            snapshot._avatarSrc = avatarPreview ? avatarPreview.src : '';
         }
-        if (biometricsStatus) {
-            biometricsStatus.textContent = 'Status: ' + (enabled ? 'Enabled' : 'Disabled');
+
+        function restoreSnapshot() {
+            fields.forEach(function (f, i) {
+                var key = f.name || i;
+                if (snapshot[key] !== undefined) f.value = snapshot[key];
+            });
+            if (avatarPreview && snapshot._avatarSrc) avatarPreview.src = snapshot._avatarSrc;
+            if (avatarInput) avatarInput.value = '';
         }
-    });
 
-    // Theme selector
-    const themeSelect = document.getElementById('themeSelect');
-    if (themeSelect) {
-        themeSelect.addEventListener('change', function () {
-            // In a real app, this would save to backend and apply theme
-            console.log('Theme changed to:', this.value);
-        });
-    }
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function () {
+                var file = this.files && this.files[0] ? this.files[0] : null;
+                if (!file) return;
+                if (!file.type || file.type.indexOf('image/') !== 0) return;
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    avatarPreview.src = e.target && e.target.result ? e.target.result.toString() : avatarPreview.src;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
-    // Language selector
-    const languageSelect = document.getElementById('languageSelect');
-    if (languageSelect) {
-        languageSelect.addEventListener('change', function () {
-            // In a real app, this would save to backend and update language
-            console.log('Language changed to:', this.value);
+        if (editToggle) {
+            editToggle.addEventListener('click', function () {
+                if (!isEditing) {
+                    takeSnapshot();
+                    setEditing(true);
+                }
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                restoreSnapshot();
+                setEditing(false);
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function () {
+                if (!saveBtn) return;
+                saveBtn.disabled = true;
+                var text = saveBtn.querySelector('.button-text');
+                if (text) text.textContent = 'Saving...';
+            });
+        }
+
+        setEditing(false);
+
+        var step1 = document.getElementById('changePwdStep1');
+        if (!step1) return;
+
+        var step2 = document.getElementById('changePwdStep2');
+        var pwdForm = document.getElementById('changePwdForm');
+        var sendResetLinkForm = document.getElementById('sendResetLinkForm');
+        var currentPassword = document.getElementById('currentPassword');
+        var hiddenCurrent = document.getElementById('hiddenCurrentPassword');
+        var newPassword = document.getElementById('newPassword');
+        var confirmPassword = document.getElementById('confirmPassword');
+        var currentPwdError = document.getElementById('currentPwdError');
+        var mismatchMsg = document.getElementById('changePwdMismatch');
+        var errorDiv = document.getElementById('changePwdError');
+        var successDiv = document.getElementById('changePwdSuccess');
+        var resetLinkSuccess = document.getElementById('resetLinkSuccess');
+        var resetLinkError = document.getElementById('resetLinkError');
+
+        function showStep1() {
+            step1.classList.remove('hidden');
+            step2.classList.add('hidden');
+            pwdForm.classList.add('hidden');
+            currentPassword.value = '';
+            hiddenCurrent.value = '';
+            newPassword.value = '';
+            confirmPassword.value = '';
+            currentPwdError.classList.add('hidden');
+            mismatchMsg.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+        }
+        function showStep2() {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            pwdForm.classList.add('hidden');
+            currentPassword.focus();
+        }
+        function showStep3() {
+            step2.classList.add('hidden');
+            pwdForm.classList.remove('hidden');
+            hiddenCurrent.value = currentPassword.value;
+            newPassword.focus();
+        }
+
+        document.querySelectorAll('.pwd-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = this.getAttribute('data-target');
+                var input = targetId ? document.getElementById(targetId) : null;
+                if (!input) return;
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            });
         });
-    }
-})();
+
+        document.getElementById('btnStartChangePwd').addEventListener('click', showStep2);
+        document.getElementById('btnCancelChangePwd').addEventListener('click', showStep1);
+        document.getElementById('btnContinueToNewPwd').addEventListener('click', async function () {
+            var value = (currentPassword.value || '').trim();
+            if (!value) {
+                currentPwdError.textContent = 'Current password is required.';
+                currentPwdError.classList.remove('hidden');
+                return;
+            }
+
+            currentPwdError.classList.add('hidden');
+            var btn = this;
+            btn.disabled = true;
+            var original = btn.textContent;
+            btn.textContent = 'Checking...';
+
+            try {
+                var tokenInput = document.querySelector('#changePwdForm input[name="__RequestVerificationToken"]');
+                var token = tokenInput ? tokenInput.value : '';
+                var res = await fetch('?handler=VerifyCurrentPassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ currentPassword: value })
+                });
+                var data = await res.json().catch(function () { return {}; });
+                if (res.ok && data.ok === true) {
+                    showStep3();
+                } else {
+                    currentPwdError.textContent = data.message || 'Current password is incorrect.';
+                    currentPwdError.classList.remove('hidden');
+                }
+            } catch (_) {
+                currentPwdError.textContent = 'Unable to verify current password. Please try again.';
+                currentPwdError.classList.remove('hidden');
+            }
+
+            btn.disabled = false;
+            btn.textContent = original;
+        });
+        document.getElementById('btnCancelNewPwd').addEventListener('click', showStep1);
+
+        function validateMatch() {
+            mismatchMsg.classList.toggle('hidden', !confirmPassword.value || newPassword.value === confirmPassword.value);
+        }
+        confirmPassword.addEventListener('input', validateMatch);
+        newPassword.addEventListener('input', validateMatch);
+
+        pwdForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (newPassword.value !== confirmPassword.value) {
+                mismatchMsg.classList.remove('hidden');
+                return;
+            }
+            mismatchMsg.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            var btn = document.getElementById('btnSubmitChangePwd');
+            btn.disabled = true;
+            var formData = new FormData(pwdForm);
+            formData.set('currentPassword', hiddenCurrent.value);
+            formData.set('newPassword', newPassword.value);
+
+            try {
+                var res = await fetch(pwdForm.action, { method: 'POST', body: formData });
+                var data = await res.json().catch(function () { return {}; });
+                if (res.ok && data.ok) {
+                    successDiv.classList.remove('hidden');
+                    setTimeout(showStep1, 1500);
+                } else {
+                    errorDiv.textContent = data.message || 'Failed to update password.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (_) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.classList.remove('hidden');
+            }
+            btn.disabled = false;
+        });
+
+        if (sendResetLinkForm) {
+            sendResetLinkForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                resetLinkSuccess.classList.add('hidden');
+                resetLinkError.classList.add('hidden');
+
+                var btn = document.getElementById('btnSendResetLink');
+                var btnText = document.getElementById('btnSendResetLinkText');
+                var original = btnText ? btnText.textContent : '';
+                btn.disabled = true;
+                if (btnText) btnText.textContent = 'Sending...';
+
+                try {
+                    var formData = new FormData(sendResetLinkForm);
+                    var res = await fetch(sendResetLinkForm.action, { method: 'POST', body: formData });
+                    var data = await res.json().catch(function () { return {}; });
+
+                    if (res.ok && data.ok) {
+                        resetLinkSuccess.textContent = data.message || 'Reset link sent. Check your inbox.';
+                        resetLinkSuccess.classList.remove('hidden');
+                    } else {
+                        resetLinkError.textContent = data.message || 'Failed to send reset link.';
+                        resetLinkError.classList.remove('hidden');
+                    }
+                } catch (_) {
+                    resetLinkError.textContent = 'Network error. Please try again.';
+                    resetLinkError.classList.remove('hidden');
+                }
+
+                btn.disabled = false;
+                if (btnText) btnText.textContent = original || 'Send password reset link';
+            });
+        }
+    })();
 </script>
-
 }
-

@@ -98,7 +98,7 @@
             <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Current Subscription</h2>
         <a asp-page="/SuperAdmin/Subscriptions/Manage" asp-route-orgId="@Model.Organization.OrgID"
         class="text-sm text-subblue-600 hover:text-subblue-700 font-medium">
-            Manage Subscription ?
+            Manage Subscription
        </a>
          </div>
    
@@ -110,7 +110,7 @@
            </div>
          <div>
      <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Billing</dt>
-  <dd class="text-lg font-semibold text-slate-900 dark:text-white mt-1">?@Model.CurrentSubscription.FinalPrice.ToString("N2")</dd>
+  <dd class="text-lg font-semibold text-slate-900 dark:text-white mt-1">₱@Model.CurrentSubscription.FinalPrice.ToString("N2")</dd>
     <dd class="text-sm text-slate-600 dark:text-slate-400">@Model.CurrentSubscription.BillingCycle</dd>
               </div>
  <div>
@@ -194,15 +194,17 @@
     </div>
 </div>
 
+<form id="antiForgeryForm" method="post" class="hidden">@Html.AntiForgeryToken()</form>
+
 <script>
     function suspendOrganization() {
         if (confirm('Are you sure you want to suspend "@Model.Organization.OrgName"? This will disable access for all users.')) {
-      // TODO: Implement suspend organization
-  fetch('/SuperAdmin/Organizations/Suspend', {
+  fetch('?handler=Suspend', {
                 method: 'POST',
     headers: {
   'Content-Type': 'application/json',
-     },
+  'RequestVerificationToken': document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value || ''
+      },
    body: JSON.stringify({ orgId: @Model.Organization.OrgID })
         }).then(response => {
         if (response.ok) {

@@ -7,6 +7,7 @@
 }
 
 <div class="mx-auto">
+    @Html.AntiForgeryToken()
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Overtime Requests</h1>
@@ -31,57 +32,7 @@
                     </tr>
                 </thead>
                 <tbody id="otTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="1" data-employee="Tim Jones" data-date="2025-02-22" data-start="18:00" data-end="21:00" data-reason="Project deadline" data-status="Pending">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Tim+Jones&background=209030&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <span class="text-sm font-medium text-slate-900 dark:text-white">Tim Jones</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 22, 2025</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">18:00 – 21:00</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Project deadline</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="1" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
-                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="2" data-employee="Jane Smith" data-date="2025-02-21" data-start="17:00" data-end="20:00" data-reason="Inventory count" data-status="Pending">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=0060B0&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <span class="text-sm font-medium text-slate-900 dark:text-white">Jane Smith</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 21, 2025</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">17:00 – 20:00</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Inventory count</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Pending</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="2" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
-                    <tr class="ot-row cursor-pointer transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="3" data-employee="Alex Reyes" data-date="2025-02-20" data-start="19:00" data-end="22:00" data-reason="Deployment support" data-status="Approved">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name=Alex+Reyes&background=6b7280&color=fff" class="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-800" alt="" />
-                                <span class="text-sm font-medium text-slate-900 dark:text-white">Alex Reyes</span>
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">Feb 20, 2025</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">19:00 – 22:00</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">Deployment support</td>
-                        <td class="px-5 py-3">
-                            <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300">Approved</span>
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            <a asp-page="/App/Operations/OvertimeRequests/Details" asp-route-id="3" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50">View</a>
-                        </td>
-                    </tr>
+                    <tr><td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading overtime requests...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -91,11 +42,70 @@
 @section Scripts {
 <script>
 (function () {
+    function statusBadge(status) {
+        var s = (status || '').toLowerCase();
+        if (s === 'approved') return 'bg-subgreen-50 text-subgreen-700 dark:bg-subgreen-900/30 dark:text-subgreen-300';
+        if (s === 'rejected') return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300';
+        if (s === 'systemgenerated' || s === 'needsreview') return 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300';
+        return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
+    }
+
+    function formatTime(dt) {
+        var d = new Date(dt);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function renderRows(list) {
+        var body = document.getElementById('otTableBody');
+        if (!body) return;
+        if (!list || !list.length) {
+            body.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">No overtime requests found.</td></tr>';
+            return;
+        }
+
+        body.innerHTML = list.map(function (r) {
+            var dateText = r.otDate ? new Date(String(r.otDate).substring(0, 10) + 'T00:00:00').toLocaleDateString() : '—';
+            var badge = statusBadge(r.status);
+            var canAction = (r.status || '').toLowerCase() === 'pending' || (r.status || '').toLowerCase() === 'systemgenerated' || (r.status || '').toLowerCase() === 'needsreview';
+            return '<tr class="ot-row transition-colors hover:bg-subgreen-50/30 dark:hover:bg-subgreen-900/10" data-id="' + r.otRequestID + '">' +
+                '<td class="px-5 py-3"><span class="text-sm font-medium text-slate-900 dark:text-white">' + (r.employeeName || '—') + '</span></td>' +
+                '<td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">' + dateText + '</td>' +
+                '<td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">' + formatTime(r.startTime) + ' – ' + formatTime(r.endTime) + '</td>' +
+                '<td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">' + (r.reason || '—') + '</td>' +
+                '<td class="px-5 py-3"><span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + badge + '">' + (r.status || 'Pending') + '</span></td>' +
+                '<td class="px-5 py-3 text-right">' + (canAction ? ('<button data-action="approve" class="mr-2 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 hover:bg-subgreen-200">Approve</button><button data-action="reject" class="rounded-lg bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-200">Reject</button>') : '') + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function loadQueue() {
+        fetch('?handler=Queue', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(renderRows)
+            .catch(function () { renderRows([]); });
+    }
+
+    function submitAction(id, action) {
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
+        fd.append('id', id);
+        fd.append('action', action);
+        fetch('?handler=Action', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (x) { if (x && x.ok) loadQueue(); })
+            .catch(function () { });
+    }
+
     document.getElementById('otTableBody')?.addEventListener('click', function (e) {
-        if (e.target.closest('a[href*="Details"]')) return;
         var row = e.target.closest('tr.ot-row');
-        if (row) window.location.href = '/App/Operations/OvertimeRequests/Details?id=' + encodeURIComponent(row.getAttribute('data-id'));
+        if (!row) return;
+        var btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        submitAction(row.getAttribute('data-id'), btn.getAttribute('data-action'));
     });
+
+    loadQueue();
 })();
 </script>
 }

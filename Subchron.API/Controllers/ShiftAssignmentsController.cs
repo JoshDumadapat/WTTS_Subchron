@@ -144,6 +144,26 @@ public class ShiftAssignmentsController : ControllerBase
         if (emp == null)
             return BadRequest(new { ok = false, message = "Employee not found or not active." });
 
+        if (req.EndTime == req.StartTime)
+            return BadRequest(new { ok = false, message = "Shift end time must be different from start time." });
+
+        var sameDayAssignments = await _db.ShiftAssignments
+            .Where(s => s.OrgID == orgId.Value && s.EmpID == req.EmpID && s.AssignmentDate == req.AssignmentDate.Date)
+            .OrderBy(s => s.StartTime)
+            .ToListAsync();
+
+        if (sameDayAssignments.Count > 0 && !req.OverrideExisting)
+        {
+            var overlap = sameDayAssignments.Any(s => TimeRangesOverlap(s.StartTime, s.EndTime, req.StartTime, req.EndTime));
+            var conflictMessage = overlap
+                ? "This employee already has an overlapping shift on this date. Would you like to override the existing assignment?"
+                : "This employee is already assigned on this date. Would you like to override the existing assignment?";
+            return Conflict(new { ok = false, conflict = true, message = conflictMessage });
+        }
+
+        if (sameDayAssignments.Count > 0 && req.OverrideExisting)
+            _db.ShiftAssignments.RemoveRange(sameDayAssignments);
+
         var assignment = new ShiftAssignment
         {
             OrgID = orgId.Value,
@@ -266,6 +286,24 @@ public class ShiftAssignmentsController : ControllerBase
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public string? Notes { get; set; }
+        public bool OverrideExisting { get; set; }
+    }
+
+    private static bool TimeRangesOverlap(TimeSpan existingStart, TimeSpan existingEnd, TimeSpan incomingStart, TimeSpan incomingEnd)
+    {
+        var eStart = NormalizeMinutes(existingStart);
+        var eEnd = NormalizeMinutes(existingEnd, treatMidnightAsNextDay: true);
+        var iStart = NormalizeMinutes(incomingStart);
+        var iEnd = NormalizeMinutes(incomingEnd, treatMidnightAsNextDay: true);
+        return iStart < eEnd && iEnd > eStart;
+    }
+
+    private static int NormalizeMinutes(TimeSpan value, bool treatMidnightAsNextDay = false)
+    {
+        var minutes = (int)value.TotalMinutes;
+        if (treatMidnightAsNextDay && minutes == 0)
+            return 24 * 60;
+        return minutes;
     }
 
     public class UpdateShiftRequest

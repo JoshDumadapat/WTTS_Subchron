@@ -1,202 +1,113 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Subchron.Web.Pages.Auth;
 
 namespace Subchron.Web.Pages.SuperAdmin.DemoRequests
 {
- public class DetailsModel : PageModel
+    public class DetailsModel : PageModel
     {
-     public new DemoRequestDetailViewModel Request { get; set; } = new();
+        private readonly IHttpClientFactory _http;
+        private readonly IConfiguration _config;
+
+        public DetailsModel(IHttpClientFactory http, IConfiguration config)
+        {
+            _http = http;
+            _config = config;
+        }
+
+        public new DemoRequestDetailViewModel Request { get; set; } = new();
         public string? ErrorMessage { get; set; }
- public string? SuccessMessage { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-      var request = await LoadDemoRequest(id);
-     if (request == null)
-      {
-       return NotFound();
-  }
+            var request = await LoadDemoRequestAsync(id);
+            if (request == null)
+                return NotFound();
 
-        Request = request;
-  return Page();
- }
-
-    public async Task<IActionResult> OnPostAsync(int id, string action)
-  {
-var request = await LoadDemoRequest(id);
-  if (request == null)
-       {
-    return NotFound();
-   }
-
-    Request = request;
-
-   if (Request.Status != "Pending")
-    {
-ErrorMessage = "This request has already been reviewed.";
-   return Page();
+            Request = request;
+            return Page();
         }
 
-   try
-  {
-   if (action == "approve")
-       {
-    await ApproveRequest(id);
-        SuccessMessage = "Demo request approved successfully. Organization created.";
-         return RedirectToPage("/SuperAdmin/Organizations/Details", new { id = Request.OrgID });
-      }
-      else if (action == "reject")
+        public async Task<IActionResult> OnPostAsync(int id, string action)
         {
-         await RejectRequest(id);
-  SuccessMessage = "Demo request rejected.";
-   return RedirectToPage("/SuperAdmin/DemoRequests/Index");
-       }
-     }
-     catch (Exception ex)
-  {
-     ErrorMessage = $"Failed to process request: {ex.Message}";
-  return Page();
-     }
+            var request = await LoadDemoRequestAsync(id);
+            if (request == null)
+                return NotFound();
 
-     return Page();
-     }
+            Request = request;
+            if (!string.Equals(Request.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "This request has already been reviewed.";
+                return Page();
+            }
 
-   private async Task<DemoRequestDetailViewModel?> LoadDemoRequest(int id)
-   {
-      // Mock data - replace with actual repository call
-     await Task.Delay(10);
+            var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+            var baseUrl = (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
+            {
+                ErrorMessage = "Session expired. Please sign in again.";
+                return Page();
+            }
 
- var mockRequests = new List<DemoRequestDetailViewModel>
-   {
-       new()
-       {
-    DemoRequestID = 1,
-   OrgName = "TechFlow Solutions",
-ContactName = "John Smith",
-       Email = "john.smith@techflow.com",
-      Phone = "+1-555-0101",
-      OrgSize = "50-100",
-            DesiredMode = "Biometric",
-  Message = "We need a comprehensive time tracking system for our growing team. Our current solution is outdated and we're looking for something modern with biometric authentication to ensure accuracy.",
-      Status = "Pending",
-     CreatedAt = DateTime.Now.AddDays(-2)
-  },
-  new()
-      {
-    DemoRequestID = 2,
-     OrgName = "Digital Marketing Pro",
-    ContactName = "Sarah Johnson",
-     Email = "sarah@digitalmp.com",
-   Phone = "+1-555-0102",
-     OrgSize = "10-50",
- DesiredMode = "QR Code",
-            Message = "Looking for a simple solution for remote team tracking.",
-    Status = "Approved",
-     CreatedAt = DateTime.Now.AddDays(-5),
-   ReviewedAt = DateTime.Now.AddDays(-1),
-      OrgID = 123
-      }
-    };
+            try
+            {
+                var client = _http.CreateClient("Subchron.API");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var resp = await client.PostAsJsonAsync(baseUrl + $"/api/demo-requests/{id}/review", new { action });
+                if (!resp.IsSuccessStatusCode)
+                {
+                    ErrorMessage = "Unable to update request status.";
+                    return Page();
+                }
 
-      return mockRequests.FirstOrDefault(r => r.DemoRequestID == id);
+                TempData["FlashMessage"] = action == "approve"
+                    ? "Demo request approved successfully."
+                    : "Demo request rejected successfully.";
+                return RedirectToPage("/SuperAdmin/DemoRequests/Index");
+            }
+            catch
+            {
+                ErrorMessage = "Unable to update request status.";
+                return Page();
+            }
         }
 
-      private async Task ApproveRequest(int demoRequestId)
-      {
-       // TODO: Replace with actual service calls
-       await Task.Delay(10);
-
-// 1. Create organization
-    var orgId = await CreateOrganizationFromRequest(demoRequestId);
-
-     // 2. Create default organization settings
-       await CreateOrganizationSettings(orgId);
-
-   // 3. Create trial subscription
-     await CreateTrialSubscription(orgId);
-
-       // 4. Update demo request
-  await UpdateDemoRequestStatus(demoRequestId, "Approved", orgId);
-
-     // 5. Create audit logs
-    await CreateAuditLog("APPROVE_DEMO_REQUEST", "DemoRequests", demoRequestId, $"Approved demo request #{demoRequestId}");
-   await CreateAuditLog("CREATE_ORG", "Organizations", orgId, $"Organization created from demo request #{demoRequestId}");
-
-      // Update the current request object
-  Request.Status = "Approved";
-  Request.ReviewedAt = DateTime.Now;
-  Request.OrgID = orgId;
-  }
-
-   private async Task RejectRequest(int demoRequestId)
+        private async Task<DemoRequestDetailViewModel?> LoadDemoRequestAsync(int id)
         {
-       // TODO: Replace with actual service calls
-     await Task.Delay(10);
+            var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+            var baseUrl = (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(baseUrl))
+                return null;
 
-        // 1. Update demo request
-       await UpdateDemoRequestStatus(demoRequestId, "Rejected", null);
-
-        // 2. Create audit log
-   await CreateAuditLog("REJECT_DEMO_REQUEST", "DemoRequests", demoRequestId, $"Rejected demo request #{demoRequestId}");
-
-       // Update the current request object
-   Request.Status = "Rejected";
- Request.ReviewedAt = DateTime.Now;
-   }
-
-      private async Task<int> CreateOrganizationFromRequest(int demoRequestId)
-      {
-     // Mock implementation - replace with actual repository call
-       await Task.Delay(10);
-        var orgId = new Random().Next(1000, 9999);
-         
-          // Organization creation logic would go here
-    // Return the created organization ID
-     return orgId;
+            try
+            {
+                var client = _http.CreateClient("Subchron.API");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                return await client.GetFromJsonAsync<DemoRequestDetailViewModel>(baseUrl + $"/api/demo-requests/{id}");
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 
-       private async Task CreateOrganizationSettings(int orgId)
-        {
-     // Mock implementation - replace with actual repository call
-    await Task.Delay(10);
-      // Default settings creation logic
-   }
-
-    private async Task CreateTrialSubscription(int orgId)
-       {
-      // Mock implementation - replace with actual repository call
-        await Task.Delay(10);
-    // Trial subscription creation logic
-   }
-
-   private async Task UpdateDemoRequestStatus(int demoRequestId, string status, int? orgId)
+    public class DemoRequestDetailViewModel
     {
-    // Mock implementation - replace with actual repository call
-     await Task.Delay(10);
-        // Update status, reviewed date, and org ID if provided
-   }
-
-   private async Task CreateAuditLog(string action, string entityName, int entityId, string details)
-        {
-   // Mock implementation - replace with actual repository call
-     await Task.Delay(10);
-  }
-    }
-
- public class DemoRequestDetailViewModel
-    {
-      public int DemoRequestID { get; set; }
-     public string OrgName { get; set; } = string.Empty;
-      public string ContactName { get; set; } = string.Empty;
+        public int DemoRequestID { get; set; }
+        public string OrgName { get; set; } = string.Empty;
+        public string ContactName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-  public string Phone { get; set; } = string.Empty;
-      public string OrgSize { get; set; } = string.Empty;
-       public string DesiredMode { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-     public string Status { get; set; } = "Pending";
-   public DateTime CreatedAt { get; set; }
-     public DateTime? ReviewedAt { get; set; }
-   public int? ReviewedByUserID { get; set; }
-       public int? OrgID { get; set; }
-   }
+        public string? Phone { get; set; }
+        public string? OrgSize { get; set; }
+        public string? DesiredMode { get; set; }
+        public string? Message { get; set; }
+        public string Status { get; set; } = "Pending";
+        public DateTime CreatedAt { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public int? ReviewedByUserID { get; set; }
+        public int? OrgID { get; set; }
+    }
 }

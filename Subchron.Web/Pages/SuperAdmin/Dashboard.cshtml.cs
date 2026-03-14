@@ -1,72 +1,102 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Subchron.Web.Pages.Auth;
 
-namespace Subchron.Web.Pages.SuperAdmin
+namespace Subchron.Web.Pages.SuperAdmin;
+
+public class DashboardModel : PageModel
 {
-    public class DashboardModel : PageModel
+    private readonly IHttpClientFactory _http;
+
+    public DashboardModel(IHttpClientFactory http)
     {
-        // Stats properties
-        public int TotalOrganizations { get; set; }
-        public int TrialOrganizations { get; set; }
-        public int ActiveOrganizations { get; set; }
-        public int SuspendedOrganizations { get; set; }
-        public int PendingDemoRequests { get; set; }
-        public int NewOrgsThisMonth { get; set; }
-        public int NewActiveThisMonth { get; set; }
-        public int TrialsExpiringSoon { get; set; }
+        _http = http;
+    }
 
-        // Data lists
-        public List<TrialExpiring> TrialsExpiring { get; set; } = new();
-        public List<AuditLogSummary> RecentAuditLogs { get; set; } = new();
+    public int TotalOrganizations { get; set; }
+    public int TrialOrganizations { get; set; }
+    public int ActiveOrganizations { get; set; }
+    public int SuspendedOrganizations { get; set; }
+    public int PendingDemoRequests { get; set; }
+    public int NewOrgsThisMonth { get; set; }
+    public int NewActiveThisMonth { get; set; }
+    public int TrialsExpiringSoon { get; set; }
+    public int TotalUsers { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public string Currency { get; set; } = "PHP";
 
-    public void OnGet()
-        {
-            // TODO: Replace with actual data service calls
-LoadDashboardStats();
-     LoadTrialsExpiring();
-            LoadRecentActivity();
-        }
+    public List<TrialExpiring> TrialsExpiring { get; set; } = new();
+    public List<AuditLogSummary> RecentAuditLogs { get; set; } = new();
+    public List<GrowthPoint> OrganizationGrowth { get; set; } = new();
 
-    private void LoadDashboardStats()
-        {
-            // Mock data - replace with actual repository calls
-          TotalOrganizations = 42;
-      TrialOrganizations = 8;
-            ActiveOrganizations = 32;
-            SuspendedOrganizations = 2;
-PendingDemoRequests = 5;
-  NewOrgsThisMonth = 6;
-            NewActiveThisMonth = 4;
-            TrialsExpiringSoon = 3;
-        }
+    public async Task OnGetAsync()
+    {
+        var client = CreateAuthorizedClient();
+        if (client == null)
+            return;
 
-        private void LoadTrialsExpiring()
-     {
-      // Mock data - replace with actual repository calls
-            TrialsExpiring = new List<TrialExpiring>
-  {
-         new() { OrgName = "TechCorp Solutions", OrgCode = "TECH001", EndDate = DateTime.Now.AddDays(2), DaysRemaining = 2 },
-  new() { OrgName = "Digital Ventures", OrgCode = "DIGI002", EndDate = DateTime.Now.AddDays(5), DaysRemaining = 5 },
-    new() { OrgName = "Innovation Labs", OrgCode = "INNO003", EndDate = DateTime.Now.AddDays(6), DaysRemaining = 6 }
-        };
-        }
+        var summary = await client.GetFromJsonAsync<DashboardSummaryResponse>("api/superadmin/dashboard/summary");
+        if (summary == null)
+            return;
 
-        private void LoadRecentActivity()
-        {
-        // Mock data - replace with actual repository calls
-       RecentAuditLogs = new List<AuditLogSummary>
-         {
-new() { Action = "CREATE_ORG", EntityName = "Organizations", CreatedAt = DateTime.Now.AddHours(-2), OrgName = "NewCorp" },
-      new() { Action = "APPROVE_DEMO_REQUEST", EntityName = "DemoRequests", CreatedAt = DateTime.Now.AddHours(-4), OrgName = null },
-            new() { Action = "UPDATE_SUBSCRIPTION", EntityName = "Subscriptions", CreatedAt = DateTime.Now.AddHours(-6), OrgName = "TechCorp" },
-         new() { Action = "CREATE_PLAN", EntityName = "Plans", CreatedAt = DateTime.Now.AddDays(-1), OrgName = null },
-           new() { Action = "SUSPEND_ORG", EntityName = "Organizations", CreatedAt = DateTime.Now.AddDays(-1), OrgName = "OldCorp" }
-   };
-        }
+        TotalOrganizations = summary.TotalOrganizations;
+        TrialOrganizations = summary.TrialOrganizations;
+        ActiveOrganizations = summary.ActiveOrganizations;
+        SuspendedOrganizations = summary.SuspendedOrganizations;
+        PendingDemoRequests = summary.PendingDemoRequests;
+        NewOrgsThisMonth = summary.NewOrganizationsThisMonth;
+        NewActiveThisMonth = summary.NewActiveOrganizationsThisMonth;
+        TotalUsers = summary.TotalUsers;
+        TotalRevenue = summary.TotalRevenue;
+        Currency = string.IsNullOrWhiteSpace(summary.Currency) ? "PHP" : summary.Currency;
+
+        TrialsExpiring = summary.TrialsExpiringSoon
+            .Select(t => new TrialExpiring
+            {
+                OrgName = t.OrgName,
+                OrgCode = t.OrgCode,
+                EndDate = t.EndDate,
+                DaysRemaining = t.DaysRemaining
+            })
+            .ToList();
+        TrialsExpiringSoon = TrialsExpiring.Count;
+
+        RecentAuditLogs = summary.RecentActivity
+            .Select(a => new AuditLogSummary
+            {
+                Action = a.Action,
+                EntityName = a.EntityName,
+                CreatedAt = a.CreatedAt,
+                OrgName = a.OrgName
+            })
+            .ToList();
+
+        OrganizationGrowth = summary.OrganizationGrowth
+            .Select(g => new GrowthPoint
+            {
+                Year = g.Year,
+                Month = g.Month,
+                NewOrganizations = g.NewOrganizations,
+                TotalOrganizationsCumulative = g.TotalOrganizationsCumulative
+            })
+            .ToList();
+    }
+
+    private HttpClient? CreateAuthorizedClient()
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return client;
     }
 
     public class TrialExpiring
     {
-   public string OrgName { get; set; } = string.Empty;
+        public string OrgName { get; set; } = string.Empty;
         public string OrgCode { get; set; } = string.Empty;
         public DateTime EndDate { get; set; }
         public int DaysRemaining { get; set; }
@@ -75,8 +105,57 @@ new() { Action = "CREATE_ORG", EntityName = "Organizations", CreatedAt = DateTim
     public class AuditLogSummary
     {
         public string Action { get; set; } = string.Empty;
-  public string? EntityName { get; set; }
+        public string? EntityName { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? OrgName { get; set; }
+    }
+
+    public class GrowthPoint
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int NewOrganizations { get; set; }
+        public int TotalOrganizationsCumulative { get; set; }
+    }
+
+    private sealed class DashboardSummaryResponse
+    {
+        public int TotalOrganizations { get; set; }
+        public int TrialOrganizations { get; set; }
+        public int ActiveOrganizations { get; set; }
+        public int SuspendedOrganizations { get; set; }
+        public int NewOrganizationsThisMonth { get; set; }
+        public int NewActiveOrganizationsThisMonth { get; set; }
+        public int TotalUsers { get; set; }
+        public int PendingDemoRequests { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public string Currency { get; set; } = "PHP";
+        public List<TrialExpiringResponse> TrialsExpiringSoon { get; set; } = new();
+        public List<ActivityResponse> RecentActivity { get; set; } = new();
+        public List<GrowthPointResponse> OrganizationGrowth { get; set; } = new();
+    }
+
+    private sealed class TrialExpiringResponse
+    {
+        public string OrgName { get; set; } = string.Empty;
+        public string OrgCode { get; set; } = string.Empty;
+        public DateTime EndDate { get; set; }
+        public int DaysRemaining { get; set; }
+    }
+
+    private sealed class ActivityResponse
+    {
+        public string Action { get; set; } = string.Empty;
+        public string? EntityName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? OrgName { get; set; }
+    }
+
+    private sealed class GrowthPointResponse
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int NewOrganizations { get; set; }
+        public int TotalOrganizationsCumulative { get; set; }
     }
 }

@@ -40,6 +40,16 @@ public class Employee
     [Required, MaxLength(40)]
     public string EmploymentType { get; set; } = "Regular";
 
+    [Required, MaxLength(20)]
+    public string CompensationBasisOverride { get; set; } = "UseOrgDefault";
+
+    public decimal BasePayAmount { get; set; }
+
+    [MaxLength(40)]
+    public string? CustomUnitLabel { get; set; }
+
+    public decimal? CustomWorkHours { get; set; }
+
     [Required, MaxLength(40)]
     public string WorkState { get; set; } = "Active";
 

@@ -1,197 +1,115 @@
+using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.ComponentModel.DataAnnotations;
+using Subchron.Web.Pages.Auth;
 
 namespace Subchron.Web.Pages.SuperAdmin.Subscriptions
 {
     public class ManageModel : PageModel
     {
-      public OrganizationSummary Organization { get; set; } = new();
+        private readonly IHttpClientFactory _http;
+
+        public ManageModel(IHttpClientFactory http)
+        {
+            _http = http;
+        }
+
+        public OrganizationSummary Organization { get; set; } = new();
         public List<PlanOption> AvailablePlans { get; set; } = new();
 
-      [BindProperty]
+        [BindProperty]
         public SubscriptionInput Input { get; set; } = new();
 
         public string? ErrorMessage { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int orgId, bool activate = false)
         {
-            var org = await LoadOrganization(orgId);
-    if (org == null)
-     {
-          return NotFound();
-  }
+            if (orgId <= 0)
+                return NotFound();
 
-   Organization = org;
-         await LoadAvailablePlans();
-        await LoadCurrentSubscription(orgId);
+            var loaded = await LoadManageDataAsync(orgId);
+            if (!loaded)
+                return NotFound();
 
-    if (activate)
-     {
-           Input.Status = "Active";
-      }
+            if (activate)
+                Input.Status = "Active";
 
-     return Page();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string action)
         {
-            var org = await LoadOrganization(Input.OrgID);
-    if (org == null)
- {
-   return NotFound();
-            }
-
-      Organization = org;
-          await LoadAvailablePlans();
-
-     if (!ModelState.IsValid)
-        {
-           return Page();
-    }
-
-   try
-      {
-        if (action == "save")
-       {
-      await SaveSubscription();
-    return RedirectToPage("/SuperAdmin/Subscriptions/Index");
-                }
-                else if (action == "activate")
-    {
-        await ActivateSubscription();
-        return RedirectToPage("/SuperAdmin/Organizations/Details", new { id = Input.OrgID });
-   }
-         }
-   catch (Exception ex)
-     {
-  ErrorMessage = $"Failed to update subscription: {ex.Message}";
-  return Page();
-            }
-
-         return Page();
-        }
-
-        private async Task<OrganizationSummary?> LoadOrganization(int orgId)
-        {
-   // Mock data - replace with actual repository call
-        await Task.Delay(10);
-
-         var mockOrgs = new List<OrganizationSummary>
+            if (!ModelState.IsValid)
             {
-     new() { OrgID = 1, OrgName = "TechCorp Solutions", OrgCode = "TECH001", Status = "Active" },
-        new() { OrgID = 2, OrgName = "Digital Ventures", OrgCode = "DIGI002", Status = "Trial" },
-     new() { OrgID = 3, OrgName = "Innovation Labs", OrgCode = "INNO003", Status = "Active" }
+                await LoadManageDataAsync(Input.OrgID);
+                return Page();
+            }
+
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return RedirectToPage("/Auth/Login");
+
+            if (action == "activate")
+                Input.Status = "Active";
+
+            var payload = new SuperAdminManagePayload
+            {
+                OrgID = Input.OrgID,
+                PlanID = Input.PlanID,
+                AttendanceMode = Input.AttendanceMode,
+                BillingCycle = Input.BillingCycle,
+                StartDate = Input.StartDate,
+                EndDate = Input.EndDate,
+                Status = Input.Status,
+                ModePrice = Input.ModePrice
             };
 
-  return mockOrgs.FirstOrDefault(o => o.OrgID == orgId);
-        }
-
-        private async Task LoadAvailablePlans()
-        {
-            // Mock data - replace with actual repository call
-    await Task.Delay(10);
-
-            AvailablePlans = new List<PlanOption>
-    {
-             new() { PlanID = 1, PlanName = "Basic", BasePrice = 1500 },
-        new() { PlanID = 2, PlanName = "Standard", BasePrice = 2500 },
-          new() { PlanID = 3, PlanName = "Enterprise", BasePrice = 5000 }
-     };
-   }
-
-     private async Task LoadCurrentSubscription(int orgId)
-        {
-   // Mock data - replace with actual repository call
-   await Task.Delay(10);
-
-            // Pre-populate form with current subscription data
-   if (orgId == 1)
-       {
-                Input.OrgID = 1;
-  Input.PlanID = 2; // Standard
-           Input.AttendanceMode = "Biometric";
-                Input.BillingCycle = "Monthly";
-              Input.StartDate = DateTime.Now.AddMonths(-3);
-      Input.EndDate = DateTime.Now.AddMonths(9);
-       Input.Status = "Active";
-     Input.ModePrice = null; // Use default
+            var resp = await client.PostAsJsonAsync($"api/superadmin/subscriptions/{Input.OrgID}/manage", payload);
+            if (!resp.IsSuccessStatusCode)
+            {
+                ErrorMessage = "Failed to update subscription.";
+                await LoadManageDataAsync(Input.OrgID);
+                return Page();
             }
-            else if (orgId == 2)
-      {
-      Input.OrgID = 2;
-          Input.PlanID = 2; // Standard
-              Input.AttendanceMode = "QR Code";
-Input.BillingCycle = "Monthly";
-       Input.StartDate = DateTime.Now.AddDays(-10);
-        Input.EndDate = DateTime.Now.AddDays(4);
-      Input.Status = "Trial";
-      Input.ModePrice = null;
-   }
-      else
-            {
-         // New subscription
-                Input.OrgID = orgId;
-       Input.PlanID = 2; // Default to Standard
-      Input.AttendanceMode = "QR Code"; // Default
-                Input.BillingCycle = "Monthly";
-     Input.StartDate = DateTime.Now;
-      Input.EndDate = DateTime.Now.AddDays(14); // 14-day trial
-        Input.Status = "Trial";
-          Input.ModePrice = null;
+
+            return RedirectToPage("/SuperAdmin/Subscriptions/Index");
+        }
+
+        private async Task<bool> LoadManageDataAsync(int orgId)
+        {
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return false;
+
+            var resp = await client.GetAsync($"api/superadmin/subscriptions/{orgId}/manage");
+            if (!resp.IsSuccessStatusCode)
+                return false;
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var data = await resp.Content.ReadFromJsonAsync<SuperAdminManageResponse>(options);
+            if (data == null)
+                return false;
+
+            Organization = data.Organization;
+            AvailablePlans = data.Plans;
+            Input = data.Input;
+            return true;
+        }
+
+        private HttpClient? CreateAuthorizedClient()
+        {
+            var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var client = _http.CreateClient("Subchron.API");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
     }
-        }
-
-        private async Task SaveSubscription()
- {
-          // TODO: Replace with actual service calls
-      await Task.Delay(10);
-
-            // Calculate final price
-      var selectedPlan = AvailablePlans.FirstOrDefault(p => p.PlanID == Input.PlanID);
-    if (selectedPlan == null) throw new InvalidOperationException("Invalid plan selected");
-
-     var basePrice = selectedPlan.BasePrice;
-        var modePrice = Input.ModePrice ?? GetDefaultModePrice(Input.AttendanceMode);
-var finalPrice = basePrice + modePrice;
-
-        // Apply annual discount if applicable
-  if (Input.BillingCycle == "Annual")
-            {
-      finalPrice = finalPrice * 0.9m; // 10% discount
-}
-
-            // Create audit log
-          await CreateAuditLog("UPDATE_SUBSCRIPTION", "Subscriptions", Input.OrgID,
-     $"Subscription updated: Plan={selectedPlan.PlanName}, Mode={Input.AttendanceMode}, Status={Input.Status}");
-   }
-
-        private async Task ActivateSubscription()
-        {
-            await SaveSubscription();
-
-   // Create audit log for activation
-  await CreateAuditLog("ACTIVATE_SUBSCRIPTION", "Subscriptions", Input.OrgID,
-    "Trial subscription activated");
-        }
-
-        private decimal GetDefaultModePrice(string attendanceMode)
-        {
-return attendanceMode switch
-            {
-                "QR Code" => 0,
-     "Biometric" => 500,
-    "Geo Location" => 300,
-          _ => 0
-        };
-        }
-
-        private async Task CreateAuditLog(string action, string entityName, int entityId, string details)
-        {
-    // Mock implementation - replace with actual repository call
-     await Task.Delay(10);
-        }
-  }
 
     public class OrganizationSummary
     {
@@ -203,18 +121,20 @@ return attendanceMode switch
 
     public class PlanOption
     {
-  public int PlanID { get; set; }
+        public int PlanID { get; set; }
         public string PlanName { get; set; } = string.Empty;
         public decimal BasePrice { get; set; }
     }
 
     public class SubscriptionInput
     {
-    [Required]
- public int OrgID { get; set; }
+        public int? SubscriptionID { get; set; }
+
+        [Required]
+        public int OrgID { get; set; }
 
         [Required(ErrorMessage = "Please select a plan")]
-     public int PlanID { get; set; }
+        public int PlanID { get; set; }
 
         [Required(ErrorMessage = "Please select an attendance mode")]
         public string AttendanceMode { get; set; } = "QR Code";
@@ -229,9 +149,28 @@ return attendanceMode switch
         public DateTime EndDate { get; set; }
 
         [Required]
-    public string Status { get; set; } = "Trial";
+        public string Status { get; set; } = "Trial";
 
-      [Range(0, 10000, ErrorMessage = "Mode price must be between 0 and 10000")]
+        [Range(0, 10000, ErrorMessage = "Mode price must be between 0 and 10000")]
+        public decimal? ModePrice { get; set; }
+    }
+
+    public sealed class SuperAdminManageResponse
+    {
+        public OrganizationSummary Organization { get; set; } = new();
+        public List<PlanOption> Plans { get; set; } = new();
+        public SubscriptionInput Input { get; set; } = new();
+    }
+
+    public sealed class SuperAdminManagePayload
+    {
+        public int OrgID { get; set; }
+        public int PlanID { get; set; }
+        public string AttendanceMode { get; set; } = "QR Code";
+        public string BillingCycle { get; set; } = "Monthly";
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; } = "Trial";
         public decimal? ModePrice { get; set; }
     }
 }

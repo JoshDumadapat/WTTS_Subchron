@@ -163,7 +163,7 @@ public class AuthController : ControllerBase
         if (user is null || !user.IsActive)
         {
             RecordLoginAttempt(ip);
-            await _audit.LogSuperAdminAsync(null, null, "LoginFailed", "User", null, "Invalid email or inactive: " + (email.Length > 80 ? email[..80] : email));
+            await SafeLogPlatformAuthEventAsync("LoginFailed", "User", null, "Invalid email or inactive: " + (email.Length > 80 ? email[..80] : email));
             var nowRequiresCaptcha = IsLoginCaptchaRequired(ip);
 
             return Unauthorized(new LoginResponse
@@ -177,7 +177,7 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(user.Password))
         {
             RecordLoginAttempt(ip);
-            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "No password (external account)");
+            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "No password (external account)");
             return Unauthorized(new LoginResponse
             {
                 Ok = false,
@@ -190,7 +190,7 @@ public class AuthController : ControllerBase
         if (!BCrypt.Net.BCrypt.Verify(req.Password ?? "", user.Password))
         {
             RecordLoginAttempt(ip);
-            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "LoginFailed", "User", user.UserID, "Invalid password");
+            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Invalid password");
             var nowRequiresCaptcha = IsLoginCaptchaRequired(ip);
 
             return Unauthorized(new LoginResponse
@@ -201,13 +201,26 @@ public class AuthController : ControllerBase
             });
         }
 
+        var tempAccess = await GetActiveTemporaryAccessAsync(user.UserID, req.Password ?? "");
+        if (tempAccess is not null && tempAccess.ExpiresAt < DateTime.UtcNow)
+        {
+            RecordLoginAttempt(ip);
+            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Temporary password expired");
+            return Unauthorized(new LoginResponse
+            {
+                Ok = false,
+                Message = "Temporary password expired. Ask your admin to reissue temporary access.",
+                RequiresCaptcha = IsLoginCaptchaRequired(ip)
+            });
+        }
+
         // Success - clear failed attempts for this IP
         ClearLoginAttempts(ip);
 
         // TOTP required?
         if (user.TotpEnabled)
         {
-            await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "TOTP required");
+            await SafeLogTenantAuthEventAsync(user, "Login", "TOTP required");
             return Ok(new LoginResponse
             {
                 Ok = true,
@@ -218,7 +231,7 @@ public class AuthController : ControllerBase
 
         // Update last login and audit
         _ = UpdateLastLoginAsync(user.UserID);
-        await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, "Success");
+        await SafeLogTenantAuthEventAsync(user, "Login", "Success");
 
         // Use linked Employee's Role for token/redirect
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
@@ -236,6 +249,11 @@ public class AuthController : ControllerBase
             return StatusCode(500, new LoginResponse { Ok = false, Message = "An error occurred during sign-in. Please try again.", RequiresCaptcha = false });
         }
 
+        var tempAccessExpiry = tempAccess?.ExpiresAt;
+        var tempAccessMessage = tempAccessExpiry.HasValue
+            ? $"Temporary password accepted. Please change your password today. Temporary access expires at {tempAccessExpiry.Value.ToLocalTime():MMM dd, yyyy h:mm tt}."
+            : null;
+
         return Ok(new LoginResponse
         {
             Ok = true,
@@ -244,7 +262,8 @@ public class AuthController : ControllerBase
             OrgName = orgName,
             Role = roleString,
             Name = user.Name ?? "",
-            Token = token
+            Token = token,
+            Message = tempAccessMessage
         });
         }
         catch (Exception ex)
@@ -267,7 +286,18 @@ public class AuthController : ControllerBase
             userId = uid;
         if (!string.IsNullOrEmpty(orgIdClaim) && int.TryParse(orgIdClaim, out var oid))
             orgId = oid;
-        await _audit.LogSuperAdminAsync(orgId, userId, "Logout", "User", userId, "Success");
+        if (userId.HasValue)
+        {
+            var logoutUser = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserID == userId.Value);
+            if (logoutUser is not null)
+                await SafeLogTenantAuthEventAsync(logoutUser, "Logout", "Success");
+            else
+                await SafeLogPlatformAuthEventAsync("Logout", "User", userId, "Success");
+        }
+        else
+        {
+            await SafeLogPlatformAuthEventAsync("Logout", "User", userId, "Success");
+        }
         return Ok(new { ok = true });
     }
 
@@ -283,9 +313,13 @@ public class AuthController : ControllerBase
         if (req is null || string.IsNullOrWhiteSpace(req.Email))
             return BadRequest(new { ok = false, message = "Email is required." });
         if (string.IsNullOrWhiteSpace(req.Password))
-            return BadRequest(new { ok = false, message = "Password is required." });
+            return BadRequest(new { ok = false, message = "Temporary password is required." });
 
         var email = req.Email.Trim().ToLowerInvariant();
+        var tempPassword = req.Password.Trim();
+        if (!IsValidTemporaryPassword(tempPassword))
+            return BadRequest(new { ok = false, message = "Temporary password must be 16 characters and include uppercase, lowercase, number, and symbol." });
+
         var existing = await _db.Users.AnyAsync(u => u.Email.ToLower() == email);
         if (existing)
             return Conflict(new { ok = false, message = "This email is already registered." });
@@ -306,16 +340,110 @@ public class AuthController : ControllerBase
             OrgID = orgId,
             Name = name,
             Email = email,
-            Password = BCrypt.Net.BCrypt.HashPassword(req.Password.Trim()),
+            Password = BCrypt.Net.BCrypt.HashPassword(tempPassword),
             IsActive = true,
             Role = UserRoleType.Employee,
             EmailVerified = false,
             AvatarUrl = avatarUrl
         };
         _db.Users.Add(user);
+
+        var tempAccessExpiresAt = DateTime.UtcNow.AddHours(5);
+        _db.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            User = user,
+            TokenHash = BuildTemporaryPasswordTokenHash(tempPassword),
+            ExpiresAt = tempAccessExpiresAt,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
 
-        return Ok(new { ok = true, userId = user.UserID });
+        var webBaseUrl = ResolveWebBaseUrl();
+        var loginUrl = "https://subchron.runasp.net/Auth/Login";
+        var html = EmailTemplates.GetEmployeeTemporaryAccessHtml(loginUrl, email, tempPassword, tempAccessExpiresAt, webBaseUrl);
+        var emailSent = true;
+        try
+        {
+            await _email.SendAsync(email, "Your Subchron temporary login access", html);
+        }
+        catch (Exception ex)
+        {
+            emailSent = false;
+            _logger.LogWarning(ex, "Failed to send temporary access email to {Email}", email);
+        }
+
+        return Ok(new
+        {
+            ok = true,
+            userId = user.UserID,
+            emailSent,
+            message = emailSent
+                ? "Temporary access email sent. Password expires in 5 hours."
+                : "User created but email could not be sent. Reissue temporary access from admin panel."
+        });
+    }
+
+    [Authorize]
+    [HttpPost("reissue-employee-temp-access")]
+    public async Task<IActionResult> ReissueEmployeeTempAccess([FromBody] ReissueEmployeeTempAccessRequest? req)
+    {
+        var orgIdClaim = User.FindFirstValue("orgId");
+        if (string.IsNullOrEmpty(orgIdClaim) || !int.TryParse(orgIdClaim, out var orgId))
+            return Forbid();
+
+        if (req is null || req.UserID <= 0)
+            return BadRequest(new { ok = false, message = "User is required." });
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.UserID == req.UserID && u.OrgID == orgId);
+        if (user is null)
+            return NotFound(new { ok = false, message = "User account not found in this organization." });
+        if (!user.IsActive)
+            return BadRequest(new { ok = false, message = "User account is inactive." });
+
+        var tempPassword = GenerateTemporaryPassword();
+        user.Password = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+
+        var now = DateTime.UtcNow;
+        var activeTempTokens = await _db.PasswordResetTokens
+            .Where(x => x.UserID == user.UserID && x.UsedAt == null && x.TokenHash.StartsWith("TEMP:"))
+            .ToListAsync();
+        foreach (var token in activeTempTokens)
+            token.UsedAt = now;
+
+        var tempAccessExpiresAt = now.AddHours(5);
+        _db.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            UserID = user.UserID,
+            TokenHash = BuildTemporaryPasswordTokenHash(tempPassword),
+            ExpiresAt = tempAccessExpiresAt,
+            CreatedAt = now
+        });
+
+        await _db.SaveChangesAsync();
+
+        var webBaseUrl = ResolveWebBaseUrl();
+        var loginUrl = "https://subchron.runasp.net/Auth/Login";
+        var html = EmailTemplates.GetEmployeeTemporaryAccessHtml(loginUrl, user.Email, tempPassword, tempAccessExpiresAt, webBaseUrl);
+        var emailSent = true;
+        try
+        {
+            await _email.SendAsync(user.Email, "Your Subchron temporary login access", html);
+        }
+        catch (Exception ex)
+        {
+            emailSent = false;
+            _logger.LogWarning(ex, "Failed to send reissued temporary access email to {Email}", user.Email);
+        }
+
+        return Ok(new
+        {
+            ok = true,
+            emailSent,
+            message = emailSent
+                ? "Temporary access reissued. A new login password has been emailed and expires in 5 hours."
+                : "Temporary access was reissued but email sending failed. Reissue again after checking SMTP."
+        });
     }
 
     [Authorize]
@@ -432,16 +560,7 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
 
         // Build reset URL and get web base URL for logo
-        var webBaseUrl =
-            Request.Headers["Origin"].FirstOrDefault()
-            ?? Request.Headers["Referer"].FirstOrDefault()?.TrimEnd('/')
-            ?? $"{Request.Scheme}://{Request.Host}";
-
-        if (Uri.TryCreate(webBaseUrl, UriKind.Absolute, out var uri))
-        {
-            webBaseUrl = $"{uri.Scheme}://{uri.Host}" +
-                         (uri.Port != 80 && uri.Port != 443 ? $":{uri.Port}" : "");
-        }
+        var webBaseUrl = ResolveWebBaseUrl();
 
         var resetUrl =
             $"{webBaseUrl}/Auth/ResetPassword?email={Uri.EscapeDataString(user.Email)}&code={Uri.EscapeDataString(token)}";
@@ -497,6 +616,29 @@ public class AuthController : ControllerBase
 
     // Change password for the authenticated user
     [Authorize]
+    [HttpPost("verify-current-password")]
+    public async Task<IActionResult> VerifyCurrentPassword([FromBody] VerifyCurrentPasswordRequest req)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            return Unauthorized(new { ok = false, message = "Not authenticated." });
+
+        var currentPassword = req?.CurrentPassword ?? "";
+        if (string.IsNullOrWhiteSpace(currentPassword))
+            return BadRequest(new { ok = false, message = "Current password is required." });
+
+        var user = await _db.Users.FindAsync(userId);
+        if (user is null)
+            return Unauthorized(new { ok = false, message = "User not found." });
+
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.Password))
+            return BadRequest(new { ok = false, message = "Current password is incorrect." });
+
+        return Ok(new { ok = true });
+    }
+
+    // Change password for the authenticated user
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
     {
@@ -519,6 +661,15 @@ public class AuthController : ControllerBase
             return BadRequest(new { ok = false, message = "Current password is incorrect." });
 
         user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        var tempTokens = await _db.PasswordResetTokens
+            .Where(x => x.UserID == user.UserID && x.UsedAt == null && x.TokenHash.StartsWith("TEMP:"))
+            .ToListAsync();
+        if (tempTokens.Count > 0)
+        {
+            var usedAt = DateTime.UtcNow;
+            foreach (var token in tempTokens)
+                token.UsedAt = usedAt;
+        }
         await _db.SaveChangesAsync();
         return Ok(new { ok = true });
     }
@@ -583,8 +734,12 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             return Unauthorized(new { ok = false, message = "Not authenticated." });
 
+        var resolvedEmpId = await ResolveEmployeeIdForCurrentUserAsync(userId, includeArchived: true);
+        if (!resolvedEmpId.HasValue)
+            return Ok(new { hasEmployee = false });
+
         var emp = await _tenantDb.Employees.AsNoTracking()
-            .Where(e => e.UserID == userId)
+            .Where(e => e.EmpID == resolvedEmpId.Value)
             .Select(e => new
             {
                 e.FirstName,
@@ -592,10 +747,13 @@ public class AuthController : ControllerBase
                 e.LastName,
                 e.EmpNumber,
                 e.DepartmentID,
+                departmentName = _tenantDb.Departments.Where(d => d.DepID == e.DepartmentID).Select(d => d.DepartmentName).FirstOrDefault(),
                 e.EmploymentType,
                 workState = e.WorkState,
                 isArchived = e.IsArchived,
                 e.DateHired,
+                e.BirthDate,
+                e.Gender,
                 e.Phone,
                 e.AddressLine1,
                 e.AddressLine2,
@@ -631,10 +789,14 @@ public class AuthController : ControllerBase
             lastName = emp.LastName,
             empNumber = emp.EmpNumber ?? "",
             departmentID = emp.DepartmentID,
+            departmentName = emp.departmentName ?? "",
             employmentType = emp.EmploymentType ?? "Regular",
             workState = emp.workState ?? "Active",
             isArchived = emp.isArchived,
             dateHired = emp.DateHired,
+            birthDate = emp.BirthDate,
+            gender = emp.Gender ?? "",
+            baseSalary = (string?)null,
             phone = emp.Phone ?? "",
             addressLine1 = emp.AddressLine1 ?? "",
             addressLine2 = emp.AddressLine2 ?? "",
@@ -647,6 +809,86 @@ public class AuthController : ControllerBase
             emergencyContactRelation = emp.EmergencyContactRelation ?? "",
             role = role?.ToString() ?? ""
         });
+    }
+
+    [Authorize]
+    [HttpGet("employee-attendance-qr")]
+    public async Task<IActionResult> GetCurrentEmployeeAttendanceQr()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            return Unauthorized(new { ok = false, message = "Not authenticated." });
+
+        var resolvedEmpId = await ResolveEmployeeIdForCurrentUserAsync(userId, includeArchived: false);
+        if (!resolvedEmpId.HasValue)
+            return NotFound(new { ok = false, message = "No employee record linked to your account." });
+
+        var emp = await _tenantDb.Employees.FirstOrDefaultAsync(e => e.EmpID == resolvedEmpId.Value);
+        if (emp is null)
+            return NotFound(new { ok = false, message = "No employee record linked to your account." });
+
+        if (string.IsNullOrEmpty(emp.AttendanceQrToken))
+        {
+            emp.AttendanceQrToken = AttendanceQrHelper.GenerateAttendanceQrToken(32);
+            emp.AttendanceQrIssuedAt = DateTime.UtcNow;
+            await _tenantDb.SaveChangesAsync();
+        }
+
+        var webBase = (_config["WebBaseUrl"] ?? "").TrimEnd('/');
+        if (string.IsNullOrEmpty(webBase))
+        {
+            var headerBase = (Request.Headers["X-Web-Base"].ToString() ?? "").Trim();
+            if (!string.IsNullOrEmpty(headerBase))
+                webBase = headerBase.TrimEnd('/');
+        }
+        if (string.IsNullOrEmpty(webBase))
+        {
+            var origin = (Request.Headers["Origin"].ToString() ?? "").Trim();
+            if (!string.IsNullOrEmpty(origin))
+                webBase = origin.TrimEnd('/');
+        }
+        if (string.IsNullOrEmpty(webBase))
+            webBase = (Request.Scheme + "://" + Request.Host).TrimEnd('/');
+        if (string.IsNullOrEmpty(webBase))
+            return StatusCode(500, new { ok = false, message = "WebBaseUrl is not configured." });
+
+        var scanUrl = $"{webBase}/attendance/scan/{emp.AttendanceQrToken}";
+        var pngBytes = AttendanceQrHelper.GenerateQrPng(scanUrl);
+        return File(pngBytes, "image/png");
+    }
+
+    private async Task<int?> ResolveEmployeeIdForCurrentUserAsync(int userId, bool includeArchived)
+    {
+        var employeeByUser = await _tenantDb.Employees
+            .Where(e => e.UserID == userId && (includeArchived || !e.IsArchived))
+            .Select(e => new { e.EmpID })
+            .FirstOrDefaultAsync();
+        if (employeeByUser != null)
+            return employeeByUser.EmpID;
+
+        var userEmail = await _db.Users.AsNoTracking()
+            .Where(u => u.UserID == userId)
+            .Select(u => u.Email)
+            .FirstOrDefaultAsync();
+        if (string.IsNullOrWhiteSpace(userEmail))
+            return null;
+
+        var normalizedEmail = userEmail.Trim().ToLower();
+        var employeeByEmail = await _tenantDb.Employees.FirstOrDefaultAsync(e =>
+            (includeArchived || !e.IsArchived) &&
+            !string.IsNullOrEmpty(e.Email) &&
+            e.Email!.Trim().ToLower() == normalizedEmail &&
+            (!e.UserID.HasValue || e.UserID == userId));
+        if (employeeByEmail is null)
+            return null;
+
+        if (!employeeByEmail.UserID.HasValue)
+        {
+            employeeByEmail.UserID = userId;
+            await _tenantDb.SaveChangesAsync();
+        }
+
+        return employeeByEmail.EmpID;
     }
 
     [Authorize]
@@ -866,7 +1108,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        await _audit.LogSuperAdminAsync(user.OrgID, user.UserID, "Login", "User", user.UserID, provider);
+        await SafeLogTenantAuthEventAsync(user, "Login", provider);
 
         // If 2FA is enabled, require TOTP before issuing session token
         if (user.TotpEnabled)
@@ -1357,15 +1599,20 @@ public class AuthController : ControllerBase
                 });
 
                 var startDate = DateTime.UtcNow.Date;
-                var isTrialPlan = (plan.PlanName ?? "").Equals("Standard", StringComparison.OrdinalIgnoreCase);
+                var resolvedPlanName = plan.PlanName ?? "";
+                var displayBasePrice = GetDisplayPrice(resolvedPlanName);
+                var finalPrice = string.Equals(billing, "Annual", StringComparison.OrdinalIgnoreCase)
+                    ? Math.Round(displayBasePrice * 0.9m, 2)
+                    : displayBasePrice;
+                var isTrialPlan = resolvedPlanName.Equals("Standard", StringComparison.OrdinalIgnoreCase);
                 _db.Subscriptions.Add(new Subscription
                 {
                     OrgID = org.OrgID,
                     PlanID = plan.PlanID,
                     AttendanceMode = mode,
-                    BasePrice = plan.BasePrice,
+                    BasePrice = displayBasePrice,
                     ModePrice = 0m,
-                    FinalPrice = plan.BasePrice,
+                    FinalPrice = finalPrice,
                     BillingCycle = billing,
                     StartDate = startDate,
                     EndDate = isTrialPlan ? DateTime.UtcNow.AddMinutes(GetTrialDurationMinutes()) : (DateTime?)null,
@@ -1474,6 +1721,11 @@ public class AuthController : ControllerBase
         var planName = plan.PlanName ?? "";
         var isFreeTrial = planName == "Standard";
 
+        decimal paidAmount = 0m;
+        string? paidPaymentId = null;
+        string? paidFailureCode = null;
+        string? paidFailureMessage = null;
+
         if (!isFreeTrial)
         {
             if (string.IsNullOrWhiteSpace(req.PaymentIntentId))
@@ -1485,6 +1737,11 @@ public class AuthController : ControllerBase
                 return BadRequest(new { ok = false, message = "Payment session not found." });
             if (intent.Status != "succeeded")
                 return BadRequest(new { ok = false, message = "Only confirmed paid payments grant access. Current status: " + (intent.Status ?? "unknown") + "." });
+
+            paidAmount = intent.Amount / 100m;
+            paidPaymentId = intent.PayMongoPaymentId;
+            paidFailureCode = intent.LastPaymentErrorCode;
+            paidFailureMessage = intent.LastPaymentErrorMessage;
         }
         else if (!string.IsNullOrWhiteSpace(req.PaymentIntentId))
             return BadRequest(new { ok = false, message = "Free trial does not require payment." });
@@ -1520,15 +1777,19 @@ public class AuthController : ControllerBase
                     AttendanceMode = mode
                 });
                 var startDate = DateTime.UtcNow.Date;
+                var displayBasePrice = GetDisplayPrice(planName);
+                var finalPrice = string.Equals(billing, "Annual", StringComparison.OrdinalIgnoreCase)
+                    ? Math.Round(displayBasePrice * 0.9m, 2)
+                    : displayBasePrice;
                 var isTrialPlan = planName.Equals("Standard", StringComparison.OrdinalIgnoreCase);
                 _db.Subscriptions.Add(new Subscription
                 {
                     OrgID = org.OrgID,
                     PlanID = plan.PlanID,
                     AttendanceMode = mode,
-                    BasePrice = plan.BasePrice,
+                    BasePrice = displayBasePrice,
                     ModePrice = 0m,
-                    FinalPrice = plan.BasePrice,
+                    FinalPrice = finalPrice,
                     BillingCycle = billing,
                     StartDate = startDate,
                     EndDate = isTrialPlan ? DateTime.UtcNow.AddMinutes(GetTrialDurationMinutes()) : (DateTime?)null,
@@ -1607,17 +1868,49 @@ public class AuthController : ControllerBase
                 {
                     var paymentTxn = await _db.PaymentTransactions
                         .FirstOrDefaultAsync(pt => pt.PayMongoPaymentIntentId == req.PaymentIntentId);
-                    if (paymentTxn != null)
+                    var subscriptionId = await _db.Subscriptions
+                        .Where(s => s.OrgID == org.OrgID)
+                        .OrderByDescending(s => s.StartDate)
+                        .Select(s => s.SubscriptionID)
+                        .FirstOrDefaultAsync();
+
+                    if (paymentTxn == null)
+                    {
+                        paymentTxn = new PaymentTransaction
+                        {
+                            OrgID = org.OrgID,
+                            UserID = user.UserID,
+                            SubscriptionID = subscriptionId > 0 ? subscriptionId : null,
+                            Amount = paidAmount,
+                            Currency = "PHP",
+                            Status = "paid",
+                            PayMongoPaymentIntentId = req.PaymentIntentId,
+                            PayMongoPaymentId = paidPaymentId,
+                            FailureCode = paidFailureCode,
+                            FailureMessage = paidFailureMessage,
+                            Description = "Subchron - " + planName,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _db.PaymentTransactions.Add(paymentTxn);
+                    }
+                    else
                     {
                         paymentTxn.OrgID = org.OrgID;
                         paymentTxn.UserID = user.UserID;
-                        paymentTxn.SubscriptionID = (await _db.Subscriptions
-                            .Where(s => s.OrgID == org.OrgID)
-                            .OrderByDescending(s => s.StartDate)
-                            .Select(s => s.SubscriptionID)
-                            .FirstOrDefaultAsync());
+                        paymentTxn.SubscriptionID = subscriptionId > 0 ? subscriptionId : paymentTxn.SubscriptionID;
+                        paymentTxn.Amount = paidAmount;
+                        paymentTxn.Status = "paid";
+                        paymentTxn.PayMongoPaymentId = paidPaymentId ?? paymentTxn.PayMongoPaymentId;
+                        paymentTxn.FailureCode = paidFailureCode;
+                        paymentTxn.FailureMessage = paidFailureMessage;
                         paymentTxn.UpdatedAt = DateTime.UtcNow;
-                        await _db.SaveChangesAsync();
+                    }
+
+                    await _db.SaveChangesAsync();
+
+                    if (paymentTxn != null)
+                    {
+                        await UpsertBillingRecordFromRequestAsync(paymentTxn.Id, org.OrgID, user.UserID, req);
                     }
                 }
 
@@ -1626,10 +1919,16 @@ public class AuthController : ControllerBase
                 if (!isFreeTrial && !string.IsNullOrWhiteSpace(req.PaymentIntentId))
                 {
                     var paymentTxn = await _db.PaymentTransactions.FirstOrDefaultAsync(pt => pt.PayMongoPaymentIntentId == req.PaymentIntentId);
-                    if (paymentTxn != null)
-                        await UpsertBillingRecordFromRequestAsync(paymentTxn.Id, org.OrgID, user.UserID, req);
                     var sub = await _db.Subscriptions.FirstOrDefaultAsync(s => s.OrgID == org.OrgID && s.Status == "Trial");
-                    if (sub != null) { sub.Status = "Active"; sub.EndDate = DateTime.UtcNow.AddMonths(1); await _db.SaveChangesAsync(); }
+                    if (sub != null)
+                    {
+                        sub.Status = "Active";
+                        sub.EndDate = DateTime.UtcNow.AddMonths(1);
+                        org.Status = "Active";
+                        if (paymentTxn != null)
+                            paymentTxn.SubscriptionID = sub.SubscriptionID;
+                        await _db.SaveChangesAsync();
+                    }
                 }
 
                 var receiptTo = (req.BillingEmail ?? email)?.Trim();
@@ -1717,6 +2016,11 @@ public class AuthController : ControllerBase
         public string? Password { get; set; }
         public string? Name { get; set; }
         public string? AvatarUrl { get; set; }
+    }
+
+    public class ReissueEmployeeTempAccessRequest
+    {
+        public int UserID { get; set; }
     }
 
     public class CompleteSignupWithBillingRequest
@@ -1886,6 +2190,142 @@ public class AuthController : ControllerBase
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw ?? ""));
         return Convert.ToBase64String(bytes);
+    }
+
+    private async Task SafeLogTenantAuthEventAsync(User user, string action, string details)
+    {
+        try
+        {
+            if (!user.OrgID.HasValue)
+            {
+                await SafeLogPlatformAuthEventAsync(action, "User", user.UserID, details);
+                return;
+            }
+
+            var employee = await _tenantDb.Employees.AsNoTracking()
+                .Where(e => e.OrgID == user.OrgID.Value && e.UserID == user.UserID)
+                .Select(e => new { e.EmpID, e.FirstName, e.LastName })
+                .FirstOrDefaultAsync();
+
+            var displayName = employee is not null
+                ? ($"{employee.FirstName} {employee.LastName}").Trim()
+                : (user.Name ?? user.Email ?? "User");
+
+            await _audit.LogTenantAsync(
+                user.OrgID.Value,
+                user.UserID,
+                action,
+                employee is not null ? "Employee" : "User",
+                employee?.EmpID ?? user.UserID,
+                $"{displayName} - {details}",
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
+                userAgent: Request.Headers["User-Agent"].ToString());
+        }
+        catch
+        {
+            // never block auth flow due to audit failure
+        }
+    }
+
+    private async Task SafeLogPlatformAuthEventAsync(string action, string entityName, int? entityId, string details)
+    {
+        try
+        {
+            await _audit.LogSuperAdminAsync(
+                null,
+                null,
+                action,
+                entityName,
+                entityId,
+                details,
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
+                userAgent: Request.Headers["User-Agent"].ToString());
+        }
+        catch
+        {
+            // never block auth flow due to audit failure
+        }
+    }
+
+    private static string BuildTemporaryPasswordTokenHash(string rawPassword)
+    {
+        return "TEMP:" + Sha256Base64(rawPassword);
+    }
+
+    private async Task<PasswordResetToken?> GetActiveTemporaryAccessAsync(int userId, string rawPassword)
+    {
+        var tokenHash = BuildTemporaryPasswordTokenHash(rawPassword);
+        return await _db.PasswordResetTokens
+            .AsNoTracking()
+            .Where(x => x.UserID == userId && x.UsedAt == null && x.TokenHash == tokenHash)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
+    private static bool IsValidTemporaryPassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password) || password.Length != 16)
+            return false;
+
+        var hasUpper = false;
+        var hasLower = false;
+        var hasDigit = false;
+        var hasSymbol = false;
+        const string allowedSymbols = "!@#$%&*?";
+        foreach (var ch in password)
+        {
+            if (char.IsUpper(ch)) hasUpper = true;
+            else if (char.IsLower(ch)) hasLower = true;
+            else if (char.IsDigit(ch)) hasDigit = true;
+            else if (allowedSymbols.Contains(ch)) hasSymbol = true;
+            else return false;
+        }
+
+        return hasUpper && hasLower && hasDigit && hasSymbol;
+    }
+
+    private static string GenerateTemporaryPassword(int length = 16)
+    {
+        const string upperChars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lowerChars = "abcdefghijkmnopqrstuvwxyz";
+        const string digitChars = "23456789";
+        const string symbolChars = "!@#$%&*?";
+        var allChars = upperChars + lowerChars + digitChars + symbolChars;
+
+        var chars = new List<char>(length)
+        {
+            upperChars[RandomNumberGenerator.GetInt32(upperChars.Length)],
+            lowerChars[RandomNumberGenerator.GetInt32(lowerChars.Length)],
+            digitChars[RandomNumberGenerator.GetInt32(digitChars.Length)],
+            symbolChars[RandomNumberGenerator.GetInt32(symbolChars.Length)]
+        };
+
+        while (chars.Count < length)
+            chars.Add(allChars[RandomNumberGenerator.GetInt32(allChars.Length)]);
+
+        for (var i = chars.Count - 1; i > 0; i--)
+        {
+            var j = RandomNumberGenerator.GetInt32(i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        return new string(chars.ToArray());
+    }
+
+    private string ResolveWebBaseUrl()
+    {
+        var webBaseUrl =
+            Request.Headers["Origin"].FirstOrDefault()
+            ?? Request.Headers["Referer"].FirstOrDefault()?.TrimEnd('/')
+            ?? $"{Request.Scheme}://{Request.Host}";
+
+        if (Uri.TryCreate(webBaseUrl, UriKind.Absolute, out var uri))
+        {
+            webBaseUrl = $"{uri.Scheme}://{uri.Host}" +
+                         (uri.Port != 80 && uri.Port != 443 ? $":{uri.Port}" : "");
+        }
+
+        return webBaseUrl.TrimEnd('/');
     }
 
     // ======= TOTP Related =======

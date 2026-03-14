@@ -245,6 +245,88 @@ namespace Subchron.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Organizations", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            OrgID = 101,
+                            CreatedAt = new DateTime(2025, 12, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "NWS101",
+                            OrgName = "Northwind Systems",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 102,
+                            CreatedAt = new DateTime(2025, 12, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "SRG102",
+                            OrgName = "Skyline Retail Group",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 103,
+                            CreatedAt = new DateTime(2025, 12, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "PDL103",
+                            OrgName = "Pacific Data Labs",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 104,
+                            CreatedAt = new DateTime(2025, 12, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "MHO104",
+                            OrgName = "Metro Health Ops",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 105,
+                            CreatedAt = new DateTime(2025, 12, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "VXL105",
+                            OrgName = "Vertex Logistics",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 106,
+                            CreatedAt = new DateTime(2025, 12, 17, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "BPS106",
+                            OrgName = "Bluepeak Services",
+                            Status = "Trial"
+                        },
+                        new
+                        {
+                            OrgID = 107,
+                            CreatedAt = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "CRF107",
+                            OrgName = "Crescent Foods",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 108,
+                            CreatedAt = new DateTime(2025, 12, 23, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "OBW108",
+                            OrgName = "Omni Build Works",
+                            Status = "Suspended"
+                        },
+                        new
+                        {
+                            OrgID = 109,
+                            CreatedAt = new DateTime(2025, 12, 26, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "HFC109",
+                            OrgName = "Harbor Finance Co",
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            OrgID = 110,
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrgCode = "SME110",
+                            OrgName = "Summit Education",
+                            Status = "Trial"
+                        });
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.OrganizationPaymentMethod", b =>
@@ -385,6 +467,108 @@ namespace Subchron.API.Migrations
                     b.HasKey("OrgID");
 
                     b.ToTable("OrganizationSettings", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            OrgID = 101,
+                            AttendanceMode = "QR",
+                            CreatedAt = new DateTime(2025, 12, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 102,
+                            AttendanceMode = "Hybrid",
+                            CreatedAt = new DateTime(2025, 12, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 103,
+                            AttendanceMode = "Biometric",
+                            CreatedAt = new DateTime(2025, 12, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "NIGHT",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 104,
+                            AttendanceMode = "QR",
+                            CreatedAt = new DateTime(2025, 12, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 105,
+                            AttendanceMode = "Hybrid",
+                            CreatedAt = new DateTime(2025, 12, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 106,
+                            AttendanceMode = "QR",
+                            CreatedAt = new DateTime(2025, 12, 17, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 107,
+                            AttendanceMode = "Biometric",
+                            CreatedAt = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "NIGHT",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 108,
+                            AttendanceMode = "QR",
+                            CreatedAt = new DateTime(2025, 12, 23, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 109,
+                            AttendanceMode = "Hybrid",
+                            CreatedAt = new DateTime(2025, 12, 26, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            OrgID = 110,
+                            AttendanceMode = "QR",
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            DefaultShiftTemplateCode = "DAY",
+                            Timezone = "Asia/Manila",
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.PasswordResetToken", b =>
@@ -497,6 +681,528 @@ namespace Subchron.API.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("PaymentTransactions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 2001,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 101,
+                            PayMongoPaymentId = "seed-pay-2001",
+                            PayMongoPaymentIntentId = "seed-pi-2001",
+                            Status = "paid",
+                            SubscriptionID = 1001
+                        },
+                        new
+                        {
+                            Id = 2002,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 101,
+                            PayMongoPaymentId = "seed-pay-2002",
+                            PayMongoPaymentIntentId = "seed-pi-2002",
+                            Status = "paid",
+                            SubscriptionID = 1002
+                        },
+                        new
+                        {
+                            Id = 2003,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 101,
+                            PayMongoPaymentId = "seed-pay-2003",
+                            PayMongoPaymentIntentId = "seed-pi-2003",
+                            Status = "paid",
+                            SubscriptionID = 1003
+                        },
+                        new
+                        {
+                            Id = 2004,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 101,
+                            PayMongoPaymentId = "seed-pay-2004",
+                            PayMongoPaymentIntentId = "seed-pi-2004",
+                            Status = "paid",
+                            SubscriptionID = 1004
+                        },
+                        new
+                        {
+                            Id = 2005,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 8, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 102,
+                            PayMongoPaymentId = "seed-pay-2005",
+                            PayMongoPaymentIntentId = "seed-pi-2005",
+                            Status = "paid",
+                            SubscriptionID = 1005
+                        },
+                        new
+                        {
+                            Id = 2006,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 102,
+                            PayMongoPaymentId = "seed-pay-2006",
+                            PayMongoPaymentIntentId = "seed-pi-2006",
+                            Status = "paid",
+                            SubscriptionID = 1006
+                        },
+                        new
+                        {
+                            Id = 2007,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 8, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 102,
+                            PayMongoPaymentId = "seed-pay-2007",
+                            PayMongoPaymentIntentId = "seed-pi-2007",
+                            Status = "paid",
+                            SubscriptionID = 1007
+                        },
+                        new
+                        {
+                            Id = 2008,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 8, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 102,
+                            PayMongoPaymentId = "seed-pay-2008",
+                            PayMongoPaymentIntentId = "seed-pi-2008",
+                            Status = "paid",
+                            SubscriptionID = 1008
+                        },
+                        new
+                        {
+                            Id = 2009,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2025, 12, 1, 8, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 103,
+                            PayMongoPaymentId = "seed-pay-2009",
+                            PayMongoPaymentIntentId = "seed-pi-2009",
+                            Status = "paid",
+                            SubscriptionID = 1009
+                        },
+                        new
+                        {
+                            Id = 2010,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 103,
+                            PayMongoPaymentId = "seed-pay-2010",
+                            PayMongoPaymentIntentId = "seed-pi-2010",
+                            Status = "paid",
+                            SubscriptionID = 1010
+                        },
+                        new
+                        {
+                            Id = 2011,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 8, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 103,
+                            PayMongoPaymentId = "seed-pay-2011",
+                            PayMongoPaymentIntentId = "seed-pi-2011",
+                            Status = "paid",
+                            SubscriptionID = 1011
+                        },
+                        new
+                        {
+                            Id = 2012,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 8, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 103,
+                            PayMongoPaymentId = "seed-pay-2012",
+                            PayMongoPaymentIntentId = "seed-pi-2012",
+                            Status = "paid",
+                            SubscriptionID = 1012
+                        },
+                        new
+                        {
+                            Id = 2013,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 8, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 104,
+                            PayMongoPaymentId = "seed-pay-2013",
+                            PayMongoPaymentIntentId = "seed-pi-2013",
+                            Status = "paid",
+                            SubscriptionID = 1013
+                        },
+                        new
+                        {
+                            Id = 2014,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 104,
+                            PayMongoPaymentId = "seed-pay-2014",
+                            PayMongoPaymentIntentId = "seed-pi-2014",
+                            Status = "paid",
+                            SubscriptionID = 1014
+                        },
+                        new
+                        {
+                            Id = 2015,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 2, 1, 8, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 104,
+                            PayMongoPaymentId = "seed-pay-2015",
+                            PayMongoPaymentIntentId = "seed-pi-2015",
+                            Status = "paid",
+                            SubscriptionID = 1015
+                        },
+                        new
+                        {
+                            Id = 2016,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 8, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 104,
+                            PayMongoPaymentId = "seed-pay-2016",
+                            PayMongoPaymentIntentId = "seed-pi-2016",
+                            Status = "paid",
+                            SubscriptionID = 1016
+                        },
+                        new
+                        {
+                            Id = 2017,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2025, 12, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 105,
+                            PayMongoPaymentId = "seed-pay-2017",
+                            PayMongoPaymentIntentId = "seed-pi-2017",
+                            Status = "paid",
+                            SubscriptionID = 1017
+                        },
+                        new
+                        {
+                            Id = 2018,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 105,
+                            PayMongoPaymentId = "seed-pay-2018",
+                            PayMongoPaymentIntentId = "seed-pi-2018",
+                            Status = "paid",
+                            SubscriptionID = 1018
+                        },
+                        new
+                        {
+                            Id = 2019,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 105,
+                            PayMongoPaymentId = "seed-pay-2019",
+                            PayMongoPaymentIntentId = "seed-pi-2019",
+                            Status = "paid",
+                            SubscriptionID = 1019
+                        },
+                        new
+                        {
+                            Id = 2020,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 9, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 105,
+                            PayMongoPaymentId = "seed-pay-2020",
+                            PayMongoPaymentIntentId = "seed-pi-2020",
+                            Status = "paid",
+                            SubscriptionID = 1020
+                        },
+                        new
+                        {
+                            Id = 2021,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 9, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 106,
+                            PayMongoPaymentId = "seed-pay-2021",
+                            PayMongoPaymentIntentId = "seed-pi-2021",
+                            Status = "paid",
+                            SubscriptionID = 1021
+                        },
+                        new
+                        {
+                            Id = 2022,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 1, 1, 9, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 106,
+                            PayMongoPaymentId = "seed-pay-2022",
+                            PayMongoPaymentIntentId = "seed-pi-2022",
+                            Status = "paid",
+                            SubscriptionID = 1022
+                        },
+                        new
+                        {
+                            Id = 2023,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 2, 1, 9, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 106,
+                            PayMongoPaymentId = "seed-pay-2023",
+                            PayMongoPaymentIntentId = "seed-pi-2023",
+                            Status = "paid",
+                            SubscriptionID = 1023
+                        },
+                        new
+                        {
+                            Id = 2024,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 3, 1, 9, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 106,
+                            PayMongoPaymentId = "seed-pay-2024",
+                            PayMongoPaymentIntentId = "seed-pi-2024",
+                            Status = "paid",
+                            SubscriptionID = 1024
+                        },
+                        new
+                        {
+                            Id = 2025,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 9, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 107,
+                            PayMongoPaymentId = "seed-pay-2025",
+                            PayMongoPaymentIntentId = "seed-pi-2025",
+                            Status = "paid",
+                            SubscriptionID = 1025
+                        },
+                        new
+                        {
+                            Id = 2026,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 1, 1, 9, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 107,
+                            PayMongoPaymentId = "seed-pay-2026",
+                            PayMongoPaymentIntentId = "seed-pi-2026",
+                            Status = "paid",
+                            SubscriptionID = 1026
+                        },
+                        new
+                        {
+                            Id = 2027,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 9, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 107,
+                            PayMongoPaymentId = "seed-pay-2027",
+                            PayMongoPaymentIntentId = "seed-pi-2027",
+                            Status = "paid",
+                            SubscriptionID = 1027
+                        },
+                        new
+                        {
+                            Id = 2028,
+                            Amount = 8999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 9, 30, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Enterprise",
+                            OrgID = 107,
+                            PayMongoPaymentId = "seed-pay-2028",
+                            PayMongoPaymentIntentId = "seed-pi-2028",
+                            Status = "paid",
+                            SubscriptionID = 1028
+                        },
+                        new
+                        {
+                            Id = 2029,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2025, 12, 1, 9, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 108,
+                            PayMongoPaymentId = "seed-pay-2029",
+                            PayMongoPaymentIntentId = "seed-pi-2029",
+                            Status = "paid",
+                            SubscriptionID = 1029
+                        },
+                        new
+                        {
+                            Id = 2030,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 1, 1, 9, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 108,
+                            PayMongoPaymentId = "seed-pay-2030",
+                            PayMongoPaymentIntentId = "seed-pi-2030",
+                            Status = "paid",
+                            SubscriptionID = 1030
+                        },
+                        new
+                        {
+                            Id = 2031,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 9, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 108,
+                            PayMongoPaymentId = "seed-pay-2031",
+                            PayMongoPaymentIntentId = "seed-pi-2031",
+                            Status = "paid",
+                            SubscriptionID = 1031
+                        },
+                        new
+                        {
+                            Id = 2032,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 9, 45, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 108,
+                            PayMongoPaymentId = "seed-pay-2032",
+                            PayMongoPaymentIntentId = "seed-pi-2032",
+                            Status = "paid",
+                            SubscriptionID = 1032
+                        },
+                        new
+                        {
+                            Id = 2033,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 109,
+                            PayMongoPaymentId = "seed-pay-2033",
+                            PayMongoPaymentIntentId = "seed-pi-2033",
+                            Status = "paid",
+                            SubscriptionID = 1033
+                        },
+                        new
+                        {
+                            Id = 2034,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 1, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 109,
+                            PayMongoPaymentId = "seed-pay-2034",
+                            PayMongoPaymentIntentId = "seed-pi-2034",
+                            Status = "paid",
+                            SubscriptionID = 1034
+                        },
+                        new
+                        {
+                            Id = 2035,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 109,
+                            PayMongoPaymentId = "seed-pay-2035",
+                            PayMongoPaymentIntentId = "seed-pi-2035",
+                            Status = "paid",
+                            SubscriptionID = 1035
+                        },
+                        new
+                        {
+                            Id = 2036,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 109,
+                            PayMongoPaymentId = "seed-pay-2036",
+                            PayMongoPaymentIntentId = "seed-pi-2036",
+                            Status = "paid",
+                            SubscriptionID = 1036
+                        },
+                        new
+                        {
+                            Id = 2037,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2025, 12, 1, 10, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 110,
+                            PayMongoPaymentId = "seed-pay-2037",
+                            PayMongoPaymentIntentId = "seed-pi-2037",
+                            Status = "paid",
+                            SubscriptionID = 1037
+                        },
+                        new
+                        {
+                            Id = 2038,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 1, 1, 10, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 110,
+                            PayMongoPaymentId = "seed-pay-2038",
+                            PayMongoPaymentIntentId = "seed-pi-2038",
+                            Status = "paid",
+                            SubscriptionID = 1038
+                        },
+                        new
+                        {
+                            Id = 2039,
+                            Amount = 2499m,
+                            CreatedAt = new DateTime(2026, 2, 1, 10, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Basic",
+                            OrgID = 110,
+                            PayMongoPaymentId = "seed-pay-2039",
+                            PayMongoPaymentIntentId = "seed-pi-2039",
+                            Status = "paid",
+                            SubscriptionID = 1039
+                        },
+                        new
+                        {
+                            Id = 2040,
+                            Amount = 5999m,
+                            CreatedAt = new DateTime(2026, 3, 1, 10, 15, 0, 0, DateTimeKind.Utc),
+                            Currency = "PHP",
+                            Description = "Subchron - Standard",
+                            OrgID = 110,
+                            PayMongoPaymentId = "seed-pay-2040",
+                            PayMongoPaymentIntentId = "seed-pi-2040",
+                            Status = "paid",
+                            SubscriptionID = 1040
+                        });
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.Plan", b =>
@@ -616,6 +1322,568 @@ namespace Subchron.API.Migrations
                     b.HasIndex("PlanID");
 
                     b.ToTable("Subscriptions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            SubscriptionID = 1001,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 101,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1002,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 101,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1003,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 101,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1004,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 101,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1005,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 102,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1006,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 102,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1007,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 102,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1008,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 102,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1009,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 103,
+                            PlanID = 2,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1010,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 103,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1011,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 103,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1012,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 103,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1013,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 104,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1014,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 104,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1015,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 104,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1016,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 104,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1017,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 105,
+                            PlanID = 2,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1018,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 105,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1019,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 105,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1020,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 105,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1021,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 106,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1022,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 106,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1023,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 106,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1024,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 106,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Trial"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1025,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 107,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1026,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 107,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1027,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 107,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1028,
+                            AttendanceMode = "Biometric",
+                            BasePrice = 8999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 8999m,
+                            ModePrice = 0m,
+                            OrgID = 107,
+                            PlanID = 3,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1029,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 108,
+                            PlanID = 2,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1030,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 108,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1031,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 108,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1032,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 108,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Suspended"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1033,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 109,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1034,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 109,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1035,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 109,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1036,
+                            AttendanceMode = "Hybrid",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 109,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Active"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1037,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2025, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 110,
+                            PlanID = 1,
+                            StartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1038,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 1, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 110,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1039,
+                            AttendanceMode = "QR",
+                            BasePrice = 2499m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 2, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 2499m,
+                            ModePrice = 0m,
+                            OrgID = 110,
+                            PlanID = 1,
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Expired"
+                        },
+                        new
+                        {
+                            SubscriptionID = 1040,
+                            AttendanceMode = "QR",
+                            BasePrice = 5999m,
+                            BillingCycle = "Monthly",
+                            EndDate = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FinalPrice = 5999m,
+                            ModePrice = 0m,
+                            OrgID = 110,
+                            PlanID = 2,
+                            StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Status = "Trial"
+                        });
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.SuperAdminAuditLog", b =>
@@ -670,6 +1938,178 @@ namespace Subchron.API.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("SuperAdminAuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.SuperAdminExpense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<string>("ReferenceNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Tin")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.ToTable("SuperAdminExpenses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 3001,
+                            Amount = 42000m,
+                            Category = "Infrastructure",
+                            CreatedAt = new DateTime(2025, 12, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Cloud hosting and compute",
+                            Notes = "December cloud invoice",
+                            OccurredAt = new DateTime(2025, 12, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2025-12-001",
+                            TaxAmount = 5040m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3002,
+                            Amount = 18000m,
+                            Category = "Marketing",
+                            CreatedAt = new DateTime(2025, 12, 15, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Marketing and ads",
+                            Notes = "December campaigns",
+                            OccurredAt = new DateTime(2025, 12, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2025-12-002",
+                            TaxAmount = 2160m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3003,
+                            Amount = 24000m,
+                            Category = "Infrastructure",
+                            CreatedAt = new DateTime(2026, 1, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Platform monitoring tools",
+                            Notes = "January tools renewal",
+                            OccurredAt = new DateTime(2026, 1, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-01-001",
+                            TaxAmount = 2880m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3004,
+                            Amount = 15000m,
+                            Category = "Personnel",
+                            CreatedAt = new DateTime(2026, 1, 20, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Operations and support",
+                            Notes = "Support contractor payout",
+                            OccurredAt = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-01-002",
+                            TaxAmount = 1800m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3005,
+                            Amount = 12000m,
+                            Category = "Infrastructure",
+                            CreatedAt = new DateTime(2026, 2, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Data backup storage",
+                            Notes = "Backup and archival",
+                            OccurredAt = new DateTime(2026, 2, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-02-001",
+                            TaxAmount = 1440m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3006,
+                            Amount = 9000m,
+                            Category = "Office",
+                            CreatedAt = new DateTime(2026, 2, 18, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Office and admin",
+                            Notes = "Office and legal supplies",
+                            OccurredAt = new DateTime(2026, 2, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-02-002",
+                            TaxAmount = 1080m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3007,
+                            Amount = 26000m,
+                            Category = "Infrastructure",
+                            CreatedAt = new DateTime(2026, 3, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Security and compliance tools",
+                            Notes = "March security stack",
+                            OccurredAt = new DateTime(2026, 3, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-03-001",
+                            TaxAmount = 3120m,
+                            Tin = "123-456-789-000"
+                        },
+                        new
+                        {
+                            Id = 3008,
+                            Amount = 17000m,
+                            Category = "Marketing",
+                            CreatedAt = new DateTime(2026, 3, 12, 1, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedByUserId = 1,
+                            Description = "Sales outreach and events",
+                            Notes = "March partner events",
+                            OccurredAt = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ReferenceNumber = "EXP-2026-03-002",
+                            TaxAmount = 2040m,
+                            Tin = "123-456-789-000"
+                        });
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.User", b =>

@@ -1,155 +1,311 @@
+using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
+using Subchron.Web.Pages.Auth;
 
-namespace Subchron.Web.Pages.SuperAdmin.Sales
+namespace Subchron.Web.Pages.SuperAdmin.Sales;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IHttpClientFactory _http;
+
+    public IndexModel(IHttpClientFactory http)
     {
-        public decimal TotalIncome { get; set; }
-        public decimal TotalExpenses { get; set; }
-        public decimal NetProfit => TotalIncome - TotalExpenses;
+        _http = http;
+    }
 
-        // Filters
-        [BindProperty(SupportsGet = true)]
-        public string? SearchTerm { get; set; }
-        [BindProperty(SupportsGet = true)]
-        public string? TypeFilter { get; set; }
-        [BindProperty(SupportsGet = true)]
-        public DateTime? DateStart { get; set; }
-        [BindProperty(SupportsGet = true)]
-        public DateTime? DateEnd { get; set; }
+    public decimal TotalIncome { get; set; }
+    public decimal TotalExpenses { get; set; }
+    public decimal NetProfit => TotalIncome - TotalExpenses;
 
-        // Pagination
-        [BindProperty(SupportsGet = true)]
-        public int CurrentPage { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public int TotalPages { get; set; }
-        public int TotalCount { get; set; }
+    [BindProperty(SupportsGet = true)]
+    public string? SearchTerm { get; set; }
 
-        public List<TransactionViewModel> Transactions { get; set; } = new();
+    [BindProperty(SupportsGet = true)]
+    public string? TypeFilter { get; set; }
 
-        public SelectList TypeOptions { get; set; } = new SelectList(new[] { "Income", "Expense" });
+    [BindProperty(SupportsGet = true)]
+    public DateTime? DateStart { get; set; }
 
-        [BindProperty]
-        public TransactionInputModel NewTransaction { get; set; } = new();
+    [BindProperty(SupportsGet = true)]
+    public DateTime? DateEnd { get; set; }
 
-        public void OnGet()
+    [BindProperty(SupportsGet = true)]
+    public int CurrentPage { get; set; } = 1;
+
+    [BindProperty(SupportsGet = true)]
+    public int PageSize { get; set; } = 10;
+
+    public int TotalPages { get; set; }
+    public int TotalCount { get; set; }
+
+    public List<TransactionViewModel> Transactions { get; set; } = new();
+
+    public SelectList TypeOptions { get; set; } = new SelectList(new[] { "Income", "Expense" });
+
+    [BindProperty]
+    public TransactionInputModel NewTransaction { get; set; } = new();
+
+    public List<string> TrendLabels { get; set; } = new();
+    public List<decimal> TrendIncome { get; set; } = new();
+    public List<decimal> TrendExpenses { get; set; } = new();
+
+    [TempData]
+    public string? FlashMessage { get; set; }
+
+    public async Task<IActionResult> OnGetAsync()
+    {
+        TypeOptions = new SelectList(new[] { "Income", "Expense" });
+        await LoadDataAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        NewTransaction.Description = (NewTransaction.Description ?? string.Empty).Trim();
+        NewTransaction.ReferenceNumber = (NewTransaction.ReferenceNumber ?? string.Empty).Trim().ToUpperInvariant();
+        NewTransaction.Tin = NormalizeTin(NewTransaction.Tin);
+
+        if (NewTransaction.TaxAmount < 0)
+            ModelState.AddModelError("NewTransaction.TaxAmount", "VAT/Tax cannot be negative.");
+
+        if (!ModelState.IsValid)
         {
             TypeOptions = new SelectList(new[] { "Income", "Expense" });
-            LoadData();
+            await LoadDataAsync();
+            return Page();
         }
 
-        public IActionResult OnPost()
+        var client = CreateAuthorizedClient();
+        if (client == null)
         {
-            if (!ModelState.IsValid)
-            {
-                TypeOptions = new SelectList(new[] { "Income", "Expense" });
-                LoadData();
-                return Page();
-            }
-
-            // In a real app, save to DB here.
-            // For this mock, we simply reload.
-            return RedirectToPage();
+            FlashMessage = "Your session expired. Please sign in again.";
+            return RedirectToPage("/Auth/Login");
         }
 
-        private void LoadData()
+        var payload = new
         {
-            // 1. Generate Mock Data (In real app, this comes from DB)
-            var allTransactions = new List<TransactionViewModel>
-            {
-                new() { Id = 1, Date = DateTime.Now.AddDays(-2), Description = "Subscription Payment - Org A", Amount = 1500.00m, Type = TransactionType.Income, ReferenceNumber="OR-2023-001", Tin="123-456-789-000", Category="Subscription", TaxAmount=160.71m, Notes="VAT Inclusive" },
-                new() { Id = 2, Date = DateTime.Now.AddDays(-5), Description = "Server Hosting Bill (Azure)", Amount = 500.00m, Type = TransactionType.Expense, ReferenceNumber="INV-MS-992", Tin="987-654-321-000", Category="Infrastructure", TaxAmount=0, Notes="Zero Rated" },
-                new() { Id = 3, Date = DateTime.Now.AddDays(-1), Description = "Enterprise Plan - Org B", Amount = 5000.00m, Type = TransactionType.Income, ReferenceNumber="OR-2023-002", Tin="111-222-333-000", Category="Enterprise", TaxAmount=535.71m, Notes="VAT Inclusive" },
-                new() { Id = 4, Date = DateTime.Now, Description = "Marketing Ads (FB)", Amount = 2000.00m, Type = TransactionType.Expense, ReferenceNumber="INV-FB-221", Tin="000-000-000-000", Category="Marketing", TaxAmount=0, Notes="Foreign Corp" },
-                new() { Id = 5, Date = DateTime.Now.AddDays(-10), Description = "Freelance Dev Support", Amount = 3000.00m, Type = TransactionType.Expense, ReferenceNumber="PVC-001", Tin="555-555-555-000", Category="Personnel", TaxAmount=300.00m, Notes="Withholding Tax Applied" },
-                // Add more specific mock data for pagination testing
-                new() { Id = 6, Date = DateTime.Now.AddDays(-12), Description = "Consulting Fee", Amount = 1200.00m, Type = TransactionType.Income, ReferenceNumber="OR-2023-003", Tin="123-123-123-000", Category="Services", TaxAmount=128.57m },
-                new() { Id = 7, Date = DateTime.Now.AddDays(-15), Description = "Office Supplies", Amount = 150.00m, Type = TransactionType.Expense, ReferenceNumber="INV-OFF-001", Tin="999-999-999-000", Category="Office", TaxAmount=16.07m },
-            };
+            Date = DateTime.UtcNow.Date,
+            Description = NewTransaction.Description,
+            Amount = NewTransaction.Amount,
+            ReferenceNumber = NewTransaction.ReferenceNumber,
+            Tin = NewTransaction.Tin,
+            TaxAmount = NewTransaction.TaxAmount,
+            Category = NewTransaction.Category,
+            Notes = NewTransaction.Notes
+        };
 
-            // 2. Calculate Totals (Global, before filter usually, or after? Let's do Global for the top cards)
-            TotalIncome = allTransactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
-            TotalExpenses = allTransactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
-
-            // 3. Apply Filters
-            var query = allTransactions.AsQueryable();
-
-            if (!string.IsNullOrEmpty(SearchTerm))
-            {
-                var term = SearchTerm.ToLower();
-                query = query.Where(t => t.Description.ToLower().Contains(term) || t.ReferenceNumber.ToLower().Contains(term) || t.Category.ToLower().Contains(term));
-            }
-
-            if (!string.IsNullOrEmpty(TypeFilter) && Enum.TryParse<TransactionType>(TypeFilter, out var typeEnum))
-            {
-                query = query.Where(t => t.Type == typeEnum);
-            }
-
-            if (DateStart.HasValue)
-            {
-                query = query.Where(t => t.Date.Date >= DateStart.Value.Date);
-            }
-
-            if (DateEnd.HasValue)
-            {
-                query = query.Where(t => t.Date.Date <= DateEnd.Value.Date);
-            }
-
-            // 4. Pagination Logic
-            TotalCount = query.Count();
-            TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
-            
-            Transactions = query
-                .OrderByDescending(t => t.Date)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-        }
-
-        public class TransactionViewModel
+        var resp = await client.PostAsJsonAsync("api/superadmin/sales/expenses", payload);
+        if (!resp.IsSuccessStatusCode)
         {
-            public int Id { get; set; }
-            public DateTime Date { get; set; }
-            public string Description { get; set; } = string.Empty;
-            public decimal Amount { get; set; }
-            public TransactionType Type { get; set; }
-            
-            // BIR / System Details
-            public string ReferenceNumber { get; set; } = string.Empty; // OR or SI or Invoice
-            public string Tin { get; set; } = string.Empty;
-            public decimal TaxAmount { get; set; }
-            public string Category { get; set; } = string.Empty;
-            public string? Notes { get; set; }
+            var serverMsg = await resp.Content.ReadAsStringAsync();
+            FlashMessage = string.IsNullOrWhiteSpace(serverMsg)
+                ? "Could not save expense record."
+                : serverMsg;
+            TypeOptions = new SelectList(new[] { "Income", "Expense" });
+            await LoadDataAsync();
+            return Page();
         }
 
-        public class TransactionInputModel
+        FlashMessage = "Expense record saved.";
+        TypeOptions = new SelectList(new[] { "Income", "Expense" });
+        return RedirectToPage(new
         {
-            [Required]
-            public string Description { get; set; } = string.Empty;
+            SearchTerm,
+            TypeFilter,
+            DateStart,
+            DateEnd,
+            CurrentPage,
+            PageSize
+        });
+    }
 
-            [Required]
-            [Range(0.01, 10000000, ErrorMessage = "Amount must be greater than 0")]
-            public decimal Amount { get; set; }
+    private async Task LoadDataAsync()
+    {
+        CurrentPage = Math.Max(1, CurrentPage);
+        PageSize = Math.Clamp(PageSize, 5, 100);
 
-            [Required]
-            public TransactionType Type { get; set; } = TransactionType.Expense;
+        var client = CreateAuthorizedClient();
+        if (client == null)
+            return;
 
-            [Required(ErrorMessage = "Reference Number (OR/SI) is required")]
-            public string ReferenceNumber { get; set; } = string.Empty;
-
-            public string? Tin { get; set; }
-            public decimal TaxAmount { get; set; }
-            public string? Category { get; set; }
-            public string? Notes { get; set; }
-        }
-
-        public enum TransactionType
+        var query = new List<string>
         {
-            Income,
-            Expense
-        }
+            "page=" + CurrentPage,
+            "pageSize=" + PageSize
+        };
+
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+            query.Add("search=" + Uri.EscapeDataString(SearchTerm.Trim()));
+        if (!string.IsNullOrWhiteSpace(TypeFilter))
+            query.Add("type=" + Uri.EscapeDataString(TypeFilter.Trim()));
+        if (DateStart.HasValue)
+            query.Add("dateStart=" + Uri.EscapeDataString(DateStart.Value.ToString("yyyy-MM-dd")));
+        if (DateEnd.HasValue)
+            query.Add("dateEnd=" + Uri.EscapeDataString(DateEnd.Value.ToString("yyyy-MM-dd")));
+
+        var resp = await client.GetAsync("api/superadmin/sales/transactions?" + string.Join("&", query));
+        if (!resp.IsSuccessStatusCode)
+            return;
+
+        var data = await resp.Content.ReadFromJsonAsync<SalesTransactionsResponse>();
+        if (data == null)
+            return;
+
+        TotalIncome = data.TotalIncome;
+        TotalExpenses = data.TotalExpenses;
+        TotalCount = data.TotalCount;
+        CurrentPage = Math.Max(1, data.Page);
+        PageSize = Math.Clamp(data.PageSize, 5, 100);
+        TotalPages = Math.Max(1, (int)Math.Ceiling(TotalCount / (double)PageSize));
+
+        Transactions = data.Items
+            .Select(t => new TransactionViewModel
+            {
+                Id = t.Id,
+                Date = t.Date,
+                Description = t.Description,
+                Amount = t.Amount,
+                Type = string.Equals(t.Type, "Expense", StringComparison.OrdinalIgnoreCase)
+                    ? TransactionType.Expense
+                    : TransactionType.Income,
+                ReferenceNumber = t.ReferenceNumber,
+                Category = t.Category,
+                Notes = t.Notes,
+                TaxAmount = t.TaxAmount,
+                Tin = t.Tin ?? string.Empty
+            })
+            .ToList();
+
+        TrendLabels = data.Trend
+            .OrderBy(t => t.Year)
+            .ThenBy(t => t.Month)
+            .Select(t => new DateTime(t.Year, t.Month, 1).ToString("MMM"))
+            .ToList();
+        TrendIncome = data.Trend
+            .OrderBy(t => t.Year)
+            .ThenBy(t => t.Month)
+            .Select(t => t.Income)
+            .ToList();
+        TrendExpenses = data.Trend
+            .OrderBy(t => t.Year)
+            .ThenBy(t => t.Month)
+            .Select(t => t.Expense)
+            .ToList();
+    }
+
+    private HttpClient? CreateAuthorizedClient()
+    {
+        var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var client = _http.CreateClient("Subchron.API");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return client;
+    }
+
+    private static string? NormalizeTin(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return null;
+
+        var digits = new string(input.Where(char.IsDigit).ToArray());
+        if (digits.Length == 0)
+            return null;
+        if (digits.Length > 12)
+            digits = digits[..12];
+
+        var groups = new List<string>();
+        for (var i = 0; i < digits.Length; i += 3)
+            groups.Add(digits.Substring(i, Math.Min(3, digits.Length - i)));
+
+        return string.Join("-", groups);
+    }
+
+    public class TransactionViewModel
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public TransactionType Type { get; set; }
+        public string ReferenceNumber { get; set; } = string.Empty;
+        public string Tin { get; set; } = string.Empty;
+        public decimal TaxAmount { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string? Notes { get; set; }
+    }
+
+    public class TransactionInputModel
+    {
+        [Required]
+        [StringLength(120, ErrorMessage = "Description must be 120 characters or less.")]
+        public string Description { get; set; } = string.Empty;
+
+        [Required]
+        [Range(0.01, 10000000, ErrorMessage = "Amount must be greater than 0")]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public TransactionType Type { get; set; } = TransactionType.Expense;
+
+        [Required(ErrorMessage = "Reference Number (OR/SI) is required")]
+        [StringLength(40, ErrorMessage = "Reference number must be 40 characters or less.")]
+        public string ReferenceNumber { get; set; } = string.Empty;
+
+        [RegularExpression(@"^\d{3}-\d{3}-\d{3}(-\d{3})?$", ErrorMessage = "TIN must be in 000-000-000 or 000-000-000-000 format.")]
+        public string? Tin { get; set; }
+
+        [Range(0, 10000000, ErrorMessage = "VAT/Tax cannot be negative.")]
+        public decimal TaxAmount { get; set; }
+
+        [StringLength(40, ErrorMessage = "Category must be 40 characters or less.")]
+        public string? Category { get; set; }
+
+        [StringLength(255, ErrorMessage = "Notes must be 255 characters or less.")]
+        public string? Notes { get; set; }
+    }
+
+    public enum TransactionType
+    {
+        Income,
+        Expense
+    }
+
+    private sealed class SalesTransactionsResponse
+    {
+        public List<SalesTransactionItem> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public decimal TotalIncome { get; set; }
+        public decimal TotalExpenses { get; set; }
+        public List<SalesTrendPoint> Trend { get; set; } = new();
+    }
+
+    private sealed class SalesTransactionItem
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string Type { get; set; } = "Income";
+        public string ReferenceNumber { get; set; } = string.Empty;
+        public string? Tin { get; set; }
+        public decimal TaxAmount { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string? Notes { get; set; }
+    }
+
+    private sealed class SalesTrendPoint
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public decimal Income { get; set; }
+        public decimal Expense { get; set; }
     }
 }

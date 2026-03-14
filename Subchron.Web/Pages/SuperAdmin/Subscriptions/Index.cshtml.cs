@@ -1,125 +1,100 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Subchron.Web.Pages.Auth;
 
 namespace Subchron.Web.Pages.SuperAdmin.Subscriptions
 {
     public class IndexModel : PageModel
     {
-  public List<SubscriptionViewModel> Subscriptions { get; set; } = new();
+        private readonly IHttpClientFactory _http;
 
-        public void OnGet()
-{
-     LoadSubscriptions();
- }
+        public IndexModel(IHttpClientFactory http)
+        {
+            _http = http;
+        }
 
-private void LoadSubscriptions()
+        public List<SubscriptionViewModel> Subscriptions { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public string? StatusFilter { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? PlanFilter { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public bool ExpiringOnly { get; set; }
+
+        [TempData]
+        public string? FlashMessage { get; set; }
+
+        public async Task OnGetAsync()
         {
-  // Mock data - replace with actual repository calls
-            Subscriptions = new List<SubscriptionViewModel>
-     {
-       new()
-  {
-      SubscriptionID = 1,
-        OrgID = 1,
-     OrgName = "TechCorp Solutions",
-     OrgCode = "TECH001",
-      PlanName = "Standard",
-   AttendanceMode = "Biometric",
-     BasePrice = 2500,
-     ModePrice = 500,
-      FinalPrice = 3000,
-     BillingCycle = "Monthly",
-        StartDate = DateTime.Now.AddMonths(-3),
-       EndDate = DateTime.Now.AddMonths(9),
-    Status = "Active",
-      DaysRemaining = 0
-    },
- new()
-      {
-   SubscriptionID = 2,
-       OrgID = 2,
-       OrgName = "Digital Ventures",
-     OrgCode = "DIGI002",
-        PlanName = "Standard",
-        AttendanceMode = "QR Code",
-      BasePrice = 2500,
-        ModePrice = 0,
-           FinalPrice = 2500,
-  BillingCycle = "Monthly",
-       StartDate = DateTime.Now.AddDays(-10),
-  EndDate = DateTime.Now.AddDays(4),
-        Status = "Trial",
-    DaysRemaining = 4
-      },
-       new()
+            await LoadSubscriptionsAsync();
+        }
+
+        public async Task<IActionResult> OnPostExtendTrialAsync(int subscriptionId)
         {
-  SubscriptionID = 3,
-     OrgID = 3,
-         OrgName = "Innovation Labs",
-        OrgCode = "INNO003",
-         PlanName = "Enterprise",
-     AttendanceMode = "Geo Location",
-     BasePrice = 5000,
-     ModePrice = 1000,
-      FinalPrice = 6000,
-   BillingCycle = "Annual",
-      StartDate = DateTime.Now.AddMonths(-2),
-        EndDate = DateTime.Now.AddMonths(10),
- Status = "Active",
-    DaysRemaining = 0
-   },
-        new()
-  {
-    SubscriptionID = 4,
-   OrgID = 4,
-   OrgName = "StartupXYZ",
-        OrgCode = "STAR004",
- PlanName = "Basic",
-    AttendanceMode = "QR Code",
-  BasePrice = 1500,
-    ModePrice = 0,
-     FinalPrice = 1500,
-   BillingCycle = "Monthly",
-      StartDate = DateTime.Now.AddMonths(-4),
-  EndDate = DateTime.Now.AddDays(-30),
- Status = "Expired",
-  DaysRemaining = 0
-  },
-     new()
-       {
-        SubscriptionID = 5,
-    OrgID = 5,
-         OrgName = "Global Services Inc",
-        OrgCode = "GLOB005",
-    PlanName = "Standard",
-       AttendanceMode = "QR Code",
-     BasePrice = 2500,
-ModePrice = 0,
-       FinalPrice = 2500,
-      BillingCycle = "Monthly",
-   StartDate = DateTime.Now.AddDays(-3),
-     EndDate = DateTime.Now.AddDays(11),
-  Status = "Trial",
-      DaysRemaining = 11
-  },
-      new()
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return RedirectToPage("/Auth/Login");
+
+            var resp = await client.PostAsJsonAsync($"api/superadmin/subscriptions/{subscriptionId}/extend-trial", new { days = 7 });
+            if (!resp.IsSuccessStatusCode)
+                FlashMessage = "Could not extend trial.";
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostActivateAsync(int subscriptionId)
         {
-        SubscriptionID = 6,
-   OrgID = 6,
-      OrgName = "Quick Solutions",
-    OrgCode = "QUICK006",
-   PlanName = "Standard",
-    AttendanceMode = "QR Code",
-     BasePrice = 2500,
-   ModePrice = 0,
-     FinalPrice = 2500,
-      BillingCycle = "Monthly",
-       StartDate = DateTime.Now.AddDays(-12),
-     EndDate = DateTime.Now.AddDays(2),
-         Status = "Trial",
- DaysRemaining = 2
- }
-  };
-  }
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return RedirectToPage("/Auth/Login");
+
+            var resp = await client.PostAsync($"api/superadmin/subscriptions/{subscriptionId}/activate", null);
+            if (!resp.IsSuccessStatusCode)
+                FlashMessage = "Could not activate subscription.";
+            return RedirectToPage();
+        }
+
+        private async Task LoadSubscriptionsAsync()
+        {
+            Subscriptions = new List<SubscriptionViewModel>();
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return;
+
+            var query = new List<string>();
+            if (!string.IsNullOrWhiteSpace(StatusFilter))
+                query.Add("status=" + Uri.EscapeDataString(StatusFilter.Trim()));
+            if (!string.IsNullOrWhiteSpace(PlanFilter))
+                query.Add("plan=" + Uri.EscapeDataString(PlanFilter.Trim()));
+            if (ExpiringOnly)
+                query.Add("expiringOnly=true");
+
+            var url = "api/superadmin/subscriptions" + (query.Count > 0 ? "?" + string.Join("&", query) : string.Empty);
+            var resp = await client.GetAsync(url);
+            if (!resp.IsSuccessStatusCode)
+                return;
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var data = await resp.Content.ReadFromJsonAsync<List<SubscriptionViewModel>>(options);
+            if (data != null)
+                Subscriptions = data;
+        }
+
+        private HttpClient? CreateAuthorizedClient()
+        {
+            var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var client = _http.CreateClient("Subchron.API");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
     }
 
     public class SubscriptionViewModel
@@ -135,8 +110,8 @@ ModePrice = 0,
         public decimal FinalPrice { get; set; }
    public string BillingCycle { get; set; } = string.Empty;
      public DateTime StartDate { get; set; }
-      public DateTime EndDate { get; set; }
- public string Status { get; set; } = string.Empty;
+       public DateTime? EndDate { get; set; }
+  public string Status { get; set; } = string.Empty;
   public int DaysRemaining { get; set; }
     }
 }

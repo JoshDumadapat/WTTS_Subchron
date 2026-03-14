@@ -11,38 +11,92 @@
         <div>
             <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Scan Stations</h1>
         </div>
-        <a asp-page="/App/Operations/ScanStation/Create" class="btn-primary">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Create Station
-        </a>
+        @if (Model.IsScanStationAvailable)
+        {
+            <a asp-page="/App/Operations/ScanStation/Create" class="btn-primary">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Create Station
+            </a>
+        }
+        else
+        {
+            <button type="button" id="scanModeBlockedTrigger" class="btn-secondary" aria-haspopup="dialog">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M6.938 4h10.124c1.656 0 2.69 1.792 1.86 3.2l-5.062 8.6c-.828 1.408-2.89 1.408-3.718 0l-5.062-8.6C4.248 5.792 5.282 4 6.938 4z" /></svg>
+                Scan Station Unavailable
+            </button>
+        }
     </div>
 
-    <!-- Placeholder list (UI only, no backend) -->
+    @if (!Model.IsScanStationAvailable)
+    {
+        <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-200">
+            Attendance capture mode is currently set to <strong>@Model.PrimaryMode</strong>. Scan Station is only available for QR or Hybrid modes.
+        </div>
+    }
+
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="border-b border-slate-100 bg-slate-50/50 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/50">
             <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Your stations</p>
             <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Click a station to view details, copy kiosk URL, or open on a tablet.</p>
         </div>
         <div class="divide-y divide-slate-100 dark:divide-slate-700" id="stationList">
-            <!-- Sample row for flow demo -->
-            <a href="/App/Operations/ScanStation/Details?id=demo-1" class="station-row flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30" data-station-id="demo-1">
-                <div class="flex min-w-0 items-center gap-4">
-                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/40 dark:text-subgreen-400">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-slate-900 dark:text-white">Main Lobby Kiosk</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Site: HQ Building · QR Scan ON · ID Entry ON</p>
-                    </div>
+            @if (Model.Stations.Count == 0)
+            {
+                <div class="px-5 py-8 text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">No stations yet. Use <strong>Create Station</strong> to add one.</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center rounded-full bg-subgreen-50 px-2.5 py-0.5 text-xs font-medium text-subgreen-700 dark:bg-subgreen-900/40 dark:text-subgreen-300">Always Open</span>
-                    <svg class="h-5 w-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </div>
-            </a>
-            <div class="px-5 py-8 text-center">
-                <p class="text-sm text-slate-500 dark:text-slate-400">No other stations yet. Use <strong>Create Station</strong> to add one.</p>
-            </div>
+            }
+            else
+            {
+                @foreach (var station in Model.Stations)
+                {
+                    <a href="/App/Operations/ScanStation/Details?id=@station.ScanStationID" class="station-row flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30" data-station-id="@station.ScanStationID">
+                        <div class="flex min-w-0 items-center gap-4">
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-subgreen-100 text-subgreen-600 dark:bg-subgreen-900/40 dark:text-subgreen-400">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-900 dark:text-white">@station.StationName</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Site: @station.LocationName · QR @(station.QrEnabled ? "ON" : "OFF") · ID Entry @(station.IdEntryEnabled ? "ON" : "OFF")</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center rounded-full @(station.IsActive ? "bg-subgreen-50 text-subgreen-700 dark:bg-subgreen-900/40 dark:text-subgreen-300" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300") px-2.5 py-0.5 text-xs font-medium">@(station.IsActive ? station.ScheduleMode : "Inactive")</span>
+                            <svg class="h-5 w-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </div>
+                    </a>
+                }
+            }
         </div>
     </div>
 </div>
+
+@if (!Model.IsScanStationAvailable)
+{
+    <div id="scanModeBlockedModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4">
+        <div class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Scan Station Not Available</h3>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                Attendance capture is set to <strong>Biometric + Geofencing</strong>. Scan Station is disabled in this mode.
+                Switch the Primary Mode in Organization Attendance Settings to <strong>QR</strong> or <strong>Hybrid</strong> to enable Scan Station.
+            </p>
+            <div class="mt-5 flex justify-end">
+                <button type="button" id="scanModeBlockedClose" class="btn-primary">Got it</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var modal = document.getElementById('scanModeBlockedModal');
+            var trigger = document.getElementById('scanModeBlockedTrigger');
+            var closeBtn = document.getElementById('scanModeBlockedClose');
+            if (!modal) return;
+            function openModal() { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            function closeModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            trigger && trigger.addEventListener('click', openModal);
+            closeBtn && closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+            openModal();
+        })();
+    </script>
+}

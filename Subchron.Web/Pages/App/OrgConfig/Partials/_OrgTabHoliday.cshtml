@@ -2188,18 +2188,33 @@
                     name: x.name ?? x.ruleName ?? x.displayName ?? `Rule ${x.id ?? ''}`.trim(),
                     classification: x.classification ?? x.holidayClassification ?? ''
                 }));
+
+                if (!state.payrollRules.length) {
+                    state.payrollRules = [
+                        { id: 'default-regular', name: 'Regular Holiday Rule', classification: 'RegularHoliday' },
+                        { id: 'default-special-nonworking', name: 'Special Non-working Rule', classification: 'SpecialNonWorkingHoliday' },
+                        { id: 'default-special-working', name: 'Special Working Rule', classification: 'SpecialWorkingHoliday' },
+                        { id: 'default-double', name: 'Double Holiday Rule', classification: 'DoubleHoliday' },
+                        { id: 'default-restday-regular', name: 'Rest Day + Regular Holiday Rule', classification: 'RestDayRegularHoliday' },
+                        { id: 'default-restday-special-nonworking', name: 'Rest Day + Special Non-working Rule', classification: 'RestDaySpecialNonWorkingHoliday' },
+                        { id: 'default-restday-special-working', name: 'Rest Day + Special Working Rule', classification: 'RestDaySpecialWorkingHoliday' },
+                        { id: 'default-restday-double', name: 'Rest Day + Double Holiday Rule', classification: 'RestDayDoubleHoliday' },
+                        { id: 'default-local', name: 'Local Holiday Rule', classification: 'LocalHoliday' },
+                        { id: 'default-company', name: 'Company Holiday Rule', classification: 'CompanyHoliday' }
+                    ];
+                }
             } catch {
                 state.payrollRules = [
-                    { id: 'regular', name: 'Regular Holiday Rule', classification: 'RegularHoliday' },
-                    { id: 'special-nonworking', name: 'Special Non-working Rule', classification: 'SpecialNonWorkingHoliday' },
-                    { id: 'special-working', name: 'Special Working Rule', classification: 'SpecialWorkingHoliday' },
-                    { id: 'double-holiday', name: 'Double Holiday Rule', classification: 'DoubleHoliday' },
-                    { id: 'restday-regular', name: 'Rest Day + Regular Holiday Rule', classification: 'RestDayRegularHoliday' },
-                    { id: 'restday-special-nonworking', name: 'Rest Day + Special Non-working Rule', classification: 'RestDaySpecialNonWorkingHoliday' },
-                    { id: 'restday-special-working', name: 'Rest Day + Special Working Rule', classification: 'RestDaySpecialWorkingHoliday' },
-                    { id: 'restday-double', name: 'Rest Day + Double Holiday Rule', classification: 'RestDayDoubleHoliday' },
-                    { id: 'local-holiday', name: 'Local Holiday Rule', classification: 'LocalHoliday' },
-                    { id: 'company-holiday', name: 'Company Holiday Rule', classification: 'CompanyHoliday' }
+                    { id: 'default-regular', name: 'Regular Holiday Rule', classification: 'RegularHoliday' },
+                    { id: 'default-special-nonworking', name: 'Special Non-working Rule', classification: 'SpecialNonWorkingHoliday' },
+                    { id: 'default-special-working', name: 'Special Working Rule', classification: 'SpecialWorkingHoliday' },
+                    { id: 'default-double', name: 'Double Holiday Rule', classification: 'DoubleHoliday' },
+                    { id: 'default-restday-regular', name: 'Rest Day + Regular Holiday Rule', classification: 'RestDayRegularHoliday' },
+                    { id: 'default-restday-special-nonworking', name: 'Rest Day + Special Non-working Rule', classification: 'RestDaySpecialNonWorkingHoliday' },
+                    { id: 'default-restday-special-working', name: 'Rest Day + Special Working Rule', classification: 'RestDaySpecialWorkingHoliday' },
+                    { id: 'default-restday-double', name: 'Rest Day + Double Holiday Rule', classification: 'RestDayDoubleHoliday' },
+                    { id: 'default-local', name: 'Local Holiday Rule', classification: 'LocalHoliday' },
+                    { id: 'default-company', name: 'Company Holiday Rule', classification: 'CompanyHoliday' }
                 ];
             }
 

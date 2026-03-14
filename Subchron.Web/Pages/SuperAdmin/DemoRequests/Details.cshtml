@@ -36,7 +36,7 @@
       </div>
      <div>
             <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Size</dt>
-   <dd class="text-sm text-slate-900 dark:text-white mt-1">@Model.Request.OrgSize employees</dd>
+      <dd class="text-sm text-slate-900 dark:text-white mt-1">@(string.IsNullOrWhiteSpace(Model.Request.OrgSize) ? "—" : Model.Request.OrgSize)</dd>
     </div>
            <div>
          <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Desired Mode</dt>
@@ -61,7 +61,7 @@
      <div>
           <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Phone</dt>
         <dd class="text-sm text-slate-900 dark:text-white mt-1">
-         <a href="tel:@Model.Request.Phone" class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">@Model.Request.Phone</a>
+          <a href="tel:@Model.Request.Phone" class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">@(string.IsNullOrWhiteSpace(Model.Request.Phone) ? "—" : Model.Request.Phone)</a>
       </dd>
             </div>
      </dl>
@@ -95,7 +95,7 @@
            @Model.Request.ReviewedAt?.ToString("MMM dd, yyyy HH:mm")
       @if (Model.Request.OrgID.HasValue && Model.Request.Status == "Approved")
       {
-  <span>� Organization ID: @Model.Request.OrgID</span>
+  <span> · Organization ID: @Model.Request.OrgID</span>
   }
      </p>
       </div>
@@ -127,12 +127,12 @@
      <form method="post">
   <input type="hidden" name="action" value="" id="actionInput" />
  <div class="space-y-3">
-    <button type="button" onclick="approveRequest()"
+      <button type="button" onclick="approveRequest()"
      class="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
-      Approve & Create Organization
+      Approve Request
            </button>
 
       <button type="button" onclick="rejectRequest()"
@@ -148,31 +148,31 @@
 
        <!-- Approval Info -->
       <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 dark:bg-slate-800/50 dark:border-slate-700">
-      <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-3">What happens on approval:</h3>
-            <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+       <h3 class="text-sm font-medium text-slate-900 dark:text-white mb-3">What happens on approval:</h3>
+             <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-2">
   <li class="flex items-start">
       <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
            </svg>
-           Create new organization
+            Mark request as approved
     </li>
   <li class="flex items-start">
    <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
-    Set up default settings
+            Save reviewed timestamp
               </li>
       <li class="flex items-start">
        <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
            </svg>
-   Create 14-day trial subscription
+            Keep request record for tracking
     </li>
      <li class="flex items-start">
  <svg class="w-4 h-4 text-emerald-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
    </svg>
-            Generate audit log entries
+            Visible in demo request list
     </li>
         </ul>
         </div>
@@ -200,14 +200,9 @@
    @if (Model.Request.OrgID.HasValue)
    {
    <div>
-   <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Created</dt>
-       <dd class="text-sm text-slate-900 dark:text-white mt-1">
-         <a asp-page="/SuperAdmin/Organizations/Details" asp-route-id="@Model.Request.OrgID" 
-       class="text-subblue-600 hover:text-subblue-700 dark:text-subblue-400">
-       View Organization #@Model.Request.OrgID
-       </a>
-    </dd>
-        </div>
+       <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Organization Reference</dt>
+       <dd class="text-sm text-slate-900 dark:text-white mt-1">#@Model.Request.OrgID</dd>
+   </div>
       }
    </dl>
      </div>
@@ -228,7 +223,7 @@
 
 <script>
     function approveRequest() {
-    if (confirm('Are you sure you want to approve this request? This will create a new organization and trial subscription.')) {
+    if (confirm('Are you sure you want to approve this request?')) {
        document.getElementById('actionInput').value = 'approve';
     document.querySelector('form').submit();
         }

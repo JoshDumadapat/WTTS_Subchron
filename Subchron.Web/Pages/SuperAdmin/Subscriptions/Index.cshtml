@@ -9,36 +9,42 @@
 }
 
 <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 dark:bg-slate-800 dark:border-slate-700">
+    @if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
+    {
+        <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-300">@Model.FlashMessage</div>
+    }
     <!-- Header and filters -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
          <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Subscription Management</h2>
  <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">@Model.Subscriptions.Count total subscriptions</p>
      </div>
-        <div class="flex items-center space-x-4 mt-4 sm:mt-0">
-   <div class="relative">
-      <select id="statusFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
-      <option value="">All Statuses</option>
-    <option value="Trial">Trial</option>
-  <option value="Active">Active</option>
-      <option value="Expired">Expired</option>
-       </select>
- </div>
-    <div class="relative">
-      <select id="planFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
-        <option value="">All Plans</option>
-        <option value="Basic">Basic</option>
-     <option value="Standard">Standard</option>
-         <option value="Enterprise">Enterprise</option>
-         </select>
-   </div>
-      <div class="relative">
-      <select id="expiringFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
-        <option value="">All Subscriptions</option>
-   <option value="expiring">Expiring Soon (7 days)</option>
-         </select>
-     </div>
-        </div>
+        <form method="get" class="flex items-center space-x-4 mt-4 sm:mt-0">
+            <div class="relative">
+                <select id="statusFilter" name="StatusFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                    <option value="">All Statuses</option>
+                    <option value="Trial" selected="@(Model.StatusFilter == "Trial" ? "selected" : null)">Trial</option>
+                    <option value="Active" selected="@(Model.StatusFilter == "Active" ? "selected" : null)">Active</option>
+                    <option value="Expired" selected="@(Model.StatusFilter == "Expired" ? "selected" : null)">Expired</option>
+                    <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled" ? "selected" : null)">Cancelled</option>
+                </select>
+            </div>
+            <div class="relative">
+                <select id="planFilter" name="PlanFilter" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                    <option value="">All Plans</option>
+                    <option value="Basic" selected="@(Model.PlanFilter == "Basic" ? "selected" : null)">Basic</option>
+                    <option value="Standard" selected="@(Model.PlanFilter == "Standard" ? "selected" : null)">Standard</option>
+                    <option value="Enterprise" selected="@(Model.PlanFilter == "Enterprise" ? "selected" : null)">Enterprise</option>
+                </select>
+            </div>
+            <div class="relative">
+                <select id="expiringFilter" name="ExpiringOnly" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-subgreen-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                    <option value="false" selected="@(!Model.ExpiringOnly ? "selected" : null)">All Subscriptions</option>
+                    <option value="true" selected="@(Model.ExpiringOnly ? "selected" : null)">Expiring Soon (7 days)</option>
+                </select>
+            </div>
+            <button type="submit" class="rounded-lg bg-subgreen-600 px-3 py-2 text-sm font-semibold text-white hover:bg-subgreen-700">Apply</button>
+        </form>
     </div>
 
     <!-- Subscriptions table -->
@@ -90,11 +96,11 @@
         <div class="text-sm text-slate-500 dark:text-slate-400">@subscription.AttendanceMode</div>
       </td>
            <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm font-medium text-slate-900 dark:text-white">?@subscription.FinalPrice.ToString("N2")</div>
+          <div class="text-sm font-medium text-slate-900 dark:text-white">PHP @subscription.FinalPrice.ToString("N2")</div>
        <div class="text-sm text-slate-500 dark:text-slate-400">@subscription.BillingCycle</div>
     </td>
         <td class="px-6 py-4 whitespace-nowrap">
-        <div class="text-sm text-slate-900 dark:text-white">@subscription.StartDate.ToString("MMM dd") - @subscription.EndDate.ToString("MMM dd, yyyy")</div>
+        <div class="text-sm text-slate-900 dark:text-white">@subscription.StartDate.ToString("MMM dd") - @(subscription.EndDate?.ToString("MMM dd, yyyy") ?? "-")</div>
   @if (subscription.Status == "Trial" && subscription.DaysRemaining <= 7)
    {
        <div class="text-xs text-red-600 dark:text-red-400">@subscription.DaysRemaining day(s) left</div>
@@ -113,23 +119,31 @@
       </td>
     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
     <div class="flex items-center justify-end space-x-2">
-         <a asp-page="/SuperAdmin/Subscriptions/Manage" asp-route-orgId="@subscription.OrgID"
-           class="text-subblue-600 hover:text-subblue-900 dark:text-subblue-400 dark:hover:text-subblue-300">
-          Manage
-   </a>
-   @if (subscription.Status == "Trial")
-      {
-      <button onclick="extendTrial(@subscription.SubscriptionID, '@subscription.OrgName')"
-   class="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300">
-     Extend
-      </button>
-  <button onclick="activateNow(@subscription.SubscriptionID, '@subscription.OrgName')"
-       class="text-emerald-600 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-300">
-     Activate
-    </button>
-           }
-     </div>
-      </td>
+          <a asp-page="/SuperAdmin/Subscriptions/Manage" asp-route-orgId="@subscription.OrgID"
+            class="text-subblue-600 hover:text-subblue-900 dark:text-subblue-400 dark:hover:text-subblue-300">
+           Manage
+    </a>
+    @if (subscription.Status == "Trial")
+       {
+            <form method="post" asp-page-handler="ExtendTrial" onsubmit="return confirm('Extend trial for @subscription.OrgName by 7 days?');">
+                <input type="hidden" name="subscriptionId" value="@subscription.SubscriptionID" />
+                <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-violet-600 hover:bg-violet-50 hover:text-violet-800 dark:text-violet-300 dark:hover:bg-violet-900/20" title="Extend trial">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+            </form>
+            <form method="post" asp-page-handler="Activate" onsubmit="return confirm('Activate subscription for @subscription.OrgName now?');">
+                <input type="hidden" name="subscriptionId" value="@subscription.SubscriptionID" />
+                <button type="submit" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-900/20" title="Activate now">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            </form>
+            }
+      </div>
+       </td>
               </tr>
     }
             </tbody>
@@ -149,29 +163,6 @@
 </div>
 
 <script>
-    function extendTrial(subscriptionId, orgName) {
- if (confirm(`Extend trial for "${orgName}" by 7 days?`)) {
-   // TODO: Implement extend trial
- fetch(`/SuperAdmin/Subscriptions/ExtendTrial`, {
-     method: 'POST',
-    headers: {
-           'Content-Type': 'application/json',
-  },
-       body: JSON.stringify({ subscriptionId: subscriptionId })
-   }).then(response => {
- if (response.ok) {
-             location.reload();
-        }
-    });
-   }
-    }
-
-    function activateNow(subscriptionId, orgName) {
-        if (confirm(`Activate subscription for "${orgName}" now?`)) {
-   window.location.href = `/SuperAdmin/Subscriptions/Manage?orgId=${subscriptionId}&activate=true`;
-        }
-    }
-
    // Search functionality
     document.getElementById('globalSearch')?.addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
@@ -183,39 +174,4 @@
         });
     });
 
-    // Filters
-    function applyFilters() {
- const statusFilter = document.getElementById('statusFilter').value;
-     const planFilter = document.getElementById('planFilter').value;
-        const expiringFilter = document.getElementById('expiringFilter').value;
-    const rows = document.querySelectorAll('tbody tr');
-   
-        rows.forEach(row => {
-      let show = true;
-  
-    if (statusFilter) {
-      const statusCell = row.querySelector('td:nth-child(5) span');
-       const rowStatus = statusCell?.textContent.trim();
-   show = show && rowStatus === statusFilter;
-       }
-    
-   if (planFilter) {
-      const planCell = row.querySelector('td:nth-child(2) div:first-child');
-      const rowPlan = planCell?.textContent.trim();
-         show = show && rowPlan === planFilter;
-     }
-  
-      if (expiringFilter === 'expiring') {
-        const periodCell = row.querySelector('td:nth-child(4) div:nth-child(2)');
-                const hasWarning = periodCell && periodCell.classList.contains('text-red-600');
-   show = show && hasWarning;
-       }
-   
-    row.style.display = show ? '' : 'none';
-        });
-    }
-
-    document.getElementById('statusFilter')?.addEventListener('change', applyFilters);
-  document.getElementById('planFilter')?.addEventListener('change', applyFilters);
-    document.getElementById('expiringFilter')?.addEventListener('change', applyFilters);
 </script>

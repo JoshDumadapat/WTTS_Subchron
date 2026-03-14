@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Subchron.API.Data;
 using Subchron.API.Models.Entities;
 using Subchron.API.Models.Organizations;
+using Subchron.API.Services;
 
 namespace Subchron.API.Controllers;
 
@@ -14,10 +15,12 @@ namespace Subchron.API.Controllers;
 public class OrgPayConfigController : ControllerBase
 {
     private readonly TenantDbContext _tenantDb;
+    private readonly IAuditService _audit;
 
-    public OrgPayConfigController(TenantDbContext tenantDb)
+    public OrgPayConfigController(TenantDbContext tenantDb, IAuditService audit)
     {
         _tenantDb = tenantDb;
+        _audit = audit;
     }
 
     [HttpGet]
@@ -94,6 +97,8 @@ public class OrgPayConfigController : ControllerBase
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _tenantDb.SaveChangesAsync(ct);
+        await TryAuditTenantAsync(orgId.Value, GetUserId(), "OrgPayConfigUpdated", nameof(OrgPayConfig), orgId.Value,
+            "Organization pay configuration updated.", ct);
         return Ok(new { ok = true });
     }
 
@@ -127,5 +132,26 @@ public class OrgPayConfigController : ControllerBase
     {
         var claim = User.FindFirstValue("orgId");
         return int.TryParse(claim, out var id) ? id : null;
+    }
+
+    private int? GetUserId()
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(claim, out var id) ? id : null;
+    }
+
+    private async Task TryAuditTenantAsync(int orgId, int? userId, string action, string? entityName, int? entityId, string? details, CancellationToken ct)
+    {
+        try
+        {
+            await _audit.LogTenantAsync(orgId, userId, action, entityName, entityId, details,
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
+                userAgent: Request.Headers["User-Agent"].ToString(),
+                ct: ct);
+        }
+        catch
+        {
+            // do not fail business flow on audit issues
+        }
     }
 }

@@ -334,14 +334,14 @@
                                             View
                                         </button>
 
-                                        <button type="button" onclick="openEditModal(@e.EmpID)"
-                                                class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50"
-                                                title="Edit">
+                                        <a asp-page="/App/Employee/EditEmployee" asp-route-id="@e.EmpID"
+                                           class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50"
+                                           title="Edit">
                                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L6 18l.8-2.685a4.5 4.5 0 011.897-1.897l8.932-8.931zm0 0L19.5 7.125" />
                                             </svg>
                                             Edit
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -503,157 +503,7 @@
 <!-- ✅ ID Modal moved to partial -->
 <partial name="App/Employee/Partials/_EmployeeIdModal" view-data="idModalViewData" />
 
-<!-- Edit Employee Modal -->
-<div id="editModal" class="fixed inset-0 z-[200] hidden overflow-y-auto">
-    <div class="flex min-h-screen items-center justify-center p-4">
-        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
 
-        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl transition-all dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-slate-300 px-8 py-6 dark:border-gray-800">
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit Employee</h3>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Update employee details.</p>
-            </div>
-
-            <form id="editEmployeeForm" method="post" asp-page-handler="UpdateEmployee" data-turbo="false" class="p-8">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" id="editEmpID" value="" />
-
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <div class="md:col-span-2">
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div><input type="text" name="FirstName" id="editFirstName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="First name" required /></div>
-                            <div><input type="text" name="MiddleName" id="editMiddleName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Middle (optional)" /></div>
-                            <div><input type="text" name="LastName" id="editLastName" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" placeholder="Last name" required /></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label>
-                        <input type="text" name="EmpNumber" id="editEmpNumber" class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400" readonly />
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
-                         <select name="DepartmentID" id="editDepartmentID" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                             <option value="">— Select —</option>
-                             @foreach (var dep in Model.Departments)
-                             {
-                                 <option value="@dep.DepID">@dep.DepartmentName</option>
-                             }
-                         </select>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label for="editBirthDate" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Birthdate</label>
-                                <div class="relative max-w-sm">
-                                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                                        <svg class="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
-                                    </div>
-                                    <input type="date" name="birthDate" id="editBirthDate" class="block w-full ps-9 pe-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-900 focus:border-subgreen-500 focus:ring-subgreen-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-subgreen-500" />
-                                </div>
-                            </div>
-                            <div>
-                                <label for="editBirthDateAgeDisplay" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
-                                <input type="text" id="editBirthDateAgeDisplay" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 dark:border-gray-700 dark:bg-gray-800 dark:text-slate-300" value="—" readonly tabindex="-1" placeholder="—" />
-                            </div>
-                            <div>
-                                <label for="editGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
-                                <select name="gender" id="editGender" class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                                    <option value="">Gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Non-binary">Non-binary</option>
-                                    <option value="Prefer not to say">Prefer not to say</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role</label>
-                        <select name="role" id="editRole" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                            <option value="Employee">Employee</option>
-                            <option value="HR">HR</option>
-                            <option value="Manager">Manager</option>
-                            <option value="PayrollPersonnel">Payroll Personnel</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type</label>
-                        <select name="EmploymentType" id="editEmploymentType" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                            <option value="Regular">Regular</option>
-                            <option value="Contractual">Contractual</option>
-                            <option value="Part-Time">Part-Time</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Work state</label>
-                        <select name="workState" id="editWorkState" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                            <option value="Active">Active</option>
-                            <option value="On Leave">On Leave</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Probation">Probation</option>
-                            <option value="Training">Training</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label>
-                        <input type="date" name="dateHired" id="editDateHired" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
-                    </div>
-
-                    <!-- Address + contact sections unchanged (kept as-is) -->
-                    <div class="md:col-span-2">
-                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Address</h4>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div class="address-autocomplete relative sm:col-span-2">
-                                <input type="text" name="AddressLine1" id="editAddressLine1" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Start typing address..." autocomplete="off" />
-                                <div id="editAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-300 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
-                            </div>
-                            <div class="sm:col-span-2"><input type="text" name="AddressLine2" id="editAddressLine2" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Address line 2 (optional)" /></div>
-                            <div><input type="text" name="City" id="editCity" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="City" /></div>
-                            <div><input type="text" name="StateProvince" id="editStateProvince" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="State / Province" /></div>
-                            <div><input type="text" name="PostalCode" id="editPostalCode" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Postal code" /></div>
-                            <div><input type="text" name="Country" id="editCountry" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Country" /></div>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account / contact</h4>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="mb-1 block text-xs text-slate-500">Phone</label>
-                                <div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800">
-                                    <span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span>
-                                    <input type="tel" name="Phone" id="editPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emergency contact</h4>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div><label class="mb-1 block text-xs text-slate-500">Name</label><input type="text" name="EmergencyContactName" id="editEmergencyContactName" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="Full name" /></div>
-                            <div><label class="mb-1 block text-xs text-slate-500">Phone</label><div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800"><span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">+63</span><input type="tel" name="EmergencyContactPhone" id="editEmergencyContactPhone" class="ph-phone-input h-10 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-3 text-sm dark:text-white" placeholder="0956 777 9876" maxlength="14" /></div></div>
-                            <div><label class="mb-1 block text-xs text-slate-500">Relation</label><input type="text" name="EmergencyContactRelation" id="editEmergencyContactRelation" class="h-10 w-full rounded-xl border border-slate-300 px-3 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white" placeholder="e.g. Spouse, Parent" /></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex gap-3">
-                    <button type="button" onclick="closeEditModal()" class="btn-secondary h-12 flex-1">Cancel</button>
-                    <button type="submit" id="editEmployeeSubmitBtn" class="btn-primary h-12 flex-1 disabled:opacity-70 disabled:cursor-not-allowed">Update Employee</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- View Employee Drawer -->
 <div id="viewDrawerRoot" class="fixed inset-0 z-[220] hidden" aria-hidden="true">
@@ -964,7 +814,7 @@
                 '<td class="px-5 py-3 text-right"><div class="flex justify-end gap-1 flex-wrap">' +
                 '<button type="button" onclick="openIdModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-subgreen-100 px-2 py-1 text-xs font-medium text-subgreen-700 transition-all hover:bg-subgreen-200 dark:bg-subgreen-900/30 dark:text-subgreen-300 dark:hover:bg-subgreen-800/50" title="View / Print ID">ID</button>' +
                 '<button type="button" onclick="openViewModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition-all hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:hover:bg-sky-800/50" title="View"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>View</button>' +
-                '<button type="button" onclick="openEditModal(' + empId + ')" class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50" title="Edit"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L6 18l.8-2.685a4.5 4.5 0 011.897-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>Edit</button>' +
+                '<a href="/App/Employee/EditEmployee/' + empId + '" class="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-all hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-800/50" title="Edit"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.897L6 18l.8-2.685a4.5 4.5 0 011.897-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>Edit</a>' +
                 '</div></td>';
 
             return tr;
@@ -1655,65 +1505,7 @@
         }, 300);
     }
 
-    function openEditModal(id) {
-        document.getElementById('editEmpID').value = id;
-        document.getElementById('editModal').classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-
-        fetch('/App/Employee/EmployeeManagement?handler=Employee&id=' + encodeURIComponent(id), { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (e) {
-                if (!e) return;
-
-                document.getElementById('editFirstName').value = (e.FirstName || e.firstName) || '';
-                document.getElementById('editMiddleName').value = (e.MiddleName || e.middleName) || '';
-                document.getElementById('editLastName').value = (e.LastName || e.lastName) || '';
-                document.getElementById('editEmpNumber').value = (e.EmpNumber || e.empNumber) || '';
-
-                var deptId = e.DepartmentID != null ? e.DepartmentID : e.departmentID;
-                document.getElementById('editDepartmentID').value = deptId != null ? String(deptId) : '';
-
-                var roleEl = document.getElementById('editRole');
-                if (roleEl) roleEl.value = (e.Role || e.role) || 'Employee';
-
-                document.getElementById('editEmploymentType').value = (e.EmploymentType || e.employmentType) || 'Regular';
-
-                var workStateEl = document.getElementById('editWorkState');
-                if (workStateEl) workStateEl.value = (e.WorkState || e.workState) || 'Active';
-
-                var birthInput = document.getElementById('editBirthDate');
-                var birthAgeDisplay = document.getElementById('editBirthDateAgeDisplay');
-                var birthIso = normalizeBirthDate(e.BirthDate || e.birthDate);
-                if (birthInput) birthInput.value = birthIso || '';
-                if (birthAgeDisplay && typeof updateAgeDisplayInput === 'function') {
-                    updateAgeDisplayInput(birthInput, birthAgeDisplay);
-                } else if (birthAgeDisplay) {
-                    birthAgeDisplay.value = birthIso ? (calculateAgeFromIso(birthIso) ?? '—') : '—';
-                }
-
-                document.getElementById('editGender').value = (e.Gender || e.gender) || '';
-
-                var dh = e.DateHired || e.dateHired;
-                document.getElementById('editDateHired').value = dh ? (typeof dh === 'string' ? dh.substring(0, 10) : '') : '';
-
-                document.getElementById('editAddressLine1').value = (e.AddressLine1 || e.addressLine1) || '';
-                document.getElementById('editAddressLine2').value = (e.AddressLine2 || e.addressLine2) || '';
-                document.getElementById('editCity').value = (e.City || e.city) || '';
-                document.getElementById('editStateProvince').value = (e.StateProvince || e.stateProvince) || '';
-                document.getElementById('editPostalCode').value = (e.PostalCode || e.postalCode) || '';
-                document.getElementById('editCountry').value = (e.Country || e.country) || '';
-                document.getElementById('editPhone').value = (e.Phone || e.phone) || '';
-                document.getElementById('editEmergencyContactName').value = (e.EmergencyContactName || e.emergencyContactName) || '';
-                document.getElementById('editEmergencyContactPhone').value = (e.EmergencyContactPhone || e.emergencyContactPhone) || '';
-                document.getElementById('editEmergencyContactRelation').value = (e.EmergencyContactRelation || e.emergencyContactRelation) || '';
-            })
-            .catch(function () { });
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
+    
 </script>
 
 <script>
@@ -1734,10 +1526,6 @@
     document.getElementById('archiveForm')?.addEventListener('submit', function () {
         document.body.classList.remove('overflow-hidden');
         setSubmitButtonLoading(document.getElementById('archiveSubmitBtn'));
-    });
-
-    document.getElementById('editEmployeeForm')?.addEventListener('submit', function () {
-        setSubmitButtonLoading(document.getElementById('editEmployeeSubmitBtn'));
     });
 
     (function () {

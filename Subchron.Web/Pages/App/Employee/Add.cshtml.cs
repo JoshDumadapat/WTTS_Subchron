@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Subchron.Web.Pages.Auth;
+using System.Security.Claims;
 
 namespace Subchron.Web.Pages.App.Employee;
 
@@ -20,6 +21,7 @@ public class AddModel : PageModel
     public List<DepartmentItem> Departments { get; set; } = new();
     public List<ShiftTemplateItem> ShiftTemplates { get; set; } = new();
     public List<LocationItem> Locations { get; set; } = new();
+    public List<DeductionRuleItem> DeductionRules { get; set; } = new();
     public string? Error { get; set; }
     public string? ToastMessage { get; set; }
     public bool? ToastSuccess { get; set; }
@@ -60,7 +62,7 @@ public class AddModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnGetCheckUniqueAsync(string type, string value)
+    public async Task<IActionResult> OnGetCheckUniqueAsync(string type, string value, string? scope)
     {
         var token = GetAccessToken();
         if (string.IsNullOrEmpty(token))
@@ -75,7 +77,7 @@ public class AddModel : PageModel
         try
         {
             var client = CreateAuthorizedApiClient(token);
-            var result = await CheckUniqueAsync(client, baseUrl, kind, val);
+            var result = await CheckUniqueAsync(client, baseUrl, kind, val, string.IsNullOrWhiteSpace(scope) ? null : scope.Trim());
             return new JsonResult(new { ok = result.ok, exists = result.exists });
         }
         catch
@@ -96,17 +98,20 @@ public class AddModel : PageModel
             var departmentsTask = FetchDepartmentsAsync(client, baseUrl);
             var shiftsTask = FetchShiftTemplatesAsync(client, baseUrl);
             var locationsTask = FetchLocationsAsync(client, baseUrl);
-            await Task.WhenAll(departmentsTask, shiftsTask, locationsTask);
+            var deductionsTask = FetchDeductionRulesAsync(client, baseUrl);
+            await Task.WhenAll(departmentsTask, shiftsTask, locationsTask, deductionsTask);
 
             Departments = departmentsTask.Result;
             ShiftTemplates = shiftsTask.Result;
             Locations = locationsTask.Result;
+            DeductionRules = deductionsTask.Result;
         }
         catch
         {
             Departments = new List<DepartmentItem>();
             ShiftTemplates = new List<ShiftTemplateItem>();
             Locations = new List<LocationItem>();
+            DeductionRules = new List<DeductionRuleItem>();
         }
     }
 
@@ -118,7 +123,9 @@ public class AddModel : PageModel
         string? phone, string addressLine1, string? addressLine2,
         string city, string? stateProvince, string? postalCode, string country,
         string role, string employmentType,
+        string? compensationBasisOverride, decimal? basePayAmount, string? customUnitLabel, decimal? customWorkHours,
         string? emergencyContactName, string? emergencyContactPhone, string? emergencyContactRelation,
+        int[]? selectedDeductionRuleIds,
         bool createAccount, string? ContactEmail, string? Email, string? DefaultPassword,
         string? idPictureUrl, string? signatureUrl,
         IFormFile? profilePicture, IFormFile? signature)
@@ -176,10 +183,19 @@ public class AddModel : PageModel
         if (string.IsNullOrWhiteSpace(role)) role = "Employee";
         if (string.IsNullOrWhiteSpace(employmentType)) employmentType = "Regular";
         var dateHiredVal = dateHired ?? DateTime.Today;
+        var client = CreateAuthorizedApiClient(token);
+
+        var contactEmail = string.IsNullOrWhiteSpace(ContactEmail) ? null : ContactEmail.Trim();
+        if (string.IsNullOrWhiteSpace(contactEmail))
+        {
+            TempData["ToastMessage"] = "Email is required.";
+            TempData["ToastSuccess"] = false;
+            return Page();
+        }
 
         if (createAccount)
         {
-            var loginEmail = string.IsNullOrWhiteSpace(Email) ? ContactEmail?.Trim() : Email.Trim();
+            var loginEmail = string.IsNullOrWhiteSpace(Email) ? contactEmail : Email.Trim();
             var password = DefaultPassword?.Trim();
             if (string.IsNullOrEmpty(loginEmail) || string.IsNullOrEmpty(password))
             {
@@ -187,11 +203,25 @@ public class AddModel : PageModel
                 TempData["ToastSuccess"] = false;
                 return Page();
             }
+
+            var uniqueLoginCheck = await CheckUniqueAsync(client, baseUrl, "email", loginEmail, "global-user");
+            if (!uniqueLoginCheck.ok)
+            {
+                TempData["ToastMessage"] = "Unable to validate login email right now. Please try again.";
+                TempData["ToastSuccess"] = false;
+                return Page();
+            }
+
+            if (uniqueLoginCheck.exists)
+            {
+                TempData["ToastMessage"] = "This email already has an existing account (possibly from another organization or SuperAdmin). Uncheck 'Create login account' to save employee only, or use a different email for the login account.";
+                TempData["ToastSuccess"] = false;
+                return Page();
+            }
         }
 
         var resolvedIdPictureUrl = idPictureUrl?.Trim();
         var resolvedSignatureUrl = signatureUrl?.Trim();
-        var client = CreateAuthorizedApiClient(token);
         var uploadedImages = await UploadEmployeeImagesAsync(client, baseUrl, profilePicture, signature);
         if (!string.IsNullOrWhiteSpace(uploadedImages.idPictureUrl)) resolvedIdPictureUrl = uploadedImages.idPictureUrl;
         if (!string.IsNullOrWhiteSpace(uploadedImages.signatureUrl)) resolvedSignatureUrl = uploadedImages.signatureUrl;
@@ -224,8 +254,13 @@ public class AddModel : PageModel
             Role = role.Trim(),
             WorkState = "Active",
             EmploymentType = employmentType.Trim(),
+            CompensationBasisOverride = string.IsNullOrWhiteSpace(compensationBasisOverride) ? "UseOrgDefault" : compensationBasisOverride.Trim(),
+            BasePayAmount = basePayAmount ?? 0,
+            CustomUnitLabel = string.IsNullOrWhiteSpace(customUnitLabel) ? null : customUnitLabel.Trim(),
+            CustomWorkHours = customWorkHours,
             DateHired = dateHiredVal,
             Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim(),
+            Email = contactEmail,
             AddressLine1 = string.IsNullOrWhiteSpace(addressLine1) ? null : addressLine1.Trim(),
             AddressLine2 = string.IsNullOrWhiteSpace(addressLine2) ? null : addressLine2.Trim(),
             City = string.IsNullOrWhiteSpace(city) ? null : city.Trim(),
@@ -290,9 +325,19 @@ public class AddModel : PageModel
         }
 
         // 2) If "Create account" was checked, create user and link to the new employee.
+        var deductionIds = (selectedDeductionRuleIds ?? Array.Empty<int>()).Distinct().ToArray();
+        if (deductionIds.Length > 0)
+        {
+            await client.PutAsJsonAsync(baseUrl + "/api/employees/" + empId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/deductions", new
+            {
+                Items = deductionIds.Select(x => new { DeductionRuleID = x, Mode = "UseRule" }).ToArray()
+            });
+        }
+
+        // 2) If "Create account" was checked, create user and link to the new employee.
         if (createAccount)
         {
-            var loginEmail = string.IsNullOrWhiteSpace(Email) ? ContactEmail?.Trim() : Email.Trim();
+            var loginEmail = string.IsNullOrWhiteSpace(Email) ? contactEmail : Email.Trim();
             var password = DefaultPassword?.Trim();
             HttpResponseMessage userResp;
             try
@@ -316,6 +361,7 @@ public class AddModel : PageModel
             if (!userResp.IsSuccessStatusCode)
             {
                 var msg = "Employee saved. Failed to create login account.";
+                var accountConflict = userResp.StatusCode == System.Net.HttpStatusCode.Conflict;
                 try
                 {
                     var body = await userResp.Content.ReadAsStringAsync();
@@ -327,15 +373,25 @@ public class AddModel : PageModel
                     }
                 }
                 catch { /* ignore */ }
+                if (accountConflict)
+                {
+                    msg = "Login account creation failed because this email already has an existing account (possibly from another organization or SuperAdmin). Uncheck 'Create login account' to save employee only, or use a different login email.";
+                }
                 TempData["ToastMessage"] = msg;
                 TempData["ToastSuccess"] = false;
-                return RedirectToPage("/App/Employee/EmployeeManagement");
+                return Page();
             }
 
             int createdUserId;
+            string? accountCreateMessage = null;
+            bool? accountEmailSent = null;
             try
             {
                 var userJson = await userResp.Content.ReadFromJsonAsync<JsonElement>();
+                if (userJson.TryGetProperty("message", out var messageEl) && messageEl.ValueKind == JsonValueKind.String)
+                    accountCreateMessage = messageEl.GetString();
+                if (userJson.TryGetProperty("emailSent", out var emailSentEl) && (emailSentEl.ValueKind == JsonValueKind.True || emailSentEl.ValueKind == JsonValueKind.False))
+                    accountEmailSent = emailSentEl.GetBoolean();
                 if (!userJson.TryGetProperty("userId", out var uid))
                 {
                     TempData["ToastMessage"] = "Employee saved. Login account was created but could not be linked; link from Edit Employee.";
@@ -357,6 +413,20 @@ public class AddModel : PageModel
                 TempData["ToastMessage"] = "Employee and login account were created but could not be linked. Link from Edit Employee.";
                 TempData["ToastSuccess"] = true;
                 return RedirectToPage("/App/Employee/EmployeeManagement");
+            }
+
+            if (!accountEmailSent.GetValueOrDefault(true))
+            {
+                TempData["ToastMessage"] = "Employee and login account were created, but temporary access email failed to send. Reissue temporary access from employee actions.";
+                TempData["ToastSuccess"] = true;
+                return RedirectToPage("/App/Employee/EmployeeManagement");
+            }
+
+            if (!string.IsNullOrWhiteSpace(accountCreateMessage))
+            {
+                TempData["ToastMessage"] = "Employee created. " + accountCreateMessage;
+                TempData["ToastSuccess"] = true;
+                return RedirectToPage("/App/Employee/EmployeeManagement", new { showId = empId });
             }
         }
 
@@ -543,6 +613,16 @@ public class AddModel : PageModel
         return (list ?? new List<LocationItem>()).Where(x => x.IsActive).OrderBy(x => x.LocationName).ToList();
     }
 
+    private async Task<List<DeductionRuleItem>> FetchDeductionRulesAsync(HttpClient client, string baseUrl)
+    {
+        var orgIdClaim = User.FindFirstValue("orgId");
+        if (!int.TryParse(orgIdClaim, out var orgId))
+            return new List<DeductionRuleItem>();
+
+        var list = await client.GetFromJsonAsync<List<DeductionRuleItem>>(baseUrl + "/api/organizations/" + orgId + "/pay-components/deductions");
+        return (list ?? new List<DeductionRuleItem>()).OrderBy(x => x.Name).ToList();
+    }
+
     // Employee Management - fetching data API functions
     private static async Task<string> FetchNextEmpNumberAsync(HttpClient client, string baseUrl, string? role)
     {
@@ -552,9 +632,11 @@ public class AddModel : PageModel
     }
 
     // Employee Management - fetching data API functions
-    private static async Task<(bool ok, bool exists)> CheckUniqueAsync(HttpClient client, string baseUrl, string type, string value)
+    private static async Task<(bool ok, bool exists)> CheckUniqueAsync(HttpClient client, string baseUrl, string type, string value, string? scope = null)
     {
         var url = baseUrl + "/api/employees/check-unique?type=" + Uri.EscapeDataString(type) + "&value=" + Uri.EscapeDataString(value);
+        if (!string.IsNullOrWhiteSpace(scope))
+            url += "&scope=" + Uri.EscapeDataString(scope);
         var resp = await client.GetFromJsonAsync<UniqueCheckResponse>(url);
         return (resp?.Ok == true, resp?.Exists == true);
     }
@@ -616,6 +698,17 @@ public class AddModel : PageModel
         public int LocationId { get; set; }
         public string LocationName { get; set; } = "";
         public bool IsActive { get; set; }
+    }
+
+    public class DeductionRuleItem
+    {
+        public int DeductionRuleID { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string DeductionType { get; set; } = string.Empty;
+        public decimal? Amount { get; set; }
+        public string? ComputeBasedOn { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     private class UniqueCheckResponse

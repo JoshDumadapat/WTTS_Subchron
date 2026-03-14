@@ -1,0 +1,427 @@
+@page "{id:int}"
+@model Subchron.Web.Pages.App.Employee.EditEmployeeModel
+@{
+    ViewData["Title"] = "Edit Employee";
+    ViewData["PageTitle"] = "Edit Employee";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
+    var e = Model.Employee;
+    var dateHired = e?.DateHired?.ToString("yyyy-MM-dd") ?? "";
+    var birthDate = e?.BirthDate?.ToString("yyyy-MM-dd") ?? "";
+    var currentGender = e?.Gender ?? "";
+    var currentRole = e?.Role ?? "";
+    var currentEmploymentType = e?.EmploymentType ?? "";
+    var currentWorkState = e?.WorkState ?? "";
+    var currentShiftCode = e?.AssignedShiftTemplateCode ?? "";
+    var currentDepartmentId = e?.DepartmentID?.ToString() ?? "";
+    var currentLocationId = e?.AssignedLocationId?.ToString() ?? "";
+    var currentCompBasis = e?.CompensationBasisOverride ?? "UseOrgDefault";
+    var currentBasePayAmount = e?.BasePayAmount ?? 0m;
+    var currentCustomUnitLabel = e?.CustomUnitLabel ?? "";
+    var currentCustomWorkHours = e?.CustomWorkHours?.ToString() ?? "";
+    var hasLoginAccount = e?.UserID.HasValue == true;
+}
+
+<div class="px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">Edit Employee</h1>
+    </div>
+
+    @if (e == null)
+    {
+        <p class="text-slate-600 dark:text-slate-400">Employee not found.</p>
+    }
+    else
+    {
+    <form id="editEmployeeForm" method="post" asp-page-handler="Update" asp-route-id="@Model.Id" enctype="multipart/form-data" data-turbo="false">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" name="idPictureUrl" id="editIdPictureUrl" value="@(e.IdPictureUrl ?? "")" />
+    <input type="hidden" name="signatureUrl" id="editSignatureUrl" value="@(e.SignatureUrl ?? "")" />
+
+    <div class="flex gap-6 items-start">
+        <div class="flex-1 min-w-0 space-y-6">
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Basic information</h2>
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div class="md:col-span-2">
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Full name <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <input type="text" name="firstName" id="editFirstName" value="@e.FirstName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="First name" required />
+                            <input type="text" name="middleName" id="editMiddleName" value="@e.MiddleName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Middle (optional)" />
+                            <input type="text" name="lastName" id="editLastName" value="@e.LastName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Last name" required />
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label for="editBirthDate" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Birthdate</label>
+                                <input type="date" name="birthDate" id="editBirthDate" value="@birthDate" class="block w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                            </div>
+                            <div>
+                                <label for="editBirthDateAgeDisplay" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Age</label>
+                                <input type="text" id="editBirthDateAgeDisplay" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300" value="—" readonly />
+                            </div>
+                            <div>
+                                <label for="editGender" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Gender</label>
+                                <select name="gender" id="editGender" data-current="@currentGender" class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                                    <option value="">Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Non-binary">Non-binary</option>
+                                    <option value="Prefer not to say">Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Address</h2>
+                <div class="address-autocomplete relative">
+                    <label for="editAddressLine1" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line <span class="text-red-500">*</span></label>
+                    <input type="text" name="addressLine1" id="editAddressLine1" value="@e.AddressLine1" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Street address" autocomplete="off" required />
+                    <div id="editAddressSuggestions" class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-60 overflow-auto rounded-xl border border-slate-300 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"></div>
+                </div>
+                <div class="mt-4">
+                    <label for="editAddressLine2" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Address line 2 (optional)</label>
+                    <input type="text" name="addressLine2" id="editAddressLine2" value="@e.AddressLine2" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                </div>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div><label for="editCity" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">City <span class="text-red-500">*</span></label><input type="text" name="city" id="editCity" value="@e.City" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required /></div>
+                    <div><label for="editStateProvince" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">State / Province</label><input type="text" name="stateProvince" id="editStateProvince" value="@e.StateProvince" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                    <div><label for="editPostalCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Postal code</label><input type="text" name="postalCode" id="editPostalCode" value="@e.PostalCode" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                    <div><label for="editCountry" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Country <span class="text-red-500">*</span></label><input type="text" name="country" id="editCountry" value="@(e.Country ?? "Philippines")" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required /></div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Account / contact</h2>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Contact number</label>
+                        <div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700">
+                            <span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span>
+                            <input type="tel" name="phone" id="editPhone" value="@e.Phone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" maxlength="14" />
+                        </div>
+                    </div>
+                    <div>
+                        <label for="editContactEmail" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+                        <input type="email" name="contactEmail" id="editContactEmail" value="@e.Email" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <input type="checkbox" name="hasAccount" id="editHasAccount" value="true" class="h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" @(hasLoginAccount ? "checked disabled" : string.Empty) />
+                    <label for="editHasAccount" class="text-sm font-medium text-slate-700 dark:text-slate-300">Has login account</label>
+                </div>
+                <div id="editAccountFields" class="mt-4 @(hasLoginAccount ? "" : "hidden") space-y-4 border-l-4 border-subgreen-200 pl-4 dark:border-subgreen-800">
+                    <div>
+                        <label for="editLoginEmail" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Login email</label>
+                        <input type="email" name="loginEmail" id="editLoginEmail" value="@e.Email" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="employee@company.com" />
+                    </div>
+                    <div>
+                        <label for="editDefaultPassword" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Temporary password</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" name="defaultPassword" id="editDefaultPassword" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Auto-generated" autocomplete="off" @(hasLoginAccount ? "readonly" : string.Empty) />
+                            <button type="button" id="editGenerateTempPassword" class="btn-secondary h-11 shrink-0 px-4 text-sm @(hasLoginAccount ? "hidden" : "")">Regenerate</button>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Use for first login or reissue when first-login session has expired.</p>
+                    </div>
+                    @if (hasLoginAccount)
+                    {
+                        <div>
+                            <button type="submit" name="submitAction" value="reissue-access" formnovalidate class="btn-secondary h-10 px-4 text-sm" onclick="return confirm('Reissue temporary access now? This sends a new temporary password and resets first-login access.')">Reissue Temporary Access</button>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Emergency contact</h2>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div><label for="editEmergencyContactName" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label><input type="text" name="emergencyContactName" id="editEmergencyContactName" value="@e.EmergencyContactName" class="name-cap input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                    <div><label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label><div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700"><span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">+63</span><input type="tel" name="emergencyContactPhone" id="editEmergencyContactPhone" value="@e.EmergencyContactPhone" class="ph-phone-input input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" maxlength="14" /></div></div>
+                    <div><label for="editEmergencyContactRelation" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Relation</label><input type="text" name="emergencyContactRelation" id="editEmergencyContactRelation" value="@e.EmergencyContactRelation" class="name-cap input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-white">Employment information</h2>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div><label for="editRole" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Role <span class="text-red-500">*</span></label><select name="role" id="editRole" data-current="@currentRole" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required><option value="">— Select role —</option><option value="Employee">Employee</option><option value="HR">HR</option><option value="Manager">Manager</option><option value="PayrollPersonnel">Payroll Personnel</option><option value="Supervisor">Supervisor</option></select></div>
+                    <div><label for="editEmpNumber" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employee ID</label><input type="text" name="empNumber" id="editEmpNumber" value="@e.EmpNumber" class="input-field h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 text-base text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400" readonly /></div>
+                    <div><label for="editDateHired" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Date hired</label><input type="date" name="dateHired" id="editDateHired" value="@dateHired" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                    <div><label for="editDepartmentID" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label><select name="departmentID" id="editDepartmentID" data-current="@currentDepartmentId" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white"><option value="">— Select —</option>@foreach (var d in Model.Departments){<option value="@d.DepID" data-default-shift="@d.DefaultShiftTemplateCode" data-default-location="@d.DefaultLocationId">@d.DepartmentName</option>}</select></div>
+                    <div><label for="editAssignedShiftTemplateCode" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Shift assignment</label><select name="assignedShiftTemplateCode" id="editAssignedShiftTemplateCode" data-current="@currentShiftCode" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white"><option value="">— Use department/org default —</option>@foreach (var s in Model.ShiftTemplates){<option value="@s.Code">@s.DisplayLabel</option>}</select></div>
+                    <div><label for="editAssignedLocationId" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Site location assignment</label><select name="assignedLocationId" id="editAssignedLocationId" data-current="@currentLocationId" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white"><option value="">— Use department default —</option>@foreach (var l in Model.Locations){<option value="@l.LocationId">@l.LocationName</option>}</select></div>
+                    <div><label for="editEmploymentType" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Employment type <span class="text-red-500">*</span></label><select name="employmentType" id="editEmploymentType" data-current="@currentEmploymentType" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" required><option value="">— Select —</option><option value="Contractual">Contractual</option><option value="Part-time">Part-time</option><option value="Regular">Regular</option></select></div>
+                    <div><label for="editWorkState" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Work state</label><select name="workState" id="editWorkState" data-current="@currentWorkState" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white"><option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Suspended">Suspended</option><option value="Probation">Probation</option><option value="Training">Training</option></select></div>
+                    <div><label for="editCompensationBasisOverride" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Compensation basis</label><select name="compensationBasisOverride" id="editCompensationBasisOverride" data-current="@currentCompBasis" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white"><option value="UseOrgDefault">Use organization default</option><option value="Monthly">Monthly</option><option value="Daily">Daily</option><option value="Hourly">Hourly</option><option value="Custom">Custom</option></select></div>
+                    <div><label for="editBasePayAmount" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Base pay amount</label><div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700"><span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">₱</span><input type="number" name="basePayAmount" id="editBasePayAmount" value="@currentBasePayAmount" class="input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" step="0.01" min="0" /></div></div>
+                    <div id="editCustomUnitLabelWrap" class="hidden"><label for="editCustomUnitLabel" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Custom unit label</label><input type="text" name="customUnitLabel" id="editCustomUnitLabel" value="@currentCustomUnitLabel" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" /></div>
+                    <div id="editCustomWorkHoursWrap" class="hidden"><label for="editCustomWorkHours" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Custom work hours</label><input type="number" name="customWorkHours" id="editCustomWorkHours" value="@currentCustomWorkHours" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" step="0.01" min="0" /></div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-2 text-base font-semibold text-slate-900 dark:text-white">Deductions</h2>
+                <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Fetched from Payroll Config (Pay tab). Selected rules are assigned to this employee.</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    @if (Model.DeductionRules.Count == 0)
+                    {
+                        <p class="text-sm text-slate-500 dark:text-slate-400">No active deduction rules found. Configure deductions first in Payroll Config.</p>
+                    }
+                    else
+                    {
+                        @foreach (var d in Model.DeductionRules)
+                        {
+                            var isChecked = Model.SelectedDeductionRuleIds.Contains(d.DeductionRuleID);
+                            <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/50">
+                                <input type="checkbox" name="selectedDeductionRuleIds" value="@d.DeductionRuleID" @(isChecked ? "checked" : null) class="mt-0.5 h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
+                                <span>
+                                    <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">@d.Name</span>
+                                    <span class="block text-xs text-slate-500 dark:text-slate-400">@d.Category · @d.DeductionType</span>
+                                </span>
+                            </label>
+                        }
+                    }
+                </div>
+            </section>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-end pb-6">
+                <a href="/App/Employee/EmployeeManagement" class="btn-secondary h-12 px-6">Cancel</a>
+                <button type="submit" id="editEmployeeSubmitBtn" class="btn-primary h-12 gap-2 px-6 disabled:opacity-70"><span id="editEmployeeSubmitText">Update Employee</span><span id="editEmployeeSubmitSpinner" class="hidden h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></span></button>
+            </div>
+        </div>
+
+        <div class="w-80 flex-shrink-0 flex flex-col gap-4">
+            <div class="rounded-2xl border border-slate-300 bg-white p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-0.5 text-sm font-semibold text-slate-900 dark:text-white">Profile / ID Picture</h2>
+                <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Standard 2×2 ID photo · portrait</p>
+                <div id="profilePicDropzone" class="group relative mx-auto cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-subgreen-400 hover:bg-subgreen-50 dark:border-slate-600 dark:bg-slate-700/40" style="width:100%;aspect-ratio:4/5;" onclick="document.getElementById('profilePicInput').click()">
+                    <img id="profilePicPreview" src="@(e.IdPictureUrl ?? e.AvatarUrl ?? "")" alt="Profile preview" class="@(string.IsNullOrWhiteSpace(e.IdPictureUrl) && string.IsNullOrWhiteSpace(e.AvatarUrl) ? "hidden" : "") absolute inset-0 h-full w-full object-cover object-top" />
+                    <div id="profilePicPlaceholder" class="@(string.IsNullOrWhiteSpace(e.IdPictureUrl) && string.IsNullOrWhiteSpace(e.AvatarUrl) ? "" : "hidden") absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Click or drag photo here</p>
+                    </div>
+                    <input type="file" id="profilePicInput" name="profilePicture" accept="image/png,image/jpeg,image/webp" class="hidden" />
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-300 bg-white p-5 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                <h2 class="mb-0.5 text-sm font-semibold text-slate-900 dark:text-white">Signature</h2>
+                <p class="mb-3 text-xs text-slate-500 dark:text-slate-400">Scanned or digital · landscape</p>
+                <div id="signatureDropzone" class="group relative w-full cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-white transition hover:border-subgreen-400 hover:bg-subgreen-50 dark:border-slate-600" style="aspect-ratio:3/1;" onclick="document.getElementById('signatureInput').click()">
+                    <img id="signaturePreview" src="@(e.SignatureUrl ?? "")" alt="Signature preview" class="@(string.IsNullOrWhiteSpace(e.SignatureUrl) ? "hidden" : "") absolute inset-0 h-full w-full object-contain object-center p-3" />
+                    <div id="signaturePlaceholder" class="@(string.IsNullOrWhiteSpace(e.SignatureUrl) ? "" : "hidden") absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center">
+                        <p class="text-xs font-semibold text-slate-500">Click or drag signature here</p>
+                    </div>
+                    <input type="file" id="signatureInput" name="signature" accept="image/png,image/jpeg,image/webp" class="hidden" />
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+    }
+</div>
+
+<script src="~/js/ph-phone.js" asp-append-version="true"></script>
+@section Scripts {
+<script>
+(function () {
+    function setupImageUpload(inputId, previewId, placeholderId, dropzoneId, hiddenFieldId) {
+        var input = document.getElementById(inputId);
+        var preview = document.getElementById(previewId);
+        var placeholder = document.getElementById(placeholderId);
+        var dropzone = document.getElementById(dropzoneId);
+        var hiddenField = document.getElementById(hiddenFieldId);
+        if (!input || !preview || !placeholder || !dropzone) return;
+
+        function showPreview(file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                if (hiddenField) hiddenField.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        input.addEventListener('change', function () {
+            if (this.files && this.files[0]) showPreview(this.files[0]);
+        });
+
+        dropzone.addEventListener('dragover', function (e) { e.preventDefault(); this.classList.add('border-subgreen-400'); });
+        dropzone.addEventListener('dragleave', function () { this.classList.remove('border-subgreen-400'); });
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('border-subgreen-400');
+            var file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                var dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
+
+    setupImageUpload('profilePicInput', 'profilePicPreview', 'profilePicPlaceholder', 'profilePicDropzone', 'editIdPictureUrl');
+    setupImageUpload('signatureInput', 'signaturePreview', 'signaturePlaceholder', 'signatureDropzone', 'editSignatureUrl');
+
+    document.querySelectorAll('select[data-current]').forEach(function (el) {
+        var current = el.getAttribute('data-current') || '';
+        if (current) el.value = current;
+    });
+
+    var editCompensationBasisOverride = document.getElementById('editCompensationBasisOverride');
+    var editCustomUnitLabelWrap = document.getElementById('editCustomUnitLabelWrap');
+    var editCustomWorkHoursWrap = document.getElementById('editCustomWorkHoursWrap');
+    function syncEditCustomCompensationFields() {
+        if (!editCompensationBasisOverride) return;
+        var isCustom = editCompensationBasisOverride.value === 'Custom';
+        if (editCustomUnitLabelWrap) editCustomUnitLabelWrap.classList.toggle('hidden', !isCustom);
+        if (editCustomWorkHoursWrap) editCustomWorkHoursWrap.classList.toggle('hidden', !isCustom);
+    }
+    if (editCompensationBasisOverride) {
+        editCompensationBasisOverride.addEventListener('change', syncEditCustomCompensationFields);
+        syncEditCustomCompensationFields();
+    }
+
+    var hasAccount = document.getElementById('editHasAccount');
+    var accountFields = document.getElementById('editAccountFields');
+    var contactEmail = document.getElementById('editContactEmail');
+    var loginEmail = document.getElementById('editLoginEmail');
+    var tempPassword = document.getElementById('editDefaultPassword');
+    var regenBtn = document.getElementById('editGenerateTempPassword');
+
+    var UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    var LOWER = 'abcdefghijkmnopqrstuvwxyz';
+    var DIGIT = '23456789';
+    var SYMBOL = '!@@#$%&*?';
+    var LEN = 16;
+
+    function rand(max) {
+        if (window.crypto && window.crypto.getRandomValues) {
+            var a = new Uint32Array(1);
+            window.crypto.getRandomValues(a);
+            return a[0] % max;
+        }
+        return Math.floor(Math.random() * max);
+    }
+    function pick(chars) { return chars.charAt(rand(chars.length)); }
+    function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+            var j = rand(i + 1);
+            var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+        return arr;
+    }
+    function generateStrongTempPassword() {
+        var all = UPPER + LOWER + DIGIT + SYMBOL;
+        var chars = [pick(UPPER), pick(LOWER), pick(DIGIT), pick(SYMBOL)];
+        while (chars.length < LEN) chars.push(pick(all));
+        return shuffle(chars).join('');
+    }
+
+    function setAccountUi() {
+        if (!hasAccount || !accountFields) return;
+        var on = hasAccount.checked;
+        accountFields.classList.toggle('hidden', !on);
+        if (on && loginEmail && !loginEmail.value && contactEmail && contactEmail.value) {
+            loginEmail.value = contactEmail.value;
+        }
+        if (on && tempPassword && !tempPassword.value && regenBtn && !regenBtn.classList.contains('hidden')) {
+            tempPassword.value = generateStrongTempPassword();
+        }
+    }
+
+    if (hasAccount) {
+        hasAccount.addEventListener('change', setAccountUi);
+        setAccountUi();
+    }
+    if (contactEmail && loginEmail) {
+        contactEmail.addEventListener('input', function () {
+            if (hasAccount && hasAccount.checked && !loginEmail.value) loginEmail.value = contactEmail.value;
+        });
+    }
+    if (regenBtn && tempPassword) {
+        regenBtn.addEventListener('click', function () {
+            tempPassword.value = generateStrongTempPassword();
+        });
+    }
+
+    var birthInput = document.getElementById('editBirthDate');
+    var ageDisplay = document.getElementById('editBirthDateAgeDisplay');
+    function updateAge() {
+        if (!birthInput || !ageDisplay || !birthInput.value) { if (ageDisplay) ageDisplay.value = '—'; return; }
+        var d = new Date(birthInput.value);
+        if (isNaN(d.getTime())) { ageDisplay.value = '—'; return; }
+        var t = new Date();
+        var a = t.getFullYear() - d.getFullYear();
+        if (t.getMonth() < d.getMonth() || (t.getMonth() === d.getMonth() && t.getDate() < d.getDate())) a--;
+        ageDisplay.value = a + ' yrs';
+    }
+    if (birthInput) {
+        birthInput.addEventListener('input', updateAge);
+        birthInput.addEventListener('change', updateAge);
+        updateAge();
+    }
+
+    var addressInput = document.getElementById('editAddressLine1');
+    var list = document.getElementById('editAddressSuggestions');
+    var city = document.getElementById('editCity');
+    var state = document.getElementById('editStateProvince');
+    var postal = document.getElementById('editPostalCode');
+    var country = document.getElementById('editCountry');
+    var timer = null;
+    var abort = null;
+    function clearSuggestions() { if (!list) return; list.classList.add('hidden'); list.innerHTML = ''; }
+    function fillAddress(item) {
+        addressInput.value = item.addressLine || item.displayName || '';
+        if (city) city.value = item.city || '';
+        if (state) state.value = item.state || '';
+        if (postal) postal.value = item.postalCode || '';
+        if (country) country.value = item.country || 'Philippines';
+        clearSuggestions();
+    }
+    function searchAddress(q) {
+        if (!q || q.length < 3) { clearSuggestions(); return; }
+        if (abort) abort.abort();
+        abort = new AbortController();
+        fetch('/api/location/autocomplete?q=' + encodeURIComponent(q) + '&limit=6', { signal: abort.signal })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (data) {
+                clearSuggestions();
+                if (!Array.isArray(data) || !list || data.length === 0) return;
+                data.forEach(function (item) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'block w-full cursor-pointer px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700';
+                    btn.textContent = item.displayName || item.addressLine || 'Address';
+                    btn.addEventListener('click', function () { fillAddress(item); });
+                    list.appendChild(btn);
+                });
+                list.classList.remove('hidden');
+            })
+            .catch(function () { clearSuggestions(); });
+    }
+    if (addressInput) {
+        addressInput.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () { searchAddress(addressInput.value.trim()); }, 300);
+        });
+    }
+    document.addEventListener('click', function (e) { if (!e.target.closest('.address-autocomplete')) clearSuggestions(); });
+
+    document.getElementById('editEmployeeForm')?.addEventListener('submit', function () {
+        var btn = document.getElementById('editEmployeeSubmitBtn');
+        if (!btn) return;
+        btn.disabled = true;
+        var text = document.getElementById('editEmployeeSubmitText');
+        var sp = document.getElementById('editEmployeeSubmitSpinner');
+        if (text) text.textContent = 'Updating...';
+        if (sp) sp.classList.remove('hidden');
+    });
+})();
+</script>
+}

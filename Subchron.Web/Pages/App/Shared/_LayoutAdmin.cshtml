@@ -48,27 +48,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin - Subchron</title>
-
-    <!-- Suppress "cdn.tailwindcss.com should not be used in production" (use Tailwind CLI/PostCSS in production) -->
-    <script>
-        (function(){var w=console.warn;if(typeof w==='function'){console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;return w.apply(console,arguments);};}})();
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              colors: {
-                subgreen: {
-                  50: "#effbf1", 100: "#d9f5de", 200: "#b6eac0", 300: "#84d999", 400: "#4bc56c",
-                  500: "#28a84d", 600: "#209030", 700: "#177027", 800: "#145923", 900: "#114a1f"
-                }
-              }
-            }
-          }
-        };
-    </script>
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
 
     <script src="https://cdn.jsdelivr.net/npm/@@hotwired/turbo@@8.0.4/dist/turbo.es2017-umd.min.js" defer></script>
     <script>
@@ -660,7 +640,7 @@
                             <a href="/App/PayrollAndReports/Payroll" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
                                 Payroll Export <span class="nav-indicator" aria-hidden="true"></span>
                             </a>
-                            <a href="/App/PayrollAndReports/PayrollProcessing" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
+                            <a href="/App/PayrollAndReports/Payroll" class="nav-item group block rounded-r-lg px-4 py-2.5 text-sm whitespace-nowrap text-slate-500 hover:text-emerald-600 dark:text-slate-400">
                                 Payroll Processing <span class="nav-indicator" aria-hidden="true"></span>
                             </a>
                         </div>
@@ -974,8 +954,8 @@
                                 }
 
                                 // ── Special case: Employee Edit ───────────────────────────────────────
-                                // URL: /App/Employee/Edit/42
-                                var isEmployeeEdit = rawSegs.some(function(s){ return s.toLowerCase() === 'edit'; })
+                                // URL: /App/Employee/EditEmployee/42
+                                var isEmployeeEdit = rawSegs.some(function(s){ return s.toLowerCase() === 'editemployee' || s.toLowerCase() === 'edit'; })
                                                   && rawSegs.some(function(s){ return s.toLowerCase() === 'employee'; });
                                 if (isEmployeeEdit) {
                                     segments = [

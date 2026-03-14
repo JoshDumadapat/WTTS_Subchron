@@ -24,12 +24,14 @@ public class OrgHolidaysController : ControllerBase
     private readonly TenantDbContext _tenantDb;
     private readonly IAuditService _auditService;
     private readonly IHolidayApiService _holidayApiService;
+    private readonly ILogger<OrgHolidaysController> _logger;
 
-    public OrgHolidaysController(TenantDbContext tenantDb, IAuditService auditService, IHolidayApiService holidayApiService)
+    public OrgHolidaysController(TenantDbContext tenantDb, IAuditService auditService, IHolidayApiService holidayApiService, ILogger<OrgHolidaysController> logger)
     {
         _tenantDb = tenantDb;
         _auditService = auditService;
         _holidayApiService = holidayApiService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -47,10 +49,29 @@ public class OrgHolidaysController : ControllerBase
             query = query.Where(h => h.HolidayDate.Year == year.Value);
         }
 
-        var items = await query
-            .OrderBy(h => h.HolidayDate)
-            .ThenByDescending(h => h.Precedence)
-            .ToListAsync(ct);
+        List<OrgHolidayConfig> items;
+        try
+        {
+            items = await query
+                .OrderBy(h => h.HolidayDate)
+                .ThenByDescending(h => h.Precedence)
+                .ToListAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            if (await TryRepairTenantSchemaAsync(ex, ct))
+            {
+                items = await query
+                    .OrderBy(h => h.HolidayDate)
+                    .ThenByDescending(h => h.Precedence)
+                    .ToListAsync(ct);
+            }
+            else
+            {
+                _logger.LogWarning(ex, "Holiday config query failed; returning empty set to keep UI responsive.");
+                return Ok(Array.Empty<OrgHolidayResponse>());
+            }
+        }
 
         return Ok(items.Select(MapToResponse));
     }
@@ -85,19 +106,49 @@ public class OrgHolidaysController : ControllerBase
         if (!string.IsNullOrEmpty(validationError))
             return BadRequest(new { ok = false, message = validationError });
 
-        request.Date = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
-        await NormalizeHolidayRulesAsync(request, orgId.Value, null, ct);
+        if (!TryNormalizeDate(request, out var normalizedDate))
+            return BadRequest(new { ok = false, message = "Holiday date is invalid. Expected format yyyy-MM-dd." });
 
-        var entity = MapToEntity(request, orgId.Value);
-        entity.CreatedAt = DateTime.UtcNow;
-        entity.UpdatedAt = entity.CreatedAt;
+        request.Date = normalizedDate;
 
-        _tenantDb.OrgHolidayConfigs.Add(entity);
-        await _tenantDb.SaveChangesAsync(ct);
+        try
+        {
+            await NormalizeHolidayRulesAsync(request, orgId.Value, null, ct);
 
-        await TryLogAuditAsync(orgId.Value, "OrgHolidayCreated", $"Created holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+            var entity = MapToEntity(request, orgId.Value);
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = entity.CreatedAt;
 
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = entity.OrgHolidayConfigID }, MapToResponse(entity));
+            _tenantDb.OrgHolidayConfigs.Add(entity);
+            await _tenantDb.SaveChangesAsync(ct);
+
+            await TryLogAuditAsync(orgId.Value, "OrgHolidayCreated", $"Created holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = entity.OrgHolidayConfigID }, MapToResponse(entity));
+        }
+        catch (DbUpdateException ex)
+        {
+            if (await TryRepairTenantSchemaAsync(ex, ct))
+            {
+                await NormalizeHolidayRulesAsync(request, orgId.Value, null, ct);
+                var entity = MapToEntity(request, orgId.Value);
+                entity.CreatedAt = DateTime.UtcNow;
+                entity.UpdatedAt = entity.CreatedAt;
+
+                _tenantDb.OrgHolidayConfigs.Add(entity);
+                await _tenantDb.SaveChangesAsync(ct);
+
+                await TryLogAuditAsync(orgId.Value, "OrgHolidayCreated", $"Created holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+                return CreatedAtAction(nameof(GetByIdAsync), new { id = entity.OrgHolidayConfigID }, MapToResponse(entity));
+            }
+
+            _logger.LogError(ex, "Holiday create failed for org {OrgId}", orgId.Value);
+            return StatusCode(500, new { ok = false, message = "Failed to save holiday rule." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Holiday create failed for org {OrgId}", orgId.Value);
+            return StatusCode(500, new { ok = false, message = "Failed to save holiday rule." });
+        }
     }
 
     [HttpPut("{id:int}")]
@@ -120,16 +171,43 @@ public class OrgHolidaysController : ControllerBase
         if (!string.IsNullOrEmpty(validationError))
             return BadRequest(new { ok = false, message = validationError });
 
-        request.Date = DateTime.Parse(request.Date, CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
-        await NormalizeHolidayRulesAsync(request, orgId.Value, id, ct);
+        if (!TryNormalizeDate(request, out var normalizedDate))
+            return BadRequest(new { ok = false, message = "Holiday date is invalid. Expected format yyyy-MM-dd." });
 
-        MapToEntity(request, orgId.Value, entity);
-        entity.UpdatedAt = DateTime.UtcNow;
+        request.Date = normalizedDate;
 
-        await _tenantDb.SaveChangesAsync(ct);
-        await TryLogAuditAsync(orgId.Value, "OrgHolidayUpdated", $"Updated holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+        try
+        {
+            await NormalizeHolidayRulesAsync(request, orgId.Value, id, ct);
 
-        return Ok(MapToResponse(entity));
+            MapToEntity(request, orgId.Value, entity);
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            await _tenantDb.SaveChangesAsync(ct);
+            await TryLogAuditAsync(orgId.Value, "OrgHolidayUpdated", $"Updated holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+
+            return Ok(MapToResponse(entity));
+        }
+        catch (DbUpdateException ex)
+        {
+            if (await TryRepairTenantSchemaAsync(ex, ct))
+            {
+                await NormalizeHolidayRulesAsync(request, orgId.Value, id, ct);
+                MapToEntity(request, orgId.Value, entity);
+                entity.UpdatedAt = DateTime.UtcNow;
+                await _tenantDb.SaveChangesAsync(ct);
+                await TryLogAuditAsync(orgId.Value, "OrgHolidayUpdated", $"Updated holiday {entity.Name} on {entity.HolidayDate:yyyy-MM-dd}", ct);
+                return Ok(MapToResponse(entity));
+            }
+
+            _logger.LogError(ex, "Holiday update failed for org {OrgId}, holiday {HolidayId}", orgId.Value, id);
+            return StatusCode(500, new { ok = false, message = "Failed to save holiday rule." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Holiday update failed for org {OrgId}, holiday {HolidayId}", orgId.Value, id);
+            return StatusCode(500, new { ok = false, message = "Failed to save holiday rule." });
+        }
     }
 
     [HttpDelete("{id:int}")]
@@ -295,6 +373,23 @@ public class OrgHolidaysController : ControllerBase
             return "Holiday name must be 150 characters or fewer.";
 
         return null;
+    }
+
+    private static bool TryNormalizeDate(OrgHolidayRequest request, out string normalizedDate)
+    {
+        normalizedDate = string.Empty;
+        if (request == null || string.IsNullOrWhiteSpace(request.Date))
+            return false;
+
+        if (DateTime.TryParseExact(request.Date.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt)
+            || DateTime.TryParse(request.Date.Trim(), CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+            || DateTime.TryParse(request.Date.Trim(), out dt))
+        {
+            normalizedDate = dt.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return true;
+        }
+
+        return false;
     }
 
     private OrgHolidayResponse MapToResponse(OrgHolidayConfig entity)
@@ -550,5 +645,40 @@ public class OrgHolidaysController : ControllerBase
     {
         var role = User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue("role");
         return string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<bool> TryRepairTenantSchemaAsync(Exception ex, CancellationToken ct)
+    {
+        if (!LooksLikeSchemaIssue(ex)) return false;
+
+        try
+        {
+            _logger.LogWarning(ex, "Detected possible tenant schema mismatch for holiday config. Attempting tenant migration and retry.");
+            await _tenantDb.Database.MigrateAsync(ct);
+            _logger.LogInformation("Tenant migration completed during holiday config recovery.");
+            return true;
+        }
+        catch (Exception migrateEx)
+        {
+            _logger.LogError(migrateEx, "Tenant migration retry failed during holiday config recovery.");
+            return false;
+        }
+    }
+
+    private static bool LooksLikeSchemaIssue(Exception ex)
+    {
+        for (var cur = ex; cur != null; cur = cur.InnerException)
+        {
+            var msg = cur.Message ?? string.Empty;
+            if (msg.Contains("Invalid object name", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("Invalid column name", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("Could not find table", StringComparison.OrdinalIgnoreCase)
+                || msg.Contains("does not exist", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

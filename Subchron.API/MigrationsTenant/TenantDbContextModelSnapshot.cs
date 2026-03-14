@@ -442,12 +442,24 @@ namespace Subchron.API.MigrationsTenant
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<decimal>("BasePayAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(12,2)")
+                        .HasDefaultValue(0m);
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("date");
 
                     b.Property<string>("City")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("CompensationBasisOverride")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("UseOrgDefault");
 
                     b.Property<string>("Country")
                         .IsRequired()
@@ -459,6 +471,13 @@ namespace Subchron.API.MigrationsTenant
 
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CustomUnitLabel")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<decimal?>("CustomWorkHours")
+                        .HasColumnType("decimal(7,2)");
 
                     b.Property<DateTime?>("DateHired")
                         .HasColumnType("datetime2");
@@ -595,6 +614,66 @@ namespace Subchron.API.MigrationsTenant
                         .HasFilter("[PhoneNormalized] IS NOT NULL AND [PhoneNormalized] != ''");
 
                     b.ToTable("Employees", (string)null);
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.EmployeeDeductionProfile", b =>
+                {
+                    b.Property<int>("EmployeeDeductionProfileID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeDeductionProfileID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int>("DeductionRuleID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmpID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("UseRule");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("OrgID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<decimal?>("Value")
+                        .HasColumnType("decimal(12,4)");
+
+                    b.HasKey("EmployeeDeductionProfileID");
+
+                    b.HasIndex("DeductionRuleID");
+
+                    b.HasIndex("EmpID");
+
+                    b.HasIndex("OrgID");
+
+                    b.HasIndex("OrgID", "EmpID", "DeductionRuleID")
+                        .IsUnique();
+
+                    b.ToTable("EmployeeDeductionProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Subchron.API.Models.Entities.ExportJob", b =>
@@ -1883,6 +1962,240 @@ namespace Subchron.API.MigrationsTenant
                     b.ToTable("OvertimeRequests", (string)null);
                 });
 
+            modelBuilder.Entity("Subchron.API.Models.Entities.PayrollRun", b =>
+                {
+                    b.Property<int>("PayrollRunID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollRunID"));
+
+                    b.Property<string>("CompensationBasis")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Monthly");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int>("OrgID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PayCycle")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("SemiMonthly");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ProcessedByUserID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProcessedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Processed");
+
+                    b.Property<decimal>("TotalDeductions")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<decimal>("TotalGrossPay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<decimal>("TotalNetPay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("PayrollRunID");
+
+                    b.HasIndex("OrgID");
+
+                    b.HasIndex("ProcessedAt");
+
+                    b.ToTable("PayrollRuns", (string)null);
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.PayrollRunEmployee", b =>
+                {
+                    b.Property<int>("PayrollRunEmployeeID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollRunEmployeeID"));
+
+                    b.Property<decimal>("Allowances")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<decimal>("BasePay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<string>("BreakdownJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasDefaultValue("[]");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<decimal>("Deductions")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)")
+                        .HasDefaultValue("");
+
+                    b.Property<int>("EmpID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmpNumber")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.Property<string>("FormulaSummary")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasDefaultValue("");
+
+                    b.Property<decimal>("GrossPay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<decimal>("NetPay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<int>("OrgID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OvertimeHours")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("OvertimePay")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<int>("PayrollRunID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(14,2)");
+
+                    b.Property<decimal>("WorkedHours")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("PayrollRunEmployeeID");
+
+                    b.HasIndex("EmpID");
+
+                    b.HasIndex("OrgID");
+
+                    b.HasIndex("PayrollRunID");
+
+                    b.ToTable("PayrollRunEmployees", (string)null);
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.ScanStation", b =>
+                {
+                    b.Property<int>("ScanStationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScanStationID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int?>("CreatedByUserID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IdEntryEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("LocationID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrgID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("QrEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ScheduleMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("StationCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("StationName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int?>("UpdatedByUserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ScanStationID");
+
+                    b.HasIndex("LocationID");
+
+                    b.HasIndex("OrgID", "StationCode")
+                        .IsUnique();
+
+                    b.HasIndex("OrgID", "StationName")
+                        .IsUnique();
+
+                    b.ToTable("ScanStations", (string)null);
+                });
+
             modelBuilder.Entity("Subchron.API.Models.Entities.ShiftAssignment", b =>
                 {
                     b.Property<int>("ShiftAssignmentID")
@@ -2027,6 +2340,21 @@ namespace Subchron.API.MigrationsTenant
                         .OnDelete(DeleteBehavior.SetNull);
                 });
 
+            modelBuilder.Entity("Subchron.API.Models.Entities.EmployeeDeductionProfile", b =>
+                {
+                    b.HasOne("Subchron.API.Models.Entities.DeductionRule", null)
+                        .WithMany()
+                        .HasForeignKey("DeductionRuleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Subchron.API.Models.Entities.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmpID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Subchron.API.Models.Entities.LeaveRequest", b =>
                 {
                     b.HasOne("Subchron.API.Models.Entities.Employee", "Employee")
@@ -2110,6 +2438,21 @@ namespace Subchron.API.MigrationsTenant
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Subchron.API.Models.Entities.PayrollRunEmployee", b =>
+                {
+                    b.HasOne("Subchron.API.Models.Entities.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmpID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Subchron.API.Models.Entities.PayrollRun", null)
+                        .WithMany("Employees")
+                        .HasForeignKey("PayrollRunID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Subchron.API.Models.Entities.ShiftAssignment", b =>
                 {
                     b.HasOne("Subchron.API.Models.Entities.Employee", "Employee")
@@ -2144,6 +2487,11 @@ namespace Subchron.API.MigrationsTenant
             modelBuilder.Entity("Subchron.API.Models.Entities.OrgShiftTemplateDayOverride", b =>
                 {
                     b.Navigation("WorkWindows");
+                });
+
+            modelBuilder.Entity("Subchron.API.Models.Entities.PayrollRun", b =>
+                {
+                    b.Navigation("Employees");
                 });
 #pragma warning restore 612, 618
         }

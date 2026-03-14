@@ -304,7 +304,7 @@
     function esc(s) { if (s == null || s === undefined) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function openAuditLogDetailModal(log) {
         document.getElementById('detailCreatedAt').textContent = log.createdAt ? formatDateModal(log.createdAt) : '—';
-        document.getElementById('detailUserName').textContent = log.userName || (log.userID != null ? 'User #' + log.userID : '—');
+        document.getElementById('detailUserName').textContent = log.userName || '—';
         document.getElementById('detailAction').textContent = actionLabel(log.action) || '—';
         document.getElementById('detailEntityName').textContent = log.entityName || '—';
         document.getElementById('detailEntityId').textContent = log.entityID != null ? String(log.entityID) : '—';
@@ -346,7 +346,7 @@
                     setState(null, '');
                     logs.forEach(function (log) {
                         var date = formatDateTable(log.createdAt);
-                        var user = log.userName || (log.userID ? 'User #' + log.userID : '—');
+                        var user = log.userName || '—';
                         var action = log.action || '—';
                         var actionDisplay = actionLabel(action);
                         var recordType = log.entityName || '—';

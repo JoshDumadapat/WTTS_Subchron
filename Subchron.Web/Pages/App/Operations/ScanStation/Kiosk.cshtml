@@ -11,22 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Scan Station - Subchron</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        subgreen: { 500: '#28a84d', 600: '#209030' },
-                        subblue: { 600: '#0060B0' }
-                    }
-                }
-            }
-        };
-    </script>
 
     <script>
         (function () {
@@ -338,7 +324,7 @@
         <div id="screenScan" class="hidden min-h-[100svh] w-full flex items-center justify-center p-4">
             <div class="w-full max-w-md flex flex-col items-center text-center">
                 <div>
-                    <p class="text-lg font-semibold text-slate-600 dark:text-slate-400" id="kioskSiteName">HQ Main Entrance</p>
+                    <p class="text-lg font-semibold text-slate-600 dark:text-slate-400" id="kioskSiteName">@Model.SiteName</p>
                     <p class="mt-1 text-5xl font-bold tracking-tight text-slate-900 dark:text-white" id="kioskTime">--:--:--</p>
                 </div>
 
@@ -386,12 +372,8 @@
                         </div>
                     </div>
 
-                    <p class="mt-4 text-xs text-slate-500">
-                        Having trouble?
-                        <button type="button" id="btnSimulateScan" class="font-semibold text-subgreen-600 hover:underline dark:text-subgreen-500">
-                            Simulate a scan
-                        </button>
-                    </p>
+                    <p class="mt-4 text-xs text-slate-500">Present your employee QR code to record attendance.</p>
+                    <button type="button" id="btnToggleTestMode" class="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">Test mode: OFF</button>
                 </div>
 
                 @if (Model.IdEntryEnabled)
@@ -440,6 +422,14 @@
                 <p class="mt-2 text-base text-slate-600 dark:text-slate-400" id="failMessage">Invalid or expired code. Please try again.</p>
             </div>
         </div>
+
+        <div id="locationBlockedOverlay" class="hidden absolute inset-0 z-[100] items-center justify-center bg-slate-950/90 p-6 text-center">
+            <div class="w-full max-w-md rounded-2xl border border-red-400/40 bg-slate-900 px-6 py-6 shadow-2xl">
+                <p class="text-lg font-bold text-red-300">Station Location Restricted</p>
+                <p id="locationBlockedMessage" class="mt-2 text-sm text-slate-200">This scan station is not in the specific location set for this site.</p>
+                <button type="button" id="btnRetryLocation" class="mt-5 rounded-xl bg-subgreen-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-subgreen-500">Recheck Location</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -456,9 +446,12 @@
             var themeButtons = document.querySelectorAll('.theme-btn');
 
             var kioskTime = document.getElementById('kioskTime');
-            var btnSimulateScan = document.getElementById('btnSimulateScan');
             var btnSubmitId = document.getElementById('btnSubmitId');
             var employeeIdInput = document.getElementById('employeeIdInput');
+            var btnToggleTestMode = document.getElementById('btnToggleTestMode');
+            var locationBlockedOverlay = document.getElementById('locationBlockedOverlay');
+            var locationBlockedMessage = document.getElementById('locationBlockedMessage');
+            var btnRetryLocation = document.getElementById('btnRetryLocation');
 
             var scanBox = document.getElementById('scanBox');
             var scanVideo = document.getElementById('scanVideo');
@@ -471,13 +464,28 @@
             var qrFocus = document.getElementById('qrFocus');
             var qrBox = document.getElementById('qrBox');
 
-            var RESET_MS = 3000;
-            var COOLDOWN_MS = 1200;
-            var CAPTURE_ANIM_MS = 750;
+            var SUCCESS_RESET_MS = 5000;
+            var FAIL_RESET_MS = 5000;
+            var COOLDOWN_MS = 500;
+            var CAPTURE_ANIM_MS = 250;
+            var QR_CLEAR_MS = 800;
             var stream = null;
             var scanCooldownUntil = 0;
+            var notificationLockUntil = 0;
             var rafId = null;
             var isCapturing = false;
+            var mustClearQrBeforeNextScan = false;
+            var qrClearStartedAt = 0;
+            var stationBlocked = false;
+            var currentLat = null;
+            var currentLng = null;
+            var stationId = @Model.StationId;
+            var kioskTestMode = (new URLSearchParams(window.location.search)).get('testMode') === '1' || localStorage.getItem('kioskTestMode') === '1';
+
+            function updateTestModeButton() {
+                if (!btnToggleTestMode) return;
+                btnToggleTestMode.textContent = kioskTestMode ? 'Test mode: ON' : 'Test mode: OFF';
+            }
 
             var allScreens = [screenOff, screenBooting, screenTheme, screenScan, screenSuccess, screenFail].filter(Boolean);
 
@@ -528,7 +536,7 @@
 
                     hideScreen(screenTheme, function () {
                         showScreen(screenScan);
-                        startCamera();
+                        validateStationLocation().then(function (ok) { if (ok) startCamera(); });
                         updateTime();
                         setInterval(updateTime, 1000);
                     });
@@ -538,20 +546,120 @@
             function showSuccess(msg) {
                 var m = document.getElementById('successMessage');
                 if (m) m.textContent = msg || 'Your attendance has been recorded.';
+                notificationLockUntil = Date.now() + SUCCESS_RESET_MS;
+                scanCooldownUntil = Math.max(scanCooldownUntil, notificationLockUntil);
+                mustClearQrBeforeNextScan = true;
+                qrClearStartedAt = 0;
                 showScreen(screenSuccess);
-                setTimeout(function () { showScreen(screenScan); }, RESET_MS);
+                stopCamera();
+                setTimeout(function () {
+                    showScreen(screenScan);
+                    if (!stationBlocked) startCamera();
+                }, SUCCESS_RESET_MS);
             }
 
             function showFail(msg) {
                 var m = document.getElementById('failMessage');
                 if (m) m.textContent = msg || 'Invalid or expired code. Please try again.';
+                notificationLockUntil = Date.now() + FAIL_RESET_MS;
+                scanCooldownUntil = Math.max(scanCooldownUntil, notificationLockUntil);
+                mustClearQrBeforeNextScan = true;
+                qrClearStartedAt = 0;
                 showScreen(screenFail);
-                setTimeout(function () { showScreen(screenScan); }, RESET_MS);
+                stopCamera();
+                setTimeout(function () {
+                    showScreen(screenScan);
+                    if (!stationBlocked) startCamera();
+                }, FAIL_RESET_MS);
             }
 
             function updateTime() {
                 if (kioskTime) kioskTime.textContent =
-                    new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
+            function setLocationBlocked(blocked, message) {
+                stationBlocked = !!blocked;
+                if (locationBlockedOverlay) {
+                    locationBlockedOverlay.classList.toggle('hidden', !stationBlocked);
+                    locationBlockedOverlay.classList.toggle('flex', stationBlocked);
+                }
+                if (locationBlockedMessage && message) locationBlockedMessage.textContent = message;
+                if (btnStartCamera) btnStartCamera.disabled = stationBlocked;
+                if (btnSubmitId) btnSubmitId.disabled = stationBlocked;
+                if (employeeIdInput) employeeIdInput.disabled = stationBlocked;
+            }
+
+            function postJson(url, payload) {
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload || {})
+                }).then(function (r) {
+                    return r.json().catch(function () { return {}; }).then(function (json) {
+                        return { ok: r.ok, data: json || {} };
+                    });
+                });
+            }
+
+            function validateStationLocation() {
+                if (!navigator.geolocation) {
+                    setLocationBlocked(true, 'Location is not supported on this device.');
+                    return Promise.resolve(false);
+                }
+
+                return new Promise(function (resolve) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        currentLat = position.coords.latitude;
+                        currentLng = position.coords.longitude;
+                        postJson('?handler=ValidateLocation&id=' + encodeURIComponent(stationId), {
+                            latitude: currentLat,
+                            longitude: currentLng
+                        }).then(function (result) {
+                            if (!result.ok || result.data.insideRadius === false) {
+                                setLocationBlocked(true, result.data.message || 'This scan station is not in the specific location set for this site.');
+                                resolve(false);
+                                return;
+                            }
+                            setLocationBlocked(false);
+                            resolve(true);
+                        }).catch(function () {
+                            setLocationBlocked(true, 'Unable to validate location at this time.');
+                            resolve(false);
+                        });
+                    }, function () {
+                        setLocationBlocked(true, 'Location permission is required to use this scan station.');
+                        resolve(false);
+                    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+                });
+            }
+
+            function submitScan(payload) {
+                if (stationBlocked) {
+                    return Promise.resolve({ ok: false, data: { message: 'Station is outside assigned location.' } });
+                }
+                if (Date.now() < notificationLockUntil) {
+                    return Promise.resolve({ ok: false, data: { message: 'Please wait for the current attendance notification to finish.' } });
+                }
+                var body = payload || {};
+                body.latitude = currentLat;
+                body.longitude = currentLng;
+                body.deviceInfo = navigator.userAgent || '';
+                body.deviceTimestamp = getKioskLocalTimestamp();
+                body.testMode = kioskTestMode;
+                return postJson('?handler=Scan&id=' + encodeURIComponent(stationId), body);
+            }
+
+            function getKioskLocalTimestamp() {
+                var d = new Date();
+                var pad = function (n) { return String(n).padStart(2, '0'); };
+                var ms = String(d.getMilliseconds()).padStart(3, '0');
+                return d.getFullYear() + '-' +
+                    pad(d.getMonth() + 1) + '-' +
+                    pad(d.getDate()) + 'T' +
+                    pad(d.getHours()) + ':' +
+                    pad(d.getMinutes()) + ':' +
+                    pad(d.getSeconds()) + '.' + ms;
             }
 
             function setScanError(msg) {
@@ -666,8 +774,17 @@
 
                 setTimeout(function () {
                     var data = (code.data || '').trim();
-                    showSuccess('Success! Scanned: ' + data.substring(0, 20) + (data.length > 20 ? '...' : ''));
-                    setTimeout(resetCaptureOverlay, 250);
+                    submitScan({ qrData: data }).then(function (result) {
+                        if (result.ok && result.data && result.data.ok) {
+                            showSuccess(result.data.message || 'Attendance recorded.');
+                        } else {
+                            showFail((result.data && result.data.message) || 'Scan failed. Please try again.');
+                        }
+                        setTimeout(resetCaptureOverlay, 80);
+                    }).catch(function () {
+                        showFail('Scan request failed. Please try again.');
+                        setTimeout(resetCaptureOverlay, 80);
+                    });
                 }, CAPTURE_ANIM_MS);
             }
 
@@ -684,8 +801,16 @@
                     rafId = requestAnimationFrame(tick);
                     return;
                 }
+                if (stationBlocked) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
 
                 var now = Date.now();
+                if (now < notificationLockUntil) {
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
                 if (now < scanCooldownUntil) {
                     rafId = requestAnimationFrame(tick);
                     return;
@@ -712,6 +837,25 @@
                 var imageData = ctx.getImageData(0, 0, w, h);
                 var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
 
+                if (mustClearQrBeforeNextScan) {
+                    if (code && code.data) {
+                        qrClearStartedAt = 0;
+                        rafId = requestAnimationFrame(tick);
+                        return;
+                    }
+
+                    if (!qrClearStartedAt)
+                        qrClearStartedAt = now;
+
+                    if ((now - qrClearStartedAt) < QR_CLEAR_MS) {
+                        rafId = requestAnimationFrame(tick);
+                        return;
+                    }
+
+                    mustClearQrBeforeNextScan = false;
+                    qrClearStartedAt = 0;
+                }
+
                 if (code && code.data) {
                     scanCooldownUntil = now + COOLDOWN_MS;
                     runCaptureAnimation(code);
@@ -730,7 +874,7 @@
                 }
 
                 navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
                 })
                     .then(function (s) {
                         stream = s;
@@ -757,41 +901,62 @@
                     });
             }
 
-            btnStartCamera && btnStartCamera.addEventListener('click', startCamera);
-
-            btnSimulateScan && btnSimulateScan.addEventListener('click', function () {
-                if (!scanVideo || !scanBox) {
-                    showSuccess('Simulated scan successful.');
-                    return;
+            function stopCamera() {
+                if (rafId != null) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
                 }
 
-                var fake = {
-                    data: 'SIMULATED-QR-CODE-12345',
-                    location: {
-                        topLeftCorner: { x: scanVideo.videoWidth * 0.33, y: scanVideo.videoHeight * 0.33 },
-                        topRightCorner: { x: scanVideo.videoWidth * 0.67, y: scanVideo.videoHeight * 0.33 },
-                        bottomRightCorner: { x: scanVideo.videoWidth * 0.67, y: scanVideo.videoHeight * 0.67 },
-                        bottomLeftCorner: { x: scanVideo.videoWidth * 0.33, y: scanVideo.videoHeight * 0.67 }
-                    }
-                };
-                runCaptureAnimation(fake);
-            });
+                if (stream) {
+                    stream.getTracks().forEach(function (t) { t.stop(); });
+                    stream = null;
+                }
+
+                if (scanVideo) scanVideo.srcObject = null;
+                if (scanPlaceholder) scanPlaceholder.classList.remove('hidden');
+                if (scanLine) scanLine.classList.add('hidden');
+                resetCaptureOverlay();
+            }
+
+            btnStartCamera && btnStartCamera.addEventListener('click', startCamera);
 
             if (btnSubmitId && employeeIdInput) {
                 btnSubmitId.addEventListener('click', function () {
                     var id = (employeeIdInput.value || '').trim();
                     if (!id) return;
-
-                    if (id === '0' || id.toLowerCase() === 'fail') showFail('Invalid or expired. Try again.');
-                    else showSuccess('Attendance recorded for ID ' + id);
-
-                    employeeIdInput.value = '';
+                    submitScan({ employeeIdInput: id }).then(function (result) {
+                        if (result.ok && result.data && result.data.ok) {
+                            showSuccess(result.data.message || ('Attendance recorded for ID ' + id));
+                            employeeIdInput.value = '';
+                        } else {
+                            showFail((result.data && result.data.message) || 'ID entry failed.');
+                        }
+                    }).catch(function () {
+                        showFail('ID entry failed. Please try again.');
+                    });
                 });
 
                 employeeIdInput.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') btnSubmitId.click();
                 });
             }
+
+            btnRetryLocation && btnRetryLocation.addEventListener('click', function () {
+                validateStationLocation().then(function (ok) {
+                    if (ok && !stream) startCamera();
+                });
+            });
+
+            btnToggleTestMode && btnToggleTestMode.addEventListener('click', function () {
+                kioskTestMode = !kioskTestMode;
+                localStorage.setItem('kioskTestMode', kioskTestMode ? '1' : '0');
+                updateTestModeButton();
+                showSuccess(kioskTestMode ? 'Rapid test mode enabled.' : 'Rapid test mode disabled.');
+            });
+
+            updateTestModeButton();
+
+            validateStationLocation();
 
             showScreen(screenOff);
         })();

@@ -18,12 +18,12 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
                 <div class="sm:col-span-2 lg:col-span-1">
                     <label for="leaveSearch" class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Search</label>
-                    <input type="text" id="leaveSearch" name="search" value="@Model.SearchFilter" placeholder="Employee name or number…" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                    <input type="text" id="leaveSearch" name="search" value="@Model.SearchFilter" placeholder="Search employee name / employee no." class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder:text-slate-400" />
                 </div>
                 <div>
                     <label for="status" class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Status</label>
                     <select id="status" name="status" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
-                        <option value="" selected="@(string.IsNullOrEmpty(Model.StatusFilter) ? "selected" : null)">All</option>
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.StatusFilter) ? "selected" : null)">All statuses</option>
                         <option value="Pending" selected="@(Model.StatusFilter == "Pending" ? "selected" : null)">Pending</option>
                         <option value="Approved" selected="@(Model.StatusFilter == "Approved" ? "selected" : null)">Approved</option>
                         <option value="Declined" selected="@(Model.StatusFilter == "Declined" ? "selected" : null)">Declined</option>
@@ -253,5 +253,15 @@
     }
 
     loadLeave();
+
+    window.addEventListener('storage', function (evt) {
+        if (evt.key === 'leave:lastUpdate')
+            loadLeave();
+    });
+
+    setInterval(function () {
+        if (!document.hidden)
+            loadLeave();
+    }, 15000);
 })();
 </script>

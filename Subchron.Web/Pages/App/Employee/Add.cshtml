@@ -144,9 +144,12 @@
                     <input type="email" name="Email" id="addLoginEmail" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Same as contact email" readonly />
                 </div>
                 <div>
-                    <label for="addDefaultPassword" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Default password <span class="text-red-500">*</span></label>
-                    <input type="text" name="DefaultPassword" id="addDefaultPassword" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. TempPass123!" autocomplete="off" />
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Share this with the employee. They can change it in Settings → Security.</p>
+                    <label for="addDefaultPassword" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Temporary password <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" name="DefaultPassword" id="addDefaultPassword" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Auto-generated" autocomplete="off" readonly />
+                        <button type="button" id="addGenerateTempPassword" class="btn-secondary h-11 shrink-0 px-4 text-sm">Regenerate</button>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">A secure 16-character temporary password is generated automatically, emailed to the employee, and valid for 5 hours.</p>
                     <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addDefaultPassword"></span>
                 </div>
             </div>
@@ -240,12 +243,54 @@
                     <span class="field-error mt-1 hidden text-xs text-red-600 dark:text-red-400" data-for="addEmploymentType"></span>
                 </div>
                 <div>
-                    <label for="addBaseSalary" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Base salary</label>
+                    <label for="addCompensationBasisOverride" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Compensation basis</label>
+                    <select name="compensationBasisOverride" id="addCompensationBasisOverride" class="h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="UseOrgDefault" selected>Use organization default</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Hourly">Hourly</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="addBasePayAmount" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Base pay amount</label>
                     <div class="flex rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700">
                         <span class="inline-flex items-center rounded-l-xl border-r border-slate-300 bg-slate-50 px-3 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">₱</span>
-                        <input type="text" name="BaseSalary" id="addBaseSalary" class="input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0.00" inputmode="decimal" />
+                        <input type="number" name="basePayAmount" id="addBasePayAmount" class="input-field h-11 min-w-0 flex-1 rounded-r-xl border-0 bg-transparent px-4 text-base dark:text-white" placeholder="0.00" inputmode="decimal" step="0.01" min="0" />
                     </div>
                 </div>
+                <div id="addCustomUnitLabelWrap" class="hidden">
+                    <label for="addCustomUnitLabel" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Custom unit label</label>
+                    <input type="text" name="customUnitLabel" id="addCustomUnitLabel" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="e.g. Project" />
+                </div>
+                <div id="addCustomWorkHoursWrap" class="hidden">
+                    <label for="addCustomWorkHours" class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Custom work hours</label>
+                    <input type="number" name="customWorkHours" id="addCustomWorkHours" class="input-field h-11 w-full rounded-xl border border-slate-300 px-4 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="0.00" inputmode="decimal" step="0.01" min="0" />
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-300 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="mb-2 text-base font-semibold text-slate-900 dark:text-white">Deductions</h2>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Fetched from Payroll Config (Pay tab). Selected rules are assigned to this employee.</p>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                @if (Model.DeductionRules.Count == 0)
+                {
+                    <p class="text-sm text-slate-500 dark:text-slate-400">No active deduction rules found. Configure deductions first in Payroll Config.</p>
+                }
+                else
+                {
+                    @foreach (var d in Model.DeductionRules)
+                    {
+                        <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/50">
+                            <input type="checkbox" name="selectedDeductionRuleIds" value="@d.DeductionRuleID" checked class="mt-0.5 h-4 w-4 rounded border-slate-300 text-subgreen-600 focus:ring-subgreen-500" />
+                            <span>
+                                <span class="block text-sm font-medium text-slate-800 dark:text-slate-100">@d.Name</span>
+                                <span class="block text-xs text-slate-500 dark:text-slate-400">@d.Category · @d.DeductionType</span>
+                            </span>
+                        </label>
+                    }
+                }
             </div>
         </section>
 
@@ -440,15 +485,21 @@
     var addContactEmail = document.getElementById('addContactEmail');
     var addLoginEmail = document.getElementById('addLoginEmail');
     var addDefaultPassword = document.getElementById('addDefaultPassword');
+    var addGenerateTempPassword = document.getElementById('addGenerateTempPassword');
     var addPhone = document.getElementById('addPhone');
-    var DEFAULT_PASSWORD = 'TempPass123!';
+    var TEMP_PASSWORD_LENGTH = 16;
+    var UPPER_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    var LOWER_CHARS = 'abcdefghijkmnopqrstuvwxyz';
+    var DIGIT_CHARS = '23456789';
+    var SYMBOL_CHARS = '!@@#$%&*?';
     var uniqueCheckUrl = form ? (form.getAttribute('data-unique-url') || '') : '';
     var uniqueState = {
         email: { value: '', exists: false, status: 'idle' },
-        phone: { value: '', exists: false, status: 'idle' }
+        phone: { value: '', exists: false, status: 'idle' },
+        fullname: { value: '', exists: false, status: 'idle' }
     };
-    var uniqueControllers = { email: null, phone: null };
-    var uniqueTimers = { email: null, phone: null };
+    var uniqueControllers = { email: null, phone: null, fullname: null };
+    var uniqueTimers = { email: null, phone: null, fullname: null };
     var isSubmitting = false;
 
     function showError(fieldId, message) {
@@ -588,9 +639,63 @@
         }
     }
 
+    function shouldUseGlobalUserEmailScope() {
+        return !!(addCreateAccount && addCreateAccount.checked);
+    }
+
+    function getEmailDuplicateMessage() {
+        if (shouldUseGlobalUserEmailScope()) {
+            return 'This email already has an existing account. Uncheck "Create login account" to save employee only, or use a different email for login.';
+        }
+        return 'Email is already used by another employee.';
+    }
+
     function capitalizeName(str) {
         if (!str || typeof str !== 'string') return str;
         return str.trim().replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+
+    function getCryptoRandomInt(maxExclusive) {
+        if (!window.crypto || !window.crypto.getRandomValues || maxExclusive <= 0) {
+            return Math.floor(Math.random() * maxExclusive);
+        }
+        var random = new Uint32Array(1);
+        window.crypto.getRandomValues(random);
+        return random[0] % maxExclusive;
+    }
+
+    function pickChar(charset) {
+        return charset.charAt(getCryptoRandomInt(charset.length));
+    }
+
+    function shuffleChars(chars) {
+        for (var i = chars.length - 1; i > 0; i--) {
+            var j = getCryptoRandomInt(i + 1);
+            var tmp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = tmp;
+        }
+        return chars;
+    }
+
+    function generateTempPassword() {
+        var allChars = UPPER_CHARS + LOWER_CHARS + DIGIT_CHARS + SYMBOL_CHARS;
+        var generated = [
+            pickChar(UPPER_CHARS),
+            pickChar(LOWER_CHARS),
+            pickChar(DIGIT_CHARS),
+            pickChar(SYMBOL_CHARS)
+        ];
+        while (generated.length < TEMP_PASSWORD_LENGTH) {
+            generated.push(pickChar(allChars));
+        }
+        return shuffleChars(generated).join('');
+    }
+
+    function ensureTempPassword() {
+        if (!addDefaultPassword) return;
+        addDefaultPassword.value = generateTempPassword();
+        clearFieldError('addDefaultPassword');
     }
     document.querySelectorAll('.name-cap').forEach(function (input) {
         input.addEventListener('blur', function () {
@@ -602,16 +707,38 @@
         addAccountFields.classList.toggle('hidden', !this.checked);
         if (this.checked) {
             addLoginEmail.value = addContactEmail.value || '';
-            addDefaultPassword.value = DEFAULT_PASSWORD;
+            ensureTempPassword();
         } else {
             addLoginEmail.value = '';
             addDefaultPassword.value = '';
         }
+        scheduleUniqueValidation('email', addContactEmail.value || '');
     });
+    if (addGenerateTempPassword) {
+        addGenerateTempPassword.addEventListener('click', function () {
+            ensureTempPassword();
+        });
+    }
     addContactEmail.addEventListener('input', function () {
         if (addCreateAccount.checked) addLoginEmail.value = this.value || '';
         scheduleUniqueValidation('email', this.value);
     });
+    var addFirstName = document.getElementById('addFirstName');
+    var addMiddleName = document.getElementById('addMiddleName');
+    var addLastName = document.getElementById('addLastName');
+    function buildFullNameUniqueValue() {
+        var first = addFirstName ? addFirstName.value.trim() : '';
+        var last = addLastName ? addLastName.value.trim() : '';
+        var middle = addMiddleName ? addMiddleName.value.trim() : '';
+        if (!first || !last) return '';
+        return first + '|' + last + '|' + middle;
+    }
+    function scheduleFullNameValidation() {
+        scheduleUniqueValidation('fullname', buildFullNameUniqueValue());
+    }
+    if (addFirstName) addFirstName.addEventListener('input', scheduleFullNameValidation);
+    if (addMiddleName) addMiddleName.addEventListener('input', scheduleFullNameValidation);
+    if (addLastName) addLastName.addEventListener('input', scheduleFullNameValidation);
     if (addPhone) {
         addPhone.addEventListener('input', function () {
             scheduleUniqueValidation('phone', this.value);
@@ -630,6 +757,9 @@
     }
 
     var addRole = document.getElementById('addRole');
+    var addCompensationBasisOverride = document.getElementById('addCompensationBasisOverride');
+    var addCustomUnitLabelWrap = document.getElementById('addCustomUnitLabelWrap');
+    var addCustomWorkHoursWrap = document.getElementById('addCustomWorkHoursWrap');
     var addEmpNumber = document.getElementById('addEmpNumber');
     var addDepartmentID = document.getElementById('addDepartmentID');
     var addAssignedShiftTemplateCode = document.getElementById('addAssignedShiftTemplateCode');
@@ -664,6 +794,17 @@
                     addEmpNumber.value = '';
                 });
         });
+    }
+
+    function syncCustomCompensationFields() {
+        if (!addCompensationBasisOverride) return;
+        var isCustom = addCompensationBasisOverride.value === 'Custom';
+        if (addCustomUnitLabelWrap) addCustomUnitLabelWrap.classList.toggle('hidden', !isCustom);
+        if (addCustomWorkHoursWrap) addCustomWorkHoursWrap.classList.toggle('hidden', !isCustom);
+    }
+    if (addCompensationBasisOverride) {
+        addCompensationBasisOverride.addEventListener('change', syncCustomCompensationFields);
+        syncCustomCompensationFields();
     }
 
     wireFieldClearOnInput('addFirstName', 'input');
@@ -861,7 +1002,7 @@
             }
         }
         if (addCreateAccount.checked && !addDefaultPassword.value.trim()) {
-            showError('addDefaultPassword', 'Default password is required when creating account.'); valid = false; validationMessages.push('Default password is required when creating account.');
+            showError('addDefaultPassword', 'Temporary password is required when creating account.'); valid = false; validationMessages.push('Temporary password is required when creating account.');
         }
         if (!roleInput.value) {
             showError('addRole', 'Role is required.'); valid = false; validationMessages.push('Role is required.');
@@ -883,12 +1024,15 @@
         if (emailVal) asyncChecks.push(runUniqueValidation('email', emailVal, true));
         var phoneVal = addPhone ? addPhone.value.trim() : '';
         if (phoneVal) asyncChecks.push(runUniqueValidation('phone', phoneVal, true));
+        var fullNameUniqueVal = buildFullNameUniqueValue();
+        if (fullNameUniqueVal) asyncChecks.push(runUniqueValidation('fullname', fullNameUniqueVal, true));
         if (asyncChecks.length) await Promise.all(asyncChecks);
 
         if (emailVal) {
             if (uniqueState.email.exists) {
-                setUniqueError('addContactEmail', 'Email is already used by another employee.');
-                validationMessages.push('Email is already used by another employee.');
+                var emailDuplicateMessage = getEmailDuplicateMessage();
+                setUniqueError('addContactEmail', emailDuplicateMessage);
+                validationMessages.push(emailDuplicateMessage);
                 valid = false;
             } else if (uniqueState.email.status === 'error') {
                 showError('addContactEmail', 'Unable to validate email right now. Please try again.');
@@ -904,6 +1048,18 @@
             } else if (uniqueState.phone.status === 'error') {
                 showError('addPhone', 'Unable to validate contact number right now.');
                 validationMessages.push('Unable to validate contact number right now.');
+                valid = false;
+            }
+        }
+        if (fullNameUniqueVal) {
+            if (uniqueState.fullname.exists) {
+                setUniqueError('addFirstName', 'This employee name already exists.');
+                showError('addLastName', 'This employee name already exists.');
+                validationMessages.push('This employee name already exists.');
+                valid = false;
+            } else if (uniqueState.fullname.status === 'error') {
+                showError('addFirstName', 'Unable to validate employee name right now.');
+                validationMessages.push('Unable to validate employee name right now.');
                 valid = false;
             }
         }
@@ -967,7 +1123,9 @@
             state.value = '';
             state.exists = false;
             state.status = 'success';
-            clearUniqueError(field === 'email' ? 'addContactEmail' : 'addPhone');
+            var clearFieldId = field === 'email' ? 'addContactEmail' : (field === 'phone' ? 'addPhone' : 'addFirstName');
+            clearUniqueError(clearFieldId);
+            if (field === 'fullname') clearFieldError('addLastName');
             return Promise.resolve(false);
         }
         if (!uniqueCheckUrl) {
@@ -982,6 +1140,9 @@
         uniqueControllers[field] = controller;
         state.status = 'pending';
         var url = uniqueCheckUrl + (uniqueCheckUrl.indexOf('?') >= 0 ? '&' : '?') + 'type=' + encodeURIComponent(field) + '&value=' + encodeURIComponent(trimmed);
+        if (field === 'email' && shouldUseGlobalUserEmailScope()) {
+            url += '&scope=' + encodeURIComponent('global-user');
+        }
         return fetch(url, { signal: controller.signal })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (data) {
@@ -990,9 +1151,21 @@
                 state.value = trimmed;
                 state.exists = exists;
                 state.status = 'success';
-                var fieldId = field === 'email' ? 'addContactEmail' : 'addPhone';
-                if (exists) setUniqueError(fieldId, field === 'email' ? 'Email is already used by another employee.' : 'Contact number is already used by another employee.');
-                else clearUniqueError(fieldId);
+                var fieldId = field === 'email' ? 'addContactEmail' : (field === 'phone' ? 'addPhone' : 'addFirstName');
+                if (exists) {
+                    if (field === 'email') {
+                        setUniqueError(fieldId, getEmailDuplicateMessage());
+                    } else if (field === 'phone') {
+                        setUniqueError(fieldId, 'Contact number is already used by another employee.');
+                    } else {
+                        setUniqueError('addFirstName', 'This employee name already exists.');
+                        showError('addLastName', 'This employee name already exists.');
+                    }
+                }
+                else {
+                    clearUniqueError(fieldId);
+                    if (field === 'fullname') clearFieldError('addLastName');
+                }
                 return exists;
             })
             .catch(function (err) {

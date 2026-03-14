@@ -9,6 +9,7 @@ public class TenantDbContext : DbContext
     public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options) { }
 
     public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<EmployeeDeductionProfile> EmployeeDeductionProfiles => Set<EmployeeDeductionProfile>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
@@ -38,6 +39,9 @@ public class TenantDbContext : DbContext
     public DbSet<EarningRule> EarningRules => Set<EarningRule>();
     public DbSet<DeductionRule> DeductionRules => Set<DeductionRule>();
     public DbSet<OrgAllowanceRule> OrgAllowanceRules => Set<OrgAllowanceRule>();
+    public DbSet<ScanStation> ScanStations => Set<ScanStation>();
+    public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
+    public DbSet<PayrollRunEmployee> PayrollRunEmployees => Set<PayrollRunEmployee>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,6 +61,10 @@ public class TenantDbContext : DbContext
             e.Property(x => x.Role).HasMaxLength(40).IsRequired();
             e.Property(x => x.WorkState).HasMaxLength(40).IsRequired();
             e.Property(x => x.EmploymentType).HasMaxLength(40).IsRequired();
+            e.Property(x => x.CompensationBasisOverride).HasMaxLength(20).HasDefaultValue("UseOrgDefault").IsRequired();
+            e.Property(x => x.BasePayAmount).HasColumnType("decimal(12,2)").HasDefaultValue(0m);
+            e.Property(x => x.CustomUnitLabel).HasMaxLength(40);
+            e.Property(x => x.CustomWorkHours).HasColumnType("decimal(7,2)");
             e.Property(x => x.AssignedShiftTemplateCode).HasMaxLength(60);
             e.Property(x => x.AddressLine1).HasMaxLength(120);
             e.Property(x => x.AddressLine2).HasMaxLength(120);
@@ -84,6 +92,23 @@ public class TenantDbContext : DbContext
             e.HasIndex(x => new { x.OrgID, x.PhoneNormalized }).IsUnique().HasFilter("[PhoneNormalized] IS NOT NULL AND [PhoneNormalized] != ''");
             e.HasIndex(x => new { x.OrgID, x.Email }).IsUnique().HasFilter("[Email] IS NOT NULL AND [Email] != ''");
             e.HasOne<Department>().WithMany().HasForeignKey(x => x.DepartmentID).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<EmployeeDeductionProfile>(e =>
+        {
+            e.ToTable("EmployeeDeductionProfiles");
+            e.HasKey(x => x.EmployeeDeductionProfileID);
+            e.Property(x => x.Mode).HasMaxLength(20).HasDefaultValue("UseRule").IsRequired();
+            e.Property(x => x.Value).HasColumnType("decimal(12,4)");
+            e.Property(x => x.Notes).HasMaxLength(300);
+            e.Property(x => x.IsActive).HasDefaultValue(true);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.HasIndex(x => x.OrgID);
+            e.HasIndex(x => x.EmpID);
+            e.HasIndex(x => new { x.OrgID, x.EmpID, x.DeductionRuleID }).IsUnique();
+            e.HasOne<Employee>().WithMany().HasForeignKey(x => x.EmpID).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<DeductionRule>().WithMany().HasForeignKey(x => x.DeductionRuleID).OnDelete(DeleteBehavior.Cascade);
         });
 
         // ----- Department: OrgID scalar (soft ref) -----
@@ -176,6 +201,21 @@ public class TenantDbContext : DbContext
             e.HasIndex(x => x.OrgID);
             e.HasIndex(x => x.EmpID);
             e.HasIndex(x => x.LogDate);
+        });
+
+        modelBuilder.Entity<ScanStation>(e =>
+        {
+            e.ToTable("ScanStations");
+            e.HasKey(x => x.ScanStationID);
+            e.Property(x => x.StationCode).HasMaxLength(32).IsRequired();
+            e.Property(x => x.StationName).HasMaxLength(120).IsRequired();
+            e.Property(x => x.ScheduleMode).HasMaxLength(20).IsRequired();
+            e.Property(x => x.IsActive).HasDefaultValue(true);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.HasIndex(x => new { x.OrgID, x.StationCode }).IsUnique();
+            e.HasIndex(x => new { x.OrgID, x.StationName }).IsUnique();
+            e.HasIndex(x => x.LocationID);
         });
 
         // ----- AttendanceCorrection: OrgID, RequestedByUserID, ReviewedByUserID scalar; AttendanceID FK to AttendanceLog -----
@@ -555,6 +595,47 @@ public class TenantDbContext : DbContext
             e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
             e.Ignore(x => x.Organization);
             e.HasIndex(x => x.OrgID);
+        });
+
+        modelBuilder.Entity<PayrollRun>(e =>
+        {
+            e.ToTable("PayrollRuns");
+            e.HasKey(x => x.PayrollRunID);
+            e.Property(x => x.PayCycle).HasMaxLength(30).HasDefaultValue("SemiMonthly");
+            e.Property(x => x.CompensationBasis).HasMaxLength(20).HasDefaultValue("Monthly");
+            e.Property(x => x.Status).HasMaxLength(20).HasDefaultValue("Processed");
+            e.Property(x => x.TotalGrossPay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.TotalDeductions).HasColumnType("decimal(14,2)");
+            e.Property(x => x.TotalNetPay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.HasIndex(x => x.OrgID);
+            e.HasIndex(x => x.ProcessedAt);
+        });
+
+        modelBuilder.Entity<PayrollRunEmployee>(e =>
+        {
+            e.ToTable("PayrollRunEmployees");
+            e.HasKey(x => x.PayrollRunEmployeeID);
+            e.Property(x => x.EmpNumber).HasMaxLength(40).IsRequired();
+            e.Property(x => x.EmployeeName).HasMaxLength(180).IsRequired();
+            e.Property(x => x.DepartmentName).HasMaxLength(120).HasDefaultValue(string.Empty);
+            e.Property(x => x.WorkedHours).HasColumnType("decimal(10,2)");
+            e.Property(x => x.OvertimeHours).HasColumnType("decimal(10,2)");
+            e.Property(x => x.BasePay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.OvertimePay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.Allowances).HasColumnType("decimal(14,2)");
+            e.Property(x => x.GrossPay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.Deductions).HasColumnType("decimal(14,2)");
+            e.Property(x => x.Tax).HasColumnType("decimal(14,2)");
+            e.Property(x => x.NetPay).HasColumnType("decimal(14,2)");
+            e.Property(x => x.FormulaSummary).HasMaxLength(1000).HasDefaultValue(string.Empty);
+            e.Property(x => x.BreakdownJson).HasColumnType("NVARCHAR(MAX)").HasDefaultValue("[]");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.HasIndex(x => x.OrgID);
+            e.HasIndex(x => x.PayrollRunID);
+            e.HasOne<PayrollRun>().WithMany(x => x.Employees).HasForeignKey(x => x.PayrollRunID).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<Employee>().WithMany().HasForeignKey(x => x.EmpID).OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

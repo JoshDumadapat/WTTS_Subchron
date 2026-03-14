@@ -28,11 +28,19 @@
                     <option value="">All employees</option>
                 </select>
             </div>
-            <div class="flex gap-2">
-                <button type="button" id="shiftPrevMonth" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">← Previous</button>
-                <button type="button" id="shiftNextMonth" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Next →</button>
+            <div class="min-w-[250px] flex-1">
+                <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Calendar month</label>
+                <div class="inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white px-1 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                    <button type="button" id="shiftPrevMonth" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-base font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white" aria-label="Previous month">&lt;</button>
+                    <h2 id="shiftMonthTitle" class="min-w-[170px] px-2 text-center text-sm font-semibold tracking-wide text-slate-800 uppercase dark:text-white">—</h2>
+                    <button type="button" id="shiftNextMonth" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-base font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white" aria-label="Next month">&gt;</button>
+                </div>
             </div>
-            <h2 id="shiftMonthTitle" class="text-lg font-semibold text-slate-800 dark:text-white ml-2">—</h2>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-300">
+            <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-subgreen-500"></span>Assigned shifts</span>
+            <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-500"></span>Busy day (3+ shifts)</span>
+            <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-slate-400"></span>No assignments</span>
         </div>
     </div>
 
@@ -48,6 +56,33 @@
             <!-- Day cells filled by JS -->
         </div>
     </div>
+
+    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-white">Employee Shift Details</h3>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Monthly schedule snapshot by employee. Assignment actions are done through calendar day cells.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold">Employee</th>
+                        <th class="px-4 py-3 text-left font-semibold">Department</th>
+                        <th class="px-4 py-3 text-left font-semibold">Role</th>
+                        <th class="px-4 py-3 text-left font-semibold">Email</th>
+                        <th class="px-4 py-3 text-left font-semibold">Date</th>
+                        <th class="px-4 py-3 text-left font-semibold">Shift</th>
+                        <th class="px-4 py-3 text-left font-semibold">Planned Time In Window</th>
+                    </tr>
+                </thead>
+                <tbody id="shiftDetailsBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Loading shift details…</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Day detail modal -->
@@ -59,29 +94,43 @@
                 <h3 id="shiftDayModalTitle" class="text-lg font-semibold text-slate-900 dark:text-white">Shifts for —</h3>
             </div>
             <div class="max-h-[60vh] overflow-y-auto px-6 py-4">
-                <div id="shiftDayList" class="space-y-2">
-                    <!-- Filled by JS -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold">Employee</th>
+                                <th class="px-4 py-2 text-left font-semibold">Shift</th>
+                                <th class="px-4 py-2 text-left font-semibold">Planned Time In Window</th>
+                                <th class="px-4 py-2 text-right font-semibold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shiftDayList" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-center text-slate-500 dark:text-slate-400">Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                     <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Add shift</h4>
-                    <form id="addShiftForm" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <form id="addShiftForm" class="grid grid-cols-1 gap-3 sm:grid-cols-12">
                         <input type="hidden" id="addShiftDate" name="assignmentDate" />
-                        <div class="sm:col-span-2">
+                        <div class="sm:col-span-5">
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Employee</label>
                             <select id="addShiftEmp" name="empId" required class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                                 <option value="">Select employee</option>
                             </select>
                         </div>
-                        <div>
+                        <div class="sm:col-span-2">
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Start time</label>
                             <input type="time" id="addShiftStart" name="startTime" required class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
                         </div>
-                        <div>
+                        <div class="sm:col-span-2">
                             <label class="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">End time</label>
                             <input type="time" id="addShiftEnd" name="endTime" required class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
                         </div>
-                        <div class="sm:col-span-2">
-                            <button type="submit" class="btn-primary px-4">Add shift</button>
+                        <div class="sm:col-span-3 sm:self-end">
+                            <button type="submit" class="btn-primary h-10 w-full px-4">Add shift</button>
                         </div>
                     </form>
                 </div>
@@ -100,11 +149,44 @@
     var monthTitle = document.getElementById('shiftMonthTitle');
     var shiftDeptFilter = document.getElementById('shiftDeptFilter');
     var shiftEmpFilter = document.getElementById('shiftEmpFilter');
+    var shiftDetailsBody = document.getElementById('shiftDetailsBody');
+    var attendanceWindow = { earliestClockInMinutes: 0, latestClockInMinutes: 0 };
+    var employeesById = {};
+
+    function parseJsonResponse(response) {
+        return response.text().then(function (text) {
+            if (!text) return {};
+            try { return JSON.parse(text); }
+            catch {
+                return { ok: false, message: text.length > 200 ? 'Request failed.' : text };
+            }
+        });
+    }
 
     function formatTimeSpan(ts) {
         if (typeof ts === 'string') return ts.substring(0, 5);
         if (ts && ts.hours !== undefined) return (ts.hours < 10 ? '0' : '') + ts.hours + ':' + (ts.minutes < 10 ? '0' : '') + (ts.minutes || 0);
         return '—';
+    }
+
+    function formatTime12(time24) {
+        if (!time24 || time24 === '—') return '—';
+        var parts = String(time24).split(':');
+        var hh = parseInt(parts[0], 10);
+        var mm = parseInt(parts[1], 10) || 0;
+        var ampm = hh >= 12 ? 'PM' : 'AM';
+        hh = hh % 12; if (hh === 0) hh = 12;
+        return hh + ':' + (mm < 10 ? '0' + mm : mm) + ' ' + ampm;
+    }
+
+    function addMinutesToTime(time24, minutes) {
+        var p = String(time24 || '00:00').split(':');
+        var total = (parseInt(p[0], 10) * 60 + (parseInt(p[1], 10) || 0)) + (minutes || 0);
+        while (total < 0) total += 24 * 60;
+        total = total % (24 * 60);
+        var h = Math.floor(total / 60);
+        var m = total % 60;
+        return (h < 10 ? '0' + h : '' + h) + ':' + (m < 10 ? '0' + m : '' + m);
     }
 
     function buildShiftsParams(from, to) {
@@ -159,7 +241,9 @@
             var clickable = 'cursor-pointer hover:bg-subgreen-50 dark:hover:bg-subgreen-900/20';
             cells.push('<div class="p-2 min-h-[80px] rounded-lg border border-slate-100 dark:border-slate-700 ' + clickable + '" data-date="' + key + '" data-year="' + year + '" data-month="' + month + '" data-day="' + d + '">' +
                 '<div class="font-medium text-slate-800 dark:text-slate-200">' + d + '</div>' +
-                (count > 0 ? '<div class="mt-1 text-xs text-subgreen-600 dark:text-subgreen-400">' + count + ' shift(s)</div>' : '') +
+                (count > 0
+                    ? '<div class="mt-1 text-xs ' + (count >= 3 ? 'text-amber-600 dark:text-amber-400' : 'text-subgreen-600 dark:text-subgreen-400') + '">' + count + ' shift(s)</div>'
+                    : '<div class="mt-1 text-xs text-slate-400 dark:text-slate-500">No shifts</div>') +
                 '</div>');
         }
         var totalCells = startPad + daysInMonth;
@@ -192,18 +276,26 @@
 
         loadShiftsByDate(date, function (list) {
             var container = document.getElementById('shiftDayList');
-            if (!list || list.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 dark:text-slate-400">No shifts this day. Add one below.</p>';
-                return;
-            }
-            container.innerHTML = list.map(function (s) {
+            function rowForShift(s) {
                 var start = formatTimeSpan(s.startTime);
                 var end = formatTimeSpan(s.endTime);
-                return '<div class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">' +
-                    '<div><span class="font-medium text-slate-800 dark:text-slate-200">' + (s.employeeName || s.empNumber || '—') + '</span> <span class="text-slate-500 dark:text-slate-400 text-sm">' + start + ' – ' + end + '</span></div>' +
-                    '<button type="button" class="text-red-600 hover:underline text-sm font-medium delete-shift" data-id="' + s.shiftAssignmentID + '">Remove</button>' +
-                    '</div>';
-            }).join('');
+                var inFrom = addMinutesToTime(start, -(attendanceWindow.earliestClockInMinutes || 0));
+                var inUntil = addMinutesToTime(start, attendanceWindow.latestClockInMinutes || 0);
+                var emp = employeesById[s.empID] || {};
+                var empName = s.employeeName || ((emp.firstName || '') + ' ' + (emp.lastName || '')).trim() || s.empNumber || '—';
+                return '<tr>' +
+                    '<td class="px-4 py-3 text-slate-800 dark:text-slate-100">' + empName + '</td>' +
+                    '<td class="px-4 py-3 text-slate-700 dark:text-slate-200">' + formatTime12(start) + ' - ' + formatTime12(end) + '</td>' +
+                    '<td class="px-4 py-3 text-slate-700 dark:text-slate-200">' + formatTime12(inFrom) + ' to ' + formatTime12(inUntil) + '</td>' +
+                    '<td class="px-4 py-3 text-right"><button type="button" class="text-red-600 hover:underline text-sm font-medium delete-shift" data-id="' + s.shiftAssignmentID + '">Remove</button></td>' +
+                    '</tr>';
+            }
+
+            if (!list || list.length === 0) {
+                container.innerHTML = '<tr><td colspan="4" class="px-4 py-3 text-center text-slate-500 dark:text-slate-400">No shifts this day yet. Add one below.</td></tr>';
+                return;
+            }
+            container.innerHTML = list.map(rowForShift).join('');
             container.querySelectorAll('.delete-shift').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
@@ -229,7 +321,83 @@
 
     function refreshCalendar() {
         var y = current.getFullYear(), m = current.getMonth();
-        loadShifts(y, m, function (shifts) { renderCalendar(y, m, shifts); });
+        loadShifts(y, m, function (shifts) {
+            renderCalendar(y, m, shifts);
+            renderShiftDetailsTable(shifts || []);
+        });
+    }
+
+    function renderShiftDetailsTable(shifts) {
+        if (!shiftDetailsBody) return;
+        var employees = Object.keys(employeesById).map(function (id) { return employeesById[id]; });
+        var depFilter = shiftDeptFilter && shiftDeptFilter.value ? String(shiftDeptFilter.value) : '';
+        var empFilter = shiftEmpFilter && shiftEmpFilter.value ? String(shiftEmpFilter.value) : '';
+
+        if (depFilter) {
+            employees = employees.filter(function (e) { return String(e.departmentID || e.departmentId || '') === depFilter; });
+        }
+        if (empFilter) {
+            employees = employees.filter(function (e) { return String(e.empID || '') === empFilter; });
+        }
+
+        var shiftsByEmployee = {};
+        (shifts || []).forEach(function (s) {
+            var key = String(s.empID || '');
+            if (!shiftsByEmployee[key]) shiftsByEmployee[key] = [];
+            shiftsByEmployee[key].push(s);
+        });
+
+        if (!employees.length && !(shifts || []).length) {
+            shiftDetailsBody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No employees found for this filter.</td></tr>';
+            return;
+        }
+
+        var rows = [];
+        employees.forEach(function (emp) {
+            var empIdKey = String(emp.empID || '');
+            var empShifts = (shiftsByEmployee[empIdKey] || []).slice().sort(function (a, b) { return new Date(a.assignmentDate) - new Date(b.assignmentDate); });
+            var empName = ((emp.firstName || '') + ' ' + (emp.lastName || '')).trim() || emp.empNumber || '—';
+            var dep = emp.departmentName || '—';
+            var role = emp.role || '—';
+            var email = emp.email || '—';
+
+            if (!empShifts.length) {
+                rows.push('<tr>' +
+                    '<td class="px-4 py-3 text-slate-800 dark:text-slate-100">' + empName + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + dep + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + role + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + email + '</td>' +
+                    '<td class="px-4 py-3 text-slate-400 dark:text-slate-500">—</td>' +
+                    '<td class="px-4 py-3 text-slate-400 dark:text-slate-500">No assignment</td>' +
+                    '<td class="px-4 py-3 text-slate-400 dark:text-slate-500">—</td>' +
+                    '</tr>');
+                return;
+            }
+
+            empShifts.forEach(function (s) {
+                var start = formatTimeSpan(s.startTime);
+                var end = formatTimeSpan(s.endTime);
+                var inFrom = addMinutesToTime(start, -(attendanceWindow.earliestClockInMinutes || 0));
+                var inUntil = addMinutesToTime(start, attendanceWindow.latestClockInMinutes || 0);
+                var date = s.assignmentDate ? new Date(s.assignmentDate).toLocaleDateString() : '—';
+                rows.push('<tr>' +
+                    '<td class="px-4 py-3 text-slate-800 dark:text-slate-100">' + empName + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + dep + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + role + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + email + '</td>' +
+                    '<td class="px-4 py-3 text-slate-600 dark:text-slate-300">' + date + '</td>' +
+                    '<td class="px-4 py-3 text-slate-700 dark:text-slate-200">' + formatTime12(start) + ' - ' + formatTime12(end) + '</td>' +
+                    '<td class="px-4 py-3 text-slate-700 dark:text-slate-200">' + formatTime12(inFrom) + ' to ' + formatTime12(inUntil) + '</td>' +
+                    '</tr>');
+            });
+        });
+
+        if (!rows.length) {
+            shiftDetailsBody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No employees found for this filter.</td></tr>';
+            return;
+        }
+
+        shiftDetailsBody.innerHTML = rows.join('');
     }
 
     document.getElementById('shiftPrevMonth').addEventListener('click', function () {
@@ -261,6 +429,7 @@
             var empFilter = document.getElementById('shiftEmpFilter');
             if (!list || !list.length) return;
             list.forEach(function (e) {
+                employeesById[e.empID] = e;
                 var name = (e.firstName || '') + ' ' + (e.lastName || '') + ' (' + (e.empNumber || '') + ')';
                 if (addEmp) {
                     var o = document.createElement('option');
@@ -275,6 +444,15 @@
                     empFilter.appendChild(o2);
                 }
             });
+            refreshCalendar();
+        });
+
+    fetch('/App/LeaveAndShift/ShiftSchedule?handler=AttendanceConfig', { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (cfg) {
+            attendanceWindow.earliestClockInMinutes = Number(cfg.earliestClockInMinutes || 0);
+            attendanceWindow.latestClockInMinutes = Number(cfg.latestClockInMinutes || 0);
+            refreshCalendar();
         });
 
     document.getElementById('addShiftForm').addEventListener('submit', function (e) {
@@ -292,10 +470,36 @@
         formData.append('notes', '');
         formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
         fetch('/App/LeaveAndShift/ShiftSchedule?handler=CreateShift', { method: 'POST', body: formData })
-            .then(function (r) { return r.json(); })
+            .then(parseJsonResponse)
             .then(function (data) {
-                if (data.ok && window._shiftModalDate) openShiftDayModal(window._shiftModalDate);
-                else if (data.message) alert(data.message);
+                if (data.ok && window._shiftModalDate) {
+                    document.getElementById('addShiftEmp').value = '';
+                    document.getElementById('addShiftStart').value = '';
+                    document.getElementById('addShiftEnd').value = '';
+                    openShiftDayModal(window._shiftModalDate);
+                    refreshCalendar();
+                    return;
+                }
+                if (data && data.conflict) {
+                    var confirmed = confirm(data.message || 'This employee already has a shift on this date. Override existing assignment?');
+                    if (!confirmed) return;
+                    formData.append('overrideExisting', 'true');
+                    fetch('/App/LeaveAndShift/ShiftSchedule?handler=CreateShift', { method: 'POST', body: formData })
+                        .then(parseJsonResponse)
+                        .then(function (d2) {
+                            if (d2.ok && window._shiftModalDate) {
+                                document.getElementById('addShiftEmp').value = '';
+                                document.getElementById('addShiftStart').value = '';
+                                document.getElementById('addShiftEnd').value = '';
+                                openShiftDayModal(window._shiftModalDate);
+                                refreshCalendar();
+                            } else if (d2.message) {
+                                alert(d2.message);
+                            }
+                        });
+                    return;
+                }
+                if (data.message) alert(data.message);
             });
     });
 

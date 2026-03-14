@@ -1,163 +1,240 @@
 @page
 @model Subchron.Web.Pages.App.PayrollAndReports.PayrollModel
 @{
-    ViewData["Title"] = "Payroll Export";
-    ViewData["PageTitle"] = "Payroll Export";
+    ViewData["Title"] = "Payroll Processing";
+    ViewData["PageTitle"] = "Payroll Processing";
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto">
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Payroll Export</h1>
+<div class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="grid gap-4 md:grid-cols-5">
+            <div>
+                <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Mode</label>
+                <select id="payrollMode" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="batch">Batch Processing</option>
+                    <option value="individual">Individual Processing</option>
+                </select>
+            </div>
+            <div id="employeeWrap" class="hidden md:col-span-2">
+                <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Employee</label>
+                <select id="employeeId" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="">Select employee</option>
+                </select>
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Period Start</label>
+                <input type="date" id="periodStart" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+            </div>
+            <div>
+                <label class="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Period End</label>
+                <input type="date" id="periodEnd" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+            <button id="btnPreview" class="btn-primary px-4 py-2">Preview Payroll</button>
+            <button id="btnProcess" class="btn-secondary px-4 py-2" disabled>Process Payroll</button>
         </div>
     </div>
 
-    <!-- Pay period -->
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Pay period</h3>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-                <label for="periodStart" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period start</label>
-                <div class="relative mt-1.5">
-                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
-                    </div>
-                    <input type="date" id="periodStart" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
-                </div>
-            </div>
-            <div>
-                <label for="periodEnd" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Period end</label>
-                <div class="relative mt-1.5">
-                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
-                    </div>
-                    <input type="date" id="periodEnd" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
-                </div>
-            </div>
-        </div>
-        <div class="mt-6">
-            <button type="button" id="btnGeneratePreview" class="btn-primary gap-2">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                Generate preview
-            </button>
-        </div>
-    </div>
-
-    <!-- Preview: Attendance + Approved OT -->
-    <div id="previewSection" class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Preview — Attendance logs &amp; approved OT</h3>
-            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Data that will be included in the export.</p>
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Processing Preview</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Review employee payroll summary before processing.</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Employee</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Date</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time In</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Time Out</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Hours</th>
-                        <th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">OT (approved)</th>
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/70">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Employee</th>
+                        <th class="px-4 py-2 text-left">Worked Hrs</th>
+                        <th class="px-4 py-2 text-left">Base</th>
+                        <th class="px-4 py-2 text-left">OT</th>
+                        <th class="px-4 py-2 text-left">Allowances</th>
+                        <th class="px-4 py-2 text-left">Deductions</th>
+                        <th class="px-4 py-2 text-left">Net</th>
+                        <th class="px-4 py-2 text-right">Review</th>
                     </tr>
                 </thead>
-                <tbody id="previewTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Tim Jones</td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-18</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">08:00</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">17:30</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">9.5</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">—</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Tim Jones</td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-20</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">08:00</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">22:00</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">14.0</td>
-                        <td class="px-5 py-3 text-sm text-subgreen-600 dark:text-subgreen-400">3.0</td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="px-5 py-3 text-sm font-medium text-slate-900 dark:text-white">Jane Smith</td>
-                        <td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">2025-02-19</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">09:00</td>
-                        <td class="px-5 py-3 text-sm tabular-nums text-slate-600 dark:text-slate-400">18:00</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">9.0</td>
-                        <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">—</td>
-                    </tr>
+                <tbody id="previewBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">No preview yet.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Exceptions (MVP: just flag) -->
-    <div id="exceptionsSection" class="mb-6 rounded-2xl border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-900/20" style="display: none;">
-        <div class="border-b border-amber-200 px-5 py-4 dark:border-amber-800">
-            <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-200">Exceptions</h3>
-            <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-300">Review before export. MVP: flagged only; resolve/ignore can be added later.</p>
+    <details class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-200">Payroll Formula Breakdown</summary>
+        <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <p><strong>Base Pay:</strong> Uses employee compensation basis override; if none, uses Pay tab basis.</p>
+            <p><strong>Worked Hours:</strong> Sum of attendance log TimeOut - TimeIn within selected period.</p>
+            <p><strong>Overtime Pay:</strong> Approved overtime hours x hourly rate x 1.25 multiplier.</p>
+            <p><strong>Allowances:</strong> Active allowance rules, with attendance-dependent/proration logic applied.</p>
+            <p><strong>Deductions:</strong> Employee-linked deduction rules from Pay tab; formula/percentage/fixed logic applied.</p>
+            <p><strong>Net Pay:</strong> <code>Net = (Base + OT + Allowances) - Deductions</code></p>
         </div>
-        <ul id="exceptionsList" class="divide-y divide-amber-200 px-5 py-3 dark:divide-amber-800">
-            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
-                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Missing OUT</strong> — Alex Reyes, 2025-02-21 (no time-out recorded)</span>
-                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
-            </li>
-            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
-                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Overlap</strong> — Tim Jones, 2025-02-20: two entries overlap (08:00–17:00 and 14:00–22:00)</span>
-                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
-            </li>
-            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
-                <span class="text-sm text-amber-800 dark:text-amber-200"><strong>Rejected event</strong> — Jane Smith, OT request 2025-02-17 (rejected; excluded from export)</span>
-                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">Flagged</span>
-            </li>
-        </ul>
-    </div>
+    </details>
+</div>
 
-    <!-- Export actions -->
-    <div id="exportSection" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
-        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Export</h3>
-        <div class="flex flex-wrap gap-3">
-            <button type="button" id="btnExportCsv" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export CSV</button>
-            <button type="button" id="btnExportExcel" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">Export Excel</button>
+<div id="reviewModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-800">
+        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">Payslip Summary Review</h3>
+        <div id="reviewContent" class="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-300"></div>
+        <div class="mt-4 flex justify-end gap-2">
+            <button id="closeReview" class="btn-secondary px-4 py-2">Close</button>
         </div>
-        <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">Optional: Export record can be saved to Archive/Audit for compliance.</p>
     </div>
+</div>
 
-    <p id="payrollEmpty" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Select pay period and click Generate preview to continue.</p>
+<div id="processModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-800">
+        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">Payroll Processed</h3>
+        <p id="processResult" class="mt-2 text-sm text-slate-600 dark:text-slate-300"></p>
+        <div class="mt-4 flex justify-end gap-2">
+            <button id="downloadPayslip" class="btn-primary px-4 py-2">Download Payslip PDF</button>
+            <button id="closeProcess" class="btn-secondary px-4 py-2">Close</button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
 <script>
 (function () {
+    var payrollMode = document.getElementById('payrollMode');
+    var employeeWrap = document.getElementById('employeeWrap');
+    var employeeId = document.getElementById('employeeId');
     var periodStart = document.getElementById('periodStart');
     var periodEnd = document.getElementById('periodEnd');
-    var btnGeneratePreview = document.getElementById('btnGeneratePreview');
-    var previewSection = document.getElementById('previewSection');
-    var exceptionsSection = document.getElementById('exceptionsSection');
-    var exportSection = document.getElementById('exportSection');
-    var payrollEmpty = document.getElementById('payrollEmpty');
-    var btnExportCsv = document.getElementById('btnExportCsv');
-    var btnExportExcel = document.getElementById('btnExportExcel');
+    var btnPreview = document.getElementById('btnPreview');
+    var btnProcess = document.getElementById('btnProcess');
+    var previewBody = document.getElementById('previewBody');
 
-    function setDefaultPeriod() {
+    var reviewModal = document.getElementById('reviewModal');
+    var reviewContent = document.getElementById('reviewContent');
+    var closeReview = document.getElementById('closeReview');
+
+    var processModal = document.getElementById('processModal');
+    var processResult = document.getElementById('processResult');
+    var closeProcess = document.getElementById('closeProcess');
+    var downloadPayslip = document.getElementById('downloadPayslip');
+
+    var previewData = null;
+    var latestRunId = null;
+
+    function setDefaultDates() {
         var today = new Date();
-        var start = new Date(today);
-        start.setDate(1);
+        var start = new Date(today.getFullYear(), today.getMonth(), 1);
         periodStart.value = start.toISOString().slice(0, 10);
         periodEnd.value = today.toISOString().slice(0, 10);
     }
-    setDefaultPeriod();
 
-    btnGeneratePreview.addEventListener('click', function () {
-        previewSection.style.display = 'block';
-        exceptionsSection.style.display = 'block';
-        exportSection.style.display = 'block';
-        payrollEmpty.style.display = 'none';
+    function currency(n) {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
+    }
+
+    function modeChanged() {
+        var individual = payrollMode.value === 'individual';
+        employeeWrap.classList.toggle('hidden', !individual);
+    }
+
+    function getPayload() {
+        return {
+            periodStart: periodStart.value,
+            periodEnd: periodEnd.value,
+            mode: payrollMode.value,
+            empID: payrollMode.value === 'individual' && employeeId.value ? Number(employeeId.value) : null
+        };
+    }
+
+    function renderPreview(items) {
+        if (!items || !items.length) {
+            previewBody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">No employees found for selected criteria.</td></tr>';
+            btnProcess.disabled = true;
+            return;
+        }
+
+        previewBody.innerHTML = items.map(function (x, idx) {
+            return '<tr>' +
+                '<td class="px-4 py-3">' + x.employeeName + ' <span class="text-xs text-slate-400">(' + x.empNumber + ')</span></td>' +
+                '<td class="px-4 py-3">' + Number(x.workedHours || 0).toFixed(2) + '</td>' +
+                '<td class="px-4 py-3">' + currency(x.basePay) + '</td>' +
+                '<td class="px-4 py-3">' + currency(x.overtimePay) + '</td>' +
+                '<td class="px-4 py-3">' + currency(x.allowances) + '</td>' +
+                '<td class="px-4 py-3">' + currency(x.deductions) + '</td>' +
+                '<td class="px-4 py-3 font-semibold">' + currency(x.netPay) + '</td>' +
+                '<td class="px-4 py-3 text-right"><button type="button" class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100" data-review="' + idx + '">Review</button></td>' +
+                '</tr>';
+        }).join('');
+
+        previewBody.querySelectorAll('[data-review]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var item = items[Number(btn.getAttribute('data-review'))];
+                var lines = (item.breakdown || []).map(function (b) { return '<p>' + b.type + ': ' + b.name + ' - <strong>' + currency(b.amount) + '</strong></p>'; }).join('');
+                reviewContent.innerHTML =
+                    '<p><strong>' + item.employeeName + '</strong> (' + item.empNumber + ')</p>' +
+                    '<p>Worked Hours: ' + Number(item.workedHours || 0).toFixed(2) + '</p>' +
+                    '<p>Gross: ' + currency(item.grossPay) + '</p>' +
+                    '<p>Deductions: ' + currency(item.deductions) + '</p>' +
+                    '<p>Net: <strong>' + currency(item.netPay) + '</strong></p>' +
+                    '<hr class="my-2 border-slate-200 dark:border-slate-700" />' + lines;
+                reviewModal.classList.remove('hidden');
+                reviewModal.classList.add('flex');
+            });
+        });
+
+        btnProcess.disabled = false;
+    }
+
+    function loadEmployees() {
+        fetch('?handler=Employees').then(function (r) { return r.json(); }).then(function (rows) {
+            employeeId.innerHTML = '<option value="">Select employee</option>' +
+                (rows || []).map(function (x) { return '<option value="' + x.empID + '">' + x.firstName + ' ' + x.lastName + ' (' + x.empNumber + ')</option>'; }).join('');
+        });
+    }
+
+    btnPreview.addEventListener('click', function () {
+        fetch('?handler=Preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(getPayload())
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            previewData = data;
+            renderPreview(data.items || []);
+        });
     });
 
-    btnExportCsv.addEventListener('click', function () { alert('Export CSV (backend not connected).'); });
-    btnExportExcel.addEventListener('click', function () { alert('Export Excel (backend not connected).'); });
+    btnProcess.addEventListener('click', function () {
+        fetch('?handler=Process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(getPayload())
+        }).then(function (r) { return r.json(); }).then(function (res) {
+            latestRunId = res.runId;
+            processResult.textContent = 'Processed ' + (res.processedCount || 0) + ' employee(s). Net total: ' + currency(res.totalNet || 0);
+            processModal.classList.remove('hidden');
+            processModal.classList.add('flex');
+        });
+    });
+
+    closeReview.addEventListener('click', function () {
+        reviewModal.classList.add('hidden');
+        reviewModal.classList.remove('flex');
+    });
+
+    closeProcess.addEventListener('click', function () {
+        processModal.classList.add('hidden');
+        processModal.classList.remove('flex');
+    });
+
+    downloadPayslip.addEventListener('click', function () {
+        if (!latestRunId) return;
+        window.location.href = '?handler=PayslipPdf&runId=' + latestRunId;
+    });
+
+    payrollMode.addEventListener('change', modeChanged);
+    setDefaultDates();
+    modeChanged();
+    loadEmployees();
 })();
 </script>
 }

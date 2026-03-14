@@ -1,8 +1,35 @@
 @using System.Security.Claims
 @using Subchron.Web.Rbac
+@using Subchron.Web.Services
+@inject LayoutBrandingService LayoutBrandingService
 @{
     var displayName = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name ?? "Employee";
     var canAccessBackoffice = RoleModuleAccess.CanAccessBackoffice(User);
+
+    var branding = await LayoutBrandingService.GetAsync(User);
+    if (!string.IsNullOrWhiteSpace(branding.ProfileName))
+        displayName = branding.ProfileName!.Trim();
+
+    var orgSidebarName = !string.IsNullOrWhiteSpace(branding.OrgName)
+        ? branding.OrgName!.Trim()
+        : "Employee Portal";
+
+    var orgLogoUrl = string.IsNullOrWhiteSpace(branding.OrgLogoUrl)
+        ? null
+        : branding.OrgLogoUrl!.Trim();
+    var orgLogoResolved = orgLogoUrl;
+    if (!string.IsNullOrWhiteSpace(orgLogoResolved) && orgLogoResolved.StartsWith("~/", StringComparison.Ordinal))
+        orgLogoResolved = Url.Content(orgLogoResolved);
+
+    var orgLogoSrc = !string.IsNullOrWhiteSpace(orgLogoResolved)
+        ? orgLogoResolved + (orgLogoResolved.Contains("?") ? "&" : "?") + "v=" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+        : Url.Content("~/images/logo/logo.png");
+
+    var profileAvatarSrc = branding.ProfileAvatarUrl;
+    if (!string.IsNullOrWhiteSpace(profileAvatarSrc) && profileAvatarSrc.StartsWith("~/", StringComparison.Ordinal))
+        profileAvatarSrc = Url.Content(profileAvatarSrc);
+    if (string.IsNullOrWhiteSpace(profileAvatarSrc))
+        profileAvatarSrc = "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(displayName) + "&background=209030&color=fff&bold=true";
 }
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth" id="htmlRoot">
@@ -10,10 +37,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Employee Portal - Subchron</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: "class", theme: { extend: { colors: { subgreen: { 50: "#effbf1", 100: "#d9f5de", 200: "#b6eac0", 300: "#84d999", 400: "#4bc56c", 500: "#28a84d", 600: "#209030", 700: "#177027", 800: "#145923", 900: "#114a1f" } } } } };
-    </script>
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
     <script>
         (function () { var stored = localStorage.getItem("subchron-theme"); var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", stored === "dark" || (!stored && prefersDark)); })();
     </script>
@@ -74,9 +98,9 @@
             <div class="flex h-[100px] items-center px-6 relative">
                 <div class="profile-header flex items-center gap-3 overflow-hidden">
                     <div class="logo-box h-12 w-12 flex-shrink-0 overflow-hidden rounded-none bg-transparent">
-                        <img src="~/images/logo/logo.png" alt="Logo" class="block h-full w-full object-cover" />
+                        <img src="@orgLogoSrc" alt="@orgSidebarName logo" class="block h-full w-full object-cover" />
                     </div>
-                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">Employee Portal</span>
+                    <span class="company-name text-lg font-bold whitespace-nowrap text-slate-800 dark:text-white">@orgSidebarName</span>
                 </div>
                 <div class="toggle-wrap" aria-hidden="false">
                     <button id="sidebarToggle" class="toggle-btn" type="button" aria-label="Sidebar toggle / close">
@@ -146,7 +170,7 @@
                         </button>
                         <div id="profileDropdown" class="profile-dropdown relative flex-shrink-0">
                             <button type="button" id="profileDropdownTrigger" class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700 flex-shrink-0" aria-expanded="false" aria-haspopup="true">
-                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(displayName))&background=209030&color=fff&bold=true" alt="" class="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-600 flex-shrink-0" />
+                                <img src="@profileAvatarSrc" alt="" class="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-600 flex-shrink-0" />
                                 <span class="max-w-[140px] truncate text-sm font-medium hidden sm:inline">@displayName</span>
                                 <svg class="h-4 w-4 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                             </button>

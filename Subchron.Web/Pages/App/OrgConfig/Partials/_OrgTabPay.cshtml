@@ -179,7 +179,7 @@
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400">Compensation Basis <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <select id="compensation-basis" onchange="toggleCustomCompensationFields()" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
+                            <select id="compensation-basis" onchange="toggleCustomCompensationFields()" style="color-scheme: light dark;" class="block w-full appearance-none rounded-lg border-0 bg-slate-100 py-2.5 pr-10 pl-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-gray-900 dark:text-white dark:ring-gray-600">
                                 <option value="Monthly" selected>Monthly</option>
                                 <option value="Daily">Daily</option>
                                 <option value="Hourly">Hourly</option>
@@ -1041,7 +1041,12 @@
             if (!config) return;
             document.getElementById('pay-currency').value = 'PHP';
             document.getElementById('pay-cycle').value = config.payCycle || 'SemiMonthly';
-            document.getElementById('compensation-basis').value = config.compensationBasis || 'Monthly';
+            var compensationBasisRaw = (config.compensationBasis || 'Monthly').toString().toLowerCase();
+            var compensationBasis = compensationBasisRaw === 'custom' ? 'Custom'
+                : compensationBasisRaw === 'daily' ? 'Daily'
+                : compensationBasisRaw === 'hourly' ? 'Hourly'
+                : 'Monthly';
+            document.getElementById('compensation-basis').value = compensationBasis;
             document.getElementById('custom-unit-label').value = config.customUnitLabel || '';
             document.getElementById('custom-work-hours').value = config.customWorkHours != null ? config.customWorkHours : '';
             document.getElementById('pay-hours-per-day').value = config.hoursPerDay != null ? config.hoursPerDay : 8;
@@ -1134,6 +1139,8 @@
             if (!paySectionState[sectionKey]) {
                 setPaySectionEditable(sectionKey, true);
                 button.textContent = 'Save ' + meta.label;
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-primary');
                 return;
             }
 
@@ -1141,6 +1148,8 @@
                 if (!ok) return;
                 setPaySectionEditable(sectionKey, false);
                 button.textContent = 'Edit ' + meta.label;
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
             });
         }
 

@@ -539,6 +539,59 @@ The {AppName} Team
 ";
     }
 
+    public static string GetEmployeeTemporaryAccessHtml(string loginUrl, string userEmail, string tempPassword, DateTime expiresAtUtc, string? webBaseUrl = null)
+    {
+        var year = DateTime.UtcNow.Year.ToString();
+        var termsLink = webBaseUrl != null ? $"{webBaseUrl.TrimEnd('/')}/terms" : TermsUrl;
+        var privacyLink = webBaseUrl != null ? $"{webBaseUrl.TrimEnd('/')}/privacy" : PrivacyUrl;
+        var expiresDisplay = expiresAtUtc.ToString("MMM dd, yyyy hh:mm tt") + " UTC";
+
+        return $@"
+<!doctype html>
+<html lang=""en"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width,initial-scale=1"" />
+  <title>Temporary login access - {AppName}</title>
+</head>
+<body style=""margin:0;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;"">
+  <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""background:#f5f7fb;"">
+    <tr>
+      <td align=""center"" style=""padding:32px 16px;"">
+        <table role=""presentation"" width=""480"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""max-width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 4px 16px rgba(15,23,42,.06);"">
+          <tr>
+            <td style=""padding:32px 28px;"">
+              <div style=""font-size:22px;font-weight:800;""><span style=""color:#22c55e;"">Sub</span><span style=""color:#0052a3;"">chron</span></div>
+              <div style=""height:22px;""></div>
+              <div style=""font-size:20px;font-weight:700;color:#0f172a;"">Your temporary login access</div>
+              <div style=""height:12px;""></div>
+              <div style=""font-size:14px;line-height:21px;color:#64748b;"">An account has been created for you. Sign in using the credentials below. This temporary password is valid for 5 hours and should be changed immediately after login.</div>
+              <div style=""height:18px;""></div>
+              <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;"">
+                <tr><td style=""padding:14px 16px;font-size:13px;color:#334155;line-height:22px;"">
+                  <strong>Login email:</strong> {userEmail}<br/>
+                  <strong>Temporary password:</strong> <span style=""font-family:'Courier New',Consolas,monospace;letter-spacing:0.5px;"">{tempPassword}</span><br/>
+                  <strong>Expires:</strong> {expiresDisplay}
+                </td></tr>
+              </table>
+              <div style=""height:18px;""></div>
+              <a href=""{loginUrl}"" style=""display:inline-block;background:#16a34a;color:#fff;font-size:14px;line-height:42px;height:42px;padding:0 20px;border-radius:8px;font-weight:600;text-decoration:none;"">Go to login</a>
+              <div style=""height:18px;""></div>
+              <div style=""font-size:12px;line-height:18px;color:#64748b;"">If your temporary password expires, contact your admin to reissue access.</div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:13px;color:#334155;"">Thank you,<br/><span style=""font-weight:700;"">The {AppName} Team</span></div>
+            </td>
+          </tr>
+        </table>
+        <div style=""margin-top:18px;font-size:11px;color:#94a3b8;"">© {year} {AppName}. All rights reserved.</div>
+        <div style=""margin-top:8px;font-size:11px;""><a href=""{termsLink}"" style=""color:#64748b;text-decoration:none;"">Terms</a> <span style=""color:#cbd5e1;"">•</span> <a href=""{privacyLink}"" style=""color:#64748b;text-decoration:none;"">Privacy</a></div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+    }
+
     public static string GetReceiptHtml(string planName, string amountLine, bool isTrial, string toEmail)
     {
         var year = DateTime.UtcNow.Year.ToString();

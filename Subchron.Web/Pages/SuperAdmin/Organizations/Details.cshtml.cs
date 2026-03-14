@@ -1,169 +1,136 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Subchron.Web.Pages.Auth;
 
 namespace Subchron.Web.Pages.SuperAdmin.Organizations
 {
     public class DetailsModel : PageModel
     {
-        public OrganizationDetailViewModel Organization { get; set; } = new();
-  public OrganizationSettingsViewModel Settings { get; set; } = new();
-  public SubscriptionDetailViewModel? CurrentSubscription { get; set; }
- public int EmployeeCount { get; set; }
-  public int ActiveUsers { get; set; }
-     public DateTime? LastActivity { get; set; }
-        public decimal StorageUsed { get; set; }
-   public int ApiCallsThisMonth { get; set; }
- public int AttendanceRecords { get; set; }
+        private readonly IHttpClientFactory _http;
+        private readonly IConfiguration _config;
 
- public async Task<IActionResult> OnGetAsync(int id)
+        public DetailsModel(IHttpClientFactory http, IConfiguration config)
         {
-          var organization = await LoadOrganization(id);
-  if (organization == null)
-    {
-     return NotFound();
-    }
-
-      Organization = organization;
-  Settings = await LoadOrganizationSettings(id);
-          CurrentSubscription = await LoadCurrentSubscription(id);
-      await LoadStatistics(id);
-       
-            return Page();
-      }
-
- private async Task<OrganizationDetailViewModel?> LoadOrganization(int id)
-   {
-            // Mock data - replace with actual repository call
-await Task.Delay(10);
-
-       var mockOrganizations = new List<OrganizationDetailViewModel>
-    {
-     new()
-      {
-        OrgID = 1,
-     OrgName = "TechCorp Solutions",
-      OrgCode = "TECH001",
- Status = "Active",
-      CreatedAt = DateTime.Now.AddMonths(-6)
-       },
-      new()
-       {
-      OrgID = 2,
-  OrgName = "Digital Ventures",
-     OrgCode = "DIGI002",
-     Status = "Trial",
-     CreatedAt = DateTime.Now.AddDays(-10)
-          },
-      new()
-       {
-     OrgID = 3,
-  OrgName = "Innovation Labs",
-      OrgCode = "INNO003",
-      Status = "Active",
-      CreatedAt = DateTime.Now.AddMonths(-3)
-    }
-       };
-
-         return mockOrganizations.FirstOrDefault(o => o.OrgID == id);
-}
-
- private async Task<OrganizationSettingsViewModel> LoadOrganizationSettings(int orgId)
-        {
-    // Mock data - replace with actual repository call
-      await Task.Delay(10);
-
-     return new OrganizationSettingsViewModel
-   {
-        OrgID = orgId,
-     Timezone = "Asia/Manila",
-   Currency = "PHP",
-        AttendanceMode = "Biometric",
-        DefaultShiftTemplateCode = "NIGHT"
-     };
-   }
-
- private async Task<SubscriptionDetailViewModel?> LoadCurrentSubscription(int orgId)
- {
-   // Mock data - replace with actual repository call
-      await Task.Delay(10);
-
-      if (orgId == 1)
-        {
-         return new SubscriptionDetailViewModel
-    {
-         SubscriptionID = 1,
-  PlanName = "Standard",
-  AttendanceMode = "Biometric",
-       FinalPrice = 3000,
-            BillingCycle = "Monthly",
-    StartDate = DateTime.Now.AddMonths(-3),
-    EndDate = DateTime.Now.AddMonths(9),
-        Status = "Active",
-    DaysRemaining = 0
-  };
-  }
-      
-        if (orgId == 2)
-      {
-       return new SubscriptionDetailViewModel
-     {
-   SubscriptionID = 2,
-        PlanName = "Standard",
-     AttendanceMode = "QR Code",
-      FinalPrice = 2500,
-      BillingCycle = "Monthly",
-     StartDate = DateTime.Now.AddDays(-10),
-    EndDate = DateTime.Now.AddDays(4),
-        Status = "Trial",
-         DaysRemaining = 4
-        };
+            _http = http;
+            _config = config;
         }
 
-    return null;
- }
+        public OrganizationDetailViewModel Organization { get; set; } = new();
+        public OrganizationSettingsViewModel Settings { get; set; } = new();
+        public SubscriptionDetailViewModel? CurrentSubscription { get; set; }
+        public int EmployeeCount { get; set; }
+        public int ActiveUsers { get; set; }
+        public DateTime? LastActivity { get; set; }
+        public decimal StorageUsed { get; set; }
+        public int ApiCallsThisMonth { get; set; }
+        public int AttendanceRecords { get; set; }
 
-        private async Task LoadStatistics(int orgId)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-       // Mock data - replace with actual repository calls
-     await Task.Delay(10);
-     
-        EmployeeCount = 45;
-       ActiveUsers = 42;
-  LastActivity = DateTime.Now.AddHours(-2);
-  StorageUsed = 2.3m;
-     ApiCallsThisMonth = 15420;
-       AttendanceRecords = 8750;
-  }
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return RedirectToPage("/Auth/Login");
+
+            try
+            {
+                var data = await client.GetFromJsonAsync<OrganizationDetailsResponse>("api/superadmin/organizations/" + id);
+                if (data == null)
+                    return NotFound();
+
+                Organization = data.Organization;
+                Settings = data.Settings;
+                CurrentSubscription = data.CurrentSubscription;
+                EmployeeCount = data.EmployeeCount;
+                ActiveUsers = data.ActiveUsers;
+                LastActivity = data.LastActivity;
+                StorageUsed = data.StorageUsed;
+                ApiCallsThisMonth = data.ApiCallsThisMonth;
+                AttendanceRecords = data.AttendanceRecords;
+                return Page();
+            }
+            catch
+            {
+                return NotFound();
+            }
+        }
+
+        public async Task<IActionResult> OnPostSuspendAsync([FromBody] SuspendRequest req)
+        {
+            if (req.OrgId <= 0)
+                return new JsonResult(new { ok = false, message = "Invalid organization." }) { StatusCode = 400 };
+
+            var client = CreateAuthorizedClient();
+            if (client == null)
+                return new JsonResult(new { ok = false, message = "Session expired." }) { StatusCode = 401 };
+
+            var resp = await client.PostAsync("api/superadmin/organizations/" + req.OrgId + "/suspend", null);
+            var body = await resp.Content.ReadAsStringAsync();
+            return new ContentResult
+            {
+                StatusCode = (int)resp.StatusCode,
+                ContentType = "application/json",
+                Content = string.IsNullOrWhiteSpace(body) ? "{}" : body
+            };
+        }
+
+        private HttpClient? CreateAuthorizedClient()
+        {
+            var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var client = _http.CreateClient("Subchron.API");
+            var baseUrl = (_config["ApiBaseUrl"] ?? string.Empty).TrimEnd('/');
+            if (!string.IsNullOrWhiteSpace(baseUrl))
+                client.BaseAddress = new Uri(baseUrl + "/");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
+
+        public class OrganizationDetailsResponse
+        {
+            public OrganizationDetailViewModel Organization { get; set; } = new();
+            public OrganizationSettingsViewModel Settings { get; set; } = new();
+            public SubscriptionDetailViewModel? CurrentSubscription { get; set; }
+            public int EmployeeCount { get; set; }
+            public int ActiveUsers { get; set; }
+            public DateTime? LastActivity { get; set; }
+            public decimal StorageUsed { get; set; }
+            public int ApiCallsThisMonth { get; set; }
+            public int AttendanceRecords { get; set; }
+        }
     }
 
     public class OrganizationDetailViewModel
     {
-       public int OrgID { get; set; }
-      public string OrgName { get; set; } = string.Empty;
-      public string OrgCode { get; set; } = string.Empty;
+        public int OrgID { get; set; }
+        public string OrgName { get; set; } = string.Empty;
+        public string OrgCode { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
 
- public class OrganizationSettingsViewModel
+    public class OrganizationSettingsViewModel
     {
-     public int OrgID { get; set; }
-   public string Timezone { get; set; } = string.Empty;
+        public int OrgID { get; set; }
+        public string Timezone { get; set; } = string.Empty;
         public string Currency { get; set; } = string.Empty;
- public string AttendanceMode { get; set; } = string.Empty;
+        public string AttendanceMode { get; set; } = string.Empty;
         public string? DefaultShiftTemplateCode { get; set; }
-     }
+    }
 
     public class SubscriptionDetailViewModel
     {
-     public int SubscriptionID { get; set; }
-    public string PlanName { get; set; } = string.Empty;
-     public string AttendanceMode { get; set; } = string.Empty;
-    public decimal FinalPrice { get; set; }
- public string BillingCycle { get; set; } = string.Empty;
-     public DateTime StartDate { get; set; }
-   public DateTime EndDate { get; set; }
-  public string Status { get; set; } = string.Empty;
+        public int SubscriptionID { get; set; }
+        public string PlanName { get; set; } = string.Empty;
+        public string AttendanceMode { get; set; } = string.Empty;
+        public decimal FinalPrice { get; set; }
+        public string BillingCycle { get; set; } = string.Empty;
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; } = string.Empty;
         public int DaysRemaining { get; set; }
     }
 }

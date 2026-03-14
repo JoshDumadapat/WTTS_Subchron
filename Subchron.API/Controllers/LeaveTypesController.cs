@@ -51,6 +51,32 @@ public class LeaveTypesController : ControllerBase
         return Ok(items);
     }
 
+    [HttpGet("mine")]
+    public async Task<ActionResult<List<LeaveTypeDto>>> Mine()
+    {
+        var orgId = GetUserOrgId();
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!orgId.HasValue || !int.TryParse(userIdClaim, out var userId))
+            return Forbid();
+
+        var employee = await _db.Employees.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.OrgID == orgId.Value && e.UserID == userId && !e.IsArchived);
+        if (employee == null)
+            return Ok(new List<LeaveTypeDto>());
+
+        var leaveTypes = await _db.LeaveTypes.AsNoTracking()
+            .Where(x => x.OrgID == orgId.Value && x.IsActive)
+            .OrderBy(x => x.LeaveTypeName)
+            .ToListAsync();
+
+        var items = leaveTypes
+            .Where(x => IsApplicableToEmployee(x, employee))
+            .Select(ToDto)
+            .ToList();
+
+        return Ok(items);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<LeaveTypeDto>> Get(int id)
     {
@@ -445,4 +471,19 @@ public class LeaveTypesController : ControllerBase
             CanOrgOverride = x.CanOrgOverride,
             IsSystemProtected = x.IsSystemProtected
         };
+
+    private static bool IsApplicableToEmployee(LeaveType leaveType, Employee emp)
+    {
+        return leaveType.AppliesTo switch
+        {
+            LeaveAppliesTo.All => true,
+            LeaveAppliesTo.FullTime => string.Equals(emp.EmploymentType, "Full Time", StringComparison.OrdinalIgnoreCase) || string.Equals(emp.EmploymentType, "Regular", StringComparison.OrdinalIgnoreCase),
+            LeaveAppliesTo.PartTime => string.Equals(emp.EmploymentType, "Part Time", StringComparison.OrdinalIgnoreCase),
+            LeaveAppliesTo.Probationary => string.Equals(emp.EmploymentType, "Probationary", StringComparison.OrdinalIgnoreCase),
+            LeaveAppliesTo.Regular => string.Equals(emp.EmploymentType, "Regular", StringComparison.OrdinalIgnoreCase),
+            LeaveAppliesTo.FemaleOnly => string.Equals(emp.Gender, "Female", StringComparison.OrdinalIgnoreCase),
+            LeaveAppliesTo.MaleOnly => string.Equals(emp.Gender, "Male", StringComparison.OrdinalIgnoreCase),
+            _ => true
+        };
+    }
 }
