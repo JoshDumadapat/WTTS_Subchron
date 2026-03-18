@@ -1,25 +1,328 @@
 @page
 @model Subchron.Web.Pages.App.PayrollAndReports.ReportsModel
 @{
-    ViewData["Title"] = "Reports";
-    ViewData["PageTitle"] = "Reports";
+    ViewData["Title"] = "Payroll & Finance Reports";
+    ViewData["PageTitle"] = "Payroll & Finance Reports";
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="mx-auto">
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+<style>
+    .kpi-card {
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        background: white;
+        transition: all 0.2s ease;
+    }
+    .kpi-card:hover {
+        border-color: rgb(16 185 129);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.1);
+    }
+    .quick-report-card {
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .quick-report-card:hover {
+        border-color: rgb(16 185 129);
+        background: rgb(249 250 251);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .comparison-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .comparison-badge.up { background: rgb(220 252 231); color: rgb(22 163 74); }
+    .comparison-badge.down { background: rgb(254 226 226); color: rgb(220 38 38); }
+    .chart-container { position: relative; height: 200px; }
+    .progress-bar { height: 8px; border-radius: 4px; background: rgb(226 232 240); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    
+    .dark .kpi-card, .dark .quick-report-card {
+        border-color: rgb(51 65 85);
+        background: rgb(30 41 59);
+    }
+    .dark .kpi-card:hover { border-color: rgb(16 185 129); }
+    .dark .quick-report-card:hover { background: rgb(15 23 42); }
+    .dark .comparison-badge.up { background: rgba(22, 163, 74, 0.2); color: rgb(134 239 172); }
+    .dark .comparison-badge.down { background: rgba(220, 38, 38, 0.2); color: rgb(252 165 165); }
+    .dark .progress-bar { background: rgb(51 65 85); }
+</style>
+
+<div class="mx-auto space-y-6">
+    @* Header *@
+    <div class="mb-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Reports</h1>
+            <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Payroll & Finance Reports</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Track payroll expenses, deductions, and workforce costs</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <select id="reportPeriod" class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                <option value="semi">Semi-Monthly (Mar 1-15)</option>
+                <option value="monthly">Monthly (March 2026)</option>
+                <option value="quarterly">Quarterly (Q1 2026)</option>
+                <option value="yearly">Yearly (2026)</option>
+            </select>
         </div>
     </div>
 
-    <!-- Filters card -->
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Report options</h3>
+    @* Section 1: KPI Cards (6) *@
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Monthly Gross</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱847,500</p>
+        </div>
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Deductions</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱156,840</p>
+        </div>
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Net Payroll</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱690,660</p>
+        </div>
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">YTD Payroll</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱5.08M</p>
+        </div>
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pending OT</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱42.4K</p>
+        </div>
+        <div class="kpi-card">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Avg/Employee</p>
+            <p class="mt-2 text-xl font-bold text-gray-900 dark:text-white">₱23.8K</p>
+        </div>
+    </div>
+
+    @* Section 2: Charts Row *@
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        @* Donut Chart - Cost by Department *@
+        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Cost by Department</h3>
+            <div class="chart-container flex items-center justify-center">
+                <canvas id="deptChart"></canvas>
+            </div>
+            <div class="mt-4 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span> Engineering</span>
+                    <span class="font-medium">37%</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-500"></span> Sales</span>
+                    <span class="font-medium">23%</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-purple-500"></span> Marketing</span>
+                    <span class="font-medium">17%</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-500"></span> Operations</span>
+                    <span class="font-medium">13%</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-indigo-500"></span> HR & Admin</span>
+                    <span class="font-medium">10%</span>
+                </div>
+            </div>
+        </div>
+
+        @* Bar Chart - Deductions Breakdown *@
+        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Deductions Breakdown</h3>
+            <div class="chart-container">
+                <canvas id="deductionChart"></canvas>
+            </div>
+        </div>
+
+        @* Line Chart - Payroll Trend *@
+        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Payroll Trend</h3>
+                <span class="comparison-badge up">+6.2%</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="mt-4 flex justify-between text-xs text-slate-500">
+                <span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span>
+            </div>
+        </div>
+    </div>
+
+    @* Section 3: Progress Bars - Allowance & Deductions *@
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        @* Allowances Progress *@
+        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Allowances Distribution</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Rice Allowance</span>
+                        <span class="text-sm font-medium">₱42,000</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-emerald-500" style="width: 35%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Transport</span>
+                        <span class="text-sm font-medium">₱38,500</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-blue-500" style="width: 32%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Phone/Data</span>
+                        <span class="text-sm font-medium">₱18,000</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-purple-500" style="width: 15%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Medical</span>
+                        <span class="text-sm font-medium">₱12,500</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-amber-500" style="width: 10%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Hazard</span>
+                        <span class="text-sm font-medium">₱8,200</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-indigo-500" style="width: 8%"></div></div>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold">Total</span>
+                    <span class="text-sm font-bold text-emerald-600">₱119,200</span>
+                </div>
+            </div>
+        </div>
+
+        @* Deductions Progress *@
+        <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+            <h3 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Deductions Distribution</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">BIR Tax</span>
+                        <span class="text-sm font-medium">₱98,400</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-red-500" style="width: 63%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">SSS</span>
+                        <span class="text-sm font-medium">₱24,800</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-blue-500" style="width: 16%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">PhilHealth</span>
+                        <span class="text-sm font-medium">₱18,640</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-green-500" style="width: 12%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Pag-IBIG</span>
+                        <span class="text-sm font-medium">₱10,000</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-purple-500" style="width: 6%"></div></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-slate-600 dark:text-slate-300">Loans/Other</span>
+                        <span class="text-sm font-medium">₱5,000</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-amber-500" style="width: 3%"></div></div>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold">Total</span>
+                    <span class="text-sm font-bold text-red-600">₱156,840</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Section 4: Quick Reports Grid *@
+    <div>
+        <h3 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Quick Reports</h3>
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            <button type="button" onclick="generateQuickReport('payroll')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Payroll Register</p>
+            </button>
+
+            <button type="button" onclick="generateQuickReport('bir')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">BIR Tax</p>
+            </button>
+
+            <button type="button" onclick="generateQuickReport('statutory')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-purple-50 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Statutory</p>
+            </button>
+
+            <button type="button" onclick="generateQuickReport('dept')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Cost by Dept</p>
+            </button>
+
+            <button type="button" onclick="generateQuickReport('allowance')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Allowances</p>
+            </button>
+
+            <button type="button" onclick="generateQuickReport('13th')" class="quick-report-card text-left">
+                <div class="rounded-lg bg-rose-50 p-2 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 mb-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">13th Month</p>
+            </button>
+        </div>
+    </div>
+
+    @* Section 5: Filters & Report Table *@
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">Generate Report</h3>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div>
                 <label for="reportType" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Report type</label>
-                <select id="reportType" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                <select id="reportType" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                     <option value="AttendanceSummary">Attendance Summary</option>
                     <option value="Lates">Lates</option>
                     <option value="Absences">Absences</option>
@@ -28,53 +331,22 @@
             </div>
             <div>
                 <label for="dateFrom" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Date from</label>
-                <div class="relative mt-1.5">
-                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
-                    </div>
-                    <input type="date" id="dateFrom" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
-                </div>
+                <input type="date" id="dateFrom" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
             </div>
             <div>
                 <label for="dateTo" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Date to</label>
-                <div class="relative mt-1.5">
-                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                        <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
-                    </div>
-                    <input type="date" id="dateTo" class="h-10 w-full rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:border-subgreen-500" />
-                </div>
+                <input type="date" id="dateTo" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
             </div>
-        </div>
-        <div class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div>
                 <label for="filterSite" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Site</label>
-                <select id="filterSite" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                <select id="filterSite" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                     <option value="">All sites</option>
                     <option value="main">Main Office</option>
                     <option value="warehouse">Warehouse</option>
-                    <option value="branch1">Branch 1</option>
-                </select>
-            </div>
-            <div>
-                <label for="filterDept" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Department</label>
-                <select id="filterDept" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
-                    <option value="">All departments</option>
-                    <option value="ops">Operations</option>
-                    <option value="hr">HR</option>
-                    <option value="it">IT</option>
-                </select>
-            </div>
-            <div>
-                <label for="filterEmployee" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Employee</label>
-                <select id="filterEmployee" class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
-                    <option value="">All employees</option>
-                    <option value="1">Tim Jones</option>
-                    <option value="2">Jane Smith</option>
-                    <option value="3">Alex Reyes</option>
                 </select>
             </div>
         </div>
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="mt-4 flex flex-wrap gap-3">
             <button type="button" id="btnGenerate" class="btn-primary gap-2">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                 Generate
@@ -82,7 +354,7 @@
         </div>
     </div>
 
-    <!-- Report table -->
+    @* Report Table *@
     <div id="reportSection" class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800" style="display: none;">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
             <h3 id="reportTitle" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Report results</h3>
@@ -94,23 +366,19 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50" id="reportTableHead">
-                        <!-- Filled by JS or server -->
-                    </tr>
+                    <tr class="border-y border-slate-100 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50" id="reportTableHead"></tr>
                 </thead>
-                <tbody id="reportTableBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                    <!-- Filled by JS or server -->
-                </tbody>
+                <tbody id="reportTableBody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
             </table>
         </div>
     </div>
 
-    <p id="reportEmpty" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Select options and click Generate to view the report.</p>
+    <p id="reportEmpty" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Click Generate or select a Quick Report to view results.</p>
 
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    @* Payroll History *@
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
             <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Payroll History</h3>
-            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Processed payroll runs are listed here for reports and audit.</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
@@ -118,7 +386,7 @@
                     <tr>
                         <th class="px-5 py-3">Run ID</th>
                         <th class="px-5 py-3">Period</th>
-                        <th class="px-5 py-3">Processed</th>
+                        <th class="px-5 py-3">Employees</th>
                         <th class="px-5 py-3">Gross</th>
                         <th class="px-5 py-3">Deductions</th>
                         <th class="px-5 py-3">Net</th>
@@ -126,16 +394,34 @@
                     </tr>
                 </thead>
                 <tbody id="payrollHistoryBody" class="divide-y divide-slate-100 dark:divide-slate-700">
-                    <tr><td colspan="7" class="px-5 py-8 text-center text-slate-500">Loading payroll history...</td></tr>
+                    <tr>
+                        <td class="px-5 py-3 font-medium">#PR-2026-0012</td>
+                        <td class="px-5 py-3">Mar 1-15, 2026</td>
+                        <td class="px-5 py-3">15</td>
+                        <td class="px-5 py-3">₱847,500</td>
+                        <td class="px-5 py-3">₱156,840</td>
+                        <td class="px-5 py-3 font-semibold">₱690,660</td>
+                        <td class="px-5 py-3"><span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Processed</span></td>
+                    </tr>
+                    <tr>
+                        <td class="px-5 py-3 font-medium">#PR-2026-0011</td>
+                        <td class="px-5 py-3">Feb 16-28, 2026</td>
+                        <td class="px-5 py-3">14</td>
+                        <td class="px-5 py-3">₱798,200</td>
+                        <td class="px-5 py-3">₱142,300</td>
+                        <td class="px-5 py-3 font-semibold">₱655,900</td>
+                        <td class="px-5 py-3"><span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Processed</span></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 @section Scripts {
 <script>
-(function () {
+(function() {
     var reportType = document.getElementById('reportType');
     var dateFrom = document.getElementById('dateFrom');
     var dateTo = document.getElementById('dateTo');
@@ -145,9 +431,6 @@
     var reportTitle = document.getElementById('reportTitle');
     var thead = document.getElementById('reportTableHead');
     var tbody = document.getElementById('reportTableBody');
-    var btnExportCsv = document.getElementById('btnExportCsv');
-    var btnExportPdf = document.getElementById('btnExportPdf');
-    var payrollHistoryBody = document.getElementById('payrollHistoryBody');
 
     function setDefaultDates() {
         var today = new Date();
@@ -157,6 +440,121 @@
     }
     setDefaultDates();
 
+    // Chart.js defaults
+    Chart.defaults.font.family = 'inherit';
+    Chart.defaults.color = '#64748b';
+
+    // Department Donut Chart
+    new Chart(document.getElementById('deptChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Engineering', 'Sales', 'Marketing', 'Operations', 'HR & Admin'],
+            datasets: [{
+                data: [312500, 198000, 142800, 112400, 81800],
+                backgroundColor: ['#10b981', '#3b82f6', '#a855f7', '#f59e0b', '#6366f1'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Deductions Bar Chart
+    new Chart(document.getElementById('deductionChart'), {
+        type: 'bar',
+        data: {
+            labels: ['BIR Tax', 'SSS', 'PhilHealth', 'Pag-IBIG', 'Loans'],
+            datasets: [{
+                data: [98400, 24800, 18640, 10000, 5000],
+                backgroundColor: ['#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.x.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + (value / 1000) + 'K';
+                        }
+                    }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Trend Line Chart
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+            datasets: [{
+                data: [620000, 715000, 680000, 798200, 847500],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: {
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + (value / 1000) + 'K';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
     function getDemoHeaders(type) {
         if (type === 'AttendanceSummary') return ['Employee', 'Date', 'Time In', 'Time Out', 'Hours', 'Site'];
         if (type === 'Lates') return ['Employee', 'Date', 'Scheduled', 'Actual In', 'Minutes Late'];
@@ -164,35 +562,39 @@
         if (type === 'OTSummary') return ['Employee', 'Period', 'OT Hours', 'Approved', 'Reason'];
         return ['Column 1', 'Column 2', 'Column 3'];
     }
+
     function getDemoRows(type) {
         if (type === 'AttendanceSummary') return [
-            ['Tim Jones', '2025-02-20', '08:00', '17:30', '9.5', 'Main Office'],
-            ['Jane Smith', '2025-02-20', '09:00', '18:00', '9.0', 'Warehouse'],
-            ['Alex Reyes', '2025-02-21', '08:00', '—', '—', 'Main Office']
+            ['John Doe', '2026-03-15', '08:00', '17:30', '9.5', 'Main Office'],
+            ['Alice Smith', '2026-03-15', '09:00', '18:00', '9.0', 'Warehouse'],
+            ['Robert Johnson', '2026-03-15', '08:00', '17:00', '9.0', 'Main Office']
         ];
         if (type === 'Lates') return [
-            ['Tim Jones', '2025-02-18', '08:00', '08:23', '23'],
-            ['Jane Smith', '2025-02-19', '09:00', '09:15', '15']
+            ['Alice Smith', '2026-03-14', '09:00', '09:18', '18'],
+            ['Robert Johnson', '2026-03-13', '08:00', '08:25', '25']
         ];
         if (type === 'Absences') return [
-            ['Alex Reyes', '2025-02-21', 'Sick', 'Flu', 'Approved'],
-            ['Tim Jones', '2025-02-14', 'Leave', 'Personal', 'Approved']
+            ['Maria Williams', '2026-03-12', 'Sick', 'Flu', 'Approved'],
+            ['Tom Wilson', '2026-03-10', 'Leave', 'Personal', 'Approved']
         ];
         if (type === 'OTSummary') return [
-            ['Tim Jones', 'Feb 1–15', '6.0', 'Yes', 'Project deadline'],
-            ['Jane Smith', 'Feb 1–15', '4.0', 'Yes', 'Inventory count']
+            ['John Doe', 'Mar 1-15', '6.0', 'Yes', 'Project deadline'],
+            ['Alice Smith', 'Mar 1-15', '4.5', 'Yes', 'Inventory count']
         ];
         return [['Demo', '—', '—']];
     }
 
-    function renderReport() {
-        var type = reportType.value;
+    function renderReport(type) {
         var headers = getDemoHeaders(type);
         var rows = getDemoRows(type);
-        reportTitle.textContent = 'Report results (' + reportType.options[reportType.selectedIndex].text + ')';
-        thead.innerHTML = '<th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">' + headers.map(function (h) { return h; }).join('</th><th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">') + '</th>';
-        tbody.innerHTML = rows.map(function (row) {
-            return '<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">' + row.map(function (cell) {
+        var typeName = type === 'AttendanceSummary' ? 'Attendance Summary' : 
+                       type === 'Lates' ? 'Lates' : 
+                       type === 'Absences' ? 'Absences' : 
+                       type === 'OTSummary' ? 'OT Summary' : 'Report';
+        reportTitle.textContent = 'Report results (' + typeName + ')';
+        thead.innerHTML = '<th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">' + headers.join('</th><th class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">') + '</th>';
+        tbody.innerHTML = rows.map(function(row) {
+            return '<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">' + row.map(function(cell) {
                 return '<td class="px-5 py-3 text-sm text-slate-700 dark:text-slate-300">' + cell + '</td>';
             }).join('') + '</tr>';
         }).join('');
@@ -200,43 +602,26 @@
         reportEmpty.style.display = 'none';
     }
 
-    btnGenerate.addEventListener('click', function () {
-        renderReport();
+    btnGenerate.addEventListener('click', function() {
+        renderReport(reportType.value);
     });
 
-    btnExportCsv.addEventListener('click', function () { alert('Export CSV (backend not connected).'); });
-    btnExportPdf.addEventListener('click', function () { alert('Export PDF (backend not connected).'); });
+    document.getElementById('btnExportCsv').addEventListener('click', function() { alert('Export CSV (backend not connected).'); });
+    document.getElementById('btnExportPdf').addEventListener('click', function() { alert('Export PDF (backend not connected).'); });
 
-    function currency(n) {
-        return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'PHP' }).format(Number(n || 0));
-    }
-
-    function loadPayrollHistory() {
-        fetch('?handler=PayrollRuns', { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (rows) {
-                if (!rows || !rows.length) {
-                    payrollHistoryBody.innerHTML = '<tr><td colspan="7" class="px-5 py-8 text-center text-slate-500">No payroll history yet.</td></tr>';
-                    return;
-                }
-                payrollHistoryBody.innerHTML = rows.map(function (x) {
-                    return '<tr>' +
-                        '<td class="px-5 py-3 font-medium">#' + x.payrollRunID + '</td>' +
-                        '<td class="px-5 py-3">' + String(x.periodStart).slice(0, 10) + ' to ' + String(x.periodEnd).slice(0, 10) + '</td>' +
-                        '<td class="px-5 py-3">' + (x.processedCount || 0) + '</td>' +
-                        '<td class="px-5 py-3">' + currency(x.totalGrossPay) + '</td>' +
-                        '<td class="px-5 py-3">' + currency(x.totalDeductions) + '</td>' +
-                        '<td class="px-5 py-3 font-semibold">' + currency(x.totalNetPay) + '</td>' +
-                        '<td class="px-5 py-3">' + (x.status || 'Processed') + '</td>' +
-                        '</tr>';
-                }).join('');
-            })
-            .catch(function () {
-                payrollHistoryBody.innerHTML = '<tr><td colspan="7" class="px-5 py-8 text-center text-red-500">Failed to load payroll history.</td></tr>';
-            });
-    }
-
-    loadPayrollHistory();
+    window.generateQuickReport = function(reportTypeValue) {
+        var reportTypeSelect = document.getElementById('reportType');
+        
+        switch(reportTypeValue) {
+            case 'payroll': case 'bir': case 'statutory': case 'dept': case 'allowance': case '13th':
+                reportTypeSelect.value = 'AttendanceSummary';
+                renderReport('AttendanceSummary');
+                break;
+            default:
+                reportTypeSelect.value = 'AttendanceSummary';
+                renderReport('AttendanceSummary');
+        }
+    };
 })();
 </script>
 }

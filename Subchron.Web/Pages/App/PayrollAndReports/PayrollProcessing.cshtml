@@ -2,4 +2,1419 @@
 @model Subchron.Web.Pages.App.PayrollAndReports.PayrollProcessingModel
 @{
     ViewData["Title"] = "Payroll Processing";
+    ViewData["PageTitle"] = "Payroll Processing";
+    Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
 }
+
+<style>
+    .processing-card {
+        cursor: pointer;
+        border-radius: 1rem;
+        border: 2px solid rgb(226 232 240);
+        background: rgb(248 250 252);
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .processing-card:hover {
+        border-color: rgb(52 211 153);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.12);
+    }
+
+    .processing-card.active {
+        border-color: rgb(16 185 129);
+        background: rgb(236 253 245);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .processing-card.active .card-icon {
+        background: rgb(16 185 129);
+        color: white;
+    }
+
+    .card-icon {
+        display: flex;
+        height: 3.5rem;
+        width: 3.5rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        background: rgb(226 232 240);
+        color: rgb(71 85 105);
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgb(241 245 249);
+        padding: 0.75rem 0;
+    }
+
+    .summary-row:last-child {
+        border-bottom: 0;
+    }
+
+    .guide-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        background: rgb(248 250 252);
+        padding: 1rem;
+    }
+
+    .guide-step-number {
+        display: flex;
+        height: 2rem;
+        width: 2rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        background: rgb(209 250 229);
+        color: rgb(4 120 87);
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .checkbox-cell {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .custom-checkbox {
+        height: 1.25rem;
+        width: 1.25rem;
+        cursor: pointer;
+        border-radius: 0.25rem;
+        border: 2px solid rgb(203 213 225);
+        background: white;
+        transition: all 0.2s ease;
+        accent-color: rgb(16 185 129);
+    }
+
+    .employee-row:hover {
+        background: rgb(248 250 252);
+    }
+
+    .employee-row.selected {
+        background: rgb(236 253 245);
+    }
+
+    .dark .processing-card {
+        border-color: rgb(51 65 85);
+        background: rgb(30 41 59);
+    }
+
+    .dark .processing-card:hover,
+    .dark .processing-card.active {
+        border-color: rgb(16 185 129);
+    }
+
+    .dark .processing-card.active {
+        background: rgba(6, 78, 59, 0.45);
+    }
+
+    .dark .card-icon {
+        background: rgb(51 65 85);
+        color: rgb(203 213 225);
+    }
+
+    .dark .summary-row {
+        border-bottom-color: rgb(51 65 85);
+    }
+
+    .dark .guide-step {
+        border-color: rgb(51 65 85);
+        background: rgb(30 41 59);
+    }
+
+    .dark .guide-step-number {
+        background: rgba(16, 185, 129, 0.25);
+        color: rgb(110 231 183);
+    }
+
+    .dark .custom-checkbox {
+        border-color: rgb(71 85 105);
+        background: rgb(30 41 59);
+    }
+
+    .dark .employee-row:hover {
+        background: rgba(51, 65, 85, 0.4);
+    }
+
+    .dark .employee-row.selected {
+        background: rgba(6, 78, 59, 0.35);
+    }
+
+    .batch-payslip-row {
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        background: white;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .batch-payslip-row:hover {
+        border-color: rgb(16 185 129);
+        background: rgb(248 250 252);
+    }
+
+    .batch-payslip-row.active {
+        border-color: rgb(16 185 129);
+        background: rgb(236 253 245);
+        box-shadow: 0 6px 14px rgba(16, 185, 129, 0.14);
+    }
+
+    .dark .batch-payslip-row {
+        border-color: rgb(51 65 85);
+        background: rgb(30 41 59);
+    }
+
+    .dark .batch-payslip-row:hover {
+        border-color: rgb(16 185 129);
+        background: rgb(15 23 42);
+    }
+
+    .dark .batch-payslip-row.active {
+        border-color: rgb(16 185 129);
+        background: rgba(6, 78, 59, 0.35);
+    }
+</style>
+
+<div class="space-y-6">
+    @* ── TOP CARD: Payroll Rules Summary ── *@
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Payroll Configuration Rules</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Current organization payroll settings (read-only)</p>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-4">
+            @* Payment Cycle *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Payment Cycle</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">Semi-Monthly</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">1st-15th & 16th-EOM</p>
+            </div>
+
+            @* Work Hours *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Work Hours/Day</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">8 Hours</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Standard work day</p>
+            </div>
+
+            @* OT Policy *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">OT Policy</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">1.25x - 2.0x</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Regular + Holiday/Rest Day</p>
+            </div>
+
+            @* Compensation Basis *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Compensation</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">Monthly</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">PHP Currency</p>
+            </div>
+
+            @* 13th Month *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">13th Month</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">Basic Only</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Per DOLE guidelines</p>
+            </div>
+
+            @* Tax Settings *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tax & Statutory</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">BIR + SSS + PhilHealth</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">SSS 8.5% | PhilHealth 3% | Pag-IBIG 2%</p>
+            </div>
+
+            @* Night Differential *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Night Differential</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">10%</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">10PM - 6AM</p>
+            </div>
+
+            @* Lock Attendance *@
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <div class="mb-2 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Lock Attendance</span>
+                </div>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">Disabled</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Manual corrections allowed</p>
+            </div>
+        </div>
+    </div>
+
+    @* ── PROCESSING MODE CARDS ── *@
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div id="individualProcessingCard" class="processing-card active" onclick="switchProcessingMode('individual')">
+            <div class="flex items-center gap-4">
+                <div class="card-icon">
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Individual Processing</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Process payroll for a single employee</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="batchProcessingCard" class="processing-card" onclick="switchProcessingMode('batch')">
+            <div class="flex items-center gap-4">
+                <div class="card-icon">
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Batch Processing</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Process payroll for multiple employees</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── INDIVIDUAL PROCESSING SECTION ── *@
+    <div id="individualSection">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            @* Left: Employee Selection *@
+            <div class="lg:col-span-2">
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Select Employee</h3>
+                    </div>
+                    <div class="p-6">
+                        @* Search and Filters *@
+                        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="individualSearchInput" 
+                                       class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-700/30 dark:text-white"
+                                       placeholder="Search by name or employee ID...">
+                            </div>
+                            <select id="individualDepartmentFilter" 
+                                    class="h-10 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-700/30 dark:text-slate-300">
+                                <option value="">All Departments</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Sales">Sales</option>
+                                <option value="HR">Human Resources</option>
+                            </select>
+                            <select id="individualStatusFilter" 
+                                    class="h-10 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-700/30 dark:text-slate-300">
+                                <option value="">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="OnLeave">On Leave</option>
+                                <option value="Probation">Probation</option>
+                            </select>
+                        </div>
+
+                        @* Employee List *@
+                        <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                                <thead class="bg-slate-50 dark:bg-slate-700/30">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Employee</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Department</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Position</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Basic Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="individualEmployeeTable" class="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-800">
+                                    <tr class="employee-row cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="selectIndividualEmployee('1')">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">JD</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-001</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Engineering</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Software Engineer</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱45,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="selectIndividualEmployee('2')">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-400">AS</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Alice Smith</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-002</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Marketing</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Marketing Manager</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱55,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="selectIndividualEmployee('3')">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-sm font-bold text-purple-700 dark:bg-purple-900/50 dark:text-purple-400">RJ</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Robert Johnson</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-003</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Sales</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Sales Representative</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱35,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onclick="selectIndividualEmployee('4')">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700 dark:bg-orange-900/50 dark:text-orange-400">MW</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Maria Williams</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-004</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Human Resources</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">HR Coordinator</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400">On Leave</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱30,000.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Right: Payroll Summary *@
+            <div class="lg:col-span-1">
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sticky top-6">
+                    <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Payroll Summary</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" id="individualEmployeeName">Select an employee</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-700/30">
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Pay Period</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">March 1-15, 2026</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Work Days</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">15 days</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Regular Hours</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">120 hrs</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Earnings</h4>
+                            <div class="space-y-2">
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Basic Salary</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱22,500.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Overtime (5 hrs)</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱1,406.25</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Allowances</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱2,500.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Deductions</h4>
+                            <div class="space-y-2">
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">BIR Tax</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱2,450.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">SSS</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱800.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">PhilHealth</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱337.50</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Pag-IBIG</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱225.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-900/30">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">Net Pay</span>
+                                <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400">₱22,593.75</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openIndividualConfirmModal()" class="mt-4 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                            Process Payroll
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── BATCH PROCESSING SECTION (Hidden by default) ── *@
+    <div id="batchSection" class="hidden">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            @* Left: Multi-Employee Selection *@
+            <div class="lg:col-span-2">
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Select Employees</h3>
+                        <div class="flex items-center gap-3">
+                            <button onclick="selectAllEmployees()" class="text-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
+                                Select All
+                            </button>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">|</span>
+                            <span id="selectedCount" class="text-sm font-medium text-gray-900 dark:text-white">0 selected</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        @* Search and Filters *@
+                        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="batchSearchInput" 
+                                       class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-700/30 dark:text-white"
+                                       placeholder="Search by name or employee ID...">
+                            </div>
+                            <select id="batchDepartmentFilter" 
+                                    class="h-10 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-700/30 dark:text-slate-300">
+                                <option value="">All Departments</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Sales">Sales</option>
+                                <option value="HR">Human Resources</option>
+                            </select>
+                        </div>
+
+                        @* Employee List with Checkboxes *@
+                        <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                                <thead class="bg-slate-50 dark:bg-slate-700/30">
+                                    <tr>
+                                        <th class="w-12 px-4 py-3">
+                                            <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Employee</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Department</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Basic Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batchEmployeeTable" class="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-800">
+                                    <tr class="employee-row">
+                                        <td class="checkbox-cell px-4">
+                                            <input type="checkbox" class="custom-checkbox employee-checkbox" value="1" onchange="updateSelectedCount()">
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">JD</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-001</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Engineering</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱45,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row">
+                                        <td class="checkbox-cell px-4">
+                                            <input type="checkbox" class="custom-checkbox employee-checkbox" value="2" onchange="updateSelectedCount()">
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-400">AS</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Alice Smith</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-002</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Marketing</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱55,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row">
+                                        <td class="checkbox-cell px-4">
+                                            <input type="checkbox" class="custom-checkbox employee-checkbox" value="3" onchange="updateSelectedCount()">
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-sm font-bold text-purple-700 dark:bg-purple-900/50 dark:text-purple-400">RJ</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Robert Johnson</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-003</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Sales</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">Active</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱35,000.00</td>
+                                    </tr>
+                                    <tr class="employee-row">
+                                        <td class="checkbox-cell px-4">
+                                            <input type="checkbox" class="custom-checkbox employee-checkbox" value="4" onchange="updateSelectedCount()">
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700 dark:bg-orange-900/50 dark:text-orange-400">MW</div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Maria Williams</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">EMP-004</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">Human Resources</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400">On Leave</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">₱30,000.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Right: Batch Payroll Summary *@
+            <div class="lg:col-span-1">
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sticky top-6">
+                    <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Batch Payroll Summary</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">4 employees selected</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-700/30">
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Pay Period</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">March 1-15, 2026</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Total Employees</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">4</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Total Work Days</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">60 days</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Earnings</h4>
+                            <div class="space-y-2">
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Basic Salary</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱82,500.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Overtime</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱5,625.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Allowances</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱10,000.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Deductions</h4>
+                            <div class="space-y-2">
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">BIR Tax</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱9,800.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">SSS</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱3,200.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">PhilHealth</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱1,350.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Pag-IBIG</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">₱900.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-900/30">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">Total Net Pay</span>
+                                <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400">₱81,875.00</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openBatchConfirmModal()" class="mt-4 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                            Process Batch Payroll
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── PAYROLL CALCULATION GUIDE ── *@
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Payroll Calculation Guide</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Philippine labor law compliance and computation methodology</p>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
+            @* Step 1 *@
+            <div class="guide-step">
+                <span class="guide-step-number">1</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Basic Salary Calculation</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Monthly rate divided by number of working days in the pay period. For semi-monthly: divide by 15 or 16 days.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">₱45,000 ÷ 15 = ₱3,000/day</p>
+                </div>
+            </div>
+
+            @* Step 2 *@
+            <div class="guide-step">
+                <span class="guide-step-number">2</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Overtime Pay (OT)</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Per DOLE, overtime beyond 8 hours should be paid at least 25% above the regular rate.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Hourly Rate × 1.25 × OT Hours</p>
+                </div>
+            </div>
+
+            @* Step 3 *@
+            <div class="guide-step">
+                <span class="guide-step-number">3</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Holiday Pay</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Regular holidays (10/year) paid at 100%. Special holidays at 30% if worked.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Regular: 100% | Special: 30%</p>
+                </div>
+            </div>
+
+            @* Step 4 *@
+            <div class="guide-step">
+                <span class="guide-step-number">4</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Night Differential</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Employees working between 10PM to 6AM should receive at least 10% additional pay.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Hourly Rate × 0.10 × Night Hours</p>
+                </div>
+            </div>
+
+            @* Step 5 *@
+            <div class="guide-step">
+                <span class="guide-step-number">5</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Rest Day / Sunday Work</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">At least 30% additional pay for work on rest day when it's also a regular holiday.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Regular: +30% | w/ Holiday: +50%</p>
+                </div>
+            </div>
+
+            @* Step 6 *@
+            <div class="guide-step">
+                <span class="guide-step-number">6</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Statutory Deductions</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">SSS, PhilHealth, and Pag-IBIG contributions based on employee compensation bracket.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">BIR Tax Table (semi-monthly)</p>
+                </div>
+            </div>
+
+            @* Step 7 *@
+            <div class="guide-step">
+                <span class="guide-step-number">7</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">13th Month Pay</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Required under Presidential Decree No. 851. Must be given before December 24.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Total Basic Salary ÷ 12</p>
+                </div>
+            </div>
+
+            @* Step 8 *@
+            <div class="guide-step">
+                <span class="guide-step-number">8</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">SSS Loan Deduction</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Optional. SSS salary loan amortization based on approved loan amount and term.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Per amortization schedule</p>
+                </div>
+            </div>
+
+            @* Step 9 *@
+            <div class="guide-step">
+                <span class="guide-step-number">9</span>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Final Net Pay</h4>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Gross Pay minus all deductions equals the amount to be released to the employee.</p>
+                    <p class="mt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">Gross - Deductions = Net Pay</p>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-700/30">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                <span class="font-semibold">Reference:</span> 
+                DOLE Department Order No. s. 2020 (Simplified Pay Rules), 
+                Labor Code of the Philippines (Presidential Decree No. 442), 
+                BIR Tax Table 2023,
+                SSS Contribution Table,
+                PhilHealth Contribution Schedule,
+                Pag-IBIG Contribution Guidelines.
+            </p>
+        </div>
+    </div>
+</div>
+
+@* ── INDIVIDUAL CONFIRMATION MODAL ── *@
+<div id="individualConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="closeIndividualConfirmModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Confirm Payroll Processing</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Review payslip before processing</p>
+                    </div>
+                </div>
+                <button onclick="closeIndividualConfirmModal()" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="max-h-[60vh] overflow-y-auto p-6">
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-700/30">
+                    <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">JD</div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white">John Doe</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">EMP-001 | Engineering</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pay Period</p>
+                            <p class="text-base font-semibold text-gray-900 dark:text-white">March 1-15, 2026</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Earnings</h5>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Basic Salary</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱22,500.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Overtime (5 hrs &#64; 1.25x)</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱1,406.25</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Rice Allowance</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱1,500.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Transport Allowance</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱1,000.00</span>
+                                </div>
+                                <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-semibold dark:border-slate-600">
+                                    <span class="text-gray-900 dark:text-white">Gross Pay</span>
+                                    <span class="text-gray-900 dark:text-white">₱26,406.25</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Deductions</h5>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">BIR Withholding Tax</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱2,450.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">SSS Contribution</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱800.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">PhilHealth</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱337.50</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Pag-IBIG</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">₱225.00</span>
+                                </div>
+                                <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-semibold dark:border-slate-600">
+                                    <span class="text-gray-900 dark:text-white">Total Deductions</span>
+                                    <span class="text-gray-900 dark:text-white">₱3,812.50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-lg bg-emerald-50 p-4 dark:bg-emerald-900/30">
+                        <div class="flex items-center justify-between">
+                            <span class="text-base font-bold text-gray-900 dark:text-white">NET PAY</span>
+                            <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">₱22,593.75</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <button onclick="closeIndividualConfirmModal()" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-600">
+                    Cancel
+                </button>
+                <button onclick="processIndividualPayroll()" class="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                    Confirm & Process
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ── BATCH CONFIRMATION MODAL ── *@
+<div id="batchConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="closeBatchConfirmModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Confirm Batch Payroll Processing</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Review all employee payslips before processing</p>
+                    </div>
+                </div>
+                <button onclick="closeBatchConfirmModal()" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="max-h-[60vh] overflow-y-auto p-6">
+                <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                    <div class="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Employees</p>
+                            <p id="batchModalEmployeesCount" class="text-lg font-bold text-gray-900 dark:text-white">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Total Gross</p>
+                            <p id="batchModalGrossTotal" class="text-lg font-bold text-gray-900 dark:text-white">₱0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Total Deductions</p>
+                            <p id="batchModalDeductionTotal" class="text-lg font-bold text-gray-900 dark:text-white">₱0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Total Net Pay</p>
+                            <p id="batchModalNetTotal" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">₱0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+                    <div>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Selected Employees</h4>
+                        <div id="batchPayslipList" class="space-y-2"></div>
+                    </div>
+
+                    <div>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Full Payslip Review</h4>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-700/30">
+                            <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <div id="batchPayslipInitial" class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">--</div>
+                                    <div>
+                                        <h4 id="batchPayslipName" class="text-base font-bold text-gray-900 dark:text-white">Select an employee</h4>
+                                        <p id="batchPayslipMeta" class="text-sm text-gray-500 dark:text-gray-400">--</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Pay Period</p>
+                                    <p class="text-base font-semibold text-gray-900 dark:text-white">March 1-15, 2026</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                                <div>
+                                    <h5 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Earnings</h5>
+                                    <div id="batchPayslipEarnings" class="space-y-2"></div>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Deductions</h5>
+                                    <div id="batchPayslipDeductions" class="space-y-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 rounded-lg bg-emerald-50 p-4 dark:bg-emerald-900/30">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-base font-bold text-gray-900 dark:text-white">NET PAY</span>
+                                    <span id="batchPayslipNetPay" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">₱0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-700/30">
+                <button onclick="closeBatchConfirmModal()" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-600">
+                    Cancel
+                </button>
+                <button id="confirmBatchBtn" onclick="processBatchPayroll()" class="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                    Confirm & Process All (0)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentMode = 'individual';
+
+    // Individual Modal Functions
+    function openIndividualConfirmModal() {
+        document.getElementById('individualConfirmModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeIndividualConfirmModal() {
+        document.getElementById('individualConfirmModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function processIndividualPayroll() {
+        closeIndividualConfirmModal();
+        alert('Individual payroll processed successfully!');
+    }
+
+    const batchPayslipData = {
+        '1': {
+            id: '1',
+            initial: 'JD',
+            name: 'John Doe',
+            meta: 'EMP-001 | Engineering',
+            avatarClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400',
+            gross: 26406.25,
+            deductionsTotal: 3812.5,
+            net: 22593.75,
+            earnings: [
+                { label: 'Basic Salary', amount: 22500.00 },
+                { label: 'Overtime (5 hrs x 1.25)', amount: 1406.25 },
+                { label: 'Rice Allowance', amount: 1500.00 },
+                { label: 'Transport Allowance', amount: 1000.00 }
+            ],
+            deductions: [
+                { label: 'BIR Withholding Tax', amount: 2450.00 },
+                { label: 'SSS Contribution', amount: 800.00 },
+                { label: 'PhilHealth', amount: 337.50 },
+                { label: 'Pag-IBIG', amount: 225.00 }
+            ]
+        },
+        '2': {
+            id: '2',
+            initial: 'AS',
+            name: 'Alice Smith',
+            meta: 'EMP-002 | Marketing',
+            avatarClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400',
+            gross: 32062.5,
+            deductionsTotal: 4843.75,
+            net: 27218.75,
+            earnings: [
+                { label: 'Basic Salary', amount: 27500.00 },
+                { label: 'Overtime (6 hrs x 1.25)', amount: 2062.50 },
+                { label: 'Rice Allowance', amount: 1500.00 },
+                { label: 'Transport Allowance', amount: 1000.00 }
+            ],
+            deductions: [
+                { label: 'BIR Withholding Tax', amount: 3300.00 },
+                { label: 'SSS Contribution', amount: 900.00 },
+                { label: 'PhilHealth', amount: 393.75 },
+                { label: 'Pag-IBIG', amount: 250.00 }
+            ]
+        },
+        '3': {
+            id: '3',
+            initial: 'RJ',
+            name: 'Robert Johnson',
+            meta: 'EMP-003 | Sales',
+            avatarClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400',
+            gross: 24718.75,
+            deductionsTotal: 6750.00,
+            net: 17968.75,
+            earnings: [
+                { label: 'Basic Salary', amount: 17500.00 },
+                { label: 'Commission', amount: 5000.00 },
+                { label: 'OT (4 hrs x 1.25)', amount: 1218.75 },
+                { label: 'Transport Allowance', amount: 1000.00 }
+            ],
+            deductions: [
+                { label: 'BIR Withholding Tax', amount: 2950.00 },
+                { label: 'SSS Contribution', amount: 850.00 },
+                { label: 'PhilHealth', amount: 450.00 },
+                { label: 'Pag-IBIG', amount: 250.00 },
+                { label: 'Cash Advance Deduction', amount: 2250.00 }
+            ]
+        },
+        '4': {
+            id: '4',
+            initial: 'MW',
+            name: 'Maria Williams',
+            meta: 'EMP-004 | Human Resources',
+            avatarClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400',
+            gross: 22437.5,
+            deductionsTotal: 8343.75,
+            net: 14093.75,
+            earnings: [
+                { label: 'Basic Salary', amount: 15000.00 },
+                { label: 'Leave Adjustment', amount: -2500.00 },
+                { label: 'OT (3 hrs x 1.25)', amount: 937.50 },
+                { label: 'Allowances', amount: 9000.00 }
+            ],
+            deductions: [
+                { label: 'BIR Withholding Tax', amount: 1100.00 },
+                { label: 'SSS Contribution', amount: 650.00 },
+                { label: 'PhilHealth', amount: 168.75 },
+                { label: 'Pag-IBIG', amount: 175.00 },
+                { label: 'Loan Deduction', amount: 6250.00 }
+            ]
+        }
+    };
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP',
+            minimumFractionDigits: 2
+        }).format(value);
+    }
+
+    function renderBatchSummary(selectedEmployees) {
+        const grossTotal = selectedEmployees.reduce((sum, employee) => sum + employee.gross, 0);
+        const deductionTotal = selectedEmployees.reduce((sum, employee) => sum + employee.deductionsTotal, 0);
+        const netTotal = selectedEmployees.reduce((sum, employee) => sum + employee.net, 0);
+
+        document.getElementById('batchModalEmployeesCount').textContent = String(selectedEmployees.length);
+        document.getElementById('batchModalGrossTotal').textContent = formatCurrency(grossTotal);
+        document.getElementById('batchModalDeductionTotal').textContent = formatCurrency(deductionTotal);
+        document.getElementById('batchModalNetTotal').textContent = formatCurrency(netTotal);
+        document.getElementById('confirmBatchBtn').textContent = 'Confirm & Process All (' + selectedEmployees.length + ')';
+    }
+
+    function renderBatchPayslip(employee) {
+        const initial = document.getElementById('batchPayslipInitial');
+        initial.className = 'flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ' + employee.avatarClass;
+        initial.textContent = employee.initial;
+
+        document.getElementById('batchPayslipName').textContent = employee.name;
+        document.getElementById('batchPayslipMeta').textContent = employee.meta;
+        document.getElementById('batchPayslipNetPay').textContent = formatCurrency(employee.net);
+
+        const earningsHtml = employee.earnings
+            .map(entry => '<div class="flex justify-between text-sm"><span class="text-gray-600 dark:text-gray-400">' + entry.label + '</span><span class="font-medium text-gray-900 dark:text-white">' + formatCurrency(entry.amount) + '</span></div>')
+            .join('') +
+            '<div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-semibold dark:border-slate-600"><span class="text-gray-900 dark:text-white">Gross Pay</span><span class="text-gray-900 dark:text-white">' + formatCurrency(employee.gross) + '</span></div>';
+
+        const deductionsHtml = employee.deductions
+            .map(entry => '<div class="flex justify-between text-sm"><span class="text-gray-600 dark:text-gray-400">' + entry.label + '</span><span class="font-medium text-gray-900 dark:text-white">' + formatCurrency(entry.amount) + '</span></div>')
+            .join('') +
+            '<div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-semibold dark:border-slate-600"><span class="text-gray-900 dark:text-white">Total Deductions</span><span class="text-gray-900 dark:text-white">' + formatCurrency(employee.deductionsTotal) + '</span></div>';
+
+        document.getElementById('batchPayslipEarnings').innerHTML = earningsHtml;
+        document.getElementById('batchPayslipDeductions').innerHTML = deductionsHtml;
+    }
+
+    function selectBatchPayslip(employeeId) {
+        const listItems = document.querySelectorAll('[data-batch-payslip-row]');
+        listItems.forEach(item => item.classList.remove('active'));
+
+        const activeItem = document.querySelector('[data-batch-payslip-row="' + employeeId + '"]');
+        if (activeItem) {
+            activeItem.classList.add('active');
+        }
+
+        const employee = batchPayslipData[employeeId];
+        if (employee) {
+            renderBatchPayslip(employee);
+        }
+    }
+
+    function renderBatchPayslipList(selectedEmployees) {
+        const container = document.getElementById('batchPayslipList');
+        container.innerHTML = selectedEmployees
+            .map(employee => {
+                return '<button type="button" data-batch-payslip-row="' + employee.id + '" onclick="selectBatchPayslip(\'' + employee.id + '\')" class="batch-payslip-row w-full text-left">' +
+                    '<div class="flex items-center justify-between gap-3">' +
+                        '<div class="flex items-center gap-3">' +
+                            '<div class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ' + employee.avatarClass + '">' + employee.initial + '</div>' +
+                            '<div>' +
+                                '<p class="text-sm font-semibold text-gray-900 dark:text-white">' + employee.name + '</p>' +
+                                '<p class="text-xs text-gray-500 dark:text-gray-400">' + employee.meta + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="mt-3 grid grid-cols-3 gap-2 text-[11px]">' +
+                        '<p class="text-gray-500 dark:text-gray-400">Gross: <span class="font-semibold text-gray-700 dark:text-gray-200">' + formatCurrency(employee.gross) + '</span></p>' +
+                        '<p class="text-gray-500 dark:text-gray-400">Deductions: <span class="font-semibold text-gray-700 dark:text-gray-200">' + formatCurrency(employee.deductionsTotal) + '</span></p>' +
+                        '<p class="text-emerald-700 dark:text-emerald-400">Net: <span class="font-semibold">' + formatCurrency(employee.net) + '</span></p>' +
+                    '</div>' +
+                '</button>';
+            })
+            .join('');
+
+        if (selectedEmployees.length > 0) {
+            selectBatchPayslip(selectedEmployees[0].id);
+        }
+    }
+
+    // Batch Modal Functions
+    function openBatchConfirmModal() {
+        const selectedEmployeeIds = Array.from(document.querySelectorAll('.employee-checkbox:checked')).map(checkbox => checkbox.value);
+        if (selectedEmployeeIds.length === 0) {
+            alert('Please select at least one employee to process.');
+            return;
+        }
+
+        const selectedEmployees = selectedEmployeeIds
+            .map(id => batchPayslipData[id])
+            .filter(Boolean);
+
+        renderBatchSummary(selectedEmployees);
+        renderBatchPayslipList(selectedEmployees);
+
+        document.getElementById('batchConfirmModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeBatchConfirmModal() {
+        document.getElementById('batchConfirmModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function processBatchPayroll() {
+        closeBatchConfirmModal();
+        const checkboxes = document.querySelectorAll('.employee-checkbox:checked');
+        alert('Batch payroll processed for ' + checkboxes.length + ' employees successfully!');
+    }
+
+    function switchProcessingMode(mode) {
+        currentMode = mode;
+        
+        const individualCard = document.getElementById('individualProcessingCard');
+        const batchCard = document.getElementById('batchProcessingCard');
+        const individualSection = document.getElementById('individualSection');
+        const batchSection = document.getElementById('batchSection');
+
+        if (mode === 'individual') {
+            individualCard.classList.add('active');
+            batchCard.classList.remove('active');
+            individualSection.classList.remove('hidden');
+            batchSection.classList.add('hidden');
+        } else {
+            individualCard.classList.remove('active');
+            batchCard.classList.add('active');
+            individualSection.classList.add('hidden');
+            batchSection.classList.remove('hidden');
+        }
+    }
+
+    function selectIndividualEmployee(id) {
+        const rows = document.querySelectorAll('#individualEmployeeTable .employee-row');
+        rows.forEach(row => row.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        
+        const name = event.currentTarget.querySelector('.text-sm.font-medium').textContent;
+        document.getElementById('individualEmployeeName').textContent = name;
+    }
+
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('.employee-checkbox:checked');
+        document.getElementById('selectedCount').textContent = checkboxes.length + ' selected';
+    }
+
+    function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const checkboxes = document.querySelectorAll('.employee-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        updateSelectedCount();
+    }
+
+    function selectAllEmployees() {
+        const checkboxes = document.querySelectorAll('.employee-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        document.getElementById('selectAllCheckbox').checked = !allChecked;
+        updateSelectedCount();
+    }
+
+    // Search functionality for individual
+    document.getElementById('individualSearchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#individualEmployeeTable .employee-row');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Search functionality for batch
+    document.getElementById('batchSearchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#batchEmployeeTable .employee-row');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Department filter for individual
+    document.getElementById('individualDepartmentFilter').addEventListener('change', function(e) {
+        const dept = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#individualEmployeeTable .employee-row');
+        rows.forEach(row => {
+            if (!dept) {
+                row.style.display = '';
+            } else {
+                row.style.display = row.textContent.toLowerCase().includes(dept) ? '' : 'none';
+            }
+        });
+    });
+
+    // Department filter for batch
+    document.getElementById('batchDepartmentFilter').addEventListener('change', function(e) {
+        const dept = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#batchEmployeeTable .employee-row');
+        rows.forEach(row => {
+            if (!dept) {
+                row.style.display = '';
+            } else {
+                row.style.display = row.textContent.toLowerCase().includes(dept) ? '' : 'none';
+            }
+        });
+    });
+</script>
