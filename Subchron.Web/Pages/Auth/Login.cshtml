@@ -1,4 +1,4 @@
-@page
+﻿@page
 @model LoginModel
 @{
     ViewData["Title"] = "Login";
@@ -46,7 +46,7 @@
 
                     <div class="relative">
                         <input id="password" name="password" type="password" autocomplete="current-password" required
-                               placeholder="••••••••"
+                               placeholder="Enter your password"
                                class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pe-12 text-sm text-slate-900 shadow-sm
                                       transition outline-none placeholder:text-slate-400
                                       focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/30
@@ -84,14 +84,9 @@
                     </a>
                 </div>
 
-                <!-- reCAPTCHA v2 -->
+                <!-- reCAPTCHA v2 (explicit render in script â€” do not use g-recaptcha class here) -->
                 <div id="recaptchaWrapper" class="mt-4 mb-2 hidden">
-                    <div id="recaptcha-container"
-                         class="g-recaptcha"
-                         data-sitekey="@Model.RecaptchaSiteKey"
-                         data-size="normal"
-                         style="transform:scale(.9); transform-origin:0 0;">
-                    </div>
+                    <div id="recaptcha-container" style="transform:scale(.9); transform-origin:0 0;"></div>
                 </div>
 
                 <button type="submit" id="submitBtn"
@@ -186,8 +181,14 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
 }
 
 <script>
-    const apiBaseUrl = '@Model.ApiBaseUrl';
+    const loginHandlerUrl = '@Model.LoginHandlerUrl';
     const recaptchaSiteKey = '@Model.RecaptchaSiteKey';
+    const initialLoginError = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LoginErrorMessage ?? ""));
+
+    function loginHandler(name) {
+        const sep = loginHandlerUrl.includes('?') ? '&' : '?';
+        return `${loginHandlerUrl}${sep}handler=${encodeURIComponent(name)}`;
+    }
 
     // When set, we came from external login and must use verify-external-totp (no password).
     let externalTotpIntentToken = (function() {
@@ -206,11 +207,12 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
     // Track if captcha is currently required and rendered
     let captchaRequired = false;
     let captchaRendered = false;
+    let recaptchaWidgetId = null;
 
     // Check if captcha is required on page load
     async function checkCaptchaRequired() {
         try {
-            const res = await fetch(`${apiBaseUrl}/api/auth/captcha-required`);
+            const res = await fetch(loginHandler('CaptchaRequired'));
             const data = await res.json();
             if (data.required) {
                 showRecaptcha();
@@ -240,8 +242,8 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         if (captchaRendered) return;
 
         try {
-            grecaptcha.render('recaptcha-container', {
-                'sitekey': recaptchaSiteKey
+            recaptchaWidgetId = grecaptcha.render('recaptcha-container', {
+                sitekey: recaptchaSiteKey
             });
             captchaRendered = true;
         } catch (e) {
@@ -256,18 +258,111 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         }
     }
 
+    const LOCKOUT_STORAGE_KEY = 'subchron_login_lockout';
+
+    function clearLockoutTimer() {
+        if (window.lockoutTimer) {
+            clearInterval(window.lockoutTimer);
+            window.lockoutTimer = null;
+        }
+    }
+
     // Show inline error below Sign In button
     function showError(message) {
+        clearLockoutTimer();
         const errorEl = document.getElementById('loginError');
         const errorText = document.getElementById('loginErrorText');
         errorText.textContent = message || 'Invalid credentials';
         errorEl.classList.remove('hidden');
     }
 
-    // Hide error
     function hideError() {
         const errorEl = document.getElementById('loginError');
         errorEl.classList.add('hidden');
+    }
+
+    function formatLockoutClock(totalSeconds) {
+        const s = Math.max(0, Math.ceil(totalSeconds));
+        if (s >= 3600) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            return m > 0 ? `${h}h ${m}m` : `${h}h`;
+        }
+        const minutes = Math.floor(s / 60);
+        const seconds = s % 60;
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function lockoutMessage(remaining, isExtended) {
+        const clock = formatLockoutClock(remaining);
+        return isExtended
+            ? `Account locked. Try again in ${clock}.`
+            : `Too many attempts. Try again in ${clock}.`;
+    }
+
+    function persistLockout(email, seconds, isExtended) {
+        try {
+            sessionStorage.setItem(LOCKOUT_STORAGE_KEY, JSON.stringify({
+                email,
+                until: Date.now() + Math.ceil(seconds) * 1000,
+                isExtended: !!isExtended
+            }));
+        } catch (_) { /* ignore */ }
+    }
+
+    function clearPersistedLockout() {
+        try { sessionStorage.removeItem(LOCKOUT_STORAGE_KEY); } catch (_) { /* ignore */ }
+    }
+
+    function restoreLockoutFromStorage() {
+        try {
+            const raw = sessionStorage.getItem(LOCKOUT_STORAGE_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            const email = (document.getElementById('email')?.value || '').trim().toLowerCase();
+            if (!data?.until || data.email !== email) return;
+            const remaining = Math.ceil((data.until - Date.now()) / 1000);
+            if (remaining > 0) showLockout(remaining, !!data.isExtended);
+            else clearPersistedLockout();
+        } catch (_) { /* ignore */ }
+    }
+
+    function showLockout(seconds, isExtended) {
+        if (typeof seconds !== 'number' || seconds <= 0) {
+            showError('Too many attempts. Please try again later.');
+            setLoginDisabled(true);
+            return;
+        }
+
+        const email = (document.getElementById('email')?.value || '').trim().toLowerCase();
+        if (email) persistLockout(email, seconds, isExtended);
+
+        let remaining = Math.ceil(seconds);
+        const tick = () => showError(lockoutMessage(remaining, isExtended));
+
+        tick();
+        setLoginDisabled(true);
+        clearLockoutTimer();
+        window.lockoutTimer = setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearLockoutTimer();
+                clearPersistedLockout();
+                hideError();
+                setLoginDisabled(false);
+                return;
+            }
+            tick();
+        }, 1000);
+    }
+
+    function setLoginDisabled(disabled) {
+        const btn = document.getElementById('submitBtn');
+        if (btn) btn.disabled = !!disabled;
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        if (email) email.disabled = !!disabled;
+        if (password) password.disabled = !!disabled;
     }
 
     // Set loading state - shows spinner only when processing, hides when done
@@ -283,7 +378,7 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         }
     }
 
-    // ── STEP 1: credentials → API login ──────────────────────────
+    // â”€â”€ STEP 1: credentials â†’ API login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function handleLogin(e) {
         e.preventDefault();
         hideError();
@@ -304,7 +399,7 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         setLoading(true);
 
         try {
-            const res = await fetch(`${apiBaseUrl}/api/auth/login`, {
+            const res = await fetch(loginHandler('Login'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -323,16 +418,20 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
                 }
 
                 // Reset reCAPTCHA on failure if it's showing
-                if (captchaRequired && typeof grecaptcha !== 'undefined') {
-                    grecaptcha.reset();
+                if (captchaRequired && typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+                    grecaptcha.reset(recaptchaWidgetId);
                 }
 
-                showError(data.message || 'Invalid credentials');
+                if (data.isLocked || data.lockoutSecondsRemaining) {
+                    showLockout(data.lockoutSecondsRemaining, data.isExtendedLockout);
+                } else {
+                    showError(data.message || 'Invalid credentials');
+                }
                 setLoading(false);
                 return false;
             }
 
-            // Account requires TOTP → show Step 2
+            // Account requires TOTP â†’ show Step 2
             if (data.requiresTotp) {
                 document.getElementById('loginStep').classList.add('hidden');
                 document.getElementById('totpStep').classList.remove('hidden');
@@ -348,21 +447,21 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
                 return false;
             }
 
-            // No TOTP → complete login immediately
+            // No TOTP â†’ complete login immediately
             await completeLogin(data.userId, data.orgId, data.role, data.name, data.token, data.orgName);
         } catch (error) {
             // Reset reCAPTCHA on error if showing
-            if (captchaRequired && typeof grecaptcha !== 'undefined') {
-                grecaptcha.reset();
+            if (captchaRequired && typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+                grecaptcha.reset(recaptchaWidgetId);
             }
-            showError('Network error. Please check your connection and try again.');
+            showError('Sign-in request failed. Check that Subchron.API is running, then try again.');
             setLoading(false);
         }
 
         return false;
     }
 
-    // ── STEP 2: TOTP verification ────────────────────────────────
+    // â”€â”€ STEP 2: TOTP verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function verifyTotp(e) {
         e.preventDefault();
 
@@ -381,18 +480,18 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         var totpBtnText = document.getElementById('totpVerifyBtnText');
         if (totpBtn) { totpBtn.disabled = true; }
         if (totpSpinner) totpSpinner.classList.remove('hidden');
-        if (totpBtnText) totpBtnText.textContent = 'Verifying…';
+        if (totpBtnText) totpBtnText.textContent = 'Verifyingâ€¦';
         if (err) err.classList.add('hidden');
 
         let res, data;
         if (externalTotpIntentToken) {
-            res = await fetch(`${apiBaseUrl}/api/auth/verify-external-totp`, {
+            res = await fetch(loginHandler('VerifyExternalTotp'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ totpIntentToken: externalTotpIntentToken, totpCode: code })
             });
         } else {
-            res = await fetch(`${apiBaseUrl}/api/auth/verify-totp`, {
+            res = await fetch(loginHandler('VerifyTotp'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -417,7 +516,7 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         return false;
     }
 
-    // ── Set cookie session via Razor Page handler ────────────────
+    // â”€â”€ Set cookie session via Razor Page handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function completeLogin(userId, orgId, role, name, token, orgName) {
         const res = await fetch('/Auth/CompleteLogin', {
             method: 'POST',
@@ -455,7 +554,7 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         document.getElementById('password')?.focus();
     }
 
-    // ── Recovery UI ──────────────────────────────────────────────
+    // â”€â”€ Recovery UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function openRecovery() {
         document.getElementById('totpEntry')?.classList.add('hidden');
         document.getElementById('recoveryPanel')?.classList.remove('hidden');
@@ -496,17 +595,17 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         var recBtnText = document.getElementById('recoveryVerifyBtnText');
         if (recBtn) recBtn.disabled = true;
         if (recSpinner) recSpinner.classList.remove('hidden');
-        if (recBtnText) recBtnText.textContent = 'Verifying…';
+        if (recBtnText) recBtnText.textContent = 'Verifyingâ€¦';
 
         var res, data;
         if (externalTotpIntentToken) {
-            res = await fetch(`${apiBaseUrl}/api/auth/verify-external-recovery`, {
+            res = await fetch(loginHandler('VerifyExternalRecovery'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ totpIntentToken: externalTotpIntentToken, recoveryCode: code })
             });
         } else {
-            res = await fetch(`${apiBaseUrl}/api/auth/verify-recovery`, {
+            res = await fetch(loginHandler('VerifyRecovery'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -557,8 +656,11 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
         }
     }
 
-    // Clear error when user starts typing
-    document.getElementById('email')?.addEventListener('input', hideError);
+    // Clear error when user starts typing (lockout panel stays until timer ends)
+    document.getElementById('email')?.addEventListener('input', function() {
+        hideError();
+        restoreLockoutFromStorage();
+    });
     document.getElementById('password')?.addEventListener('input', hideError);
 
     // Prevent browser from caching this page
@@ -570,7 +672,14 @@ d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.7
 
     // Check if captcha is required on page load
     document.addEventListener('DOMContentLoaded', function() {
+        if (initialLoginError) {
+            showError(initialLoginError);
+        }
         checkCaptchaRequired();
+        restoreLockoutFromStorage();
+        if (!window.lockoutTimer) {
+            setLoginDisabled(false);
+        }
         if (externalTotpIntentToken) {
             document.getElementById('loginStep').classList.add('hidden');
             document.getElementById('totpStep').classList.remove('hidden');

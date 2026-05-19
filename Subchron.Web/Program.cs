@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Subchron.Web.Infrastructure;
 using Subchron.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,13 +75,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EmployeeOnly", p => p.RequireRole("Employee"));
 });
 
-// Named HttpClient to call API
-builder.Services.AddHttpClient("Subchron.API", client =>
-{
-    var api = (builder.Configuration["ApiBaseUrl"] ?? "").TrimEnd('/');
-    if (!string.IsNullOrWhiteSpace(api))
-        client.BaseAddress = new Uri(api + "/");
-});
+builder.Services.AddSubchronApiHttpClient(builder.Configuration, builder.Environment);
+builder.Services.AddScoped<AuthApiForwarder>();
 
 builder.Services.AddScoped<LayoutBrandingService>();
 
@@ -101,7 +97,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// In Development: show friendly message when API (localhost:7077) is not running
+// In Development: show friendly message when the API (see ApiBaseUrl) is not running
 if (app.Environment.IsDevelopment())
 {
     app.Use(async (ctx, next) =>
@@ -114,13 +110,14 @@ if (app.Environment.IsDevelopment())
         {
             if (ctx.Response.HasStarted) throw;
             var isRefused = ex.Message.Contains("refused", StringComparison.OrdinalIgnoreCase) ||
-                            ex.Message.Contains("7077", StringComparison.OrdinalIgnoreCase);
+                            ex.Message.Contains("7077", StringComparison.OrdinalIgnoreCase) ||
+                            ex.Message.Contains("5058", StringComparison.OrdinalIgnoreCase);
             var isConnectionError = ex is HttpRequestException || ex is System.Net.Sockets.SocketException;
             if (isConnectionError && isRefused)
             {
                 ctx.Response.StatusCode = 503;
                 ctx.Response.ContentType = "text/html; charset=utf-8";
-                var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7077";
+                var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5058";
                 await ctx.Response.WriteAsync($$"""
                     <!DOCTYPE html>
                     <html>

@@ -22,5 +22,11 @@ namespace Subchron.API.Models.Auth
 
         // reCAPTCHA - indicates if captcha is now required for next attempt
         public bool RequiresCaptcha { get; set; }
+
+        // Lockout
+        public bool IsLocked { get; set; }
+        public int? LockoutSecondsRemaining { get; set; }
+        /// <summary>True when lockout is 15 hours (repeated failures); false for the 1-minute lockout.</summary>
+        public bool IsExtendedLockout { get; set; }
     }
 }

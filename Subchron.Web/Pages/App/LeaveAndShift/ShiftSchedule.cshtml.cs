@@ -27,13 +27,13 @@ public class ShiftScheduleModel : PageModel
 
     public string ApiBaseUrl => (_config["ApiBaseUrl"] ?? "").TrimEnd('/');
 
-    private async Task<HttpClient> GetApiClientAsync()
+    private Task<HttpClient> GetApiClientAsync()
     {
         var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
         var client = _http.CreateClient("Subchron.API");
         if (!string.IsNullOrEmpty(token))
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        return client;
+        return Task.FromResult(client);
     }
 
     public async Task<IActionResult> OnGetShiftsAsync(DateTime? from, DateTime? to, int? departmentId, int? empId)

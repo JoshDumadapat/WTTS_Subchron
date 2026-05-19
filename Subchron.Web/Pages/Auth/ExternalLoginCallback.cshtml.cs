@@ -11,10 +11,12 @@ namespace Subchron.Web.Pages.Auth;
 public class ExternalLoginCallbackModel : PageModel
 {
     private readonly IHttpClientFactory _http;
+    private readonly IConfiguration _config;
 
-    public ExternalLoginCallbackModel(IHttpClientFactory http)
+    public ExternalLoginCallbackModel(IHttpClientFactory http, IConfiguration config)
     {
         _http = http;
+        _config = config;
     }
 
     public record ExternalLoginResponse(
@@ -50,14 +52,31 @@ public class ExternalLoginCallbackModel : PageModel
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(externalId))
             return RedirectToPage("/Auth/AccessDenied");
 
-        var client = _http.CreateClient("Subchron.API");
-        var resp = await client.PostAsJsonAsync("/api/auth/external-login", new
+        HttpResponseMessage resp;
+        try
         {
-            provider = "Google",
-            externalId,
-            email,
-            name
-        });
+            var client = _http.CreateClient("Subchron.API");
+            resp = await client.PostAsJsonAsync("/api/auth/external-login", new
+            {
+                provider = "Google",
+                externalId,
+                email,
+                name
+            });
+        }
+        catch (HttpRequestException)
+        {
+            var apiUrl = (_config["ApiBaseUrl"] ?? "").Trim().TrimEnd('/');
+            TempData["LoginError"] = string.IsNullOrEmpty(apiUrl)
+                ? "Could not reach the Subchron API. Set ApiBaseUrl in appsettings (e.g. http://localhost:5058) and start the Subchron.API project."
+                : $"Could not reach the API at {apiUrl}. Start Subchron.API first (HTTP port 5058, or https://localhost:7077 with the HTTPS launch profile), then try again.";
+            return RedirectToPage("/Auth/Login");
+        }
+        catch (TaskCanceledException)
+        {
+            TempData["LoginError"] = "The sign-in request timed out. Check that Subchron.API is running and reachable.";
+            return RedirectToPage("/Auth/Login");
+        }
 
         if (!resp.IsSuccessStatusCode)
         {
@@ -90,13 +109,14 @@ public class ExternalLoginCallbackModel : PageModel
                 TempData["TotpIntentEmail"] = data.Email ?? email;
                 return RedirectToPage("/Auth/Login", new { step = "totp" });
             }
+            if (!string.IsNullOrWhiteSpace(data.Token))
+                TempData[CompleteLoginModel.TempDataAccessTokenKey] = data.Token;
             return RedirectToPage("/Auth/CompleteLogin", new
             {
                 userId = data.UserId,
                 orgId = data.OrgId,
                 role = data.Role,
                 name = data.Name ?? name,
-                token = data.Token,
                 orgName = data.OrgName
             });
         }

@@ -41,6 +41,9 @@ public class AuthController : ControllerBase
     private static readonly ConcurrentDictionary<string, (int Count, DateTime LastAttempt)> _forgotPasswordAttempts = new();
 
     private const int MaxAttemptsBeforeCaptcha = 3;
+    private const int MaxAttemptsBeforeFirstLockout = 5;
+    private static readonly TimeSpan FirstLockoutDuration = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan SecondLockoutDuration = TimeSpan.FromHours(15);
     private static readonly TimeSpan LoginAttemptWindow = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan ForgotPasswordAttemptWindow = TimeSpan.FromMinutes(5);
 
@@ -177,12 +180,34 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(user.Password))
         {
             RecordLoginAttempt(ip);
-            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "No password (external account)");
+            var lockoutSeconds = await RecordUserFailedLoginAsync(user.UserID, user.OrgID, "No password (external account)");
             return Unauthorized(new LoginResponse
             {
                 Ok = false,
-                Message = "Invalid email or password.",
-                RequiresCaptcha = IsLoginCaptchaRequired(ip)
+                Message = lockoutSeconds.HasValue
+                    ? BuildLockoutMessage(lockoutSeconds.Value)
+                    : "Invalid email or password.",
+                RequiresCaptcha = IsLoginCaptchaRequired(ip),
+                IsLocked = lockoutSeconds.HasValue,
+                LockoutSecondsRemaining = lockoutSeconds,
+                IsExtendedLockout = lockoutSeconds > 3600
+            });
+        }
+
+        if (IsUserLockedOut(user))
+        {
+            if (user.OrgID.HasValue)
+                await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Locked out");
+            else
+                await SafeLogPlatformAuthEventAsync("LoginFailed", "User", user.UserID, "Locked out");
+            return Unauthorized(new LoginResponse
+            {
+                Ok = false,
+                Message = BuildLockoutMessage(user),
+                RequiresCaptcha = captchaRequired,
+                IsLocked = true,
+                LockoutSecondsRemaining = GetLockoutSecondsRemaining(user),
+                IsExtendedLockout = user.FailedLoginBatch >= 2
             });
         }
 
@@ -190,14 +215,19 @@ public class AuthController : ControllerBase
         if (!BCrypt.Net.BCrypt.Verify(req.Password ?? "", user.Password))
         {
             RecordLoginAttempt(ip);
-            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Invalid password");
+            var lockoutSeconds = await RecordUserFailedLoginAsync(user.UserID, user.OrgID, "Invalid password");
             var nowRequiresCaptcha = IsLoginCaptchaRequired(ip);
 
             return Unauthorized(new LoginResponse
             {
                 Ok = false,
-                Message = "Invalid email or password.",
-                RequiresCaptcha = nowRequiresCaptcha
+                Message = lockoutSeconds.HasValue
+                    ? BuildLockoutMessage(lockoutSeconds.Value)
+                    : "Invalid email or password.",
+                RequiresCaptcha = nowRequiresCaptcha,
+                IsLocked = lockoutSeconds.HasValue,
+                LockoutSecondsRemaining = lockoutSeconds,
+                IsExtendedLockout = lockoutSeconds > 3600
             });
         }
 
@@ -205,17 +235,23 @@ public class AuthController : ControllerBase
         if (tempAccess is not null && tempAccess.ExpiresAt < DateTime.UtcNow)
         {
             RecordLoginAttempt(ip);
-            await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Temporary password expired");
+            var lockoutSeconds = await RecordUserFailedLoginAsync(user.UserID, user.OrgID, "Temporary password expired");
             return Unauthorized(new LoginResponse
             {
                 Ok = false,
-                Message = "Temporary password expired. Ask your admin to reissue temporary access.",
-                RequiresCaptcha = IsLoginCaptchaRequired(ip)
+                Message = lockoutSeconds.HasValue
+                    ? BuildLockoutMessage(lockoutSeconds.Value)
+                    : "Temporary password expired. Ask your admin to reissue temporary access.",
+                RequiresCaptcha = IsLoginCaptchaRequired(ip),
+                IsLocked = lockoutSeconds.HasValue,
+                LockoutSecondsRemaining = lockoutSeconds,
+                IsExtendedLockout = lockoutSeconds > 3600
             });
         }
 
         // Success - clear failed attempts for this IP
         ClearLoginAttempts(ip);
+        _ = ResetUserLoginFailureAsync(user.UserID);
 
         // TOTP required?
         if (user.TotpEnabled)
@@ -231,6 +267,7 @@ public class AuthController : ControllerBase
 
         // Update last login and audit
         _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
         await SafeLogTenantAuthEventAsync(user, "Login", "Success");
 
         // Use linked Employee's Role for token/redirect
@@ -1129,6 +1166,8 @@ public class AuthController : ControllerBase
         string? orgName = null;
         if (user.OrgID.HasValue)
             orgName = await _db.Organizations.AsNoTracking().Where(o => o.OrgID == user.OrgID.Value).Select(o => o.OrgName).FirstOrDefaultAsync();
+        _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
         var token = _jwt.CreateToken(user, roleString);
 
         return Ok(new ExternalLoginResponse
@@ -1167,6 +1206,7 @@ public class AuthController : ControllerBase
             return BadRequest(new { ok = false, message = "Invalid authentication code." });
 
         _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
         string? orgName = null;
         if (user.OrgID.HasValue)
@@ -1315,8 +1355,34 @@ public class AuthController : ControllerBase
         if (user is null || !user.IsActive)
             return Unauthorized(new { ok = false, message = "Invalid email or password." });
 
+        if (IsUserLockedOut(user))
+        {
+            if (user.OrgID.HasValue)
+                await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Locked out");
+            else
+                await SafeLogPlatformAuthEventAsync("LoginFailed", "User", user.UserID, "Locked out");
+            return Unauthorized(new
+            {
+                ok = false,
+                message = "Account temporarily locked. Please try again later.",
+                isLocked = true,
+                lockoutSecondsRemaining = GetLockoutSecondsRemaining(user)
+            });
+        }
+
         if (string.IsNullOrEmpty(user.Password) || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-            return Unauthorized(new { ok = false, message = "Invalid email or password." });
+        {
+            var lockoutSeconds = await RecordUserFailedLoginAsync(user.UserID, user.OrgID, "Invalid password");
+            return Unauthorized(new
+            {
+                ok = false,
+                message = lockoutSeconds.HasValue
+                    ? "Account temporarily locked. Please try again later."
+                    : "Invalid email or password.",
+                isLocked = lockoutSeconds.HasValue,
+                lockoutSecondsRemaining = lockoutSeconds
+            });
+        }
 
         if (!user.TotpEnabled || user.TotpSecret is null)
             return BadRequest(new { ok = false, message = "2FA is not enabled." });
@@ -1327,6 +1393,7 @@ public class AuthController : ControllerBase
             return BadRequest(new { ok = false, message = "Invalid authentication code." });
 
         _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
 
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
         string? orgName = null;
@@ -1367,8 +1434,34 @@ public class AuthController : ControllerBase
         if (user is null || !user.IsActive)
             return Unauthorized(new { ok = false, message = "Invalid email or password." });
 
+        if (IsUserLockedOut(user))
+        {
+            if (user.OrgID.HasValue)
+                await SafeLogTenantAuthEventAsync(user, "LoginFailed", "Locked out");
+            else
+                await SafeLogPlatformAuthEventAsync("LoginFailed", "User", user.UserID, "Locked out");
+            return Unauthorized(new
+            {
+                ok = false,
+                message = "Account temporarily locked. Please try again later.",
+                isLocked = true,
+                lockoutSecondsRemaining = GetLockoutSecondsRemaining(user)
+            });
+        }
+
         if (string.IsNullOrEmpty(user.Password) || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-            return Unauthorized(new { ok = false, message = "Invalid email or password." });
+        {
+            var lockoutSeconds = await RecordUserFailedLoginAsync(user.UserID, user.OrgID, "Invalid password");
+            return Unauthorized(new
+            {
+                ok = false,
+                message = lockoutSeconds.HasValue
+                    ? "Account temporarily locked. Please try again later."
+                    : "Invalid email or password.",
+                isLocked = lockoutSeconds.HasValue,
+                lockoutSecondsRemaining = lockoutSeconds
+            });
+        }
 
         if (!user.TotpEnabled)
             return BadRequest(new { ok = false, message = "2FA is not enabled." });
@@ -1387,6 +1480,7 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
 
         _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
 
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
         string? orgName = null;
@@ -1443,6 +1537,7 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
 
         _ = UpdateLastLoginAsync(user.UserID);
+        _ = ResetIdleLockStateAsync(user.UserID);
         var roleString = await GetEffectiveRoleForUserAsync(user.UserID) ?? user.Role.ToString();
         string? orgName = null;
         if (user.OrgID.HasValue)
@@ -2149,6 +2244,122 @@ public class AuthController : ControllerBase
             dict.TryRemove(key, out _);
     }
 
+    private bool IsUserLockedOut(User user)
+    {
+        if (user.LoginLockoutUntil.HasValue && user.LoginLockoutUntil.Value > DateTime.UtcNow)
+            return true;
+        return false;
+    }
+
+    private int? GetLockoutSecondsRemaining(User user)
+    {
+        if (!user.LoginLockoutUntil.HasValue)
+            return null;
+        var remaining = user.LoginLockoutUntil.Value - DateTime.UtcNow;
+        if (remaining <= TimeSpan.Zero)
+            return null;
+        return (int)Math.Ceiling(remaining.TotalSeconds);
+    }
+
+    private static string BuildLockoutMessage(User user)
+    {
+        var seconds = user.LoginLockoutUntil.HasValue
+            ? (int)Math.Ceiling((user.LoginLockoutUntil.Value - DateTime.UtcNow).TotalSeconds)
+            : 0;
+        return seconds > 0 ? BuildLockoutMessage(seconds) : "Account temporarily locked.";
+    }
+
+    private static string BuildLockoutMessage(int lockoutSecondsRemaining) =>
+        lockoutSecondsRemaining > 3600
+            ? "Too many attempts. Account locked."
+            : "Too many attempts. Try again shortly.";
+
+    private async Task<int?> RecordUserFailedLoginAsync(int userId, int? orgId, string reason)
+    {
+        var now = DateTime.UtcNow;
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.UserID == userId);
+        if (user is null)
+            return null;
+
+        var lastAt = user.FailedLoginLastAt;
+        if (lastAt.HasValue && now - lastAt.Value > LoginAttemptWindow)
+        {
+            user.FailedLoginCount = 0;
+            user.FailedLoginBatch = 0;
+            user.LoginLockoutUntil = null;
+        }
+
+        user.FailedLoginCount += 1;
+        user.FailedLoginLastAt = now;
+
+        int? lockoutSeconds = null;
+        if (user.FailedLoginCount >= MaxAttemptsBeforeFirstLockout)
+        {
+            user.FailedLoginBatch += 1;
+            user.FailedLoginCount = 0;
+
+            var lockoutDuration = user.FailedLoginBatch >= 2
+                ? SecondLockoutDuration
+                : FirstLockoutDuration;
+
+            user.LoginLockoutUntil = now.Add(lockoutDuration);
+            lockoutSeconds = (int)Math.Ceiling(lockoutDuration.TotalSeconds);
+
+            if (user.FailedLoginBatch >= 2)
+            {
+                _ = Task.Run(async () => await SendLoginAttemptAlertEmailAsync(user.Email));
+            }
+        }
+
+        await _db.SaveChangesAsync();
+
+        if (orgId.HasValue)
+        {
+            await SafeLogTenantAuthEventAsync(user, "LoginFailed", reason);
+        }
+        else
+        {
+            await SafeLogPlatformAuthEventAsync("LoginFailed", "User", user.UserID, reason);
+        }
+
+        return lockoutSeconds;
+    }
+
+    private async Task ResetUserLoginFailureAsync(int userId)
+    {
+        try
+        {
+            await _db.Users
+                .Where(u => u.UserID == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.FailedLoginCount, 0)
+                    .SetProperty(u => u.FailedLoginBatch, 0)
+                    .SetProperty(u => u.FailedLoginLastAt, (DateTime?)null)
+                    .SetProperty(u => u.LoginLockoutUntil, (DateTime?)null));
+        }
+        catch
+        {
+            // non-critical; ignore
+        }
+    }
+
+    private async Task SendLoginAttemptAlertEmailAsync(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return;
+
+        var webBaseUrl = ResolveWebBaseUrl();
+        var html = EmailTemplates.GetLoginAttemptAlertHtml(email, webBaseUrl);
+        try
+        {
+            await _email.SendAsync(email, "Security alert: login attempts detected", html);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to send login attempt alert to {Email}", email);
+        }
+    }
+
     // When the user has a linked Employee, returns that Employee's role so login redirect and RBAC use backoffice and portal correctly.
     private async Task<string?> GetEffectiveRoleForUserAsync(int userId)
     {
@@ -2179,6 +2390,26 @@ public class AuthController : ControllerBase
             await _db.Users
                 .Where(u => u.UserID == userId)
                 .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastLoginAt, DateTime.UtcNow));
+        }
+        catch
+        {
+            // non-critical; ignore
+        }
+    }
+
+    private async Task ResetIdleLockStateAsync(int userId)
+    {
+        try
+        {
+            await _db.Users
+                .Where(u => u.UserID == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(u => u.IdleLockIsLocked, false)
+                    .SetProperty(u => u.IdleLockLockedAt, (DateTime?)null)
+                    .SetProperty(u => u.IdleLockLastSeenAt, DateTime.UtcNow)
+                    .SetProperty(u => u.IdleLockPinFailedCount, 0)
+                    .SetProperty(u => u.IdleLockPinLockoutUntil, (DateTime?)null)
+                    .SetProperty(u => u.IdleLockAutoLogoutAt, (DateTime?)null));
         }
         catch
         {

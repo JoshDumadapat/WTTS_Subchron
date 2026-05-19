@@ -37,12 +37,30 @@ public class User
     public byte[]? TotpSecret { get; set; }         
     public string? RecoveryCodesHash { get; set; }
 
+    // Idle lock
+    public bool IdleLockEnabled { get; set; } = false;
+    public int? IdleLockTimeoutMinutes { get; set; }
+    public DateTime? IdleLockLastSeenAt { get; set; }
+    public bool IdleLockIsLocked { get; set; } = false;
+    public DateTime? IdleLockLockedAt { get; set; }
+    public string? IdleLockPinHash { get; set; }
+    public DateTime? IdleLockPinSetAt { get; set; }
+public int IdleLockPinFailedCount { get; set; } = 0;
+    public DateTime? IdleLockPinLockoutUntil { get; set; }
+    public DateTime? IdleLockAutoLogoutAt { get; set; }
+
     public string? ExternalProvider { get; set; }
     public string? ExternalId { get; set; }
     public bool EmailVerified { get; set; } = false;
 
+    // Login lockout
+    public int FailedLoginCount { get; set; } = 0;
+    public int FailedLoginBatch { get; set; } = 0;
+    public DateTime? FailedLoginLastAt { get; set; }
+    public DateTime? LoginLockoutUntil { get; set; }
+
     public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
     public ICollection<AuthLoginSession> AuthLoginSessions { get; set; } = new List<AuthLoginSession>();
-    public ICollection<BillingRecord> BillingRecords { get; set; } = new List<BillingRecord>();
     public ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();
+    public ICollection<BillingRecord> BillingRecords { get; set; } = new List<BillingRecord>();
 }

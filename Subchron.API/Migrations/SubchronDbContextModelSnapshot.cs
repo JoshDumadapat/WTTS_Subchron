@@ -2139,6 +2139,19 @@ namespace Subchron.API.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<int>("FailedLoginBatch")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("FailedLoginCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("FailedLoginLastAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ExternalId")
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
@@ -2147,12 +2160,52 @@ namespace Subchron.API.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<DateTime?>("IdleLockAutoLogoutAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IdleLockEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IdleLockIsLocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("IdleLockLastSeenAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("IdleLockLockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdleLockPinFailedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("IdleLockPinHash")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("IdleLockPinLockoutUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("IdleLockPinSetAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdleLockTimeoutMinutes")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
                     b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LoginLockoutUntil")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -2205,6 +2258,9 @@ namespace Subchron.API.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "ivanjoshdumadapat30@gmail.com",
                             EmailVerified = true,
+                            IdleLockEnabled = false,
+                            IdleLockIsLocked = false,
+                            IdleLockPinFailedCount = 0,
                             IsActive = true,
                             Name = "Josh Dumadapat",
                             Password = "$2a$11$Aq6k23IxUxMsGwOMuwWQme7xSDkzu3N47OHmvsB44dQxdVLJLyMBe",

@@ -1,10 +1,13 @@
 @using System.Security.Claims
 @using Subchron.Web.Rbac
 @using Subchron.Web.Services
+@using Subchron.Web.Pages.Auth
+@inject IConfiguration Config
 @inject LayoutBrandingService LayoutBrandingService
 @{
     var displayName = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name ?? "Employee";
     var canAccessBackoffice = RoleModuleAccess.CanAccessBackoffice(User);
+    var token = User.FindFirst(CompleteLoginModel.AccessTokenClaimType)?.Value;
 
     var branding = await LayoutBrandingService.GetAsync(User);
     if (!string.IsNullOrWhiteSpace(branding.ProfileName))
@@ -85,7 +88,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100">
+<body id="appRoot" class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100" data-api-base="@(Config["ApiBaseUrl"] ?? "")" data-access-token="@(token ?? "")" data-api-token="@(token ?? "")">
     <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <div class="absolute -top-[10%] -left-[15%] h-[50%] w-[50%] rounded-full bg-emerald-100/20 blur-[180px] dark:bg-emerald-900/20"></div>
         <div class="absolute top-[15%] -right-[15%] h-[45%] w-[45%] rounded-full bg-sky-100/20 blur-[180px] dark:bg-sky-900/18"></div>
@@ -238,6 +241,400 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script>
         (function () {
+          var idleEnabled = false;
+          if (!idleEnabled) return;
+
+          var root = document.getElementById('appRoot');
+          var apiBase = (root && root.dataset && root.dataset.apiBase ? root.dataset.apiBase : '').trim().replace(/\/$/, '');
+          var token = (root && root.dataset && root.dataset.accessToken ? root.dataset.accessToken : '').trim();
+          if (!apiBase || !token) return;
+
+          var idleTimeoutMs = 1 * 60 * 1000;
+          var isLocked = false;
+          var warningMs = 30 * 1000;
+          var warningCountdownTimer = null;
+          var warningCountdownRemaining = 30;
+          var lastActivity = Date.now();
+          var lastMarkActivityAt = 0;
+          var markActivityThrottleMs = 750;
+          var warningTimer = null;
+          var lockTimer = null;
+          var statusPollTimer = null;
+          var activityTimer = null;
+          var warningShownAt = null;
+          var lockHistoryKey = 'idleLock:showing';
+          var hasPin = true;
+
+          function authHeaders() {
+            return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+          }
+
+          async function fetchStatus() {
+            try {
+              var res = await fetch(apiBase + '/api/idle-lock/status', { method: 'GET', headers: authHeaders() });
+              var data = await res.json().catch(function () { return {}; });
+
+              if (!res.ok) {
+                if (res.status === 401 && (data.idleLockAutoLogout || (data.message && String(data.message).indexOf('Session ended') >= 0)))
+                  doAutoLogout();
+                return;
+              }
+
+              if (data.message && String(data.message).indexOf('Auto-logout') >= 0) {
+                doAutoLogout();
+                return;
+              }
+
+              if (res.ok && data.ok && data.enabled !== false) {
+                var tm = parseInt(data.timeoutMinutes, 10);
+                if (!isNaN(tm) && tm > 0)
+                  idleTimeoutMs = tm * 60 * 1000;
+
+                if (data.locked === true && data.autoLogoutAt) {
+                  var autoLogoutTime = new Date(data.autoLogoutAt).getTime();
+                  if (!isNaN(autoLogoutTime) && autoLogoutTime <= Date.now()) {
+                    doAutoLogout();
+                    return;
+                  }
+                }
+
+                if (data.locked === true) {
+                  isLocked = true;
+                  hasPin = data.pinSet !== false;
+                  showLock();
+                } else if (data.locked === false) {
+                  if (isLocked) {
+                    isLocked = false;
+                    hideLock();
+                    hideWarning();
+                  }
+                  setLockHistory(false);
+                  markActivity(true);
+                }
+              }
+            } catch (_) { }
+          }
+
+          function scheduleStatusPoll() {
+            if (statusPollTimer) clearInterval(statusPollTimer);
+            statusPollTimer = setInterval(fetchStatus, 10000);
+          }
+
+          function doAutoLogout() {
+            if (statusPollTimer) clearInterval(statusPollTimer);
+            hideLock();
+            hideWarning();
+            window.location.href = '/Auth/Logout?reason=auto';
+          }
+
+          function scheduleTimers() {
+            clearTimeout(warningTimer);
+            clearTimeout(lockTimer);
+            if (isLocked) return;
+            var now = Date.now();
+            var elapsed = now - lastActivity;
+            var warnIn = Math.max(500, idleTimeoutMs - warningMs - elapsed);
+            var lockIn = Math.max(500, idleTimeoutMs - elapsed);
+
+            warningTimer = setTimeout(showWarning, warnIn);
+            lockTimer = setTimeout(lockNow, lockIn);
+          }
+
+          function markActivity(force) {
+            var now = Date.now();
+            if (!force && (now - lastMarkActivityAt < markActivityThrottleMs)) return;
+            lastMarkActivityAt = now;
+            lastActivity = now;
+            hideWarning();
+            if (!isLocked) {
+              scheduleTimers();
+              pingActivity();
+            }
+          }
+
+          function pingActivity() {
+            clearTimeout(activityTimer);
+            activityTimer = setTimeout(async function () {
+              try {
+                await fetch(apiBase + '/api/idle-lock/activity', {
+                  method: 'POST', headers: authHeaders(), body: JSON.stringify({ eventType: 'active' })
+                });
+              } catch (_) { }
+            }, 1500);
+          }
+
+          function setWarningCountdown(value) {
+            var el = document.getElementById('idleWarnCountdown');
+            if (!el) return;
+            el.textContent = value + 's';
+          }
+
+          function startWarningCountdown() {
+            if (warningCountdownTimer) clearInterval(warningCountdownTimer);
+            warningShownAt = Date.now();
+            warningCountdownRemaining = Math.max(1, Math.ceil(warningMs / 1000));
+            setWarningCountdown(warningCountdownRemaining);
+            warningCountdownTimer = setInterval(function () {
+              var elapsed = warningShownAt ? (Date.now() - warningShownAt) : 0;
+              warningCountdownRemaining = Math.max(0, Math.ceil((warningMs - elapsed) / 1000));
+              if (warningCountdownRemaining <= 0) {
+                clearInterval(warningCountdownTimer);
+                warningCountdownTimer = null;
+                warningCountdownRemaining = 0;
+              }
+              setWarningCountdown(warningCountdownRemaining);
+            }, 250);
+          }
+
+          function showWarning() {
+            var warn = document.getElementById('idleWarnOverlay');
+            if (!warn) return;
+            warn.classList.remove('hidden');
+            startWarningCountdown();
+          }
+
+          function hideWarning() {
+            var warn = document.getElementById('idleWarnOverlay');
+            if (!warn) return;
+            warn.classList.add('hidden');
+            warningShownAt = null;
+            if (warningCountdownTimer) {
+              clearInterval(warningCountdownTimer);
+              warningCountdownTimer = null;
+            }
+          }
+
+          async function lockNow() {
+            hideWarning();
+            try {
+              var res = await fetch(apiBase + '/api/idle-lock/lock', { method: 'POST', headers: authHeaders() });
+              if (!res.ok) {
+                var d = await res.json().catch(function () { return {}; });
+                if (d.message) console.warn('idle lock:', d.message);
+              }
+            } catch (_) { }
+            await fetchStatus();
+            showLock();
+          }
+
+          function showLock() {
+            var lock = document.getElementById('idleLockOverlay');
+            if (!lock) return;
+            lock.classList.remove('hidden');
+            setLockHistory(true);
+            var inp = document.getElementById('idlePinInput');
+            if (inp) { inp.value = ''; inp.focus(); }
+            var err = document.getElementById('idlePinError');
+            if (err) { err.textContent = ''; err.classList.add('hidden'); }
+            setLockMode(hasPin);
+            isLocked = true;
+          }
+
+          function hideLock() {
+            var lock = document.getElementById('idleLockOverlay');
+            if (!lock) return;
+            lock.classList.add('hidden');
+            setLockHistory(false);
+          }
+
+          function setLockHistory(value) {
+            try {
+              if (value) {
+                history.pushState({ idleLock: true }, '', window.location.href);
+                localStorage.setItem(lockHistoryKey, '1');
+              } else {
+                localStorage.removeItem(lockHistoryKey);
+              }
+            } catch (_) { }
+          }
+
+          window.addEventListener('popstate', function () {
+            try {
+              if (localStorage.getItem(lockHistoryKey) === '1') {
+                showLock();
+              }
+            } catch (_) { }
+          });
+
+          function setLockMode(pinAlreadySet) {
+            hasPin = pinAlreadySet !== false;
+            var unlockSection = document.getElementById('idleUnlockSection');
+            var setupSection = document.getElementById('idleSetupSection');
+            var forgotLink = document.getElementById('idleForgotPinLink');
+            var resendLabel = document.getElementById('idleResendPinLabel');
+            var unlockBtn = document.getElementById('idleUnlockBtn');
+            var setPinBtn = document.getElementById('idleSetPinBtn');
+            var helpText = document.getElementById('idleResendHelp');
+            if (unlockSection) unlockSection.classList.toggle('hidden', !hasPin);
+            if (setupSection) setupSection.classList.toggle('hidden', hasPin);
+            if (forgotLink) forgotLink.classList.toggle('hidden', !hasPin);
+            if (resendLabel) resendLabel.textContent = hasPin ? 'Email new PIN' : 'Send email code';
+            if (unlockBtn) unlockBtn.classList.toggle('hidden', !hasPin);
+            if (setPinBtn) setPinBtn.classList.toggle('hidden', hasPin);
+            if (helpText) helpText.textContent = hasPin
+              ? 'Lost the PIN? We’ll email a new one (your old PIN will stop working). You can request again after one minute.'
+              : 'No PIN yet. Send the email code, then set your new PIN to unlock.';
+          }
+
+          function normalizePinDigits(v) {
+            return String(v || '').replace(/\D/g, '').slice(0, 6);
+          }
+
+          async function tryUnlock() {
+            var raw = document.getElementById('idlePinInput')?.value || '';
+            var pin = normalizePinDigits(raw);
+            var err = document.getElementById('idlePinError');
+            if (pin.length !== 6) {
+              if (err) { err.textContent = 'Enter the 6-digit Quick Unlock PIN from your email (not the PIN-change verification code).'; err.classList.remove('hidden'); }
+              return;
+            }
+            if (err) err.classList.add('hidden');
+            try {
+              var res = await fetch(apiBase + '/api/idle-lock/unlock', {
+                method: 'POST', headers: authHeaders(), body: JSON.stringify({ pin: pin })
+              });
+              var data = await res.json().catch(function () { return {}; });
+
+              if (!res.ok && data.pinSet === false) {
+                setLockMode(false);
+                if (err) { err.textContent = data.message || 'Quick Unlock PIN not set.'; err.classList.remove('hidden'); }
+                return;
+              }
+
+              if (!res.ok && (String(data.message || '').toLowerCase().indexOf('auto-logout') >= 0 || String(data.message || '').indexOf('prolonged') >= 0)) {
+                if (err) { err.textContent = data.message || 'Too many attempts.'; err.classList.remove('hidden'); }
+                setTimeout(doAutoLogout, 2000);
+                return;
+              }
+
+              if (!res.ok || !data.ok) {
+                if (err) {
+                  err.textContent = data.message || 'Invalid PIN.';
+                  if (typeof data.attemptsLeft === 'number') err.textContent += ' Attempts left: ' + data.attemptsLeft + '.';
+                  err.classList.remove('hidden');
+                }
+                return;
+              }
+              hideLock();
+              isLocked = false;
+              if (document.getElementById('idlePinInput')) document.getElementById('idlePinInput').value = '';
+              markActivity(true);
+              scheduleTimers();
+            } catch (_) {
+              if (err) { err.textContent = 'Unable to unlock. Try again.'; err.classList.remove('hidden'); }
+            }
+          }
+
+          async function resendUnlockPin() {
+            var st = document.getElementById('idleResendPinStatus');
+            var btn = document.getElementById('idleResendPinBtn');
+            if (btn) btn.disabled = true;
+            if (st) st.textContent = 'Sending…';
+            try {
+              var endpoint = hasPin ? '/api/idle-lock/resend-unlock-pin' : '/api/idle-lock/request-pin-reset';
+              var res = await fetch(apiBase + endpoint, { method: 'POST', headers: authHeaders() });
+              var data = await res.json().catch(function () { return {}; });
+              if (!res.ok || !data.ok) {
+                if (st) st.textContent = data.message || 'Could not send email.';
+                if (btn) btn.disabled = false;
+                return;
+              }
+              if (st) st.textContent = hasPin ? 'A new PIN was sent to your email. Check spam/junk if needed.' : 'We emailed a 6-digit code. Enter it below to set your PIN.';
+              setTimeout(function () { if (btn) btn.disabled = false; if (st) st.textContent = ''; }, 65000);
+            } catch (_) {
+              if (st) st.textContent = 'Network error.';
+              if (btn) btn.disabled = false;
+            }
+          }
+
+          async function verifyAndSetPin() {
+            var err = document.getElementById('idlePinError');
+            var code = normalizePinDigits(document.getElementById('idleVerifyCodeInput')?.value || '');
+            var newPin = normalizePinDigits(document.getElementById('idleNewPinInput')?.value || '');
+            var confirmPin = normalizePinDigits(document.getElementById('idleConfirmPinInput')?.value || '');
+            if (code.length !== 6 || newPin.length !== 6 || confirmPin.length !== 6) {
+              if (err) { err.textContent = 'Enter the 6-digit email code and a 6-digit PIN twice.'; err.classList.remove('hidden'); }
+              return;
+            }
+            if (newPin !== confirmPin) {
+              if (err) { err.textContent = 'PINs do not match.'; err.classList.remove('hidden'); }
+              return;
+            }
+            if (err) err.classList.add('hidden');
+            try {
+              var res = await fetch(apiBase + '/api/idle-lock/verify-pin-reset', {
+                method: 'POST', headers: authHeaders(), body: JSON.stringify({ code: code, newPin: newPin })
+              });
+              var data = await res.json().catch(function () { return {}; });
+              if (!res.ok || !data.ok) {
+                if (err) { err.textContent = data.message || 'Could not verify code.'; err.classList.remove('hidden'); }
+                return;
+              }
+              setLockMode(true);
+              hideLock();
+              isLocked = false;
+              markActivity(true);
+              scheduleTimers();
+            } catch (_) {
+              if (err) { err.textContent = 'Network error.'; err.classList.remove('hidden'); }
+            }
+          }
+
+          function attachEvents() {
+            ['click', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+              document.addEventListener(evt, function () {
+                if (!isLocked) markActivity(false);
+              }, { passive: true });
+            });
+            document.getElementById('idleWarnResume')?.addEventListener('click', function () { markActivity(true); });
+            document.getElementById('idleUnlockBtn')?.addEventListener('click', tryUnlock);
+            document.getElementById('idleSetPinBtn')?.addEventListener('click', verifyAndSetPin);
+            document.getElementById('idlePinInput')?.addEventListener('input', function (e) {
+              e.target.value = normalizePinDigits(e.target.value);
+            });
+            document.getElementById('idleVerifyCodeInput')?.addEventListener('input', function (e) {
+              e.target.value = normalizePinDigits(e.target.value);
+            });
+            document.getElementById('idleNewPinInput')?.addEventListener('input', function (e) {
+              e.target.value = normalizePinDigits(e.target.value);
+            });
+            document.getElementById('idleConfirmPinInput')?.addEventListener('input', function (e) {
+              e.target.value = normalizePinDigits(e.target.value);
+            });
+            document.getElementById('idlePinInput')?.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter') tryUnlock();
+            });
+            document.getElementById('idleConfirmPinInput')?.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter') verifyAndSetPin();
+            });
+            document.getElementById('idleLockUseLogin')?.addEventListener('click', function () {
+              window.location.href = '/Auth/Logout';
+            });
+            document.getElementById('idleResendPinBtn')?.addEventListener('click', resendUnlockPin);
+            document.getElementById('idleForgotPinLink')?.addEventListener('click', function () {
+              setLockMode(false);
+              resendUnlockPin();
+            });
+          }
+
+          (async function initIdle() {
+            await fetchStatus();
+            attachEvents();
+            markActivity(true);
+            scheduleTimers();
+            scheduleStatusPoll();
+            try {
+              if (localStorage.getItem(lockHistoryKey) === '1' && isLocked) {
+                showLock();
+              } else {
+                localStorage.removeItem(lockHistoryKey);
+              }
+            } catch (_) { }
+          })();
+        })();
+    </script>
+    <script>
+        (function () {
             var html = document.documentElement;
             var themeBtn = document.getElementById("themeToggle");
             var themeIcon = document.getElementById("themeIcon");
@@ -340,5 +737,85 @@
             })();
         })();
     </script>
+    <div id="idleWarnOverlay" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-labelledby="idleWarnTitle">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"></div>
+        <div class="absolute inset-0 grid place-items-center p-4">
+            <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-600 dark:bg-slate-800">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h3 id="idleWarnTitle" class="text-lg font-semibold text-slate-900 dark:text-white">You’re about to be locked out</h3>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">No activity was detected. In about <strong><span id="idleWarnCountdown">30s</span></strong> your session will lock for security. Click continue if you’re still here.</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-wrap justify-end gap-2">
+                    <button type="button" id="idleWarnResume" class="btn-primary">Continue session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="idleLockOverlay" class="fixed inset-0 z-[110] hidden" role="dialog" aria-modal="true" aria-labelledby="idleLockTitle">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 grid max-h-screen place-items-center overflow-y-auto p-4">
+            <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-600 dark:bg-slate-800">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-700">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-subgreen-100 text-subgreen-700 dark:bg-subgreen-900/40 dark:text-subgreen-200">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <h3 id="idleLockTitle" class="text-lg font-semibold text-slate-900 dark:text-white">Session locked</h3>
+                </div>
+                <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">Enter the <strong>6-digit Quick Unlock PIN</strong> from the email titled <span class="font-medium text-slate-800 dark:text-slate-200">Your Subchron Quick Unlock PIN</span>. It is different from the &quot;Confirm PIN change&quot; code in Settings.</p>
+
+                <div id="idleUnlockSection" class="mt-5">
+                    <label for="idlePinInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Quick Unlock PIN</label>
+                    <input id="idlePinInput" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"
+                           class="mt-2 w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-mono tracking-[0.35em] text-slate-900 shadow-inner focus:border-subgreen-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-100" />
+                </div>
+
+                <div id="idleSetupSection" class="mt-5 hidden">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                        First-time lock: we need to set your Quick Unlock PIN. Click “Send email code”, then enter the 6-digit code and choose a PIN.
+                    </div>
+                    <div class="mt-4">
+                        <label for="idleVerifyCodeInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email verification code</label>
+                        <input id="idleVerifyCodeInput" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"
+                               class="mt-2 w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-center font-mono text-xl tracking-[0.35em] text-slate-900 shadow-inner focus:border-subgreen-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-100" />
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label for="idleNewPinInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300">New PIN</label>
+                            <input id="idleNewPinInput" type="text" inputmode="numeric" maxlength="6" placeholder="••••••"
+                                   class="mt-2 w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-center font-mono text-xl tracking-[0.35em] text-slate-900 shadow-inner focus:border-subgreen-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label for="idleConfirmPinInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm PIN</label>
+                            <input id="idleConfirmPinInput" type="text" inputmode="numeric" maxlength="6" placeholder="••••••"
+                                   class="mt-2 w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-center font-mono text-xl tracking-[0.35em] text-slate-900 shadow-inner focus:border-subgreen-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-subgreen-500/30 dark:border-slate-600 dark:bg-slate-900/50 dark:text-slate-100" />
+                        </div>
+                    </div>
+                </div>
+
+                <div id="idlePinError" class="mt-3 hidden rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/25 dark:text-red-300"></div>
+
+                <div class="mt-5 flex flex-wrap gap-2">
+                    <button type="button" id="idleUnlockBtn" class="btn-primary">Unlock</button>
+                    <button type="button" id="idleSetPinBtn" class="btn-primary hidden">Set PIN &amp; Unlock</button>
+                    <button type="button" id="idleLockUseLogin" class="btn-secondary">Sign in again</button>
+                </div>
+                <div class="mt-6 border-t border-slate-100 pt-4 dark:border-slate-700">
+                    <p id="idleResendHelp" class="text-xs text-slate-500 dark:text-slate-400">Lost the PIN? We’ll email a new one (your old PIN will stop working). You can request again after one minute.</p>
+                    <div class="mt-2">
+                        <button type="button" id="idleResendPinBtn" class="text-sm font-semibold text-subgreen-600 hover:text-subgreen-700 dark:text-subgreen-400 dark:hover:text-subgreen-300"><span id="idleResendPinLabel">Email new PIN</span></button>
+                        <button type="button" id="idleForgotPinLink" class="ml-3 text-sm font-semibold text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100">Use email code</button>
+                    </div>
+                    <p id="idleResendPinStatus" class="mt-2 min-h-[1.25rem] text-xs text-slate-600 dark:text-slate-400"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -1,52 +1,29 @@
 @page
+@model Subchron.Web.Pages.App.DashboardModel
 @{
     ViewData["Title"] = "Dashboard";
     Layout = "/Pages/App/Shared/_LayoutAdmin.cshtml";
-
-    // ==========================================
-    // 🟢 DUMMY DATA (Backend Simulation)
-    // ==========================================
-
-    // --- 1. Top Level Metrics ---
-    var totalEmployees = 150;
-    var presentToday = 132;
-    var lateArrivals = 8;
-    var onLeave = 10;
-    var pendingOT = 12;
-    var missingTimeOut = 3;
-
-    // --- 2. Line Chart Data (Weekly Trends) ---
-    var days = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-    var onTimeData = new[] { 130, 135, 128, 132, 130, 45, 20 };
-    var lateData = new[] { 12, 5, 8, 4, 8, 2, 0 };
-
-    // --- 3. Doughnut Chart Data (Department Breakdown) ---
-    // Who is actually present right now?
-    var deptLabels = new[] { "IT/Dev", "HR & Admin", "Sales", "Operations", "Support" };
-    var deptData = new[] { 45, 12, 30, 35, 10 };
-
-    // --- 4. Recent Activity Log ---
-    var recentLogs = new[] {
-        new { Name = "Sarah Jenkins", Dept = "Design", Action = "Time In", Time = "07:55 AM", Status = "Ontime", Initials = "SJ", Color = "bg-emerald-100 text-emerald-700" },
-        new { Name = "Michael Chen", Dept = "Dev", Action = "Time In", Time = "09:12 AM", Status = "Late", Initials = "MC", Color = "bg-amber-100 text-amber-700" },
-        new { Name = "Jessica Alva", Dept = "HR", Action = "Leave", Time = "08:00 AM", Status = "Sick", Initials = "JA", Color = "bg-gray-100 text-gray-600" },
-        new { Name = "Robert Fox", Dept = "Ops", Action = "OT Req", Time = "05:30 PM", Status = "Pending", Initials = "RF", Color = "bg-purple-100 text-purple-700" },
-        new { Name = "David Kim", Dept = "Support", Action = "Time Out", Time = "06:05 PM", Status = "Out", Initials = "DK", Color = "bg-blue-100 text-blue-700" },
-    };
 }
 
 <div class="mx-auto">
+@if (!string.IsNullOrEmpty(Model.DashboardLoadError))
+{
+    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 shadow-sm dark:border-amber-500/35 dark:bg-amber-950/35 dark:text-amber-100" role="alert">
+        <p class="font-semibold">Dashboard data unavailable</p>
+        <p class="mt-1.5 leading-relaxed">@Model.DashboardLoadError</p>
+    </div>
+}
 <!-- Header row: title left | Scan Station (primary) + Reports (secondary) right -->
 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
         <h1 class="text-xl font-bold tracking-tight text-subgreen-500 dark:text-white sm:text-2xl">Dashboard</h1>
     </div>
     <div class="flex items-center gap-3">
-        <a href="#" class="btn-secondary">
+        <a href="/App/PayrollAndReports/Reports" class="btn-secondary">
             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             Reports
         </a>
-        <a href="#" class="btn-primary">
+        <a href="/App/Operations/ScanStation" class="btn-primary">
             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
             Scan Station
         </a>
@@ -63,7 +40,7 @@
                 <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                     <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
                 </div>
-                <input type="date" id="dashFromDate" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+                <input type="date" id="dashFromDate" name="from" value="@Model.From?.ToString("yyyy-MM-dd")" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
             </div>
         </div>
         <span class="mb-2 text-sm text-slate-400 dark:text-slate-500">to</span>
@@ -74,14 +51,18 @@
                 <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                     <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z"/></svg>
                 </div>
-                <input type="date" id="dashToDate" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
+                <input type="date" id="dashToDate" name="to" value="@Model.To?.ToString("yyyy-MM-dd")" class="h-10 rounded-xl border border-slate-200 bg-white ps-9 pe-3 text-sm text-slate-800 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-subgreen-500" />
             </div>
         </div>
         <!-- Department -->
         <div class="flex flex-col gap-1">
             <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Department</label>
-            <select id="dashDeptFilter" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white min-w-[160px]">
+            <select id="dashDeptFilter" name="departmentId" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-subgreen-500 focus:ring-2 focus:ring-subgreen-500/20 dark:border-slate-600 dark:bg-slate-700 dark:text-white min-w-[160px]">
                 <option value="">All departments</option>
+                @foreach (var dep in Model.Departments)
+                {
+                    <option value="@dep.DepartmentId" selected="@(Model.DepartmentId == dep.DepartmentId ? "selected" : null)">@dep.DepartmentName</option>
+                }
             </select>
         </div>
         <!-- Shortcut filters -->
@@ -100,7 +81,7 @@
             <label class="invisible text-xs font-medium">Actions</label>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="dashReset()" class="btn-secondary h-10">Reset</button>
-                <button type="button" class="btn-primary h-10">Apply</button>
+                <button type="button" onclick="dashApply()" class="btn-primary h-10">Apply</button>
             </div>
         </div>
     </div>
@@ -112,7 +93,7 @@
         <div class="relative z-10 flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Workforce</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@totalEmployees</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.TotalEmployees</h3>
             </div>
             <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -128,23 +109,23 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Present Today</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@presentToday</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.PresentToday</h3>
             </div>
             <div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
         </div>
-        <div class="mt-4 h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-700">
-            <div class="h-1.5 rounded-full bg-emerald-500" style="width: @(Math.Round((double)presentToday / totalEmployees * 100))%"></div>
-        </div>
-        <p class="mt-2 text-right text-xs text-gray-400">@Math.Round((double)presentToday / totalEmployees * 100)% Rate</p>
+            <div class="mt-4 h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-700">
+                <div class="h-1.5 rounded-full bg-emerald-500" style="width: @(Model.TotalEmployees > 0 ? Math.Round((double)Model.PresentToday / Model.TotalEmployees * 100) : 0)%"></div>
+            </div>
+        <p class="mt-2 text-right text-xs text-gray-400">@(Model.TotalEmployees > 0 ? Math.Round((double)Model.PresentToday / Model.TotalEmployees * 100) : 0)% Rate</p>
     </div>
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Late Arrivals</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@lateArrivals</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.LateArrivals</h3>
             </div>
             <div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -159,7 +140,7 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">On Leave / Absent</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@onLeave</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.OnLeave</h3>
             </div>
             <div class="rounded-lg bg-gray-100 p-2 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -172,22 +153,22 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Pending OT</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@pendingOT</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.PendingOTRequests</h3>
             </div>
             <div class="rounded-lg bg-purple-50 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
         </div>
-        <div class="mt-4 flex items-center text-xs font-medium text-purple-600 dark:text-purple-400">
-            <span class="cursor-pointer underline">Approve All</span>
-        </div>
+            <div class="mt-4 flex items-center text-xs font-medium text-purple-600 dark:text-purple-400">
+                <a class="cursor-pointer underline" href="/App/Operations/OvertimeRequests">Review requests</a>
+            </div>
     </div>
 
     <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">Missing Out</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@missingTimeOut</h3>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">@Model.MissingTimeOut</h3>
             </div>
             <div class="rounded-lg bg-rose-50 p-2 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -221,10 +202,10 @@
             <canvas id="deptChart"></canvas>
         </div>
         <div class="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
-            @for (int i = 0; i < deptLabels.Length; i++)
+            @foreach (var dep in Model.DepartmentBreakdownItems)
             {
                 <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span> @deptLabels[i]
+                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span> @dep.DepartmentName
                 </div>
             }
         </div>
@@ -236,7 +217,7 @@
         <div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Live Activity Feed</h3>
         </div>
-        <button class="text-sm font-medium text-indigo-600 hover:text-indigo-700">View All Logs</button>
+        <a class="text-sm font-medium text-indigo-600 hover:text-indigo-700" href="/App/AuditLog">View All Logs</a>
     </div>
 
     <div class="overflow-x-auto">
@@ -250,19 +231,19 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-                @foreach (var log in recentLogs)
+                @foreach (var log in Model.RecentActivity)
                 {
                     <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-slate-700/50">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-9 w-9 @log.Color items-center justify-center rounded-full text-xs font-bold shadow-lg ring-2 ring-white dark:ring-gray-800">
+                                <div class="flex h-9 w-9 @log.BadgeClass items-center justify-center rounded-full text-xs font-bold shadow-lg ring-2 ring-white dark:ring-gray-800">
                                     @log.Initials
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">@log.Name</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                            @log.Dept
+                            @log.Department
                         </td>
                         <td class="px-6 py-4">
                             @if (log.Status == "Late")
@@ -287,7 +268,7 @@
                             }
                         </td>
                         <td class="px-6 py-4 text-right font-mono text-sm text-gray-600 dark:text-gray-300">
-                            @log.Time
+                            @log.Time.ToString("hh:mm tt")
                         </td>
                     </tr>
                 }
@@ -350,6 +331,19 @@
                 btn.classList.remove('border-subgreen-500', 'bg-subgreen-50', 'text-subgreen-700', 'dark:border-subgreen-500', 'dark:bg-subgreen-900/20', 'dark:text-subgreen-400');
             });
         }
+        function dashApply() {
+            var params = new URLSearchParams();
+            var fromEl = document.getElementById('dashFromDate');
+            var toEl = document.getElementById('dashToDate');
+            var deptEl = document.getElementById('dashDeptFilter');
+            if (fromEl && fromEl.value) params.set('from', fromEl.value);
+            if (toEl && toEl.value) params.set('to', toEl.value);
+            if (deptEl && deptEl.value) params.set('departmentId', deptEl.value);
+
+            var url = window.location.pathname;
+            var qs = params.toString();
+            window.location.href = qs ? (url + '?' + qs) : url;
+        }
         function initDashboardCharts() {
             var attendanceCanvas = document.getElementById('attendanceChart');
             var deptCanvas = document.getElementById('deptChart');
@@ -359,7 +353,11 @@
                 return;
             }
 
-            dashSetShortcut('month');
+            var fromEl = document.getElementById('dashFromDate');
+            var toEl = document.getElementById('dashToDate');
+            if ((!fromEl || !fromEl.value) && (!toEl || !toEl.value)) {
+                dashSetShortcut('month');
+            }
 
             destroyDashboardCharts();
 
@@ -375,11 +373,11 @@
             window.__dashAttendanceChart = new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: @Html.Raw(Json.Serialize(days)),
+                    labels: @Html.Raw(Json.Serialize(Model.TrendLabels)),
                     datasets: [
                         {
                             label: 'On Time',
-                            data: @Html.Raw(Json.Serialize(onTimeData)),
+                            data: @Html.Raw(Json.Serialize(Model.OnTimeSeries)),
                             borderColor: '#10b981',
                             backgroundColor: gradient1,
                             borderWidth: 2,
@@ -389,7 +387,7 @@
                         },
                         {
                             label: 'Late',
-                            data: @Html.Raw(Json.Serialize(lateData)),
+                            data: @Html.Raw(Json.Serialize(Model.LateSeries)),
                             borderColor: '#f59e0b',
                             borderWidth: 2,
                             borderDash: [5, 5],
@@ -423,9 +421,9 @@
             window.__dashDeptChart = new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
-                    labels: @Html.Raw(Json.Serialize(deptLabels)),
+                    labels: @Html.Raw(Json.Serialize(Model.DepartmentBreakdownItems.Select(x => x.DepartmentName))),
                     datasets: [{
-                        data: @Html.Raw(Json.Serialize(deptData)),
+                        data: @Html.Raw(Json.Serialize(Model.DepartmentBreakdownItems.Select(x => x.PresentCount))),
                         backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#6366f1'],
                         borderWidth: 0,
                         hoverOffset: 4

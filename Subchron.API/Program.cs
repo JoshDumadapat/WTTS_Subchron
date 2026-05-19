@@ -187,7 +187,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// In Development, HTTP (e.g. localhost:5058) must not 307 to HTTPS: HttpClient often drops Authorization on redirect → 401 on all API calls.
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseCors("WebCors");
 

@@ -263,6 +263,161 @@ Privacy: {PrivacyUrl}
 ";
     }
 
+    public static string GetLoginAttemptAlertHtml(string userEmail, string? webBaseUrl = null)
+    {
+        var year = DateTime.UtcNow.Year.ToString();
+        var termsLink = webBaseUrl != null ? $"{webBaseUrl.TrimEnd('/')}/terms" : TermsUrl;
+        var privacyLink = webBaseUrl != null ? $"{webBaseUrl.TrimEnd('/')}/privacy" : PrivacyUrl;
+
+        return $@"
+<!doctype html>
+<html lang=""en"" xmlns=""http://www.w3.org/1999/xhtml"" xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width,initial-scale=1"" />
+  <meta name=""x-apple-disable-message-reformatting"" />
+  <meta name=""format-detection"" content=""telephone=no,address=no,email=no,date=no,url=no"" />
+  <title>Security alert - {AppName}</title>
+
+  <!--[if mso]>
+  <xml>
+    <o:OfficeDocumentSettings>
+      <o:AllowPNG/>
+      <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+  </xml>
+  <![endif]-->
+
+  <style>
+    html, body {{ margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; }}
+    table, td {{ border-collapse:collapse !important; }}
+    img {{ border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }}
+    a {{ text-decoration:none; }}
+
+    @media (max-width: 520px) {{
+      .wrap {{ width:100% !important; }}
+      .px {{ padding-left:16px !important; padding-right:16px !important; }}
+      .card {{ width:100% !important; }}
+    }}
+  </style>
+</head>
+
+<body style=""margin:0; padding:0; background:#f5f7fb;"">
+  <div style=""display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;"">
+    We detected repeated login attempts on your {AppName} account.
+  </div>
+
+  <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""width:100%; background:#f5f7fb;"">
+    <tr>
+      <td align=""center"" style=""padding:32px 16px 40px;"">
+
+        <table role=""presentation"" class=""wrap"" width=""480"" cellspacing=""0"" cellpadding=""0"" border=""0""
+      style=""width:480px; max-width:480px;
+            background:
+          radial-gradient(200px 200px at 10% 15%, rgba(34,197,94,.08), rgba(34,197,94,0) 70%),
+     radial-gradient(240px 240px at 90% 80%, rgba(16,185,129,.06), rgba(16,185,129,0) 70%),
+    #f5f7fb;
+        border-radius:16px;"">
+          <tr>
+            <td class=""px"" style=""padding:24px 20px;"">
+
+              <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"">
+                <tr>
+                  <td align=""center"" style=""padding:0 0 20px;"">
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size:22px; line-height:22px; font-weight:800; letter-spacing:.2px;"">
+                      <span style=""color:#22c55e;"">Sub</span><span style=""color:#0052a3;"">chron</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <table role=""presentation"" class=""card"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0""
+       style=""width:100%; max-width:440px; margin:0 auto;
+          background:#ffffff;
+        border:1px solid #e2e8f0;
+           border-radius:14px;
+             box-shadow:0 4px 16px rgba(15,23,42,.06);"">
+                <tr>
+                  <td align=""center"" style=""padding:32px 28px 28px;"">
+
+                    <img src=""{LockIconUrl}"" alt=""Security alert"" width=""56"" height=""56""
+     style=""display:block; border:0; outline:none;"" />
+
+                    <div style=""height:20px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+     font-size:20px; line-height:26px; font-weight:700; color:#0f172a;"">
+                      Security alert
+                    </div>
+
+                    <div style=""height:12px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+   font-size:14px; line-height:21px; color:#64748b;"">
+                      We detected repeated login attempts on your {AppName} account associated with
+                    </div>
+
+                    <div style=""height:4px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size:14px; line-height:21px; color:#334155; font-weight:600;"">
+                      {userEmail}
+                    </div>
+
+                    <div style=""height:20px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+          font-size:12px; line-height:18px; color:#64748b;"">
+                      If this was you, you can ignore this message. If not, we recommend changing your password.
+                    </div>
+
+                    <div style=""height:22px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+          font-size:13px; line-height:20px; color:#334155;"">
+                      Thank you,<br/>
+                      <span style=""font-weight:700;"">The {AppName} Team</span>
+                    </div>
+
+                  </td>
+                </tr>
+              </table>
+
+              <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0""
+                     style=""max-width:440px; margin:20px auto 0;"">
+                <tr>
+                  <td align=""center"" style=""padding:8px 12px 0;"">
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+          font-size:11px; line-height:17px; color:#94a3b8;"">
+                      © {year} {AppName}. All rights reserved.
+                    </div>
+
+                    <div style=""height:8px;""></div>
+
+                    <div style=""font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+          font-size:11px; line-height:17px; color:#94a3b8;"">
+                      <a href=""{termsLink}"" style=""color:#94a3b8;"">Terms</a>
+                      ·
+                      <a href=""{privacyLink}"" style=""color:#94a3b8;"">Privacy</a>
+                      ·
+                      <a href=""mailto:{SupportEmail}"" style=""color:#94a3b8;"">{SupportEmail}</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+";
+    }
+
     public static string GetPasswordResetTemplateWithPlaceholders()
     {
      return @"
@@ -537,6 +692,86 @@ The {AppName} Team
 
 © {year} {AppName}. All rights reserved.
 ";
+    }
+
+    /// <summary>Email body for delivering the session Quick Unlock PIN (plain 6-digit, no external images).</summary>
+    public static string GetQuickUnlockPinDeliveryHtml(string pin, string userEmail)
+    {
+        var year = DateTime.UtcNow.Year.ToString();
+        return $@"
+<!doctype html>
+<html lang=""en"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width,initial-scale=1"" />
+  <title>Quick Unlock PIN - {AppName}</title>
+</head>
+<body style=""margin:0;padding:0;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;"">
+  <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""background:#f5f7fb;"">
+    <tr>
+      <td align=""center"" style=""padding:32px 16px;"">
+        <table role=""presentation"" width=""480"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""max-width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;"">
+          <tr>
+            <td style=""padding:32px 28px;"">
+              <div style=""font-size:22px;font-weight:800;""><span style=""color:#22c55e;"">Sub</span><span style=""color:#0052a3;"">chron</span></div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:20px;font-weight:700;color:#0f172a;"">Your Quick Unlock PIN</div>
+              <div style=""height:12px;""></div>
+              <div style=""font-size:14px;line-height:22px;color:#64748b;"">Use this 6-digit PIN when your session is locked after idle time. Account: <strong style=""color:#334155;"">{System.Net.WebUtility.HtmlEncode(userEmail)}</strong></div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:32px;font-weight:800;letter-spacing:10px;color:#0f172a;background:#f1f5f9;padding:18px 22px;border-radius:10px;display:inline-block;font-family:ui-monospace,Consolas,monospace;"">{System.Net.WebUtility.HtmlEncode(pin)}</div>
+              <div style=""height:16px;""></div>
+              <div style=""font-size:12px;color:#94a3b8;"">Keep this PIN private. If you did not request it, change your password and contact support.</div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:12px;color:#64748b;"">— The {AppName} Team</div>
+            </td>
+          </tr>
+        </table>
+        <div style=""margin-top:16px;font-size:11px;color:#94a3b8;"">© {year} {AppName}</div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+    }
+
+    /// <summary>Email body for the 6-digit code used when changing the Quick Unlock PIN from Settings.</summary>
+    public static string GetIdleLockPinChangeCodeHtml(string verificationCode, string userEmail)
+    {
+        var year = DateTime.UtcNow.Year.ToString();
+        return $@"
+<!doctype html>
+<html lang=""en"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width,initial-scale=1"" />
+  <title>Confirm PIN change - {AppName}</title>
+</head>
+<body style=""margin:0;padding:0;background:#f5f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;"">
+  <table role=""presentation"" width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""background:#f5f7fb;"">
+    <tr>
+      <td align=""center"" style=""padding:32px 16px;"">
+        <table role=""presentation"" width=""480"" cellspacing=""0"" cellpadding=""0"" border=""0"" style=""max-width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;"">
+          <tr>
+            <td style=""padding:32px 28px;"">
+              <div style=""font-size:22px;font-weight:800;""><span style=""color:#22c55e;"">Sub</span><span style=""color:#0052a3;"">chron</span></div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:20px;font-weight:700;color:#0f172a;"">Confirm PIN change</div>
+              <div style=""height:12px;""></div>
+              <div style=""font-size:14px;line-height:22px;color:#64748b;"">Enter this verification code in Subchron to set a new Quick Unlock PIN for <strong style=""color:#334155;"">{System.Net.WebUtility.HtmlEncode(userEmail)}</strong>.</div>
+              <div style=""height:20px;""></div>
+              <div style=""font-size:32px;font-weight:800;letter-spacing:10px;color:#0f172a;background:#f1f5f9;padding:18px 22px;border-radius:10px;display:inline-block;font-family:ui-monospace,Consolas,monospace;"">{System.Net.WebUtility.HtmlEncode(verificationCode)}</div>
+              <div style=""height:12px;""></div>
+              <div style=""font-size:12px;color:#94a3b8;"">This code expires in 10 minutes. If you did not request a PIN change, ignore this email.</div>
+            </td>
+          </tr>
+        </table>
+        <div style=""margin-top:16px;font-size:11px;color:#94a3b8;"">© {year} {AppName}</div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
     }
 
     public static string GetEmployeeTemporaryAccessHtml(string loginUrl, string userEmail, string tempPassword, DateTime expiresAtUtc, string? webBaseUrl = null)

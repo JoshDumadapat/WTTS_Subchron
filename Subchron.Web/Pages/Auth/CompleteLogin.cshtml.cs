@@ -15,6 +15,9 @@ public class CompleteLoginModel : PageModel
     /// <summary>Claim name for the JWT access token (used to call API from server-side).</summary>
     public const string AccessTokenClaimType = "access_token";
 
+    /// <summary>TempData key for JWT when GET redirect cannot safely carry a long token in the query string (e.g. Google OAuth).</summary>
+    public const string TempDataAccessTokenKey = "_subchronCompleteLoginJwt";
+
     /// <summary>Claim name for organization display name (sidebar).</summary>
     public const string OrgNameClaimType = "orgName";
 
@@ -24,7 +27,10 @@ public class CompleteLoginModel : PageModel
         if (userId <= 0 || string.IsNullOrWhiteSpace(role))
             return RedirectToPage("/Auth/Login");
 
-        await IssueCookie(userId, orgId, role.Trim(), name?.Trim(), token?.Trim(), orgName?.Trim());
+        var tokenFromTemp = TempData[TempDataAccessTokenKey] as string;
+        var effectiveToken = !string.IsNullOrWhiteSpace(token) ? token : tokenFromTemp;
+
+        await IssueCookie(userId, orgId, role.Trim(), name?.Trim(), effectiveToken?.Trim(), orgName?.Trim());
         return LocalRedirect(RoleToDest(role.Trim()));
     }
 

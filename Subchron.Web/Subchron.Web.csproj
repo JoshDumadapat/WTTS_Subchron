@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>10711d2a-f5bc-4722-b4ba-a7551ecf65eb</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <LaunchProfile>http</LaunchProfile>
   </PropertyGroup>
 
   <ItemGroup>

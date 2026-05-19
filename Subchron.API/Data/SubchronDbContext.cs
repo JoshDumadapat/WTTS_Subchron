@@ -131,9 +131,22 @@ public class SubchronDbContext : DbContext
             e.Property(x => x.TotpEnabled).HasDefaultValue(false);
             e.Property(x => x.TotpSecret).HasColumnType("varbinary(64)");
             e.Property(x => x.RecoveryCodesHash).HasColumnType("NVARCHAR(MAX)");
+            e.Property(x => x.IdleLockEnabled).HasDefaultValue(false);
+            e.Property(x => x.IdleLockTimeoutMinutes);
+            e.Property(x => x.IdleLockLastSeenAt);
+            e.Property(x => x.IdleLockIsLocked).HasDefaultValue(false);
+            e.Property(x => x.IdleLockLockedAt);
+            e.Property(x => x.IdleLockPinHash).HasMaxLength(255);
+            e.Property(x => x.IdleLockPinSetAt);
+            e.Property(x => x.IdleLockPinFailedCount).HasDefaultValue(0);
+            e.Property(x => x.IdleLockPinLockoutUntil);
             e.Property(x => x.ExternalProvider).HasMaxLength(20);
             e.Property(x => x.ExternalId).HasMaxLength(128);
             e.Property(x => x.EmailVerified).HasDefaultValue(false);
+            e.Property(x => x.FailedLoginCount).HasDefaultValue(0);
+            e.Property(x => x.FailedLoginBatch).HasDefaultValue(0);
+            e.Property(x => x.FailedLoginLastAt);
+            e.Property(x => x.LoginLockoutUntil);
             e.HasIndex(x => new { x.ExternalProvider, x.ExternalId })
                 .IsUnique()
                 .HasFilter("[ExternalProvider] IS NOT NULL AND [ExternalId] IS NOT NULL");

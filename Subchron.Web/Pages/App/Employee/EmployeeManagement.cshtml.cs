@@ -348,7 +348,7 @@ public class EmployeeManagementModel : PageModel
     }
 
     // Creates a PDF from front/back card images captured in the browser so it matches the modal layout.
-    public async Task<IActionResult> OnPostDownloadIdPdfFromImagesAsync(int id, string? frontImageBase64, string? backImageBase64)
+    public IActionResult OnPostDownloadIdPdfFromImages(int id, string? frontImageBase64, string? backImageBase64)
     {
         if (string.IsNullOrWhiteSpace(frontImageBase64) || string.IsNullOrWhiteSpace(backImageBase64))
             return BadRequest("Missing front or back image.");

@@ -542,4 +542,66 @@ public class IndexModel : PageModel
         var body = await resp.Content.ReadAsStringAsync();
         return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
     }
+
+    public async Task<IActionResult> OnGetIdleLockStatusAsync()
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Session expired. Please sign in again." }) { StatusCode = 401 };
+
+        try
+        {
+            var client = CreateAuthorizedApiClient(token);
+            var resp = await client.GetAsync("api/idle-lock/status");
+            var body = await resp.Content.ReadAsStringAsync();
+            return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+        }
+        catch (HttpRequestException)
+        {
+            var baseUrl = (_config["ApiBaseUrl"] ?? "").Trim().TrimEnd('/');
+            var hint = string.IsNullOrEmpty(baseUrl)
+                ? "Set ApiBaseUrl (e.g. http://localhost:5058) in appsettings or user secrets."
+                : $"Tried {baseUrl}. Start Subchron.API (HTTP listens on 5058; HTTPS profile also uses https://localhost:7077).";
+            return new JsonResult(new { ok = false, message = "Could not reach the API. " + hint }) { StatusCode = 503 };
+        }
+    }
+
+    public async Task<IActionResult> OnPostIdleLockUpdateTimeoutAsync([FromBody] JsonElement req)
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Session expired." }) { StatusCode = 401 };
+
+        var timeout = req.TryGetProperty("timeoutMinutes", out var el) && el.TryGetInt32(out var v) ? v : 10;
+        var client = CreateAuthorizedApiClient(token);
+        var resp = await client.PostAsJsonAsync("api/idle-lock/update-timeout", new { timeoutMinutes = timeout });
+        var body = await resp.Content.ReadAsStringAsync();
+        return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+    }
+
+    public async Task<IActionResult> OnPostIdleLockRequestPinResetAsync()
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Session expired." }) { StatusCode = 401 };
+
+        var client = CreateAuthorizedApiClient(token);
+        var resp = await client.PostAsync("api/idle-lock/request-pin-reset", null);
+        var body = await resp.Content.ReadAsStringAsync();
+        return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+    }
+
+    public async Task<IActionResult> OnPostIdleLockVerifyPinResetAsync([FromBody] JsonElement req)
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrEmpty(token))
+            return new JsonResult(new { ok = false, message = "Session expired." }) { StatusCode = 401 };
+
+        var code = req.TryGetProperty("code", out var c) ? c.GetString() : null;
+        var newPin = req.TryGetProperty("newPin", out var p) ? p.GetString() : null;
+        var client = CreateAuthorizedApiClient(token);
+        var resp = await client.PostAsJsonAsync("api/idle-lock/verify-pin-reset", new { code, newPin });
+        var body = await resp.Content.ReadAsStringAsync();
+        return new ContentResult { Content = body, ContentType = "application/json", StatusCode = (int)resp.StatusCode };
+    }
 }

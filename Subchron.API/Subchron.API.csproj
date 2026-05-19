@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>1aed6344-7834-4302-bff6-fa9ef1ffe205</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <!-- Avoid https://localhost:5058 binding conflicts; Web uses http://localhost:5058 -->
+    <LaunchProfile>http</LaunchProfile>
   </PropertyGroup>
 
   <ItemGroup>
