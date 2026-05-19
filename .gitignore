@@ -484,6 +484,7 @@ $RECYCLE.BIN/
 # ===== Subchron Secrets (DO NOT COMMIT) =====
 Subchron.API/appsettings.json
 Subchron.Web/appsettings.json
+_build_check/appsettings.json
 **/appsettings.Development.json
 **/appsettings.*.Development.json
-/nul
+
